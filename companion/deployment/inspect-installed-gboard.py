@@ -15,6 +15,9 @@ import stat
 import subprocess
 import sys
 
+# Loading the existing owner helper must not create cross-project bytecode caches.
+sys.dont_write_bytecode = True
+
 HOME = Path.home()
 HELPER = HOME / 'Documents/Codex/2026-10-12-okay-so-i-was-thinking-so/linux-levels/bin/android_device.py'
 HELPER_SHA = '14a613b109e29b5b97e1c3b55b70960c06d844c218fc0f700ea7f0ba9d7ce588'

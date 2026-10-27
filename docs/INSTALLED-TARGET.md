@@ -37,3 +37,26 @@ Next: validate the pinned Morphe Desktop CLI and complete the original split
 input route on an off-phone runner. Original installed APKs remain in place.
 Phone free space remains below the20GiB reserve; no local APK merge/build or
 full-v3 model download is admitted. New-model testing remains held separately.
+
+## Verified off-phone tool route
+
+Manual workflow `apk-tools.yml`, source68b4f65, passed in
+[run40533101391](https://github.com/Sodelin/purple-patches/actions/runs/40533101391).
+It downloaded official Morphe Desktop1.19.1 only on the runner and checked
+SHA256 `a51472252cd63b2eac635dbb5a154ff918bfc15268da89679feb3d760230c573`.
+The CLI loaded the exact main Purple MPP with its independently retained hash
+and found the new optional action. Missing-APK refusal and validation,
+exclusive selection, unsigned output and result-report flags were checked.
+
+The first control run40532729790 failed because the pinned tool does not
+support the documented child `patch --help` path without a required APK.
+The corrected control checks the actual missing-input exit2 and usage before
+loading the bundle; it does not suppress an unexpected failure.
+
+An actual beta patching run must retain all original APK parts, verify input
+hashes and signing identities, use full bytecode preservation, validate unique
+fingerprints, and keep compatibility failures fatal. No forced version bypass,
+partial-success continuation, signing-key upload or installation is part of this
+preflight. A beta-specific admitted profile and successful original-APK patch
+are still required. No existing DEX inspection command was found in this
+phone's current PATH; that does not prove every local inspection route absent.
