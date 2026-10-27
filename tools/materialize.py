@@ -31,13 +31,22 @@ def materialize(destination):
     registry=destination/'patches/src/main/kotlin/dev/jason/gboardpatches/patches/gboard/registry/GboardPatchRegistry.kt'
     replace(registry,'    val morpheRegistrations: Set<Patch<*>> = linkedSetOf(',
             '    val morpheRegistrations: Set<Patch<*>> = linkedSetOf(\n        dev.purple.patches.gboard.purpleGboardActionsPatch,')
+    version=(ROOT/'tools/version.txt').read_text().strip()
+    properties=destination/'gradle.properties'
+    replace(properties,'version = 4.0.0','version = '+version)
+    # Upstream's checked-in feed points at its original release. Never ship that
+    # URL as our customized bundle or silently install the unmodified product.
+    (destination/'patches-bundle.json').write_text(json.dumps({
+        'version':version,'description':'Unreleased Purple Gboard candidate. Device acceptance pending.',
+        'created_at':subprocess.check_output(['git','-C',str(ROOT),'show','-s','--format=%cI','HEAD'],text=True).strip(),
+        'download_url':'','signature_download_url':''},indent=2)+'\n')
     build=destination/'patches/build.gradle.kts'
     replace(build,'name = "Gboard Patches"','name = "Purple Patches"')
     replace(build,'description = "Morphe patches for Gboard."','description = "Optional Gboard Whisper 3 dictation and AI translation; based on Jason Wu Gboard patches."')
     # Retain upstream license/notices; identify our distinct distribution source.
     text=build.read_text().replace('https://github.com/jasonwu1994/gboard-patches','https://github.com/Sodelin/purple-patches').replace('author = "Jason Wu"','author = "Purple Patches contributors; upstream Jason Wu"')
     build.write_text(text)
-    manifest={'upstream_commit':PIN,'overlay':[{'path':str(p.relative_to(ROOT)),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted((ROOT/'gboard').rglob('*')) if p.is_file()]}
+    manifest={'upstream_commit':PIN,'version':version,'overlay_commit':subprocess.check_output(['git','-C',str(ROOT),'rev-parse','HEAD'],text=True).strip(),'overlay':[{'path':str(p.relative_to(ROOT)),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted((ROOT/'gboard').rglob('*')) if p.is_file()]}
     (destination/'purple-provenance.json').write_text(json.dumps(manifest,indent=2)+'\n')
 
 if __name__=='__main__':materialize(Path(sys.argv[1]))
