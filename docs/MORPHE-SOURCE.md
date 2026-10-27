@@ -46,3 +46,13 @@ under the storage gate. After acceptance, publish a versioned private release
 and matching manifest, verify authenticated Manager import/update and retain
 rollback. Friends would require their own approved access/companion setup;
 this draft does not automatically make the patch available to them.
+
+The merged feed correction passed the complete hosted build/test pipeline in
+[run40538677135](https://github.com/Sodelin/purple-patches/actions/runs/40538677135).
+Independent ZIP/member hashes and the generated timestamp were verified in RAM.
+A normalized MPP comparison found identical entry names and identical payload
+bytes except `META-INF/MANIFEST.MF`; the overall archive SHA differs. This is
+repeatable source building, not a claim of byte-identical archive output.
+The original exact APK-tested MPP remains the selected retained/downloaded
+candidate; no asset was substituted under its old hash. Exact details and the
+transitional failed workflow are in[feed-rebuild-artifact.json](feed-rebuild-artifact.json).

@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-27",
+  "source_commit": "ecbb813827c68be32e8bde3e9e08e12e2f5fb68a",
+  "run": "https://github.com/Sodelin/purple-patches/actions/runs/40538677135",
+  "result": "Complete hosted build/test/metadata generation passed; feed metadata and editor controls passed. ZIP and all SHA256SUMS members independently verified in RAM.",
+  "artifact_id": 12749492706,
+  "artifact_bytes": 15459895,
+  "artifact_sha256": "a22e7cd79a72feeefe68d4a9fbf81dfd07e4dfc27ea45edeefd9508cf11a47d2",
+  "files": {
+    "patches-0.1.0-alpha.1-javadoc.mpp": {
+      "bytes": 309012,
+      "sha256": "ea3bfa0719608550e5aad20b7a4a5e80b1bf2a22f923fb8dcf17e41c5ba8e739"
+    },
+    "patches-0.1.0-alpha.1-sources.mpp": {
+      "bytes": 7183224,
+      "sha256": "4a4e4523bc4e4237cb5d433f6cd326bd9c5797edf705dd41bcee05f7cf2b8c72"
+    },
+    "patches-0.1.0-alpha.1.mpp": {
+      "bytes": 8205101,
+      "sha256": "42c9b3ebebce44b8559c69f13a348c583acf5ca6fd5171740815e23aeec03935"
+    },
+    "patches-bundle.json": {
+      "bytes": 337,
+      "sha256": "47905ed202d175b96cd33c0feb574b56584ff309a124fb25dff27ed47725e22b"
+    },
+    "patches-list.json": {
+      "bytes": 19435,
+      "sha256": "9c8208efdd5aec572b208acef325fc83769c6905aeea055255d90d6304593ca9"
+    },
+    "purple-provenance.json": {
+      "bytes": 1677,
+      "sha256": "c5f90624178e116181c36666e9d7540d59694a673bdf11a8d679cf8206bb4362"
+    }
+  },
+  "feed": {
+    "version": "0.1.0-alpha.1",
+    "description": "Purple Gboard candidate. Full large-v3 dictation and explicit AI Translate; phone acceptance pending.",
+    "created_at": "2026-10-27T16:12:45",
+    "download_url": "",
+    "signature_download_url": null,
+    "page_url": "https://github.com/Sodelin/purple-patches/releases/tag/v0.1.0-alpha.1"
+  },
+  "main_mpp_identical_to_retained_candidate": false,
+  "custody": "Metadata-validation rebuild only; does not replace the original full-APK-tested candidate in private draft or Downloads. Any changed binary selected for future release needs its own version and APK verification.",
+  "limits": "No Manager source import/update, keyboard installation, live model acceptance or new model download.",
+  "normalized_bundle_comparison": {
+    "old_only": [],
+    "new_only": [],
+    "changed_payload_entries": [
+      "META-INF/MANIFEST.MF"
+    ],
+    "payload_entries_identical": false,
+    "meaning": "ZIP/container SHA differs across builds; entry-byte comparison is separate. The exact APK-tested bundle is never replaced under its recorded hash."
+  },
+  "failed_experiment": {
+    "run": "https://github.com/Sodelin/purple-patches/actions/runs/40538626618",
+    "cause": "Workflow-only remote commit executed the feed check before its new helper source landed; failed explicitly with missing bundle_feed.py, exit2. Merged source/workflow run40538677135 passed.",
+    "superseded_runs": "40538068251 and40538164540 cancelled because delivery-only tool commits unnecessarily triggered bundle builds. Build paths now name materialize.py, bundle_feed.py andversion.txt explicitly."
+  }
+}
