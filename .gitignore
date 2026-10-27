@@ -15,3 +15,9 @@
 *.age
 *.gguf
 *.bin
+# Preserve the original exclusions for nested upstream/build/private material.
+upstream/
+dist/
+build/
+.gradle/
+.private/
