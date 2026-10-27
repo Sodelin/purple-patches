@@ -1,6 +1,7 @@
 """Apply the small authored overlay to a clean, pinned upstream checkout OFF PHONE."""
 import copy,hashlib,json,subprocess,sys
 from pathlib import Path
+from bundle_feed import bundle_feed
 PIN='2eb71854accc7e906d3e4f5495b2a54ed1e2af47'
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -36,10 +37,8 @@ def materialize(destination):
     replace(properties,'version = 4.0.0','version = '+version)
     # Upstream's checked-in feed points at its original release. Never ship that
     # URL as our customized bundle or silently install the unmodified product.
-    (destination/'patches-bundle.json').write_text(json.dumps({
-        'version':version,'description':'Unreleased Purple Gboard candidate. Device acceptance pending.',
-        'created_at':subprocess.check_output(['git','-C',str(ROOT),'show','-s','--format=%cI','HEAD'],text=True).strip(),
-        'download_url':'','signature_download_url':''},indent=2)+'\n')
+    created_at=subprocess.check_output(['git','-C',str(ROOT),'show','-s','--format=%cI','HEAD'],text=True).strip()
+    (destination/'patches-bundle.json').write_text(json.dumps(bundle_feed(version,created_at),indent=2)+'\n')
     # Register a real admitted feature, not an unaccounted-for extra patch name.
     catalog_path=destination/'patches/src/main/resources/gboard/gboard-port-product-catalog.json'
     catalog=json.loads(catalog_path.read_text())

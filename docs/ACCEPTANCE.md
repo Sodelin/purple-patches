@@ -19,7 +19,7 @@ must continue working. A successful hosted build is not device acceptance.
 | Microphone | Device tests must verify stop, cancel,60-second ceiling, permissions, interruptions and release. Health/family validation must precede microphone opening. |
 | Translation | One explicit selected-text request, exact gpt-6.1-sol, no context inheritance/fallback, preview and explicit insertion. Live testing remains held. |
 | Regression/rollback | Alongside-stock package option and independent keyboard recovery must work before changing the user's default. No installation/default switch has occurred. |
-| Update feed | Candidate feed deliberately has no download URL. Do not point it at an upstream release or present it as a working install source. Publish the verified bundle and corresponding feed together later. |
+| Update feed | Verified10-asset private draft now retains exact bundle, companion and corresponding source beyond Actions expiry; see[private-candidate-release.json](private-candidate-release.json). Feed still deliberately has no download URL. Installed Manager2.2.0 supports private-source PAT routing in source; actual phone import/update acceptance remains unperformed. |
 
 ## Reproduce without phone toolchains
 

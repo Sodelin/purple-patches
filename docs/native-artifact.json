@@ -19,5 +19,5 @@
   "variant_admission": "Full large-v3 only; turbo rejection covered by native tests",
   "native_checks": 27,
   "inspection": "RAM-only ZIP/hash/ELF inspection. No binary execution, installation, microphone or inference.",
-  "limits": "Artifact expiry7days; no actual phone privacy-path or model acceptance."
+  "limits": "No actual phone privacy-path or model acceptance. Exact companion/wrapper and corresponding source retained in verified private draft425693294; original Actions artifact expires7days."
 }

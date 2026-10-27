@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-27",
+  "repository": "Sodelin/purple-patches",
+  "private": true,
+  "release_id": 425693294,
+  "tag": "v0.1.0-alpha.1",
+  "draft": true,
+  "tool_source": "938407d0ea116ef581be7f36a8cf4c49d0c94567",
+  "assets_verified_full_remote_bytes": 10,
+  "total_asset_bytes": 23159148,
+  "manifest_sha256": "4f5297e4915984c6b52dce7f07f7045fb3ec39fb1cce1bc5a73fd9e8ccded46b",
+  "manifest": {
+    "candidate": "v0.1.0-alpha.1",
+    "status": "PRIVATE DRAFT; phone acceptance pending",
+    "gboard_source": "6719a214e6cc3f9a02e19e86c30f7fdb678620b1",
+    "companion_source": "fa321258f6c076eda970e3c77207267d700bcab7",
+    "upstream_source": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+    "assets": {
+      "companion-source.tar.gz": {
+        "bytes": 57393,
+        "sha256": "ab70ec0782f7b52dd2f7dd86fe144b25a08ef593b49381c067951e7ef6ebf600"
+      },
+      "gboard-overlay-source.tar.gz": {
+        "bytes": 58212,
+        "sha256": "224de193591966fdb462d9362389228069abc9357eee0d1e8847e1072a0dec7b"
+      },
+      "gboard-upstream-source.tar.gz": {
+        "bytes": 14060151,
+        "sha256": "1de222040b1ac8afa592b9db679b205e683016da9fe63a1f4461e6ff60622639"
+      },
+      "patches-0.1.0-alpha.1.mpp": {
+        "bytes": 8205100,
+        "sha256": "af2077907783247f667940e02659fe8b574ec36fd26df8af67e22469de3f11fe"
+      },
+      "patches-list.json": {
+        "bytes": 19435,
+        "sha256": "9c8208efdd5aec572b208acef325fc83769c6905aeea055255d90d6304593ca9"
+      },
+      "purple-gboard-service": {
+        "bytes": 336,
+        "sha256": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91"
+      },
+      "purple-keyboard-bridge": {
+        "bytes": 754360,
+        "sha256": "7e62046a3c3915d98bb2c5cc99c7e0da19486a5dd9df032a433689ac3a82fbc5"
+      },
+      "purple-provenance.json": {
+        "bytes": 1677,
+        "sha256": "6ec0c9970a4517f4cbf2b5e4f2eca351f57bdf8f17f71d85e29229058e3e2354"
+      }
+    },
+    "limits": [
+      "Unsigned APK is intentionally excluded",
+      "No full-v3 weights included",
+      "No installation or live model acceptance",
+      "Draft URLs are not a usable Manager update feed"
+    ]
+  },
+  "limits": "Private durable draft custody, not a published Manager source, app installation, privacy writer acceptance or live model test. Initial gh stdin upload refused HTTP400 Bad Content-Length; empty draft observed, then fixed-length memory upload and full readback passed. No partial asset overwritten."
+}

@@ -56,6 +56,6 @@
   "version": "0.1.0-alpha.1",
   "upstream_binary_url_removed": true,
   "inspection": "ZIP and nested main MPP inspected in RAM; binaries not persisted, executed, patched or installed on phone.",
-  "limits": "Exact original APK patching, phone privacy/control/regression, full-v3 acquisition/live acceptance and published update source remain pending. Hosted artifacts expire7days.",
+  "limits": "Exact original release APK patching now separately verified in release-apk-artifact.json. Phone privacy/control/regression, full-v3 acquisition/live acceptance and published update source remain pending. Main bundle retained with corresponding source in verified private draft425693294; Actions artifacts still expire7days.",
   "main_patch_bundle_filename": "patches-0.1.0-alpha.1.mpp"
 }
