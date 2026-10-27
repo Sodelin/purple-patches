@@ -9,6 +9,9 @@ public class SessionPolicyCheck {
         check(SessionPolicy.sameAnchor(1,1,"a","b","c","a","b","c"));
         check(!SessionPolicy.sameAnchor(1,2,"a","b","c","a","b","c"));
         check(!SessionPolicy.sameAnchor(1,1,"a","b","c","a","b","changed"));
+        check(SessionPolicy.bootstrapSuccess(0,-1));
+        for (Object err:new Object[]{null,0,1,"-1"}) check(!SessionPolicy.bootstrapSuccess(0,err));
+        for (Object exit:new Object[]{null,1,-1,"0"}) check(!SessionPolicy.bootstrapSuccess(exit,-1));
         check(SessionPolicy.bounded("hello"));check(!SessionPolicy.bounded(" "));check(!SessionPolicy.bounded("界".repeat(3000)));
         System.out.println("Editor privacy, localhost, stale selection and UTF-8 limits passed");
     }

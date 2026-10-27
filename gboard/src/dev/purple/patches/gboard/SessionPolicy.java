@@ -11,6 +11,11 @@ public final class SessionPolicy {
                 || (cls == 1 && (variation == 128 || variation == 144 || variation == 224))
                 || (cls == 2 && variation == 16) || cls == 0;
     }
+    /** Termux err is Android RESULT_OK (-1), independently of shell exitCode (0). */
+    public static boolean bootstrapSuccess(Object exitCode, Object err) {
+        return exitCode instanceof Integer && ((Integer)exitCode) == 0
+                && err instanceof Integer && ((Integer)err) == -1;
+    }
     public static boolean bounded(String value) {
         return value != null && !value.trim().isEmpty()
                 && value.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= TEXT_BYTES;

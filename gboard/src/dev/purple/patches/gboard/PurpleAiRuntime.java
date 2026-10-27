@@ -155,7 +155,7 @@ public final class PurpleAiRuntime {
                     || !Uri.parse("purple-gboard-connect:" + nonce).equals(intent.getData())) return;
             nonce = null; callback = null; // Consume the one-shot authority before parsing.
             Bundle result = intent.getBundleExtra("result");
-            if (result == null || result.getInt("exitCode", -1) != 0 || result.getInt("err", 0) != 0)
+            if (result == null || !SessionPolicy.bootstrapSuccess(result.get("exitCode"), result.get("err")))
                 throw new IllegalStateException();
             String output = result.getString("stdout");
             if (output == null || output.length() > 8192) throw new IllegalStateException();
