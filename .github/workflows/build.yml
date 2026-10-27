@@ -1,0 +1,51 @@
+name: Build Gboard patch bundle off phone
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: purple-gboard-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Pure editor/session policy controls
+        run: |
+          mkdir -p "$RUNNER_TEMP/purple-policy"
+          javac -d "$RUNNER_TEMP/purple-policy" gboard/src/dev/purple/patches/gboard/SessionPolicy.java gboard/SessionPolicyCheck.java
+          java -cp "$RUNNER_TEMP/purple-policy" SessionPolicyCheck
+      - name: Materialize pinned mature upstream
+        run: |
+          git init "$RUNNER_TEMP/gboard-upstream"
+          git -C "$RUNNER_TEMP/gboard-upstream" remote add origin https://github.com/jasonwu1994/Gboard-patches
+          git -C "$RUNNER_TEMP/gboard-upstream" fetch --depth=1 origin 2eb71854accc7e906d3e4f5495b2a54ed1e2af47
+          git -C "$RUNNER_TEMP/gboard-upstream" checkout --detach FETCH_HEAD
+          python tools/materialize.py "$RUNNER_TEMP/gboard-upstream"
+      - name: Build and test complete patch source
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          cd "$RUNNER_TEMP/gboard-upstream"
+          chmod +x gradlew
+          ./gradlew --no-daemon :patches:buildAndroid :patches:generatePatchesList
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          cp patches/build/libs/*.mpp "$GITHUB_WORKSPACE/dist/"
+          cp patches-list.json patches-bundle.json purple-provenance.json "$GITHUB_WORKSPACE/dist/"
+          cd "$GITHUB_WORKSPACE/dist"
+          sha256sum * > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: purple-gboard-candidate
+          path: dist/
+          retention-days: 7

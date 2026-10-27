@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+upstream/
+dist/
+build/
+.gradle/
+*.apk
+*.bin
+.private/

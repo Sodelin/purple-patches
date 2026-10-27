@@ -20,7 +20,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
-import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.lang.ref.WeakReference;
 import java.util.UUID;
@@ -107,17 +107,17 @@ public final class PurpleAiRuntime {
             submit(anchor, null);
         } else {
             if (!SessionPolicy.bounded(anchor.selected)) { notifyUser("Select up to 8 KiB of text to translate"); return; }
-            EditText language = new EditText(ime);
-            language.setHint("Target language, for example Spanish");
-            language.setSingleLine(); language.setSaveEnabled(false);
-            AlertDialog choose = new AlertDialog.Builder(ime).setTitle("AI Translate")
-                    .setView(language).setNegativeButton("Cancel", null)
-                    .setPositiveButton("Translate", (d, w) -> {
-                        String target = language.getText().toString().trim();
-                        if (target.isEmpty() || target.length() > 64) { notifyUser("Choose a target language"); return; }
-                        if (anchor.matches(service.get(), generation)) submit(anchor, target);
-                    }).create();
-            show(choose);
+            java.util.SortedMap<String,String> languages = new java.util.TreeMap<>();
+            for (java.util.Locale locale : java.util.Locale.getAvailableLocales()) {
+                String code = locale.getLanguage();
+                if (!code.isEmpty()) languages.put(locale.getDisplayLanguage(), code);
+            }
+            String[] labels = languages.keySet().toArray(new String[0]);
+            String[] codes = languages.values().toArray(new String[0]);
+            show(new AlertDialog.Builder(ime).setTitle("Translate to…")
+                    .setItems(labels, (d, which) -> {
+                        if (anchor.matches(service.get(), generation)) submit(anchor, codes[which]);
+                    }).setNegativeButton("Cancel", null).create());
         }
     }
     private static void permissions(Context context) {
@@ -200,11 +200,12 @@ public final class PurpleAiRuntime {
                     if (stopped.get() || !anchor.matches(service.get(), generation)) return;
                     dismiss();
                     InputMethodService current = service.get(); if (current == null) return;
-                    EditText preview = new EditText(current); preview.setText(text); preview.setSaveEnabled(false);
+                    TextView preview = new TextView(current); preview.setText(text); preview.setSaveEnabled(false);
+                    preview.setTextIsSelectable(true); preview.setPadding(24,16,24,16);
                     show(new AlertDialog.Builder(current).setTitle(voice ? "Whisper transcript" : "Translation")
                             .setView(preview).setNegativeButton("Discard", null)
                             .setPositiveButton("Insert", (d,w) -> {
-                                String replacement = preview.getText().toString();
+                                String replacement = text;
                                 if (SessionPolicy.bounded(replacement) && anchor.matches(service.get(), generation))
                                     anchor.connection.commitText(replacement, 1);
                                 else notifyUser("The editor changed; original text was preserved");
