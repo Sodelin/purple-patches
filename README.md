@@ -26,17 +26,24 @@ model family is whisper-large-v3. The older retained bridge does not satisfy
 those gates merely because it can start. No live model test is selected here.
 
 Workflow output contains a Morphe .mpp candidate, source metadata, provenance
-and hashes. Stable releases/manager install-source integration are published
-only after candidate verification. A friend still needs the supported local
+and hashes. The selected private candidate feed is now published after static artifact verification;
+actual Manager import/update and phone acceptance remain pending. Stable
+releases require device acceptance. A friend still needs the supported local
 Whisper/Codex companion, not just the keyboard patch bundle.
 
 The current acceptance record is [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md).
 Native controls and the Android cross-build are verified separately from the
 Gboard bundle and actual phone behavior. The candidate has its own version;
-its unreleased update feed cannot fetch an upstream binary by accident.
+its selected update feed points only at the exact own versioned MPP, never an upstream binary.
 
-The verified main MPP is retained in a private candidate draft alongside its
+The verified main MPP is retained in a private candidate prerelease alongside its
 corresponding source and hashes. A verified local copy is in the phone's
 `Download/Purple-Patches/` folder. This does not install the keyboard or turn
 on the companion. See [candidate delivery](docs/MORPHE-SOURCE.md) and the
 [local readback record](docs/local-patch-delivery.json).
+
+The private candidate source URL is
+`https://raw.githubusercontent.com/Sodelin/purple-patches/main/channels/candidate.json`.
+Its authenticated feed/tag/full-asset route is verified. Manager needs its own
+existing repository-access credential; no Manager credential or device setting
+was changed. See[network proof](docs/candidate-source-verification.json).

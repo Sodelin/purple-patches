@@ -20,7 +20,7 @@ must continue working. A successful hosted build is not device acceptance.
 | Microphone | Device tests must verify stop, cancel,60-second ceiling, permissions, interruptions and release. Health/family validation must precede microphone opening. |
 | Translation | One explicit selected-text request, exact gpt-6.1-sol, no context inheritance/fallback, preview and explicit insertion. Live testing remains held. |
 | Regression/rollback | Alongside-stock package option and independent keyboard recovery must work before changing the user's default. No installation/default switch has occurred. |
-| Update feed | Verified10-asset private draft now retains exact bundle, companion and corresponding source beyond Actions expiry; see[private-candidate-release.json](private-candidate-release.json). Feed still deliberately has no download URL. Installed Manager2.2.0 supports private-source PAT routing in source; actual phone import/update acceptance remains unperformed. |
+| Update feed | Private published patch-only release425723616 and companion0.2.1 release425713896; every selected asset fully verified. Authenticated raw-feed, actual tag resolution and complete pinned MPP download pass. See[candidate-source-verification.json](candidate-source-verification.json). Actual phone Manager credential/import/update acceptance remains pending. |
 
 ## Reproduce without phone toolchains
 
@@ -53,7 +53,7 @@ fixture checks and packaging work moving while that action is held.
 
 For Morphe input, select exactly `patches-0.1.0-alpha.1.mpp`. The hosted
 archive also contains auxiliary `-sources.mpp` and `-javadoc.mpp` outputs;
-those are not the Manager patch input. No update feed is published yet.
+those are not the Manager patch input. A private candidate update feed is now published and remotely verified; actual Manager import/update remains unperformed.
 
 ## Selected local deliverable
 
@@ -70,7 +70,7 @@ creation and refuses a differing existing file.
 
 Use the verified0.2.1 companion with the unchanged0.1.0-alpha.1 main MPP for
 future authorized deployment. Its executable, wrapper, fixed schema and exact
-corresponding source are retained in private draft425713896; all six assets
+corresponding source are retained in private prerelease425713896; all six assets
 passed full remote byte readback. See[private-companion-0.2.1.json](private-companion-0.2.1.json).
 The previous0.2.0 artifact/draft is retained history, with a read-back
 supersession notice; it is not a supported future runtime selection.

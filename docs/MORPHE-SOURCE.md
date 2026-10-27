@@ -1,69 +1,88 @@
-# Maintained candidate delivery
+# Private candidate update source
 
-The exact verified MPP, native ARM64 companion, wrapper, catalog/provenance,
-corresponding authored sources and pinned upstream GPL source are retained in
-private draft release425693294 (`v0.1.0-alpha.1`). All ten assets were downloaded
-back and compared in full after upload. This is durable candidate custody;
-it does not establish a published update source or phone acceptance.
-See[private-candidate-release.json](private-candidate-release.json).
+The selected Morphe JSON source is:
 
-`tools/stage_candidate_release.py --stage-private-draft` reuses the authenticated
-GitHub identity and operates in RAM. It requires a clean source repository,
-refuses a public repository or published release, verifies pinned build bytes,
-checks all existing asset bytes before adding anything missing, never replaces
-assets, and verifies all uploaded bytes. An uncertain mutation is inspected
-before retry. No APK, model or signing key is distributed. The first upload
-attempt was rejected because gh stdin transport lacked fixed Content-Length;
-fixed-length memory upload then passed.
+`https://raw.githubusercontent.com/Sodelin/purple-patches/main/channels/candidate.json`
 
-## Manager 2.2.0 source contract
+The repository and both selected releases remain private. The source requires
+an existing GitHub credential with repository access in Manager's PAT setting.
+No Manager credential was inspected, copied or configured by this work. This
+channel does not automatically grant friends access.
 
-Reviewed official tagv2.2.0, commit
-`2c2bdc6a8368fa790ca2e3a57b050070a2c36eea`:
+The actual remote route is verified: anonymous feed access returned404,
+authenticated feed bytes matched versioned source, the published component tag
+resolved through GitHub's release API, and its complete main MPP downloaded
+with the pinned hash. See[candidate-source-verification.json](candidate-source-verification.json).
+This used the existing gh identity, not Manager on the phone. Actual Manager
+source import/update acceptance, keyboard installation and live testing remain
+unverified and held separately.
 
-- [MorpheAsset.kt](https://github.com/MorpheApp/morphe-manager/blob/2c2bdc6a8368fa790ca2e3a57b050070a2c36eea/app/src/main/java/app/morphe/manager/network/dto/MorpheAsset.kt) declares `created_at` as `kotlinx.datetime.LocalDateTime`, with version, description, download URL and optional signature/page URLs.
-- [RemotePatchBundle.kt](https://github.com/MorpheApp/morphe-manager/blob/2c2bdc6a8368fa790ca2e3a57b050070a2c36eea/app/src/main/java/app/morphe/manager/domain/bundles/RemotePatchBundle.kt) parses JSON-source manifests into that DTO.
-- [MorpheAPI.kt](https://github.com/MorpheApp/morphe-manager/blob/2c2bdc6a8368fa790ca2e3a57b050070a2c36eea/app/src/main/java/app/morphe/manager/network/api/MorpheAPI.kt) retries a missing GitHub raw manifest with the user's configured PAT and resolves versioned release downloads through `releases/tags/{tag}`.
-- [AssetDownloader.kt](https://github.com/MorpheApp/morphe-manager/blob/2c2bdc6a8368fa790ca2e3a57b050070a2c36eea/app/src/main/java/app/morphe/manager/network/service/AssetDownloader.kt) supports private GitHub asset downloads through the existing PAT/API route.
+## Selected components
 
-These are observed source behaviors, not a check that this phone's Manager has
-an appropriately scoped PAT or that draft-tag resolution succeeds. No token
-was read from Manager, copied into it or embedded in a source URL. Private
-source access is a viable route to verify before proposing public publication.
-An authenticated lookup of `releases/tags/v0.1.0-alpha.1` returned HTTP404 while direct draft ID425693294 remained accessible. This confirms the current draft cannot resolve through Manager's observed tag route. A draft and an expiring signed URL are not usable permanent feed addresses.
+| Component | Version and custody |
+| --- | --- |
+| Morphe main MPP | `0.1.0-alpha.1`, release425723616, tag`patches-v0.1.0-alpha.1`, seven full-byte-verified assets including corresponding source. Exact main MPP SHA256`af2077907783247f667940e02659fe8b574ec36fd26df8af67e22469de3f11fe`. This is the existing full-APK-tested bundle. |
+| Companion | `0.2.1`, release425713896, tag`companion-v0.2.1-candidate`, six full-byte-verified assets including source and the fixed authored schema.28 public controls and Android ARM64 cross-build passed. |
 
-The previous placeholder copied Git's timezone-bearing timestamp directly into
-`created_at`. That mismatched the JSON-source LocalDateTime contract.
-`tools/bundle_feed.py` now converts the original offset to UTC, then serializes
-without an offset. Controls cover non-UTC source commits, date rollover,
-ambiguous timestamps, wrong source/version, auxiliary MPP and credential-bearing
-URLs. The unapproved feed keeps its download URL empty. No working feed is
-claimed from a schema check.
+Both are published **private prereleases**, not phone-accepted stable releases.
+Source-controlled pins for every selected asset are in
+[selected-release-assets.json](selected-release-assets.json). No APK, model
+weights or signing keys were distributed. No asset was replaced beneath an
+existing hash. Historical draft425693294 retains the original mixed candidate
+and superseded0.2.0 companion with an explicit supersession notice.
 
-Next activation boundary: verify the actual held privacy/control criteria,
-then authorize the finite phone acceptance window and provision full large-v3
-under the storage gate. After acceptance, publish a versioned private release
-and matching manifest, verify authenticated Manager import/update and retain
-rollback. Friends would require their own approved access/companion setup;
-this draft does not automatically make the patch available to them.
+`tools/publish_private_candidates.py --publish` verifies all selected component
+asset bytes against source pins before any publication mutation, refuses a
+public repository or stable-release promotion, publishes only private
+prereleases, and checks the actual tag routes. Repeating it on the same
+published versions verifies custody without replacing assets.
+`tools/verify_candidate_source.py` verifies the authenticated raw-feed and actual
+versioned asset-download route without device/model calls. Credentials remain
+in RAM and are never embedded in the feed URL.
 
-The merged feed correction passed the complete hosted build/test pipeline in
-[run40538677135](https://github.com/Sodelin/purple-patches/actions/runs/40538677135).
-Independent ZIP/member hashes and the generated timestamp were verified in RAM.
-A normalized MPP comparison found identical entry names and identical payload
-bytes except `META-INF/MANIFEST.MF`; the overall archive SHA differs. This is
-repeatable source building, not a claim of byte-identical archive output.
-The original exact APK-tested MPP remains the selected retained/downloaded
-candidate; no asset was substituted under its old hash. Exact details and the
-transitional failed workflow are in[feed-rebuild-artifact.json](feed-rebuild-artifact.json).
+For future changes, build and verify a new component version, retain its exact
+source and asset pins, publish that version, update the stable candidate-feed
+path and re-run the remote verification. Never overwrite an existing version.
+The stage helper's candidate modes refuse published releases. Gboard and native
+companion versions are independent; a native-only correction need not repatch
+or relabel an unchanged MPP. Stable promotion still requires actual phone
+acceptance and rollback proof.
 
-Companion revision0.2.1 is retained separately in private draft425713896 because
-actual Android public controls exposed a /proc/self/fd reopening failure in
-0.2.0. The correction passed28 public native controls and ARM64 cross-build,
-then six selected assets were fully read back remotely. It adds one fixed
-`response-schema.json` authored template beside the native executable and sends
-audio through stdin. The original MPP remains unchanged. The old draft now
-carries a verified supersession notice; no historical asset was overwritten.
-This independent companion version avoids replacing runtime bytes beneath an
-existing hash/version. It does not publish a working Manager source or activate
-the keyboard. Retain with `tools/stage_candidate_release.py --stage-native-021`.
+## Manager 2.2.0 contract
+
+Reviewed official tagv2.2.0, commit`2c2bdc6a8368fa790ca2e3a57b050070a2c36eea`:
+
+- [MorpheAsset.kt](https://github.com/MorpheApp/morphe-manager/blob/2c2bdc6a8368fa790ca2e3a57b050070a2c36eea/app/src/main/java/app/morphe/manager/network/dto/MorpheAsset.kt) declares JSON-source `created_at` as `kotlinx.datetime.LocalDateTime`, with version, description, download URL and optional signature/page URLs.
+- [RemotePatchBundle.kt](https://github.com/MorpheApp/morphe-manager/blob/2c2bdc6a8368fa790ca2e3a57b050070a2c36eea/app/src/main/java/app/morphe/manager/domain/bundles/RemotePatchBundle.kt) deserializes custom JSON manifests into that DTO.
+- [MorpheAPI.kt](https://github.com/MorpheApp/morphe-manager/blob/2c2bdc6a8368fa790ca2e3a57b050070a2c36eea/app/src/main/java/app/morphe/manager/network/api/MorpheAPI.kt) retries a missing GitHub raw manifest with the configured PAT and resolves downloads through`releases/tags/{tag}`.
+- [AssetDownloader.kt](https://github.com/MorpheApp/morphe-manager/blob/2c2bdc6a8368fa790ca2e3a57b050070a2c36eea/app/src/main/java/app/morphe/manager/network/service/AssetDownloader.kt) supports private GitHub assets through the PAT/API route.
+
+The feed generator converts the source timestamp to UTC and then removes its
+offset for LocalDateTime serialization. Controls cover offset/date rollover,
+ambiguous time, wrong repository/version/component, auxiliary MPP and
+credential-bearing URLs. The generated **unpublished build placeholder** keeps
+its download URL blank; the selected external candidate channel now points at
+the actual published private release.
+
+## Retained experiments and activation gaps
+
+The original draft tag returned404 through the Manager release route. This
+was a distribution-state issue, resolved by separate clean published private
+component releases without lifting installation/model holds. Earlier gh stdin
+uploads failed with Bad Content-Length; fixed-length RAM uploads and complete
+remote readback passed. The corrected timestamp pipeline passed full build
+run40538677135; its normalized MPP comparison changed only MANIFEST.MF and did
+not replace the selected APK-tested bundle. Exact experiments remain in
+[feed-rebuild-artifact.json](feed-rebuild-artifact.json) and
+[private-candidate-release.json](private-candidate-release.json).
+
+Actual Android public controls exposed anonymous /proc/self/fd reopening denial
+in companion0.2.0. Companion0.2.1 sends audio through stdin and uses a fixed,
+owner-private authored schema beside its executable. It has build/control
+acceptance, not live decoder or keyboard acceptance.
+
+Full-large-v3 weights and the retained small engine/companion assets require
+known minimum allocation beyond the20GiB reserve. See
+[runtime-asset-headroom.json](runtime-asset-headroom.json); it is a dated
+read-only lower bound, not full APK-signing/install admission or a quota.
+Existing privacy/model and installation/default-keyboard holds remain.

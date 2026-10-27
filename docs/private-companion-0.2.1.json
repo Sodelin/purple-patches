@@ -3,7 +3,7 @@
   "release_id": 425713896,
   "tag": "companion-v0.2.1-candidate",
   "private": true,
-  "draft": true,
+  "draft": false,
   "assets_verified_full_remote_bytes": 6,
   "total_asset_bytes": 831400,
   "manifest_sha256": "6c2064ca65e9d226f44d0b23ac2e704a5ac54bd8baf5763087420e87283d29c7",
@@ -32,5 +32,8 @@
       }
     }
   },
-  "limits": "Verified retained build/source only. No installation, inference, microphone or actual Manager/keyboard regression acceptance."
+  "limits": "Verified retained build/source only. No installation, inference, microphone or actual Manager/keyboard regression acceptance.",
+  "staged_as_draft": true,
+  "published_as_private_prerelease": true,
+  "asset_bytes_unchanged_at_publication": true
 }

@@ -1,0 +1,33 @@
+{
+  "source_url": "https://raw.githubusercontent.com/Sodelin/purple-patches/main/channels/candidate.json",
+  "private": true,
+  "anonymous_http_status": 404,
+  "authenticated_feed_matches_versioned_source": true,
+  "published_prerelease_tag": "patches-v0.1.0-alpha.1",
+  "actual_versioned_release_route_resolves": true,
+  "main_mpp_full_bytes_verified": {
+    "bytes": 8205100,
+    "sha256": "af2077907783247f667940e02659fe8b574ec36fd26df8af67e22469de3f11fe"
+  },
+  "credential_profile": "Existing gh identity; no Manager credential read/copied/changed",
+  "manager_device_import_verified": false,
+  "device_actions": false,
+  "model_invocations": false,
+  "limits": "Remote feed and actual versioned asset path verified; phone Manager PAT/import/update and keyboard acceptance remain unverified.",
+  "date": "2026-10-27",
+  "publication_verification": {
+    "private_repository": true,
+    "all_selected_asset_bytes_reverified_before_first_publication": true,
+    "patch_release_id": 425723616,
+    "patch_asset_count": 7,
+    "companion_release_id": 425713896,
+    "companion_asset_count": 6,
+    "both_published_private_prereleases": true,
+    "historical_mixed_candidate_still_draft": true
+  },
+  "feed_generator_pipeline": {
+    "run": "https://github.com/Sodelin/purple-patches/actions/runs/40542712502",
+    "source_commit": "98b72bbe8f17fc3fbf000485239d85cb083b98cd",
+    "result": "Complete hosted build/test/metadata generation, extended component-tag feed controls and pure editor controls passed. Outputs are verification rebuilds and do not replace the selected exact APK-tested MPP."
+  }
+}
