@@ -30,7 +30,7 @@ These are observed source behaviors, not a check that this phone's Manager has
 an appropriately scoped PAT or that draft-tag resolution succeeds. No token
 was read from Manager, copied into it or embedded in a source URL. Private
 source access is a viable route to verify before proposing public publication.
-A draft and an expiring signed URL are not usable permanent feed addresses.
+An authenticated lookup of `releases/tags/v0.1.0-alpha.1` returned HTTP404 while direct draft ID425693294 remained accessible. This confirms the current draft cannot resolve through Manager's observed tag route. A draft and an expiring signed URL are not usable permanent feed addresses.
 
 The previous placeholder copied Git's timezone-bearing timestamp directly into
 `created_at`. That mismatched the JSON-source LocalDateTime contract.
