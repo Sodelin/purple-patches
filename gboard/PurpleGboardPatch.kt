@@ -8,13 +8,16 @@ import dev.jason.gboardpatches.patches.gboard.shared.accesspoint.gboardAccessPoi
 import dev.jason.gboardpatches.patches.gboard.features.editingaccesspoints.gboardEditingAccessPointsLifecyclePatch
 import dev.jason.gboardpatches.patches.shared.Constants.COMPATIBILITY_GBOARD
 import org.w3c.dom.Element
+import dev.jason.gboardpatches.patches.gboard.shared.generated.GboardTargetAdmission
 
 @Suppress("unused")
-val purpleGboardActionsPatch = resourcePatch(
-    name = "Whisper 3 dictation and AI Translate",
+val purpleGboardActionsPatch = GboardTargetAdmission.admittedContributions("editing_access_points").let { admitted ->
+resourcePatch(
+    name = "Whisper 3 dictation and AI Translate".takeIf { admitted.isNotEmpty() },
     description = "Adds optional Whisper 3 and gpt-6.1-sol translation actions through your authenticated local tools. Preserves stock Gboard actions. Requires the memory-only companion runtime.",
     default = false,
 ) {
+    if (admitted.isNotEmpty()) {
     compatibleWith(COMPATIBILITY_GBOARD)
     dependsOn(gboardPatchesExtensionCarrierPatch, gboardAccessPointContributions1803Patch,
         gboardEditingAccessPointsLifecyclePatch)
@@ -79,4 +82,7 @@ val purpleGboardActionsPatch = resourcePatch(
             }
         }
     }
+}
+
+}
 }

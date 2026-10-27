@@ -1,0 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/sh
+# Fixed command surface; no request text/audio/tokens are passed as shell arguments.
+set -eu
+case "${1:-}" in bootstrap|status|stop) ;; *) exit 64 ;; esac
+exec "$HOME/.local/lib/purple-gboard-companion/current/purple-keyboard-bridge" "$1" --state "$HOME/.local/state/purple-gboard-companion-v1"

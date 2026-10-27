@@ -1,0 +1,43 @@
+{
+  "repo_head": "ca73b8b8dfc3ada1b7acaf4469d30cae6b77b72a",
+  "component": "purple-keyboard/bridge",
+  "working_file_hashes": [
+    {
+      "source": "Cargo.toml",
+      "sha256": "e5010980448f4474249af5cebcbf648df43ec69073a57b48c30ab7b605b85030"
+    },
+    {
+      "source": "Cargo.lock",
+      "sha256": "577e05e97cf688d5f03443851cde3ed5decc91069ae3e9fcd9b626547059c056"
+    },
+    {
+      "source": "src/cli.rs",
+      "sha256": "056ee91bd8efa3cba5e50b74fe658a32c73714eac45dcfe391499d9690414e64"
+    },
+    {
+      "source": "src/http.rs",
+      "sha256": "34b87eaadf9a946c6e305c3f5ec49af6feaf15e8a0ec780af41853c93b682551"
+    },
+    {
+      "source": "src/jobs.rs",
+      "sha256": "775cb14b76fef0864349fecfd6ee4040a011523e16045ea82c8844330963a32b"
+    },
+    {
+      "source": "src/lib.rs",
+      "sha256": "1d7c4663b9c85644b0341bbde3fa6e03bda2ea3de5a18190bee801d4c7c16534"
+    },
+    {
+      "source": "src/main.rs",
+      "sha256": "16147887864ab191726a910759f90abf2ef365ee11960b534928f03e87d25667"
+    },
+    {
+      "source": "src/private.rs",
+      "sha256": "8262df14c2cfe673b7d927f8e3119c50986b193afee2db3feeb3ef926b4e36c1"
+    },
+    {
+      "source": "src/whisper.rs",
+      "sha256": "f8bee49e35a4f68b257a111673c48c1cd5704945cc6985eec50c111807f736b1"
+    }
+  ],
+  "ownership": "Original owner retained; separate source adaptation, no original installation changed."
+}
