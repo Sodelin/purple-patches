@@ -28,3 +28,8 @@ Workflow output contains a Morphe .mpp candidate, source metadata, provenance
 and hashes. Stable releases/manager install-source integration are published
 only after candidate verification. A friend still needs the supported local
 Whisper/Codex companion, not just the keyboard patch bundle.
+
+The current acceptance record is [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md).
+Native controls and the Android cross-build are verified separately from the
+Gboard bundle and actual phone behavior. The candidate has its own version;
+its unreleased update feed cannot fetch an upstream binary by accident.
