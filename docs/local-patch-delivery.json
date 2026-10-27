@@ -1,0 +1,11 @@
+{
+  "file": "/storage/emulated/0/Download/Purple-Patches/patches-0.1.0-alpha.1.mpp",
+  "bytes": 8205100,
+  "sha256": "af2077907783247f667940e02659fe8b574ec36fd26df8af67e22469de3f11fe",
+  "source_private_release_id": 425693294,
+  "full_local_readback_verified": true,
+  "free_before_bytes": 18085416960,
+  "free_after_bytes": 18077184000,
+  "selected_file_allocation_bytes": 8216576,
+  "limits": "Selected MPP only. No APK installation, Manager import, default keyboard switch, service start, model download or inference."
+}

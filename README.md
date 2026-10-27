@@ -34,3 +34,9 @@ The current acceptance record is [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md).
 Native controls and the Android cross-build are verified separately from the
 Gboard bundle and actual phone behavior. The candidate has its own version;
 its unreleased update feed cannot fetch an upstream binary by accident.
+
+The verified main MPP is retained in a private candidate draft alongside its
+corresponding source and hashes. A verified local copy is in the phone's
+`Download/Purple-Patches/` folder. This does not install the keyboard or turn
+on the companion. See [candidate delivery](docs/MORPHE-SOURCE.md) and the
+[local readback record](docs/local-patch-delivery.json).

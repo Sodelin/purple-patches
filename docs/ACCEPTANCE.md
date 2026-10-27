@@ -53,3 +53,14 @@ fixture checks and packaging work moving while that action is held.
 For Morphe input, select exactly `patches-0.1.0-alpha.1.mpp`. The hosted
 archive also contains auxiliary `-sources.mpp` and `-javadoc.mpp` outputs;
 those are not the Manager patch input. No update feed is published yet.
+
+## Selected local deliverable
+
+The exact main bundle is also available at
+`/storage/emulated/0/Download/Purple-Patches/patches-0.1.0-alpha.1.mpp`,
+with SHA256SUMS alongside it. Full local bytes/hash readback passed; see
+[local-patch-delivery.json](local-patch-delivery.json). This is an8MB selected
+user deliverable, not a local compiler/SDK cache, APK installation, Manager
+import or keyboard activation. `tools/export_patch_bundle.py` recreates it from
+the retained private asset, verifies the pin before writing, uses exclusive
+creation and refuses a differing existing file.
