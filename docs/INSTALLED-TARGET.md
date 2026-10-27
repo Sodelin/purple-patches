@@ -1,5 +1,9 @@
 # Installed input review — 27 October 2026
 
+User correction: use the supported release APK from APKMirror. A beta port is
+not required. The installed-beta observations below are retained reference
+evidence, not an input requirement or a blocker.
+
 Read-only observation of the existing authenticated same-phone route identified
 stock Gboard `18.5.4.993608717-beta-arm64-v8a`, version code176049710. It is
 installed as four APK parts totaling140429366bytes. The base APK SHA256 is
@@ -57,6 +61,6 @@ An actual beta patching run must retain all original APK parts, verify input
 hashes and signing identities, use full bytecode preservation, validate unique
 fingerprints, and keep compatibility failures fatal. No forced version bypass,
 partial-success continuation, signing-key upload or installation is part of this
-preflight. A beta-specific admitted profile and successful original-APK patch
-are still required. No existing DEX inspection command was found in this
+preflight. The selected release now uses the existing exact admitted profile; a successful
+original-release APK patch is still required. No existing DEX inspection command was found in this
 phone's current PATH; that does not prove every local inspection route absent.
