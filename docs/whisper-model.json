@@ -1,0 +1,17 @@
+{
+  "kind": "Authored model acquisition plan; no model downloaded or tested",
+  "user_selection": "Whisper large-v3 — prioritize accuracy",
+  "variant": "large-v3",
+  "runtime_family": "whisper-large-v3",
+  "format": "whisper.cpp GGML",
+  "repository": "https://huggingface.co/ggerganov/whisper.cpp",
+  "revision": "5359861c739e955e79d9a303bcbc70fb988958b1",
+  "file": "ggml-large-v3.bin",
+  "download_url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-large-v3.bin",
+  "expected_bytes": 3095033483,
+  "expected_sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+  "metadata_evidence": "Repository revision and LFS size/SHA obtained from primary hosting API; actual full model bytes have not been acquired or independently verified.",
+  "admission": "Full large-v3 architecture only; reject turbo decoder, base and older generations. Verify complete bytes before activation; no model fallback.",
+  "storage": "Keep20GiB free after peak allocation. Do not download below reserve; stream one verified retained model without archive/source duplication. Existing base model/engine/config remain held.",
+  "acceptance": "Exact model and engine hashes, local privacy/control contract, actual dictation quality/latency/RAM/cancellation, and keyboard regression checks still required. Current60-second recording and120-second engine budgets are bounds, not a guarantee that full-v3 inference finishes on this phone."
+}
