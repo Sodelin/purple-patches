@@ -23,7 +23,7 @@ class Links(HTMLParser):
 
 def allowed(url):
     value=urlparse(url)
-    return value.scheme=='https' and (value.hostname=='apkmirror.com' or (value.hostname or '').endswith('.apkmirror.com'))
+    return value.scheme=='https' and (value.hostname in {'apkmirror.com','eb5e7388c3df147b74dd2379b7cf8323.r2.cloudflarestorage.com'} or (value.hostname or '').endswith('.apkmirror.com'))
 
 
 def fetch(destination):
