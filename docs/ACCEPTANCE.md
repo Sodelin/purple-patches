@@ -7,6 +7,7 @@ must continue working. A successful hosted build is not device acceptance.
 | Gate | Evidence or remaining work |
 | --- | --- |
 | Native deterministic controls | Run40527691599, sourcefa32125:27 passed; Android ARM64 cross-build passed. No model invoked. |
+| Gboard bundle | Run40528625015, source6719a21: complete build/test/metadata generation passed. Main MPP, all artifact hashes,44-patch catalog and overlay provenance independently verified in RAM; see[gboard-artifact.json](gboard-artifact.json). |
 | Java editor policy | Password, visible/web/numeric password, no-personalized-learning, localhost, UTF-8, stale anchors and Termux result-code controls run in hosted Gboard workflow. |
 | Version admission | The new action participates in upstream generated editing-access-point admission and published catalog. Unsupported versions must remain rejected. |
 | Target APK | Pinned upstream targets18.5.4.993608717-release-arm64-v8a. Actual installed version, original APK hash and signer remain unverified. |
@@ -48,3 +49,7 @@ memory transport label does not certify all internal Codex/session/provider
 writers, Android app data or cloud-input invisibility. Resolve those actual
 writer gates before a live translation test. Keep supporting source, public
 fixture checks and packaging work moving while that action is held.
+
+For Morphe input, select exactly `patches-0.1.0-alpha.1.mpp`. The hosted
+archive also contains auxiliary `-sources.mpp` and `-javadoc.mpp` outputs;
+those are not the Manager patch input. No update feed is published yet.

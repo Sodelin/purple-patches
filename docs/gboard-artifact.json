@@ -1,0 +1,61 @@
+{
+  "kind": "Authored independently verified build metadata; no APK patching or installation",
+  "source_commit": "6719a214e6cc3f9a02e19e86c30f7fdb678620b1",
+  "run": "https://github.com/Sodelin/purple-patches/actions/runs/40528625015",
+  "artifact_id": 12743994515,
+  "zip_bytes": 15459826,
+  "all_expected_members_and_sha256_matched": true,
+  "all_overlay_source_hashes_match_current_authored_files": true,
+  "files": [
+    {
+      "file": "patches-0.1.0-alpha.1-javadoc.mpp",
+      "bytes": 309011,
+      "sha256": "ea3640c5723ec428c2e75125bc0f2ceda60749748d0dea09f17aa3a67c5b2d94"
+    },
+    {
+      "file": "patches-0.1.0-alpha.1-sources.mpp",
+      "bytes": 7183223,
+      "sha256": "927c56ded95fae2a00711c2acb09d9388b9bfb92251cbc66f04653d8ca938a60"
+    },
+    {
+      "file": "patches-0.1.0-alpha.1.mpp",
+      "bytes": 8205100,
+      "sha256": "af2077907783247f667940e02659fe8b574ec36fd26df8af67e22469de3f11fe"
+    },
+    {
+      "file": "patches-bundle.json",
+      "bytes": 215,
+      "sha256": "49d73aeec5b1c9fb42aaee0f986d915ad3af29e4cf0911fd777d1f613b11f558"
+    },
+    {
+      "file": "patches-list.json",
+      "bytes": 19435,
+      "sha256": "9c8208efdd5aec572b208acef325fc83769c6905aeea055255d90d6304593ca9"
+    },
+    {
+      "file": "purple-provenance.json",
+      "bytes": 1677,
+      "sha256": "6ec0c9970a4517f4cbf2b5e4f2eca351f57bdf8f17f71d85e29229058e3e2354"
+    }
+  ],
+  "auxiliary_files": "The -sources.mpp and -javadoc.mpp are auxiliary build outputs, not the Manager patch input. Select only the exact main filename.",
+  "published_patch_count": 44,
+  "purple_action": {
+    "name": "Whisper 3 dictation and AI Translate",
+    "description": "Adds optional Whisper 3 and gpt-6.1-sol translation actions through your authenticated local tools. Preserves stock Gboard actions. Requires the memory-only companion runtime.",
+    "use": false,
+    "dependencies": [],
+    "compatiblePackages": {
+      "com.google.android.inputmethod.latin": [
+        "18.5.4.993608717-release-arm64-v8a"
+      ]
+    },
+    "options": []
+  },
+  "distinct_bundle_name": true,
+  "version": "0.1.0-alpha.1",
+  "upstream_binary_url_removed": true,
+  "inspection": "ZIP and nested main MPP inspected in RAM; binaries not persisted, executed, patched or installed on phone.",
+  "limits": "Exact original APK patching, phone privacy/control/regression, full-v3 acquisition/live acceptance and published update source remain pending. Hosted artifacts expire7days.",
+  "main_patch_bundle_filename": "patches-0.1.0-alpha.1.mpp"
+}
