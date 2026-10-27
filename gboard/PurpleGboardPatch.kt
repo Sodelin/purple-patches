@@ -74,6 +74,10 @@ resourcePatch(
             val existing=root.childElements("domain-config").firstOrNull { config ->
                 config.childElements("domain").any { it.textContent=="127.0.0.1" }
             }
+            check(existing == null || (existing.childElements("domain").size == 1
+                && existing.childElements("domain-config").isEmpty())) {
+                "Loopback shares a broader network policy; preserve it and port explicitly"
+            }
             val local=existing ?: doc.createElement("domain-config").also(root::appendChild)
             local.setAttribute("cleartextTrafficPermitted","true")
             if (existing==null) {
