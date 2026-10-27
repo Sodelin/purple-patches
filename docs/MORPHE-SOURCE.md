@@ -56,3 +56,14 @@ repeatable source building, not a claim of byte-identical archive output.
 The original exact APK-tested MPP remains the selected retained/downloaded
 candidate; no asset was substituted under its old hash. Exact details and the
 transitional failed workflow are in[feed-rebuild-artifact.json](feed-rebuild-artifact.json).
+
+Companion revision0.2.1 is retained separately in private draft425713896 because
+actual Android public controls exposed a /proc/self/fd reopening failure in
+0.2.0. The correction passed28 public native controls and ARM64 cross-build,
+then six selected assets were fully read back remotely. It adds one fixed
+`response-schema.json` authored template beside the native executable and sends
+audio through stdin. The original MPP remains unchanged. The old draft now
+carries a verified supersession notice; no historical asset was overwritten.
+This independent companion version avoids replacing runtime bytes beneath an
+existing hash/version. It does not publish a working Manager source or activate
+the keyboard. Retain with `tools/stage_candidate_release.py --stage-native-021`.

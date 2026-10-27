@@ -56,5 +56,11 @@
       "Draft URLs are not a usable Manager update feed"
     ]
   },
-  "limits": "Private durable draft custody, not a published Manager source, app installation, privacy writer acceptance or live model test. Initial gh stdin upload refused HTTP400 Bad Content-Length; empty draft observed, then fixed-length memory upload and full readback passed. No partial asset overwritten."
+  "limits": "Private durable draft custody, not a published Manager source, app installation, privacy writer acceptance or live model test. Initial gh stdin upload refused HTTP400 Bad Content-Length; empty draft observed, then fixed-length memory upload and full readback passed. No partial asset overwritten.",
+  "native_supersession": {
+    "new_version": "0.2.1",
+    "new_private_draft_id": 425713896,
+    "notice_readback_verified": true,
+    "reason": "Actual Android anonymous-path denial; pipe audio and fixed authored schema correction. Old binary/source assets retained unmodified as history."
+  }
 }

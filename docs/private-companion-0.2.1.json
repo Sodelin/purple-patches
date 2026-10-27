@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-27",
+  "release_id": 425713896,
+  "tag": "companion-v0.2.1-candidate",
+  "private": true,
+  "draft": true,
+  "assets_verified_full_remote_bytes": 6,
+  "total_asset_bytes": 831400,
+  "manifest_sha256": "6c2064ca65e9d226f44d0b23ac2e704a5ac54bd8baf5763087420e87283d29c7",
+  "manifest": {
+    "version": "0.2.1",
+    "source_commit": "b12cd39cce302e7c5a327d9438204c69588b6418",
+    "compatible_patch_bundle": "0.1.0-alpha.1",
+    "status": "PRIVATE DRAFT; activation held",
+    "schema_deployment": "response-schema.json beside executable, owner-private0600; exact compiled bytes required",
+    "assets": {
+      "companion-0.2.1-source.tar.gz": {
+        "bytes": 78482,
+        "sha256": "7c64aa7f2353de339b6d0b159f033bf13ee1a1df20f3580a90e3511e1c5ca474"
+      },
+      "purple-gboard-service": {
+        "bytes": 336,
+        "sha256": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91"
+      },
+      "purple-keyboard-bridge": {
+        "bytes": 751136,
+        "sha256": "78b0585b373fe4583a234fed27b242cb22c9082528414bedbcd206c3ab4809f1"
+      },
+      "response-schema.json": {
+        "bytes": 106,
+        "sha256": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa"
+      }
+    }
+  },
+  "limits": "Verified retained build/source only. No installation, inference, microphone or actual Manager/keyboard regression acceptance."
+}
