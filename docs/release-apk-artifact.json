@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-27",
+  "source_commit": "4abf70594c4eb9fb3b2d536eeff97d2ceb00bcad",
+  "run": "https://github.com/Sodelin/purple-patches/actions/runs/40536927173",
+  "artifact_id": 12749375979,
+  "artifact_sha256": "5dcba4078096c0c0c48ed64bec5731b41aa1ac2142caf5134ba1df1fdc0ab2b5",
+  "artifact_bytes": 49135617,
+  "members": {
+    "SHA256SUMS": {
+      "bytes": 184,
+      "sha256": "48211950535cd03e9c706e5f55db3bd4865c9d3a513423b23483a640a1a3217d"
+    },
+    "gboard-patch-result.json": {
+      "bytes": 401,
+      "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"
+    },
+    "gboard-purple-unsigned.apk": {
+      "bytes": 84566863,
+      "sha256": "445c9b74337bf148ec68255a134299c536b2db7c34ae36f887afed7d3968c819"
+    }
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified": true
+  },
+  "patch_result": {
+    "success": true,
+    "applied_patches": [
+      "Add Gboard Signature Bypass",
+      "Whisper 3 dictation and AI Translate",
+      "Package Rename"
+    ],
+    "failed_patches": []
+  },
+  "hosted_static_verification": {
+    "package": "dev.jason.com.google.android.inputmethod.latin",
+    "original_classes_retained": 22860,
+    "output_classes": 26001,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "dexopt_assets_excluded": true,
+    "own_components_and_permissions_present": true
+  },
+  "independent_artifact_verification": "ZIP SHA256 and all member bytes/hash verified in RAM; result success checked. No phone APK persistence. Hosted static checks do not establish device regression acceptance.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7
+}

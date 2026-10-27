@@ -37,10 +37,11 @@ an absent ADB server or changed helper, verifies only the fixed packages,
 streams hashes without copies, and seals observations before persistence.
 It does not install, select an IME, grant permissions, pair or create keys.
 
-Next: validate the pinned Morphe Desktop CLI and complete the original split
-input route on an off-phone runner. Original installed APKs remain in place.
-Phone free space remains below the20GiB reserve; no local APK merge/build or
-full-v3 model download is admitted. New-model testing remains held separately.
+The supported release was acquired from APKMirror and patched off phone. See
+[release-apk-artifact.json](release-apk-artifact.json). Original installed APKs
+remain in place. Phone free space remains below the20GiB reserve; no local
+APK build or full-v3 model download occurred. New-model testing remains held
+separately.
 
 ## Verified off-phone tool route
 
@@ -57,10 +58,24 @@ support the documented child `patch --help` path without a required APK.
 The corrected control checks the actual missing-input exit2 and usage before
 loading the bundle; it does not suppress an unexpected failure.
 
-An actual beta patching run must retain all original APK parts, verify input
-hashes and signing identities, use full bytecode preservation, validate unique
-fingerprints, and keep compatibility failures fatal. No forced version bypass,
-partial-success continuation, signing-key upload or installation is part of this
-preflight. The selected release now uses the existing exact admitted profile; a successful
-original-release APK patch is still required. No existing DEX inspection command was found in this
-phone's current PATH; that does not prove every local inspection route absent.
+## Actual supported release result
+
+[Run40536927173](https://github.com/Sodelin/purple-patches/actions/runs/40536927173)
+verified the exact original release APKMirror hash and Google signing identity,
+then applied `Whisper 3 dictation and AI Translate`, `Package Rename` and
+`Add Gboard Signature Bypass` with full bytecode, unique-fingerprint validation
+and fatal compatibility failures. No forced version admission was needed.
+
+The unsigned output package is
+`dev.jason.com.google.android.inputmethod.latin`, distinct from stock Gboard.
+Hosted SDK/DEX checks confirmed all22860 original class descriptors remain,
+all15 original native libraries and140 original assets match byte-for-byte
+(excluding regenerated dexopt assets), and the new components/permissions are
+present. These checks preserve inputs structurally; device behavior still needs
+actual regression testing. No signing key was uploaded, no APK was installed,
+and no default keyboard or permission was changed.
+
+The archive and every member hash were independently verified in RAM on the
+phone. No output APK file was stored on the phone. APK packaging is not
+byte-reproducible across runs (timestamps/container output can differ); each
+run has its own hash and is never substituted under a prior hash.
