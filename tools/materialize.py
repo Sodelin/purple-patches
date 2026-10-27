@@ -1,5 +1,5 @@
 """Apply the small authored overlay to a clean, pinned upstream checkout OFF PHONE."""
-import hashlib,json,subprocess,sys
+import copy,hashlib,json,subprocess,sys
 from pathlib import Path
 PIN='2eb71854accc7e906d3e4f5495b2a54ed1e2af47'
 ROOT=Path(__file__).resolve().parents[1]
@@ -40,6 +40,20 @@ def materialize(destination):
         'version':version,'description':'Unreleased Purple Gboard candidate. Device acceptance pending.',
         'created_at':subprocess.check_output(['git','-C',str(ROOT),'show','-s','--format=%cI','HEAD'],text=True).strip(),
         'download_url':'','signature_download_url':''},indent=2)+'\n')
+    # Register a real admitted feature, not an unaccounted-for extra patch name.
+    catalog_path=destination/'patches/src/main/resources/gboard/gboard-port-product-catalog.json'
+    catalog=json.loads(catalog_path.read_text())
+    feature=copy.deepcopy(next(f for f in catalog['features'] if f['feature_id']=='editing_access_points'))
+    feature.update(feature_id='purple_gboard_ai',public_patch_name='Whisper 3 dictation and AI Translate',feature_marker=None)
+    feature['consumer_files']=sorted(set(feature['consumer_files']+[str(patch.relative_to(destination))]))
+    feature['contributions'][0].update(contribution_id='purple_gboard_ai.runtime',order=1261)
+    catalog['features'].append(feature);catalog['features'].sort(key=lambda f:f['feature_id'])
+    catalog_path.write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n')
+    catalog_path.with_suffix('.sha256').write_text(hashlib.sha256(catalog_path.read_bytes()).hexdigest()+'\n')
+    # Extend the exact expected feature inventory; retain every original assertion.
+    contract=destination/'patches/src/test/kotlin/dev/jason/gboardpatches/patches/gboard/registry/GboardPortProductCatalogContractTest.kt'
+    replace(contract,'        val EXPECTED_MIGRATION_SCOPES = mapOf(',
+            '        val EXPECTED_MIGRATION_SCOPES = mapOf(\n            "purple_gboard_ai" to "version-sensitive",')
     build=destination/'patches/build.gradle.kts'
     replace(build,'name = "Gboard Patches"','name = "Purple Patches"')
     replace(build,'description = "Morphe patches for Gboard."','description = "Optional Gboard Whisper 3 dictation and AI translation; based on Jason Wu Gboard patches."')
