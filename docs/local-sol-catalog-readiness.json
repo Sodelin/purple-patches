@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-27",
+  "kind": "Actual local cached public model metadata; not inference or entitlement",
+  "selected_slug": "gpt-6.1-sol",
+  "matching_entries": 1,
+  "visible_matching_entries": 1,
+  "catalog_same_uid_regular_file": true,
+  "catalog_private_mode": "0600",
+  "selected_efforts_present": [
+    "medium",
+    "max"
+  ],
+  "model_invocations": 0,
+  "credential_or_session_store_read": false,
+  "limits": "Selected public model metadata cache inspected in RAM; no provider reachability, account entitlement or successful translation implied."
+}

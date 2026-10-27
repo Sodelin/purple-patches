@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-27",
+  "full_objective_complete": false,
+  "previous_goal_turn_classification": "progress: real private candidate source published and remotely verified",
+  "prepared_requirements": {
+    "maintained_source": "Versioned Purple overlay and separate companion0.2.1; source/release artifacts retained.",
+    "off_phone_builds": "Gboard build/test/metadata40528625015; native0.2.1 tests28/cross-build40540825059; feed/component build40542712502 passed.",
+    "exact_apk_patch": "Stable APKMirror hash/Google signer verified; full patch/clone/static preservation40536927173.",
+    "user_selected_capabilities": "Full-large-v3-only admission and explicit gpt-6.1-sol translation preview/insertion implemented; actual live behavior still unverified.",
+    "private_update_source": "Authenticated raw JSON, published tag and full exact MPP bytes verified; actual Manager import/update still unverified.",
+    "local_patch_deliverable": "Exact8MB selected MPP in shared Downloads, full readback verified.",
+    "cached_sol_readiness": "Actual selected slug/perms/medium/max metadata verified without inference."
+  },
+  "unproven_requirements": {
+    "full_large_v3": "Model bytes not acquired; actual engine/model decoder, latency/RAM/accuracy/cancellation untested.",
+    "local_privacy_control": "Companion source controls are not current internal Codex/session/provider writer acceptance.",
+    "device_window": "No accepted finite Gboard installation/activation/control window; no Manager signing/install or keyboard enable/default change.",
+    "device_regression_rollback": "No actual alongside-stock installation, bootstrap callback, typing/clipboard/language/editor/microphone/translation regression or physical rollback acceptance.",
+    "manager_import_update": "Remote source protocol works using existing gh identity; phone Manager credential/source import/update not tested."
+  },
+  "blockers": {
+    "privacy_model_stop": "User standing policy plus explicit Bridge encryption-critical-path packet retain new-model-testing stop. Current offline status remains dated, not acceptance proof. Withdrawn Dot wiring request does not release the full selected criterion.",
+    "installation_stop": "Current task explicitly preserves installation/default-keyboard holds. Prior quiet-install authorization concerns the original different app; no transfer inferred.",
+    "storage": "Known runtime assets alone require3098066944 additional allocated bytes beyond20GiB reserve; last byte preflight required24572903424 and observed20091125760. This is a dated lower bound, not complete APK-signing peak or a fixed quota."
+  },
+  "owner_request": {
+    "action": "PATCHES-GBOARD/privacy-owner-evidence1",
+    "recipient": "subspace-android-bridge / existing Android Bridge",
+    "message_id": "1793119677242-0000022181-01793119677242065713-000000-phone-storage-recovery",
+    "delivery": "Source packet available in own linked hub; not awakened, reading/adoption/liveness unverified.",
+    "scope": "Already-existing acceptance evidence or exact owning gap only; no resumed privacy project, models, host tests or device work."
+  },
+  "blocked_audit": {
+    "same_holds_repeated_at_least_three_consecutive_goal_turns": true,
+    "meaningful_unheld_source_build_distribution_work_completed": true,
+    "no_remaining_live_build_handle_awaited": true,
+    "next_required_action": "Obtain existing owner acceptance of the retained model-test criterion or explicit human-scoped change, plus a finite installation/control release and adequate measured headroom. Then verify actual Manager/app/engine paths; source evidence cannot substitute."
+  },
+  "preservation": "Full objective remains unfinished. Original keyboard/controller/engine/base model, new full-v3 requirement, credentials, held records and separate standalone migration goal remain untouched. No sub-agents or new conversations."
+}
