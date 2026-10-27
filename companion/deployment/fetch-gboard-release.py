@@ -33,7 +33,7 @@ def fetch(destination):
         if not allowed(url): raise RuntimeError('Unexpected download host')
         response=session.get(url, timeout=60, allow_redirects=True, stream=True)
         response.raise_for_status()
-        if not allowed(response.url): raise RuntimeError('Unexpected redirect host')
+        if not allowed(response.url): raise RuntimeError('Unexpected redirect host: '+str(urlparse(response.url).hostname))
         kind=response.headers.get('Content-Type','').lower()
         if 'text/html' not in kind:
             digest=hashlib.sha256();count=0
