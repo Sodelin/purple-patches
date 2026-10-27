@@ -10,7 +10,7 @@ must continue working. A successful hosted build is not device acceptance.
 | Gboard bundle | Run40528625015, source6719a21: complete build/test/metadata generation passed. Main MPP, all artifact hashes,44-patch catalog and overlay provenance independently verified in RAM; see[gboard-artifact.json](gboard-artifact.json). |
 | Java editor policy | Password, visible/web/numeric password, no-personalized-learning, localhost, UTF-8, stale anchors and Termux result-code controls run in hosted Gboard workflow. |
 | Version admission | The new action participates in upstream generated editing-access-point admission and published catalog. Unsupported versions must remain rejected. |
-| Target APK | Pinned upstream targets18.5.4.993608717-release-arm64-v8a. Actual installed version, original APK hash and signer remain unverified. |
+| Target APK | Pinned upstream targets18.5.4.993608717-release-arm64-v8a. Installed beta18.5.4.993608717, four original parts and Google signatures now verified read-only; release/beta compatibility remains unproven. See[INSTALLED-TARGET.md](INSTALLED-TARGET.md). |
 | Morphe patching | Produce distinctly versioned MPP, inspect catalog/provenance/hashes, then patch an exact compatible original APK. Not yet performed. |
 | Termux connection | Actual one-shot callback, nonexported receiver, denied permission, expired callback and app-process restart acceptance pending. No persisted capability preferences. |
 | Privacy | New companion keeps prompt/audio/events/output in anonymous memory/pipes, seals its capability and recovery intents using the existing identity. Actual phone sink integration and internal Codex writer coverage remain separate open checks. |
