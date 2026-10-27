@@ -23,6 +23,7 @@ jobs:
           mkdir -p dist
           cp companion/target/aarch64-linux-android/release/purple-keyboard-bridge dist/
           cp companion/deployment/purple-gboard-service dist/
+          install -m 600 companion/deployment/response-schema.json dist/response-schema.json
           cd dist
           sha256sum * > SHA256SUMS
       - uses: actions/upload-artifact@v4
