@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import subprocess
 import urllib.parse
+import urllib.request
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -67,7 +68,6 @@ def collect():
         'candidate': TAG, 'status': 'PRIVATE DRAFT; phone acceptance pending',
         'gboard_source': gboard_source, 'companion_source': native_source,
         'upstream_source': UPSTREAM,
-        'delivery_source': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'assets': {n: {'bytes': len(b), 'sha256': digest(b)} for n, b in sorted(assets.items())},
         'limits': ['Unsigned APK is intentionally excluded', 'No full-v3 weights included',
                    'No installation or live model acceptance', 'Draft URLs are not a usable Manager update feed'],
@@ -107,8 +107,18 @@ def stage(assets):
     for name, body in assets.items():
         if name not in current:
             # No automatic retry after an uncertain mutation. Re-run verifies custody.
-            response = json.loads(gh('api', endpoint + '?name=' + urllib.parse.quote(name),
-                '--method', 'POST', '-H', 'Content-Type: application/octet-stream', '--input', '-', data=body))
+            # GitHub uploads require a fixed Content-Length; gh stdin uses chunked
+            # transport here and is rejected. Keep bytes and token in RAM.
+            token = gh('auth', 'token').decode().strip()
+            request = urllib.request.Request(endpoint + '?name=' + urllib.parse.quote(name),
+                data=body, headers={'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/octet-stream', 'Content-Length': str(len(body))},
+                method='POST')
+            class NoRedirect(urllib.request.HTTPRedirectHandler):
+                def redirect_request(self, *args, **kwargs):
+                    raise RuntimeError('Unexpected upload redirect')
+            with urllib.request.build_opener(NoRedirect).open(request, timeout=120) as stream:
+                response = json.load(stream)
             assert response['name'] == name and response['size'] == len(body), 'Upload metadata mismatch'
     final = api(f"repos/{REPO}/releases/{release['id']}")
     assert final['draft'] is True and {a['name'] for a in final['assets']} == set(assets)
