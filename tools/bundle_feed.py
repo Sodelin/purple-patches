@@ -5,7 +5,9 @@ import re
 from urllib.parse import urlsplit
 
 
-def bundle_feed(version, created_at, download_url=''):
+def bundle_feed(version, created_at, download_url='', tag_prefix='v'):
+    if tag_prefix not in ('v','patches-v'):
+        raise ValueError('Unrecognized patch component tag prefix')
     if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?', version):
         raise ValueError('Invalid candidate version')
     stamp = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
@@ -16,7 +18,7 @@ def bundle_feed(version, created_at, download_url=''):
     created = stamp.astimezone(timezone.utc).replace(tzinfo=None).isoformat(timespec='seconds')
     if download_url:
         parsed = urlsplit(download_url)
-        expected = f'/Sodelin/purple-patches/releases/download/v{version}/patches-{version}.mpp'
+        expected = f'/Sodelin/purple-patches/releases/download/{tag_prefix}{version}/patches-{version}.mpp'
         if (parsed.scheme, parsed.netloc, parsed.path, parsed.query, parsed.fragment) != (
                 'https', 'github.com', expected, '', ''):
             raise ValueError('Download must select our exact versioned main MPP')
@@ -24,7 +26,7 @@ def bundle_feed(version, created_at, download_url=''):
             'description': 'Purple Gboard candidate. Full large-v3 dictation and explicit AI Translate; phone acceptance pending.',
             'created_at': created, 'download_url': download_url,
             'signature_download_url': None,
-            'page_url': f'https://github.com/Sodelin/purple-patches/releases/tag/v{version}'}
+            'page_url': f'https://github.com/Sodelin/purple-patches/releases/tag/{tag_prefix}{version}'}
 
 
 def check():
@@ -47,6 +49,14 @@ def check():
         pass
     else:
         raise AssertionError('Accepted ambiguous timestamp')
+    component_url=url.replace('/download/v','/download/patches-v')
+    assert bundle_feed(version, '2026-10-27T15:00:00Z', component_url, tag_prefix='patches-v')['download_url']==component_url
+    try:
+        bundle_feed(version, '2026-10-27T15:00:00Z', component_url)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('Wrong component tag prefix accepted')
     assert not bundle_feed(version, '2026-10-27T15:00:00Z')['download_url']
     print('Feed UTC conversion, rollover, source identity/version and unreleased refusal controls passed')
 

@@ -77,6 +77,26 @@ def collect():
     return assets
 
 
+def collect_patches_only():
+    assets, source = verified_members('gboard-artifact.json', [
+        'patches-0.1.0-alpha.1.mpp', 'patches-list.json', 'purple-provenance.json'])
+    assets['gboard-overlay-source.tar.gz'] = subprocess.check_output(
+        ['git', 'archive', '--format=tar.gz', '--prefix=purple-patches/', source], cwd=ROOT)
+    historical = api(f'repos/{REPO}/releases/425693294')
+    original = next(a for a in historical['assets'] if a['name'] == 'gboard-upstream-source.tar.gz')
+    upstream = gh('api', f"repos/{REPO}/releases/assets/{original['id']}", '-H', 'Accept: application/octet-stream')
+    assert digest(upstream) == '1de222040b1ac8afa592b9db679b205e683016da9fe63a1f4461e6ff60622639'
+    assets['gboard-upstream-source.tar.gz'] = upstream
+    manifest = {'version': '0.1.0-alpha.1', 'component': 'Morphe patch bundle',
+        'source_commit': source, 'upstream_commit': UPSTREAM,
+        'required_companion': '0.2.1; separate versioned candidate',
+        'phone_acceptance': 'PENDING; no installation or model test',
+        'assets': {n: {'bytes': len(b), 'sha256': digest(b)} for n, b in sorted(assets.items())}}
+    assets['candidate-manifest.json'] = (json.dumps(manifest, indent=2) + '\n').encode()
+    assets['SHA256SUMS'] = ''.join(f'{digest(b)}  {n}\n' for n, b in sorted(assets.items())).encode()
+    return assets
+
+
 def collect_native():
     assets, source = verified_members('native-0.2.1-artifact.json', [
         'purple-keyboard-bridge', 'purple-gboard-service', 'response-schema.json'])
@@ -150,9 +170,17 @@ if __name__ == '__main__':
     group=parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--stage-private-draft', action='store_true')
     group.add_argument('--stage-native-021', action='store_true')
+    group.add_argument('--stage-patches-only', action='store_true')
     args=parser.parse_args()
     assert not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'Commit source first'
-    if args.stage_native_021:
+    if args.stage_patches_only:
+        stage(collect_patches_only(), tag='patches-v0.1.0-alpha.1',
+              name='Purple Gboard patches 0.1.0-alpha.1 — private candidate',
+              body='Exact APK-tested Morphe bundle and corresponding source only. '
+                   'Use companion0.2.1 from its separate versioned candidate. '
+                   'Static stable-release patch verification passed; phone acceptance remains pending. '
+                   'No APK, weights, signing keys, superseded companion or installation included.')
+    elif args.stage_native_021:
         stage(collect_native(), tag='companion-v0.2.1-candidate',
               name='Purple Gboard companion 0.2.1 — private Android transport correction',
               body='Corrects actual Android anonymous /proc/self/fd input denial with pipe audio and fixed authored schema. '
