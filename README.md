@@ -14,7 +14,8 @@ installed on the phone. Generated APKs and model weights are not distributed.
 The candidate is not a verified keyboard release. Build, actual APK patching,
 Gboard device regression, companion privacy path and Whisper3 acceptance are
 separate gates. Current phone speech assets are base multilingual, NOT v3.
-No base-to-v3 relabel or automatic fallback is permitted.
+The user selected full large-v3 for accuracy. Turbo, base and other generations
+are refused; no model substitution is permitted.
 
 The two actions require the authenticated local companion bootstrap at the
 stable Termux path ~/.local/bin/purple-gboard-service. Credentials remain only

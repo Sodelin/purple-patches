@@ -13,7 +13,7 @@ must continue working. A successful hosted build is not device acceptance.
 | Morphe patching | Produce distinctly versioned MPP, inspect catalog/provenance/hashes, then patch an exact compatible original APK. Not yet performed. |
 | Termux connection | Actual one-shot callback, nonexported receiver, denied permission, expired callback and app-process restart acceptance pending. No persisted capability preferences. |
 | Privacy | New companion keeps prompt/audio/events/output in anonymous memory/pipes, seals its capability and recovery intents using the existing identity. Actual phone sink integration and internal Codex writer coverage remain separate open checks. |
-| Whisper | Existing base multilingual assets do not qualify. Genuine large-v3 or large-v3-turbo weights, matching architecture, pinned bytes and engine are required. No weights downloaded or live speech tested. |
+| Whisper | Existing base multilingual assets do not qualify. User-selected full large-v3 weights, matching architecture, pinned bytes and engine are required. No weights downloaded or live speech tested. |
 | Editor integrity | Device tests must cover selection replacement, cursor movement, editor switch, app switch, cancellation, delayed result and starting another operation before an earlier preview is inserted. Original text must survive every refusal. |
 | Microphone | Device tests must verify stop, cancel,60-second ceiling, permissions, interruptions and release. Health/family validation must precede microphone opening. |
 | Translation | One explicit selected-text request, exact gpt-6.1-sol, no context inheritance/fallback, preview and explicit insertion. Live testing remains held. |

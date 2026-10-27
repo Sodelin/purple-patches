@@ -146,8 +146,8 @@ fn model_family(path:&Path)->Result<&'static str,String>{
 fn classify_header(header:&[u8])->Result<&'static str,String>{
     let number=|at:usize|i32::from_le_bytes(header[at..at+4].try_into().unwrap());
     if header.len()<48 || header[..4]!=0x67676d6cu32.to_le_bytes() {return Err("Unsupported Whisper model container".into())}
-    if number(12)==1280 && number(20)==32 && matches!(number(36),32|4) && number(40)==128 {Ok("whisper-large-v3")}
-    else {Err("Whisper 3 full or turbo required; another model was not substituted".into())}
+    if number(12)==1280 && number(20)==32 && number(36)==32 && number(40)==128 {Ok("whisper-large-v3")}
+    else {Err("Whisper large-v3 required; another model was not substituted".into())}
 }
 pub fn transcribe(state:&Path,_directory:&Path,cancelled:&AtomicBool,bytes:&[u8])->Result<String,String>{
     validate_wav(bytes)?;
@@ -190,7 +190,7 @@ mod tests {
         let mut header=[0u8;48];header[..4].copy_from_slice(&0x67676d6cu32.to_le_bytes());
         for (offset,value) in [(12,1280i32),(20,32),(36,32),(40,128)] {header[offset..offset+4].copy_from_slice(&value.to_le_bytes());}
         assert_eq!(classify_header(&header).unwrap(),"whisper-large-v3");
-        header[36..40].copy_from_slice(&4i32.to_le_bytes());assert!(classify_header(&header).is_ok());
+        header[36..40].copy_from_slice(&4i32.to_le_bytes());assert!(classify_header(&header).is_err());
         header[40..44].copy_from_slice(&80i32.to_le_bytes());assert!(classify_header(&header).is_err());
         assert!(classify_header(&[]).is_err());
     }
