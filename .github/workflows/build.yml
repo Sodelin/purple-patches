@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - 'gboard/**'
-      - 'tools/**'
+      - 'tools/materialize.py'
+      - 'tools/bundle_feed.py'
+      - 'tools/version.txt'
       - '.github/workflows/build.yml'
 permissions:
   contents: read
@@ -23,6 +25,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - name: Feed metadata controls
+        run: python tools/bundle_feed.py --check
       - name: Pure editor/session policy controls
         run: |
           mkdir -p "$RUNNER_TEMP/purple-policy"
