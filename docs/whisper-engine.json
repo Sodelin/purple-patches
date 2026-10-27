@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-27",
+  "engine": "whisper.cpp",
+  "version": "v1.8.3",
+  "commit": "2eeeba56e9edd762b4b38467bab96c2517163158",
+  "retained_binary_bytes": 2266472,
+  "retained_binary_sha256": "38e3206071ac8dadac34a5cbb6c602caa0bf5483dbd3443f20cba5df87740db2",
+  "actual_binary_hash_reverified": true,
+  "source_evidence": {
+    "large_v3_loader": "https://github.com/ggml-org/whisper.cpp/blob/2eeeba56e9edd762b4b38467bab96c2517163158/src/whisper.cpp#L1541",
+    "stdin_audio_decoder": "https://github.com/ggml-org/whisper.cpp/blob/2eeeba56e9edd762b4b38467bab96c2517163158/examples/common-whisper.cpp#L52",
+    "no_prints_preserves_results": "https://github.com/ggml-org/whisper.cpp/blob/2eeeba56e9edd762b4b38467bab96c2517163158/examples/cli/cli.cpp#L263"
+  },
+  "decision": "Reuse retained byte-verified engine when activation is authorized; pinned loader recognizes large-v3, and -f - decodes audio from stdin. No new engine build is required by source evidence. Current base weights remain separately protected and do not qualify as full-v3.",
+  "observed_transport_issue": "Actual Android public child cannot reopen inherited anonymous input via /proc/self/fd/N; pipe stdin succeeds. Companion0.2.1 source changes audio to stdin and uses fixed authored schema beside executable for the path-only Codex flag.",
+  "new_static_schema_sha256": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
+  "runtime_acceptance": "Not achieved. Engine was hashed, not executed. No inference, microphone, model download, installation, controller or keyboard change."
+}

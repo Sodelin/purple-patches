@@ -1,37 +1,12 @@
 //! Bounded anonymous-memory inputs and owned process-pipe capture. No payload files.
-use std::fs::File;
-use std::io::{Read, Seek, SeekFrom, Write};
-use std::os::fd::{AsRawFd, FromRawFd};
+use std::io::{Read, Write};
+use std::os::fd::AsRawFd;
 use std::os::unix::process::CommandExt;
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
 
-pub struct MemoryFile(File);
-impl MemoryFile {
-    pub fn new(bytes: &[u8]) -> Result<Self,String> {
-        let label=std::ffi::CString::new("purple-keyboard-memory").unwrap();
-        let fd=unsafe {libc::syscall(libc::SYS_memfd_create,label.as_ptr(),libc::MFD_CLOEXEC) as i32};
-        if fd<0 { return Err("Anonymous memory input unavailable; no disk fallback".into()); }
-        let mut file=unsafe {File::from_raw_fd(fd)};
-        file.write_all(bytes).and_then(|_|file.seek(SeekFrom::Start(0))).map_err(|_|"Memory input failed")?;
-        Ok(Self(file))
-    }
-    pub fn inherit_for(&self, command:&mut Command) {
-        let fd=self.0.as_raw_fd();
-        // Only this selected child receives the anonymous input descriptor.
-        // Concurrent status/sealing processes retain CLOEXEC on all other inputs.
-        unsafe {command.pre_exec(move || {
-            let flags=libc::fcntl(fd,libc::F_GETFD);
-            if flags<0 || libc::fcntl(fd,libc::F_SETFD,flags & !libc::FD_CLOEXEC)<0 {
-                return Err(std::io::Error::last_os_error());
-            }
-            Ok(())
-        });}
-    }
-    pub fn path(&self) -> std::path::PathBuf { format!("/proc/self/fd/{}",self.0.as_raw_fd()).into() }
-}
 fn nonblock(fd:i32)->Result<(),String> {
     let flags=unsafe {libc::fcntl(fd,libc::F_GETFL)};
     if flags<0 || unsafe {libc::fcntl(fd,libc::F_SETFL,flags|libc::O_NONBLOCK)}<0 {Err("Pipe setup failed".into())} else {Ok(())}
@@ -99,8 +74,8 @@ pub fn run(command:&mut Command,input:&[u8],cancelled:&AtomicBool,cap:usize)->Re
 }
 #[cfg(test)]mod tests{
  use super::*;
- #[test]fn anonymous_input_roundtrip(){let input=MemoryFile::new(b"public fixture").unwrap();let mut c=Command::new("/bin/cat");c.arg(input.path());input.inherit_for(&mut c);assert_eq!(run(&mut c,b"",&AtomicBool::new(false),64).unwrap(),b"public fixture");}
- #[test]fn anonymous_input_not_inherited_by_unselected_child(){let input=MemoryFile::new(b"public fixture").unwrap();let mut c=Command::new("/bin/cat");c.arg(input.path());assert!(run(&mut c,b"",&AtomicBool::new(false),64).is_err());}
+ #[test]fn pipe_input_roundtrip(){let mut c=Command::new("/bin/cat");assert_eq!(run(&mut c,b"public fixture",&AtomicBool::new(false),64).unwrap(),b"public fixture");}
+ #[test]fn pipe_requests_do_not_reuse_input(){let mut first=Command::new("/bin/cat");let bytes=vec![b'x';2*1024*1024];assert_eq!(run(&mut first,&bytes,&AtomicBool::new(false),bytes.len()).unwrap(),bytes);let mut second=Command::new("/bin/cat");assert!(run(&mut second,b"",&AtomicBool::new(false),64).unwrap().is_empty());}
  #[test]fn failed_child_is_not_success(){let mut c=Command::new("/bin/sh");c.args(["-c","printf partial; exit 1"]);assert!(run(&mut c,b"",&AtomicBool::new(false),64).is_err());}
  #[test]fn output_overflow_refuses(){let mut c=Command::new("/bin/sh");c.args(["-c","printf 12345678"]);assert!(run(&mut c,b"",&AtomicBool::new(false),3).is_err());}
  #[test]fn cancellation_prevents_spawn(){let mut c=Command::new("/no/such/file");assert_eq!(run(&mut c,b"",&AtomicBool::new(true),64).unwrap_err(),"cancelled");}

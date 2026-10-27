@@ -152,12 +152,10 @@ fn classify_header(header:&[u8])->Result<&'static str,String>{
 pub fn transcribe(state:&Path,_directory:&Path,cancelled:&AtomicBool,bytes:&[u8])->Result<String,String>{
     validate_wav(bytes)?;
     let config=config(state)?;
-    let input=crate::memory::MemoryFile::new(bytes)?;
     let mut command=Command::new(config.binary);
-    command.arg("-m").arg(config.model).arg("-f").arg(input.path())
+    command.arg("-m").arg(config.model).arg("-f").arg("-")
         .args(["--language","auto","--no-timestamps","--threads","4","--no-prints"]);
-    input.inherit_for(&mut command);
-    let output=crate::memory::run(&mut command,b"",cancelled,cli::RESULT_CAP)?;
+    let output=crate::memory::run(&mut command,bytes,cancelled,cli::RESULT_CAP)?;
     let text=String::from_utf8(output).map_err(|_|"Invalid transcript UTF8")?;
     let text=text.trim();
     if text.is_empty(){return Err("Whisper did not recognize speech".into())}

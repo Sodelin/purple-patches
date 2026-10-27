@@ -1,0 +1,13 @@
+{
+  "platform": "Android ARM64 Termux",
+  "public_fixture_bytes": 36,
+  "anonymous_path_exit": 1,
+  "anonymous_path_payload_matches": false,
+  "anonymous_path_permission_denied": true,
+  "inherited_stdin_payload_matches": true,
+  "pipe_stdin_payload_matches": true,
+  "parent_cloexec_preserved": true,
+  "microphone": false,
+  "model_invoked": false,
+  "limits": "Actual OS/public cat controls only. Not Rust companion execution, Whisper decoder, callback, privacy-writer or live speech acceptance."
+}
