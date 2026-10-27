@@ -28,6 +28,9 @@ def materialize(destination):
     replace(lifecycle,'        SESSION.end();','        dev.purple.patches.gboard.PurpleAiRuntime.end();\n        SESSION.end();')
     patch=destination/'patches/src/main/kotlin/dev/purple/patches/gboard/PurpleGboardPatch.kt'
     patch.parent.mkdir(parents=True,exist_ok=True);patch.write_bytes((ROOT/'gboard/PurpleGboardPatch.kt').read_bytes())
+    registry=destination/'patches/src/main/kotlin/dev/jason/gboardpatches/patches/gboard/registry/GboardPatchRegistry.kt'
+    replace(registry,'    val morpheRegistrations: Set<Patch<*>> = linkedSetOf(',
+            '    val morpheRegistrations: Set<Patch<*>> = linkedSetOf(\n        dev.purple.patches.gboard.purpleGboardActionsPatch,')
     build=destination/'patches/build.gradle.kts'
     replace(build,'name = "Gboard Patches"','name = "Purple Patches"')
     replace(build,'description = "Morphe patches for Gboard."','description = "Optional Gboard Whisper 3 dictation and AI translation; based on Jason Wu Gboard patches."')

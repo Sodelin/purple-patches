@@ -33,6 +33,7 @@ public final class PurpleAiRuntime {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static WeakReference<InputMethodService> service = new WeakReference<>(null);
     private static long generation;
+    private static long operation;
     private static volatile BridgeClient bridge;
     private static volatile AtomicBoolean cancellation;
     private static volatile WhisperCapture capture;
@@ -62,6 +63,7 @@ public final class PurpleAiRuntime {
         dismiss();
     }
     private static void cancel() {
+        operation++;
         AtomicBoolean current = cancellation; if (current != null) current.set(true);
         WhisperCapture currentCapture = capture; if (currentCapture != null) currentCapture.stop();
         BridgeClient currentBridge = bridge;
@@ -75,10 +77,10 @@ public final class PurpleAiRuntime {
         InputMethodService ime = service.get();
         if (ime != null) Toast.makeText(ime, value, Toast.LENGTH_LONG).show();
     }
-    private static void show(AlertDialog value) {
-        InputMethodService ime = service.get(); if (ime == null) return;
+    private static boolean show(AlertDialog value) {
+        InputMethodService ime = service.get(); if (ime == null) return false;
         Window window = value.getWindow();
-        if (window == null || ime.getWindow() == null || ime.getWindow().getWindow() == null) return;
+        if (window == null || ime.getWindow() == null || ime.getWindow().getWindow() == null) return false;
         window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
         WindowManager.LayoutParams attributes = window.getAttributes();
         attributes.token = ime.getWindow().getWindow().getAttributes().token;
@@ -86,7 +88,7 @@ public final class PurpleAiRuntime {
         // Field/text results must not enter screenshots or Android saved state.
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         dismiss(); dialog = value;
-        try { value.show(); } catch (RuntimeException unavailable) { dialog = null; notifyUser("Open the keyboard again to use this action"); }
+        try { value.show(); return true; } catch (RuntimeException unavailable) { dialog = null; notifyUser("Open the keyboard again to use this action"); return false; }
     }
     public static void click(boolean whisper) {
         if (Looper.myLooper() != Looper.getMainLooper()) return;
@@ -169,6 +171,7 @@ public final class PurpleAiRuntime {
     private static void submit(Snapshot anchor, String language) {
         InputMethodService ime = service.get();
         if (ime == null || !anchor.matches(ime, generation) || !busy.compareAndSet(false, true)) return;
+        final long request = ++operation;
         AtomicBoolean stopped = new AtomicBoolean(); cancellation = stopped;
         boolean voice = language == null;
         WhisperCapture recorder = voice ? new WhisperCapture() : null; capture = recorder;
@@ -183,7 +186,7 @@ public final class PurpleAiRuntime {
                 recorder.stop(); progress.setMessage("Transcribing…"); v.setEnabled(false);
             });
         });
-        show(progress);
+        if (!show(progress)) { cancel(); capture = null; busy.set(false); return; }
         BridgeClient currentBridge = bridge;
         new Thread(() -> {
             byte[] audio = null;
@@ -197,7 +200,7 @@ public final class PurpleAiRuntime {
                 }
                 String text = currentBridge.execute(voice ? "transcribe" : "translate", anchor.selected, language, audio, stopped);
                 MAIN.post(() -> {
-                    if (stopped.get() || !anchor.matches(service.get(), generation)) return;
+                    if (request != operation || stopped.get() || !anchor.matches(service.get(), generation)) return;
                     dismiss();
                     InputMethodService current = service.get(); if (current == null) return;
                     TextView preview = new TextView(current); preview.setText(text); preview.setSaveEnabled(false);
@@ -206,20 +209,21 @@ public final class PurpleAiRuntime {
                             .setView(preview).setNegativeButton("Discard", null)
                             .setPositiveButton("Insert", (d,w) -> {
                                 String replacement = text;
-                                if (SessionPolicy.bounded(replacement) && anchor.matches(service.get(), generation))
+                                if (request == operation && !stopped.get() && SessionPolicy.bounded(replacement) && anchor.matches(service.get(), generation))
                                     anchor.connection.commitText(replacement, 1);
                                 else notifyUser("The editor changed; original text was preserved");
                             }).create());
                 });
             } catch (Exception failure) {
-                MAIN.post(() -> { if (!stopped.get() && anchor.session == generation) {
+                MAIN.post(() -> { if (request == operation && !stopped.get() && anchor.session == generation) {
                     dismiss(); notifyUser(failure instanceof IllegalStateException ? failure.getMessage() : "Local action unavailable; original text preserved");
                 }});
             } finally {
                 if (audio != null) java.util.Arrays.fill(audio, (byte)0);
                 if (recorder != null) recorder.stop();
                 if (capture == recorder) capture = null;
-                busy.set(false);
+                // Keep the action reserved until its queued UI result has been handled.
+                MAIN.post(() -> busy.set(false));
             }
         }, "purple-gboard-action").start();
     }

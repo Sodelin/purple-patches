@@ -19,6 +19,7 @@ struct Inner {
     jobs: VecDeque<Job>,
     active: Option<(String, Arc<AtomicBool>)>,
     worker: Option<JoinHandle<()>>,
+    recovery_pending: Option<Vec<u8>>,
 }
 pub struct Service {
     state: PathBuf,
@@ -39,6 +40,7 @@ impl Service {
                 jobs: VecDeque::new(),
                 active: None,
                 worker: None,
+                recovery_pending: None,
             }),
         }))
     }
@@ -64,6 +66,9 @@ impl Service {
         if self.stopping.load(Ordering::Relaxed) {
             return Err("Bridge is stopping".into());
         }
+        if inner.recovery_pending.is_some() {
+            return Err("Encrypted recovery unavailable; further requests refused".into());
+        }
         if inner.active.is_some() {
             return Err("A keyboard request is already running; cancel or finish it first".into());
         }
@@ -71,6 +76,10 @@ impl Service {
             let _ = worker.join();
         }
         let id = private::random_token()?;
+        // Durable encrypted no-replay intent precedes any external engine invocation.
+        // An interrupted worker remains recoverable even if completion sealing fails.
+        let intent=serde_json::to_vec(&json!({"job_id":id,"state":"INTENT_UNKNOWN_UNTIL_COMPLETION_NO_REPLAY"})).unwrap();
+        crate::vault::retain(&intent)?;
         let cancelled = Arc::new(AtomicBool::new(false));
         inner.active = Some((id.clone(), Arc::clone(&cancelled)));
         while inner.jobs.len() >= 8 {
@@ -89,12 +98,14 @@ impl Service {
                 Work::Query(query) => cli::query(&query, &service.state, &cancelled),
                 Work::Audio(bytes) => whisper::transcribe(&service.state, &service.state, &cancelled, &bytes),
             };
+            let mut pending=None;
             if outcome.is_err() {
                 // Preserve an encrypted recovery/UNKNOWN receipt; never raw payloads.
                 let receipt=serde_json::to_vec(&json!({"job_id":worker_id,"state":"FAILED_OR_CANCELLED_NO_REPLAY","cancelled":cancelled.load(Ordering::Relaxed)})).unwrap();
-                let _=crate::vault::retain(&receipt);
+                if crate::vault::retain(&receipt).is_err() { pending=Some(receipt); }
             }
             let mut inner = service.inner.lock().unwrap();
+            inner.recovery_pending=pending;
             if let Some(job) = inner.jobs.iter_mut().find(|job| job.id == worker_id) {
                 if cancelled.load(Ordering::Relaxed) {
                     job.state = "cancelled";
@@ -167,7 +178,7 @@ impl Service {
 mod tests {
     use super::*;
     #[test]
-    fn restart_removes_only_owned_job_directories() {
+    fn restart_preserves_all_predecessor_history() {
         let scratch = private::Scratch::new();
         private::private_dir(&scratch.0.join("jobs")).unwrap();
         let owned = scratch
