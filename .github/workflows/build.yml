@@ -3,6 +3,10 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - 'gboard/**'
+      - 'tools/**'
+      - '.github/workflows/build.yml'
 permissions:
   contents: read
   packages: read
