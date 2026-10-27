@@ -156,6 +156,7 @@ pub fn transcribe(state:&Path,_directory:&Path,cancelled:&AtomicBool,bytes:&[u8]
     let mut command=Command::new(config.binary);
     command.arg("-m").arg(config.model).arg("-f").arg(input.path())
         .args(["--language","auto","--no-timestamps","--threads","4","--no-prints"]);
+    input.inherit_for(&mut command);
     let output=crate::memory::run(&mut command,b"",cancelled,cli::RESULT_CAP)?;
     let text=String::from_utf8(output).map_err(|_|"Invalid transcript UTF8")?;
     let text=text.trim();

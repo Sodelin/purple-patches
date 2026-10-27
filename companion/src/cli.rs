@@ -220,6 +220,7 @@ impl Query {
 pub fn query(query: &Query, directory: &Path, cancelled: &AtomicBool) -> Result<String, String> {
     let schema=crate::memory::MemoryFile::new(SCHEMA)?;
     let mut command=query_command(query,directory,&schema.path(),Path::new("unused-memory-output"))?;
+    schema.inherit_for(&mut command);
     let events=crate::memory::run(&mut command,&query.prompt()?,cancelled,EVENT_CAP)?;
     let mut final_bytes=None;
     for line in std::str::from_utf8(&events).map_err(|_|"Invalid event UTF8")?.lines() {

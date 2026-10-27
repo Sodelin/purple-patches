@@ -12,11 +12,23 @@ pub struct MemoryFile(File);
 impl MemoryFile {
     pub fn new(bytes: &[u8]) -> Result<Self,String> {
         let label=std::ffi::CString::new("purple-keyboard-memory").unwrap();
-        let fd=unsafe {libc::syscall(libc::SYS_memfd_create,label.as_ptr(),0) as i32};
+        let fd=unsafe {libc::syscall(libc::SYS_memfd_create,label.as_ptr(),libc::MFD_CLOEXEC) as i32};
         if fd<0 { return Err("Anonymous memory input unavailable; no disk fallback".into()); }
         let mut file=unsafe {File::from_raw_fd(fd)};
         file.write_all(bytes).and_then(|_|file.seek(SeekFrom::Start(0))).map_err(|_|"Memory input failed")?;
         Ok(Self(file))
+    }
+    pub fn inherit_for(&self, command:&mut Command) {
+        let fd=self.0.as_raw_fd();
+        // Only this selected child receives the anonymous input descriptor.
+        // Concurrent status/sealing processes retain CLOEXEC on all other inputs.
+        unsafe {command.pre_exec(move || {
+            let flags=libc::fcntl(fd,libc::F_GETFD);
+            if flags<0 || libc::fcntl(fd,libc::F_SETFD,flags & !libc::FD_CLOEXEC)<0 {
+                return Err(std::io::Error::last_os_error());
+            }
+            Ok(())
+        });}
     }
     pub fn path(&self) -> std::path::PathBuf { format!("/proc/self/fd/{}",self.0.as_raw_fd()).into() }
 }
@@ -87,7 +99,8 @@ pub fn run(command:&mut Command,input:&[u8],cancelled:&AtomicBool,cap:usize)->Re
 }
 #[cfg(test)]mod tests{
  use super::*;
- #[test]fn anonymous_input_roundtrip(){let input=MemoryFile::new(b"public fixture").unwrap();let mut c=Command::new("/bin/cat");c.arg(input.path());assert_eq!(run(&mut c,b"",&AtomicBool::new(false),64).unwrap(),b"public fixture");}
+ #[test]fn anonymous_input_roundtrip(){let input=MemoryFile::new(b"public fixture").unwrap();let mut c=Command::new("/bin/cat");c.arg(input.path());input.inherit_for(&mut c);assert_eq!(run(&mut c,b"",&AtomicBool::new(false),64).unwrap(),b"public fixture");}
+ #[test]fn anonymous_input_not_inherited_by_unselected_child(){let input=MemoryFile::new(b"public fixture").unwrap();let mut c=Command::new("/bin/cat");c.arg(input.path());assert!(run(&mut c,b"",&AtomicBool::new(false),64).is_err());}
  #[test]fn failed_child_is_not_success(){let mut c=Command::new("/bin/sh");c.args(["-c","printf partial; exit 1"]);assert!(run(&mut c,b"",&AtomicBool::new(false),64).is_err());}
  #[test]fn output_overflow_refuses(){let mut c=Command::new("/bin/sh");c.args(["-c","printf 12345678"]);assert!(run(&mut c,b"",&AtomicBool::new(false),3).is_err());}
  #[test]fn cancellation_prevents_spawn(){let mut c=Command::new("/no/such/file");assert_eq!(run(&mut c,b"",&AtomicBool::new(true),64).unwrap_err(),"cancelled");}
