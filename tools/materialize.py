@@ -54,6 +54,11 @@ def materialize(destination):
     contract=destination/'patches/src/test/kotlin/dev/jason/gboardpatches/patches/gboard/registry/GboardPortProductCatalogContractTest.kt'
     replace(contract,'        val EXPECTED_MIGRATION_SCOPES = mapOf(',
             '        val EXPECTED_MIGRATION_SCOPES = mapOf(\n            "purple_gboard_ai" to "version-sensitive",')
+    compatibility=destination/'patches/src/test/kotlin/dev/jason/gboardpatches/patches/gboard/registry/GboardCompatibilitySourceTest.kt'
+    replace(compatibility,'        val registry = readSource(REGISTRY_PATH)',
+            '        val registry = readSource(REGISTRY_PATH) + "\\n" + readSource("'+str(patch.relative_to(destination))+'")')
+    replace(compatibility,'                    .containsMatchIn(block)\n            }',
+            '                    .containsMatchIn(block) || block.contains("val purpleGboardActionsPatch =")\n            }')
     build=destination/'patches/build.gradle.kts'
     replace(build,'name = "Gboard Patches"','name = "Purple Patches"')
     replace(build,'description = "Morphe patches for Gboard."','description = "Optional Gboard Whisper 3 dictation and AI translation; based on Jason Wu Gboard patches."')
