@@ -44,6 +44,14 @@ jobs:
           cp "$RUNNER_TEMP/gboard-purple-unsigned.apk" "$RUNNER_TEMP/gboard-patch-result.json" dist/
           cd dist
           sha256sum * > SHA256SUMS
+      - name: Verify generated clone and preserve stock code and data assets
+        run: |
+          AAPT2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -1)"
+          "$AAPT2" dump badging "$RUNNER_TEMP/gboard-purple-unsigned.apk" > "$RUNNER_TEMP/output-badging.txt"
+          "$AAPT2" dump xmltree "$RUNNER_TEMP/gboard-purple-unsigned.apk" --file AndroidManifest.xml > "$RUNNER_TEMP/output-manifest.txt"
+          mkdir -p "$RUNNER_TEMP/apk-check"
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/apk-check" companion/deployment/VerifyGboardApk.java
+          java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardApk "$RUNNER_TEMP/gboard-original.apk" "$RUNNER_TEMP/gboard-purple-unsigned.apk" "$RUNNER_TEMP/output-badging.txt" "$RUNNER_TEMP/output-manifest.txt"
       - uses: actions/upload-artifact@v4
         with:
           name: purple-gboard-unsigned-candidate
