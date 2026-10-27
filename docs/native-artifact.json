@@ -1,21 +1,23 @@
 {
-  "kind": "Authored selected-artifact verification; no engine invocation",
-  "source_commit": "37ed7d6097a51470817db0615f587cb14dc9816d",
-  "run": "https://github.com/Sodelin/purple-patches/actions/runs/40525471948",
-  "artifact_id": 12743816384,
-  "zip_bytes": 380860,
-  "all_members_sha256_matched": true,
-  "binary": {
-    "file": "purple-keyboard-bridge",
-    "bytes": 754424,
-    "sha256": "834793c09f8d2f2689378beb6940e0a6389561362763e0a0ad174c7abc05efa0",
-    "elf": "64-bit little-endian AArch64"
+  "kind": "Authored independently verified artifact metadata; no engine invocation",
+  "source_commit": "fa321258f6c076eda970e3c77207267d700bcab7",
+  "run": "https://github.com/Sodelin/purple-patches/actions/runs/40527691599",
+  "artifact_id": 12742959866,
+  "zip_bytes": 380861,
+  "all_expected_members_and_sha256_matched": true,
+  "files": {
+    "purple-keyboard-bridge": {
+      "bytes": 754360,
+      "sha256": "7e62046a3c3915d98bb2c5cc99c7e0da19486a5dd9df032a433689ac3a82fbc5"
+    },
+    "purple-gboard-service": {
+      "bytes": 336,
+      "sha256": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91"
+    }
   },
-  "wrapper": {
-    "file": "purple-gboard-service",
-    "bytes": 336,
-    "sha256": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91"
-  },
-  "inspection": "ZIP captured and inspected in RAM; exact expected members only. Binary not executed or installed; no artifact persisted on phone.",
-  "limits": "Build artifact expires after7days; architecture/hash verification is not device or privacy-path acceptance."
+  "elf": "64-bit little-endian AArch64",
+  "variant_admission": "Full large-v3 only; turbo rejection covered by native tests",
+  "native_checks": 27,
+  "inspection": "RAM-only ZIP/hash/ELF inspection. No binary execution, installation, microphone or inference.",
+  "limits": "Artifact expiry7days; no actual phone privacy-path or model acceptance."
 }

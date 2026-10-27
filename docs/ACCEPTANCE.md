@@ -6,7 +6,7 @@ must continue working. A successful hosted build is not device acceptance.
 
 | Gate | Evidence or remaining work |
 | --- | --- |
-| Native deterministic controls | Run40525471948, source37ed7d6:27 passed; Android ARM64 cross-build passed. No model invoked. |
+| Native deterministic controls | Run40527691599, sourcefa32125:27 passed; Android ARM64 cross-build passed. No model invoked. |
 | Java editor policy | Password, visible/web/numeric password, no-personalized-learning, localhost, UTF-8, stale anchors and Termux result-code controls run in hosted Gboard workflow. |
 | Version admission | The new action participates in upstream generated editing-access-point admission and published catalog. Unsupported versions must remain rejected. |
 | Target APK | Pinned upstream targets18.5.4.993608717-release-arm64-v8a. Actual installed version, original APK hash and signer remain unverified. |
