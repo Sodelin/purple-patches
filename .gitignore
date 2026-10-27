@@ -1,9 +1,17 @@
-__pycache__/
-*.pyc
-upstream/
-dist/
-build/
-.gradle/
+# Authored source and Cargo.lock are versioned; generated payloads stay outside Git.
+/dist/
+/.runtime/
+/companion/target/
+**/__pycache__/
+*.py[cod]
 *.apk
+*.apkm
+*.apks
+*.xapk
+*.mpp
+*.jks
+*.keystore
+*.p12
+*.age
+*.gguf
 *.bin
-.private/
