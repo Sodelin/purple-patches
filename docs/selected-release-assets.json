@@ -1,0 +1,70 @@
+{
+  "schema": "purple.selected-candidate-assets.v1",
+  "source": "Pins retained from actual staged full remote-byte readbacks; publisher revalidates them before any mutation.",
+  "candidates": [
+    {
+      "release_id": 425723616,
+      "tag": "patches-v0.1.0-alpha.1",
+      "assets": {
+        "candidate-manifest.json": {
+          "bytes": 1079,
+          "sha256": "3c60aaea87d275c975916d80ef9b0a044115ed4610ecd553fd98eced3cd1a0ee"
+        },
+        "gboard-overlay-source.tar.gz": {
+          "bytes": 58212,
+          "sha256": "224de193591966fdb462d9362389228069abc9357eee0d1e8847e1072a0dec7b"
+        },
+        "gboard-upstream-source.tar.gz": {
+          "bytes": 14060151,
+          "sha256": "1de222040b1ac8afa592b9db679b205e683016da9fe63a1f4461e6ff60622639"
+        },
+        "patches-0.1.0-alpha.1.mpp": {
+          "bytes": 8205100,
+          "sha256": "af2077907783247f667940e02659fe8b574ec36fd26df8af67e22469de3f11fe"
+        },
+        "patches-list.json": {
+          "bytes": 19435,
+          "sha256": "9c8208efdd5aec572b208acef325fc83769c6905aeea055255d90d6304593ca9"
+        },
+        "purple-provenance.json": {
+          "bytes": 1677,
+          "sha256": "6ec0c9970a4517f4cbf2b5e4f2eca351f57bdf8f17f71d85e29229058e3e2354"
+        },
+        "SHA256SUMS": {
+          "bytes": 546,
+          "sha256": "621763ccef126c32bf4768b2dbbe2357ec26609c1ca44bc7d5250c446bb4e63a"
+        }
+      }
+    },
+    {
+      "release_id": 425713896,
+      "tag": "companion-v0.2.1-candidate",
+      "assets": {
+        "candidate-manifest.json": {
+          "bytes": 890,
+          "sha256": "6c2064ca65e9d226f44d0b23ac2e704a5ac54bd8baf5763087420e87283d29c7"
+        },
+        "companion-0.2.1-source.tar.gz": {
+          "bytes": 78482,
+          "sha256": "7c64aa7f2353de339b6d0b159f033bf13ee1a1df20f3580a90e3511e1c5ca474"
+        },
+        "purple-gboard-service": {
+          "bytes": 336,
+          "sha256": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91"
+        },
+        "purple-keyboard-bridge": {
+          "bytes": 751136,
+          "sha256": "78b0585b373fe4583a234fed27b242cb22c9082528414bedbcd206c3ab4809f1"
+        },
+        "response-schema.json": {
+          "bytes": 106,
+          "sha256": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa"
+        },
+        "SHA256SUMS": {
+          "bytes": 450,
+          "sha256": "4b983bff8c50c777e91d0b842b4ef147c512f02b24965f85a29250145a009de6"
+        }
+      }
+    }
+  ]
+}
