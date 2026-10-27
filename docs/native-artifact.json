@@ -19,5 +19,7 @@
   "variant_admission": "Full large-v3 only; turbo rejection covered by native tests",
   "native_checks": 27,
   "inspection": "RAM-only ZIP/hash/ELF inspection. No binary execution, installation, microphone or inference.",
-  "limits": "No actual phone privacy-path or model acceptance. Exact companion/wrapper and corresponding source retained in verified private draft425693294; original Actions artifact expires7days."
+  "limits": "No actual phone privacy-path or model acceptance. Exact companion/wrapper and corresponding source retained in verified private draft425693294; original Actions artifact expires7days.",
+  "selected_for_deployment": false,
+  "known_runtime_gap": "Companion0.2.0 uses anonymous schema/audio paths that an actual Android public fixture cannot reopen (Permission denied). Source0.2.1 replaces this mechanism with pipe audio and a fixed authored schema. Retained old artifact remains provenance/rollback evidence, not an Android-accepted runtime."
 }

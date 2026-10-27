@@ -77,24 +77,38 @@ def collect():
     return assets
 
 
-def stage(assets):
+def collect_native():
+    assets, source = verified_members('native-0.2.1-artifact.json', [
+        'purple-keyboard-bridge', 'purple-gboard-service', 'response-schema.json'])
+    assets['companion-0.2.1-source.tar.gz'] = subprocess.check_output(
+        ['git', 'archive', '--format=tar.gz', '--prefix=purple-patches/', source], cwd=ROOT)
+    manifest = {'version': '0.2.1', 'source_commit': source,
+        'compatible_patch_bundle': '0.1.0-alpha.1', 'status': 'PRIVATE DRAFT; activation held',
+        'schema_deployment': 'response-schema.json beside executable, owner-private0600; exact compiled bytes required',
+        'assets': {n: {'bytes': len(b), 'sha256': digest(b)} for n, b in sorted(assets.items())}}
+    assets['candidate-manifest.json'] = (json.dumps(manifest, indent=2) + '\n').encode()
+    assets['SHA256SUMS'] = ''.join(f'{digest(b)}  {n}\n' for n, b in sorted(assets.items())).encode()
+    return assets
+
+
+def stage(assets, tag=TAG, name=None, body=None):
     repo = api(f'repos/{REPO}')
     assert repo['private'] is True, 'Refuse public repository'
     releases = api(f'repos/{REPO}/releases?per_page=100')
-    existing = [r for r in releases if r['tag_name'] == TAG]
+    existing = [r for r in releases if r['tag_name'] == tag]
     assert len(existing) <= 1, 'Ambiguous release'
     if existing:
         release = existing[0]
     else:
         release = api(f'repos/{REPO}/releases', {
-            'tag_name': TAG, 'target_commitish': subprocess.check_output(
+            'tag_name': tag, 'target_commitish': subprocess.check_output(
                 ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-            'name': 'Purple Gboard 0.1.0-alpha.1 — private verification candidate',
+            'name': name or 'Purple Gboard 0.1.0-alpha.1 — private verification candidate',
             'draft': True, 'prerelease': True,
-            'body': 'Verified Morphe bundle and Android ARM64 companion, with corresponding source and SHA256SUMS. '
+            'body': body or ('Verified Morphe bundle and Android ARM64 companion, with corresponding source and SHA256SUMS. '
                     'Exact stable APKMirror Gboard release patched and statically checked off phone. '
                     'Phone connection, privacy writer coverage, full Whisper large-v3 and device regression remain pending. '
-                    'This private draft is not a working Morphe update source. No APK, model weights or keys included.'})
+                    'This private draft is not a working Morphe update source. No APK, model weights or keys included.')})
     assert release['draft'] is True and release['prerelease'] is True, 'Refuse changing published release'
     current = {a['name']: a for a in release['assets']}
     assert not set(current) - set(assets), 'Unexpected existing assets'
@@ -126,14 +140,24 @@ def stage(assets):
     for asset in final['assets']:
         body = gh('api', f"repos/{REPO}/releases/assets/{asset['id']}", '-H', 'Accept: application/octet-stream')
         assert body == assets[asset['name']], 'Remote readback mismatch'
-    print(json.dumps({'release_id': final['id'], 'tag': TAG, 'draft': True,
+    print(json.dumps({'release_id': final['id'], 'tag': tag, 'draft': True,
         'private': True, 'assets_verified': len(assets), 'total_bytes': sum(map(len, assets.values())),
         'sha256': {n: digest(b) for n, b in sorted(assets.items())}}, indent=2))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--stage-private-draft', action='store_true', required=True)
-    parser.parse_args()
+    group=parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--stage-private-draft', action='store_true')
+    group.add_argument('--stage-native-021', action='store_true')
+    args=parser.parse_args()
     assert not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'Commit source first'
-    stage(collect())
+    if args.stage_native_021:
+        stage(collect_native(), tag='companion-v0.2.1-candidate',
+              name='Purple Gboard companion 0.2.1 — private Android transport correction',
+              body='Corrects actual Android anonymous /proc/self/fd input denial with pipe audio and fixed authored schema. '
+                   '28 public native controls and ARM64 cross-build passed. Compatible with retained Gboard MPP0.1.0-alpha.1. '
+                   'Full remote byte verification and corresponding source retained. '
+                   'No installation, model invocation, microphone or privacy-writer acceptance. Activation remains held.')
+    else:
+        stage(collect())
