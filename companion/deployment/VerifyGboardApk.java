@@ -29,6 +29,16 @@ public final class VerifyGboardApk {
         }
     }
     public static void main(String[] args) throws Exception {
+        var badging = java.nio.file.Files.readString(java.nio.file.Path.of(args[2]));
+        var identity = java.util.regex.Pattern.compile("^package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'", java.util.regex.Pattern.MULTILINE).matcher(badging);
+        if (!identity.find() || identity.group(1).equals("com.google.android.inputmethod.latin")
+                || !identity.group(3).equals("18.5.4.993608717-release-arm64-v8a"))
+            throw new IllegalStateException("Output clone package/version not verified");
+        var manifest = java.nio.file.Files.readString(java.nio.file.Path.of(args[3]));
+        for (String required : new String[]{"dev.purple.patches.gboard.enabled", "dev.purple.patches.gboard.PurpleBootstrapReceiver",
+                "dev.purple.patches.gboard.PurplePermissionActivity", "com.termux.permission.RUN_COMMAND", "android.permission.RECORD_AUDIO"})
+            if (!manifest.contains(required)) throw new IllegalStateException("Missing manifest integration: " + required);
+        System.out.println("Verified clone package=" + identity.group(1) + "; version=" + identity.group(3));
         var original = classes(new File(args[0]));
         var patched = classes(new File(args[1]));
         if (original.isEmpty() || !patched.containsAll(original))
