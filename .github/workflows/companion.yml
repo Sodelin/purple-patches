@@ -1,0 +1,32 @@
+name: Verify and cross-build local companion
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: purple-companion
+  cancel-in-progress: false
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Native controls without any model invocation
+        run: cargo test --locked --manifest-path companion/Cargo.toml --lib
+      - name: Android cross-build on hosted runner
+        run: |
+          rustup target add aarch64-linux-android
+          NDK_ROOT="${ANDROID_NDK_HOME:-$ANDROID_NDK_LATEST_HOME}"
+          export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android31-clang"
+          CARGO_INCREMENTAL=0 cargo build --locked --manifest-path companion/Cargo.toml --release --target aarch64-linux-android
+          mkdir -p dist
+          cp companion/target/aarch64-linux-android/release/purple-keyboard-bridge dist/
+          cp companion/deployment/purple-gboard-service dist/
+          cd dist
+          sha256sum * > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: purple-gboard-companion-candidate
+          path: dist/
+          retention-days: 7
