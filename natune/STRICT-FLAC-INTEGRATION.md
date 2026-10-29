@@ -207,3 +207,63 @@ renderer error mechanism, independently of initial format support/decoder reuse.
 It must preserve FLAC's original event/lifecycle path and refuse unsupported
 input explicitly. No such fourth guard or device-transition acceptance is claimed
 by the three-guard0.2.0-dev.1 build.
+
+## Added requirement: upgrade existing non-FLAC downloads
+
+Nolan29October2026 requests a **Find FLAC upgrades** action on the Downloads page,
+with a repeatable later search when expanded sources gain a matching rendition.
+This is part of the full Natune patch objective, not satisfied by decoder refusal.
+Search the existing completed downloads, including albums; derive actual codec
+from bytes/validated media evidence rather than filename or a resolver label.
+Already verified FLAC should be retained. Unknown codec needs inspection, not an
+assumption that the existing file is lossy or safe to remove.
+
+Find the same recording/album edition, including artist, title, duration,
+explicit/clean/live/remaster/version distinctions and track/disc relationships.
+Present available replacements, unchanged verified FLAC, no current match and
+inspection/errors distinctly. Re-running the action can discover a newer match;
+a failed or cancelled attempt must leave the playable original intact.
+
+Stage a candidate separately from the current download/cache identity. Verify
+complete file/codec/length/integrity and matching before an owner-controlled
+atomic replacement; retain original library identity, playlists, album grouping,
+metadata and appropriate source provenance. Do not remove the old download first
+or use remove-then-download as an upgrade. Space admission must include old plus
+staged bytes; no action may silently evict another original. Persist any required
+operation/recovery state through the existing selected privacy contract. Crash,
+error, cancellation, changed cache generation and uncertain commit need explicit
+recovery; no blind retry/deletion. Actual app/cache writer and UI joins remain
+required. No user library was inspected or modified to prepare this requirement.
+
+Initial public source surfaces at the pinned Natune commit:
+
+- `ui/screens/downloads/DownloadLibraryScreen.kt` has the Compose downloads
+  toolbar and per-collection controls, rather than a generic XML layout hook.
+- `downloads/ManageDownloadsUseCase.kt::observe/mapSnapshot` selects completed
+  downloads; its public actions currently expose pause/resume/remove only.
+- A second tap on an existing completed download must not accidentally invoke
+  removal or reuse the same old cached bytes as its supposed replacement.
+
+The expanded community-provider catalog, reviewed compatible adapters and actual
+matching/FLAC verification are shared requirements for this action. An available
+provider name, public pool listing or configured premium tier is not evidence
+that a matching complete FLAC file exists. Provider availability/access and any
+required account/session bindings remain explicit per-source contracts.
+
+## Input-change successor under verification: 0.2.0-dev.2
+
+Source now also guards `ge7.e0(FormatHolder)` before it changes input state or
+calls the base codec renderer. FLAC enters the exact original first instruction.
+A non-FLAC input uses the original inherited renderer error factory with the
+same renderer and actual Format, IOException cause, isRecoverable=false and
+Media3 ERROR_CODE_DECODING_FORMAT_UNSUPPORTED4005. No arbitrary runtime exception
+or new error transport is substituted. The independent verifier checks the
+actual emitted error/argument/branch instructions, transitions across successive
+fixture formats and rejects changed error code, recovery flag, source field,
+Format argument and return-instead-of-throw mutations. These fixture checks are
+not an Android runtime or UI/next-track acceptance claim.
+
+Primary error/lifecycle references:
+
+- https://github.com/androidx/media/blob/1.10.1/libraries/exoplayer/src/main/java/androidx/media3/exoplayer/BaseRenderer.java
+- https://github.com/androidx/media/blob/1.10.1/libraries/common/src/main/java/androidx/media3/common/PlaybackException.java

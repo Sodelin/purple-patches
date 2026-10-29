@@ -29,7 +29,7 @@ def materialize(destination, local_flac=False):
     target.write_bytes(source)
     if local_flac:
         (target.parent / 'NatuneLocalFlacPatch.kt').write_bytes((ROOT / 'NatuneLocalFlacPatch.kt').read_bytes())
-    version = '0.2.0-dev.1' if local_flac else '0.1.0-alpha.1'
+    version = '0.2.0-dev.2' if local_flac else '0.1.0-alpha.1'
     build = destination / 'patches/build.gradle.kts'
     text = build.read_text()
     for old, new in {

@@ -15,7 +15,8 @@ public final class VerifyNatuneLocalFlacPatch {
     static final List<Hook> HOOKS = List.of(
         new Hook("Lr8/ge7;->z0(Lr8/hv3;Lr8/yf4;)I",21,20,8,1),
         new Hook("Lr8/ge7;->y0(Lr8/yf4;)Z",6,5,8,0),
-        new Hook("Lr8/ge7;->Q(Lr8/hv3;Lr8/yf4;Z)Ljava/util/ArrayList;",7,5,9,-1)
+        new Hook("Lr8/ge7;->Q(Lr8/hv3;Lr8/yf4;Z)Ljava/util/ArrayList;",7,5,9,-1),
+        new Hook("Lr8/ge7;->e0(Lr8/ie3;)Lr8/bt2;",6,5,15,-2)
     );
     static void need(boolean ok, String why) { VerifyNatuneMobilePatch.need(ok,why); }
     static void op(Instruction i, Opcode opcode) { need(i.getOpcode()==opcode,"Wrong guard opcode"); }
@@ -30,6 +31,7 @@ public final class VerifyNatuneLocalFlacPatch {
     }
     static void guard(List<Instruction> x,Hook h) {
         need(x.size()>h.prefix,"Missing original method body");
+        if(h.refusal==-2) { lifecycleGuard(x,h); return; }
         op(x.get(0),Opcode.MOVE_OBJECT_FROM16);reg(x.get(0),0);
         need(((TwoRegisterInstruction)x.get(0)).getRegisterB()==h.format,"Wrong Format parameter");
         op(x.get(1),Opcode.IGET_OBJECT);reg(x.get(1),0);
@@ -50,6 +52,80 @@ public final class VerifyNatuneLocalFlacPatch {
             need(((WideLiteralInstruction)x.get(6)).getWideLiteral()==h.refusal,"Wrong refusal value");
             op(x.get(7),Opcode.RETURN);reg(x.get(7),0);
         }
+    }
+    static void text(Instruction i,int register,String text) {
+        need(i.getOpcode()==Opcode.CONST_STRING || i.getOpcode()==Opcode.CONST_STRING_JUMBO,"Wrong string opcode");reg(i,register);
+        need(((StringReference)((ReferenceInstruction)i).getReference()).getString().equals(text),"Wrong guard text");
+    }
+    static void lifecycleGuard(List<Instruction> x,Hook h) {
+        op(x.get(0),Opcode.IGET_OBJECT);reg(x.get(0),0);
+        need(((TwoRegisterInstruction)x.get(0)).getRegisterB()==5 && ref(x.get(0)).equals("Lr8/ie3;->z:Ljava/lang/Object;"),"Wrong original FormatHolder");
+        op(x.get(1),Opcode.CHECK_CAST);reg(x.get(1),0);need(ref(x.get(1)).equals("Lr8/yf4;"),"Wrong Format cast");
+        op(x.get(2),Opcode.IGET_OBJECT);reg(x.get(2),1);
+        need(((TwoRegisterInstruction)x.get(2)).getRegisterB()==0 && ref(x.get(2)).equals("Lr8/yf4;->o:Ljava/lang/String;"),"Wrong lifecycle parsed MIME");
+        text(x.get(3),2,"audio/flac");
+        call(x.get(4),Opcode.INVOKE_VIRTUAL,"Ljava/lang/String;->equals(Ljava/lang/Object;)Z",2,1);
+        op(x.get(5),Opcode.MOVE_RESULT);reg(x.get(5),1);
+        op(x.get(6),Opcode.IF_NEZ);reg(x.get(6),1);
+        int jump=0;for(int n=6;n<h.prefix;n++)jump+=x.get(n).getCodeUnits();
+        need(((OffsetInstruction)x.get(6)).getCodeOffset()==jump,"Lifecycle branch skips original entry");
+        op(x.get(7),Opcode.NEW_INSTANCE);reg(x.get(7),1);need(ref(x.get(7)).equals("Ljava/io/IOException;"),"Wrong error cause type");
+        text(x.get(8),2,"FLAC audio is required for local playback.");
+        call(x.get(9),Opcode.INVOKE_DIRECT,"Ljava/io/IOException;-><init>(Ljava/lang/String;)V",1,2);
+        op(x.get(10),Opcode.CONST_4);reg(x.get(10),2);need(((WideLiteralInstruction)x.get(10)).getWideLiteral()==0,"Recoverable policy error refused");
+        op(x.get(11),Opcode.CONST_16);reg(x.get(11),3);need(((WideLiteralInstruction)x.get(11)).getWideLiteral()==4005,"Wrong original error code");
+        call(x.get(12),Opcode.INVOKE_VIRTUAL,"Lr8/mu0;->f(Ljava/lang/Exception;Lr8/yf4;ZI)Lr8/gx3;",4,1,0,2,3);
+        op(x.get(13),Opcode.MOVE_RESULT_OBJECT);reg(x.get(13),0);
+        op(x.get(14),Opcode.THROW);reg(x.get(14),0);
+    }
+    record RendererFailure(Object renderer,Object format,Object cause,boolean recoverable,int code) {}
+    static Object lifecycleInterpret(List<Instruction> x,Hook h,Map<String,Object> format,Object renderer) {
+        Object[] r=new Object[6];r[4]=renderer;r[5]=Map.of("z",format);Object result=null;
+        for(int pc=0;pc<h.prefix;pc++) {
+            var i=x.get(pc);int a=i instanceof OneRegisterInstruction q?q.getRegisterA():-1;
+            switch(i.getOpcode()) {
+                case IGET_OBJECT -> r[a]=((Map<?,?>)r[((TwoRegisterInstruction)i).getRegisterB()]).get(((FieldReference)((ReferenceInstruction)i).getReference()).getName());
+                case CHECK_CAST -> need(r[a] instanceof Map,"Invalid fixture Format");
+                case CONST_STRING,CONST_STRING_JUMBO -> r[a]=((StringReference)((ReferenceInstruction)i).getReference()).getString();
+                case INVOKE_VIRTUAL -> {
+                    var q=(FiveRegisterInstruction)i;
+                    if(ref(i).startsWith("Ljava/lang/String;"))result=((String)r[q.getRegisterC()]).equals(r[q.getRegisterD()]);
+                    else result=new RendererFailure(r[q.getRegisterC()],r[q.getRegisterE()],r[q.getRegisterD()],((Number)r[q.getRegisterF()]).intValue()!=0,((Number)r[q.getRegisterG()]).intValue());
+                }
+                case MOVE_RESULT,MOVE_RESULT_OBJECT -> r[a]=result;
+                case IF_NEZ -> {if(Boolean.TRUE.equals(r[a]))return "ORIGINAL";}
+                case NEW_INSTANCE -> r[a]=new Object();
+                case INVOKE_DIRECT -> {var q=(FiveRegisterInstruction)i;r[q.getRegisterC()]=new java.io.IOException((String)r[q.getRegisterD()]);}
+                case CONST_4,CONST_16 -> r[a]=((WideLiteralInstruction)i).getWideLiteral();
+                case THROW -> {return r[a];}
+                default -> throw new IllegalStateException("Unsupported lifecycle prefix instruction");
+            }
+        }
+        throw new IllegalStateException("Lifecycle guard fell through");
+    }
+    static int lifecycleControls(List<Instruction> x,Hook h) {
+        int passed=0;Object renderer=new Object();
+        // Repeated transitions, including return to FLAC, retain each actual
+        // input object; no sticky decision for a previous track is permitted.
+        for(String mime:Arrays.asList("audio/flac","audio/aac","audio/flac","audio/opus","audio/raw",null,"audio/mpeg","audio/FLAC")) {
+            var format=new HashMap<String,Object>();format.put("o",mime);
+            Object result=lifecycleInterpret(x,h,format,renderer);
+            if("audio/flac".equals(mime))need("ORIGINAL".equals(result),"FLAC lifecycle was intercepted");
+            else {
+                need(result instanceof RendererFailure,"Lossy lifecycle did not fail");var f=(RendererFailure)result;
+                need(f.renderer==renderer && f.format==format && !f.recoverable && f.code==4005 &&
+                    f.cause instanceof java.io.IOException e && e.getMessage().equals("FLAC audio is required for local playback."),"Original renderer/format/error binding lost");
+            }
+            passed++;
+        }
+        var changed=new ArrayList<Instruction>(x);changed.set(0,new ImmutableInstruction22c(Opcode.IGET_OBJECT,0,5,new ImmutableFieldReference("Lr8/ie3;","wrong","Ljava/lang/Object;")));refused(changed,h);passed++;
+        changed=new ArrayList<>(x);changed.set(3,new ImmutableInstruction21c(Opcode.CONST_STRING,2,new ImmutableStringReference("audio/aac")));refused(changed,h);passed++;
+        changed=new ArrayList<>(x);changed.set(6,new ImmutableInstruction21t(Opcode.IF_NEZ,1,2));refused(changed,h);passed++;
+        changed=new ArrayList<>(x);changed.set(10,new ImmutableInstruction11n(Opcode.CONST_4,2,1));refused(changed,h);passed++;
+        changed=new ArrayList<>(x);changed.set(11,new ImmutableInstruction21s(Opcode.CONST_16,3,4002));refused(changed,h);passed++;
+        changed=new ArrayList<>(x);changed.set(12,new ImmutableInstruction35c(Opcode.INVOKE_VIRTUAL,5,4,1,5,2,3,new ImmutableMethodReference("Lr8/mu0;","f",List.of("Ljava/lang/Exception;","Lr8/yf4;","Z","I"),"Lr8/gx3;")));refused(changed,h);passed++;
+        changed=new ArrayList<>(x);changed.set(14,new ImmutableInstruction11x(Opcode.RETURN_OBJECT,0));refused(changed,h);passed++;
+        return passed;
     }
     // Tiny interpreter of the ACTUAL emitted prefix. It stops before the old
     // body, so this proves dispatch/refusal, not an Android decoder's behavior.
@@ -81,6 +157,7 @@ public final class VerifyNatuneLocalFlacPatch {
         need(rejected,"Corrupt guard was accepted");
     }
     static int controls(List<Instruction> x,Hook h) {
+        if(h.refusal==-2)return lifecycleControls(x,h);
         int count=0;
         for(String mime:Arrays.asList("audio/flac","audio/aac","audio/mpeg","audio/opus","audio/raw","video/avc","audio/FLAC",null)) {
             Object actual=interpret(x,h,mime);
@@ -112,7 +189,7 @@ public final class VerifyNatuneLocalFlacPatch {
         VerifyNatuneMobilePatch.initializerControls();
         var expected=VerifyNatuneMobilePatch.snapshot(new File(args[0]),true);
         var actual=VerifyNatuneMobilePatch.snapshot(new File(args[1]),false,prefixes);
-        VerifyNatuneMobilePatch.compare(expected,actual,args,"Verified five mobile-data overrides and three exact local FLAC guards; every original remaining method/body/resource preserved.");
+        VerifyNatuneMobilePatch.compare(expected,actual,args,"Verified five mobile-data overrides and four exact local FLAC guards; every original remaining method/body/resource preserved.");
         System.out.println("LOCAL_FLAC_GUARD_CONTROLS passed="+passed+" actual_patched_bytecode=true android_decoder_acceptance=false full_download_admission=false");
     }
 }

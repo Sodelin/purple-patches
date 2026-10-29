@@ -10,8 +10,10 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 /** Parsed extractor Format, never filename/provider MIME or decoded PCM output. */
 private class LocalCodecSite(
@@ -44,10 +46,23 @@ private val localCodecSites = listOf(
             "invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V\nreturn-object v0"),
 )
 
+private val localInputChange = Fingerprint(
+    definingClass = "Lr8/ge7;", name = "e0", parameters = listOf("Lr8/ie3;"), returnType = "Lr8/bt2;",
+    custom = { method, _ -> method.accessFlags == 17 && method.implementation?.let {
+        it.registerCount == 6 && it.tryBlocks.isEmpty() &&
+            it.instructions.sumOf { instruction -> instruction.codeUnits } == 29
+    } == true },
+)
+private val originalRendererError = Fingerprint(
+    definingClass = "Lr8/mu0;", name = "f",
+    parameters = listOf("Ljava/lang/Exception;", "Lr8/yf4;", "Z", "I"), returnType = "Lr8/gx3;",
+    custom = { method, _ -> method.accessFlags and 8 == 0 && method.implementation != null },
+)
+
 @Suppress("unused")
 val natuneLocalFlacPatch = bytecodePatch(
     name = "Require FLAC for local audio decoding",
-    description = "Rejects non-FLAC parsed audio formats in local decoder selection and hardware bypass. Includes cached playback. Does not validate whole downloads, recording identity or remote Cast, and does not add providers. Experimental; unavailable FLAC fails playback rather than falling back to lossy audio.",
+    description = "Rejects non-FLAC parsed audio formats in local decoder selection, hardware bypass and input-format changes. Includes cached playback. Does not validate whole downloads, recording identity or remote Cast, and does not add providers. Experimental; unavailable FLAC fails playback rather than falling back to lossy audio.",
     default = false,
 ) {
     compatibleWith(Compatibility(
@@ -75,6 +90,23 @@ val natuneLocalFlacPatch = bytecodePatch(
             check(instructions.first().opcode != Opcode.NOP) { "Unexpected release entry padding" }
             site to method
         }
+        val inputChange = localInputChange.method
+        val inputInstructions = inputChange.implementation!!.instructions.toList()
+        val holderRead = inputInstructions[0]
+        val holderField = (holderRead as? ReferenceInstruction)?.reference as? FieldReference
+        check(holderRead.opcode == Opcode.IGET_OBJECT && holderRead is TwoRegisterInstruction &&
+            holderRead.registerA == 0 && holderRead.registerB == 5 && holderField != null &&
+            holderField.definingClass == "Lr8/ie3;" && holderField.name == "z" && holderField.type == "Ljava/lang/Object;") {
+            "Input format holder binding changed"
+        }
+        val cast = inputInstructions[1]
+        check(cast.opcode == Opcode.CHECK_CAST &&
+            ((cast as? ReferenceInstruction)?.reference as? TypeReference)?.type == "Lr8/yf4;") {
+            "Input format cast changed"
+        }
+        // Resolve the actual inherited error factory before changing any site.
+        // Preserve its renderer identity/format and mark this error nonrecoverable.
+        originalRendererError.method
         // Validate all sites first; leave the complete original FLAC method body
         // and its labels/register count intact. v0/v1 are original local scratch.
         selected.forEach { (site, method) ->
@@ -89,5 +121,26 @@ val natuneLocalFlacPatch = bytecodePatch(
                 ${site.refusal}
             """.trimIndent(), ExternalLabel("purple_original", original))
         }
+        // Enforce every actual input-format change before the base renderer can
+        // reuse a decoder/bypass session or post a new-format event. Keep the
+        // complete original FLAC input/lifecycle/event path untouched.
+        val originalInput = inputChange.getInstruction(0)
+        inputChange.addInstructionsWithLabels(0, """
+            iget-object v0, v5, Lr8/ie3;->z:Ljava/lang/Object;
+            check-cast v0, Lr8/yf4;
+            iget-object v1, v0, Lr8/yf4;->o:Ljava/lang/String;
+            const-string v2, "audio/flac"
+            invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+            move-result v1
+            if-nez v1, :purple_original_input
+            new-instance v1, Ljava/io/IOException;
+            const-string v2, "FLAC audio is required for local playback."
+            invoke-direct {v1, v2}, Ljava/io/IOException;-><init>(Ljava/lang/String;)V
+            const/4 v2, 0x0
+            const/16 v3, 0xfa5
+            invoke-virtual {v4, v1, v0, v2, v3}, Lr8/mu0;->f(Ljava/lang/Exception;Lr8/yf4;ZI)Lr8/gx3;
+            move-result-object v0
+            throw v0
+        """.trimIndent(), ExternalLabel("purple_original_input", originalInput))
     }
 }
