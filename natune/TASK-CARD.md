@@ -39,6 +39,8 @@ existing synthetic checks. A separate hosted finalization produced a stored,
 aligned entry and passed a full ZIP-content and exact-original comparison;
 Morphe's direct MPP output still needs that finalization. The evidence is in
 `flac-finalized-carrier-verification.json` and `flac-16k-verification.json`.
+The next hosted build joins that carrier with the existing audio settings; the
+combined profile and its exact APK comparison are pending.
 
 ## Remaining work packages
 

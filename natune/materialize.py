@@ -84,7 +84,7 @@ configurations.configureEach {
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
 }
 """)
-    version = '0.4.0-dev.2' if folder_carrier else '0.3.0-dev.1' if runtime_settings else '0.2.0-dev.2' if local_flac else '0.1.0-alpha.1'
+    version = '0.4.0-dev.3' if folder_carrier else '0.3.0-dev.1' if runtime_settings else '0.2.0-dev.2' if local_flac else '0.1.0-alpha.1'
     build = destination / 'patches/build.gradle.kts'
     text = build.read_text()
     for old, new in {
@@ -106,7 +106,8 @@ configurations.configureEach {
     proof = {'template_commit': PIN, 'overlay_commit': os.environ['GITHUB_SHA'],
              'patch_source_sha256': hashlib.sha256(source).hexdigest(),
              'target': json.loads((ROOT / 'target.json').read_text()),
-             'feature': 'Uninstalled FLAC folder-copy carrier' if folder_carrier else 'Allow full-quality audio on mobile data',
+             'feature': ('Uninstalled audio settings and FLAC folder-copy carrier' if folder_carrier and runtime_settings else
+                         'Uninstalled FLAC folder-copy carrier' if folder_carrier else 'Allow full-quality audio on mobile data'),
              'bundle_version': version,
              'local_decoder_guard_included': local_flac,
              'local_decoder_guard_sha256': hashlib.sha256((ROOT / 'NatuneLocalFlacPatch.kt').read_bytes()).hexdigest() if local_flac else None,

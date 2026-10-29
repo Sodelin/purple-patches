@@ -147,7 +147,8 @@ public final class VerifyNatuneRuntimeSettingsPatch {
         need(found.equals(fields.keySet()),"Settings public field missing");
     }
     public static void main(String[] args) throws Exception {
-        need(args.length == 2, "Expected original and patched APK");
+        need(args.length == 2 || args.length == 3, "Expected original and patched APK, plus compiled extension for combined profile");
+        boolean carrier = args.length == 3;
         var methods = new HashMap<String, Method>();
         var classesByName = new HashMap<String, ClassDef>();
         var dex = DexFileFactory.loadDexContainer(new File(args[1]), Opcodes.getDefault());
@@ -167,6 +168,7 @@ public final class VerifyNatuneRuntimeSettingsPatch {
         int settingsInsertion=settingsEntry(screen);
         var prefixes = new HashMap<String, Integer>();
         prefixes.put(APP, 1);
+        if (carrier) prefixes.put(TYPE + "->lowData(Landroid/content/Context;)Z", 5);
         for (var hook : VerifyNatuneLocalFlacPatch.HOOKS) {
             var method = methods.get(hook.key());
             need(method != null && method.getAccessFlags() == 17 &&
@@ -183,19 +185,49 @@ public final class VerifyNatuneRuntimeSettingsPatch {
         var bodies = new TreeMap<>(selected.methods());
         Set<String> required = Set.of(TYPE, "Ldev/purple/patches/natune/PurpleSettingsPage;",
             "Ldev/purple/patches/natune/NatuneSettingsNavigation;");
-        // Android's extension build can also emit its generated namespace R.
-        Set<String> permitted = Set.of(TYPE, "Ldev/purple/patches/natune/PurpleSettingsPage;",
-            "Ldev/purple/patches/natune/NatuneSettingsNavigation;",
-            "Ldev/purple/patches/natune/R;");
-        var found = new HashSet<String>();
-        for (String name : new ArrayList<>(classes.keySet())) {
-            if (original.classes().containsKey(name)) continue;
-            String outer = name.contains("$") ? name.substring(0, name.indexOf('$')) + ";" : name;
-            need(permitted.contains(outer), "Unexpected extension class: " + name);
-            found.add(outer);
-            classes.remove(name);
+        if (carrier) {
+            var extension = VerifyNatuneMobilePatch.snapshot(new File(args[2]), false);
+            need(extension.classes().keySet().containsAll(required) &&
+                extension.classes().keySet().containsAll(VerifyNatuneFlacCarrier.REQUIRED_CLASSES),
+                "Combined compiled extension is incomplete");
+            need(Collections.disjoint(original.classes().keySet(), extension.classes().keySet()),
+                "Compiled extension collides with an original class");
+            var addedClasses = new TreeSet<>(classes.keySet());
+            addedClasses.removeAll(original.classes().keySet());
+            need(addedClasses.equals(extension.classes().keySet()), "Combined extension class set changed");
+            for (String name : addedClasses)
+                need(extension.classes().get(name).equals(classes.remove(name)), "Combined extension class changed: " + name);
+            var addedMethods = new TreeSet<>(bodies.keySet());
+            addedMethods.removeAll(original.methods().keySet());
+            need(addedMethods.equals(extension.methods().keySet()), "Combined extension method set changed");
+            Set<String> checkedMarkers = Set.of(TYPE + "->mobilePatchPresent()Z", TYPE + "->flacPatchPresent()Z");
+            for (String name : extension.methods().keySet()) {
+                if (!checkedMarkers.contains(name)) {
+                    need(extension.methods().get(name).equals(bodies.get(name)), "Combined extension method changed: " + name);
+                } else {
+                    var before = extension.methods().get(name); var after = bodies.get(name);
+                    need(after != null && before.flags() == after.flags() && before.annotations().equals(after.annotations()) &&
+                        before.parameterAnnotations().equals(after.parameterAnnotations()), "Combined marker metadata changed: " + name);
+                }
+            }
+            VerifyNatuneFlacCarrier.checkMethods(methods);
+            System.out.println("Combined compiled extension classes=" + extension.classes().size() +
+                "; methods=" + extension.methods().size());
+        } else {
+            // Android's extension build can also emit its generated namespace R.
+            Set<String> permitted = Set.of(TYPE, "Ldev/purple/patches/natune/PurpleSettingsPage;",
+                "Ldev/purple/patches/natune/NatuneSettingsNavigation;",
+                "Ldev/purple/patches/natune/R;");
+            var found = new HashSet<String>();
+            for (String name : new ArrayList<>(classes.keySet())) {
+                if (original.classes().containsKey(name)) continue;
+                String outer = name.contains("$") ? name.substring(0, name.indexOf('$')) + ";" : name;
+                need(permitted.contains(outer), "Unexpected extension class: " + name);
+                found.add(outer);
+                classes.remove(name);
+            }
+            need(found.containsAll(required), "Missing selected settings extension classes");
         }
-        need(found.containsAll(required), "Missing selected settings extension classes");
         bodies.keySet().removeIf(name -> {
             int separator = name.indexOf("->");
             return separator > 0 && !original.classes().containsKey(name.substring(0, separator));
@@ -205,7 +237,8 @@ public final class VerifyNatuneRuntimeSettingsPatch {
         bodies.put(SCREEN,new VerifyNatuneMobilePatch.MethodState(screenState.flags(),screenState.annotations(),
             screenState.parameterAnnotations(),withoutSettingsEntry(screen,settingsInsertion)));
         VerifyNatuneMobilePatch.compare(original, new VerifyNatuneMobilePatch.Snapshot(bodies, classes), args,
-            "Verified exact settings entry, bootstrap, stock-result wrapper and four optional FLAC guards; original remaining program/resources preserved.");
+            "Verified exact settings entry, bootstrap, stock-result wrapper and four optional FLAC guards; original remaining program/resources preserved.",
+            carrier ? VerifyNatuneFlacCarrier.RESOURCE_ADDITIONS : Map.of());
         System.out.println("RUNTIME_SETTINGS_BYTECODE source_apk_compared=true navigation_bound=true device_test=false");
     }
 }
