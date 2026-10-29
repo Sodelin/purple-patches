@@ -269,7 +269,8 @@
           "invoke_opcode": 113,
           "move_result_register": 20
         }
-      ]
+      ],
+      "code_units": 287
     },
     {
       "dex": "classes2.dex",
@@ -284,7 +285,8 @@
           "invoke_opcode": 113,
           "move_result_register": 4
         }
-      ]
+      ],
+      "code_units": 2320
     },
     {
       "dex": "classes2.dex",
@@ -299,7 +301,8 @@
           "invoke_opcode": 113,
           "move_result_register": 2
         }
-      ]
+      ],
+      "code_units": 1263
     },
     {
       "dex": "classes2.dex",
@@ -314,7 +317,8 @@
           "invoke_opcode": 113,
           "move_result_register": 1
         }
-      ]
+      ],
+      "code_units": 491
     },
     {
       "dex": "classes2.dex",
@@ -329,7 +333,8 @@
           "invoke_opcode": 113,
           "move_result_register": 2
         }
-      ]
+      ],
+      "code_units": 468
     },
     {
       "dex": "classes2.dex",

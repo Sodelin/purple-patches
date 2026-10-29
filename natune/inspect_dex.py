@@ -224,7 +224,7 @@ class Dex:
                     references.append({'code_unit': offset, 'target': self.methods[ref[1]],
                                        'invoke_opcode': opcode, 'move_result_register': result_register})
             if references:
-                results.append({'signature': self.methods[index], 'flags': flags, 'registers': registers,
+                results.append({'signature': self.methods[index], 'flags': flags, 'registers': registers, 'code_units': len(code) // 2,
                                 'code_sha256': hashlib.sha256(code).hexdigest(), 'calls': references})
         return results
 

@@ -1,0 +1,188 @@
+import com.android.tools.smali.dexlib2.DexFileFactory;
+import com.android.tools.smali.dexlib2.Opcodes;
+import com.android.tools.smali.dexlib2.Opcode;
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21s;
+import com.android.tools.smali.dexlib2.iface.Method;
+import com.android.tools.smali.dexlib2.iface.instruction.*;
+import com.android.tools.smali.dexlib2.iface.instruction.formats.ArrayPayload;
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
+import java.io.File;
+import java.security.MessageDigest;
+import java.util.*;
+import java.util.zip.ZipFile;
+
+/** Compare all method instructions/handlers after normalizing DEX indexes and padding. */
+public final class VerifyNatuneMobilePatch {
+    record Site(String method, int offset, int register) {}
+    static final List<Site> SITES = List.of(
+        new Site("Lmoe/rukamori/archivetune/playback/MusicService$prefetchNextMediaItemStream$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;", 73, 20),
+        new Site("Lmoe/rukamori/archivetune/playback/MusicService;->k2(Lr8/km2;Z)Lr8/km2;", 26, 4),
+        new Site("Lmoe/rukamori/archivetune/playback/MusicService;->onMediaItemTransition(Lr8/yh7;I)V", 1216, 2),
+        new Site("Lmoe/rukamori/archivetune/playback/b;->a(Lr8/km2;)Lr8/km2;", 196, 1),
+        new Site("Lmoe/rukamori/archivetune/playback/g;->g(Ljava/lang/String;Lr8/cf2;)Ljava/lang/Object;", 290, 2)
+    );
+    record Body(int registers, List<String> instructions, List<String> handlers) {}
+    record MethodState(int flags, Object annotations, Body body) {}
+    record FieldState(int flags, Object initialValue, Object annotations) {}
+    record ClassState(int flags, String superclass, Object interfaces, Object annotations, Map<String, FieldState> fields) {}
+    record Snapshot(Map<String, MethodState> methods, Map<String, ClassState> classes) {}
+
+    static void need(boolean value, String reason) {
+        if (!value) throw new IllegalStateException(reason);
+    }
+    static String signature(MethodReference method) {
+        return method.getDefiningClass() + "->" + method.getName() + "(" +
+            String.join("", method.getParameterTypes()) + ")" + method.getReturnType();
+    }
+    static void token(StringBuilder out, Object value) {
+        String text = String.valueOf(value);
+        out.append(text.length()).append(':').append(text);
+    }
+    static int label(Map<Integer,Integer> labels, int address) {
+        Integer value = labels.get(address);
+        need(value != null, "Branch/handler does not target an instruction boundary");
+        return value;
+    }
+    static String node(Instruction instruction, int address, Map<Integer,Integer> labels,
+                       Map<Integer,List<Integer>> switchOwners) {
+        var out = new StringBuilder();
+        var opcode = instruction.getOpcode();
+        token(out, switch (opcode) {
+            case GOTO, GOTO_16, GOTO_32 -> "GOTO";
+            case CONST_STRING, CONST_STRING_JUMBO -> "CONST_STRING";
+            default -> opcode.name();
+        });
+        if (instruction instanceof FiveRegisterInstruction r) {
+            int[] registers = {r.getRegisterC(), r.getRegisterD(), r.getRegisterE(), r.getRegisterF(), r.getRegisterG()};
+            token(out, r.getRegisterCount());
+            for (int i = 0; i < r.getRegisterCount(); i++) token(out, registers[i]);
+        } else if (instruction instanceof RegisterRangeInstruction r) {
+            token(out, r.getRegisterCount()); token(out, r.getStartRegister());
+        } else if (instruction instanceof ThreeRegisterInstruction r) {
+            token(out, r.getRegisterA()); token(out, r.getRegisterB()); token(out, r.getRegisterC());
+        } else if (instruction instanceof TwoRegisterInstruction r) {
+            token(out, r.getRegisterA()); token(out, r.getRegisterB());
+        } else if (instruction instanceof OneRegisterInstruction r) token(out, r.getRegisterA());
+        if (instruction instanceof WideLiteralInstruction r) token(out, r.getWideLiteral());
+        if (instruction instanceof ReferenceInstruction r) token(out, r.getReference());
+        if (instruction instanceof DualReferenceInstruction r) token(out, r.getReference2());
+        if (instruction instanceof OffsetInstruction r) token(out, label(labels, address + r.getCodeOffset()));
+        if (instruction instanceof ArrayPayload r) {
+            token(out, r.getElementWidth()); token(out, r.getArrayElements());
+        }
+        if (instruction instanceof SwitchPayload r) {
+            var owners = switchOwners.get(address);
+            need(owners != null && !owners.isEmpty(), "Unreferenced switch payload");
+            for (int owner : owners) {
+                token(out, label(labels, owner));
+                for (var element : r.getSwitchElements()) {
+                    token(out, element.getKey()); token(out, label(labels, owner + element.getOffset()));
+                }
+            }
+        }
+        return out.toString();
+    }
+    static Body body(Method method, Site expectedChange) {
+        var implementation = method.getImplementation();
+        if (implementation == null) return null;
+        var instructions = new ArrayList<Instruction>();
+        implementation.getInstructions().forEach(instructions::add);
+        int[] originalWidths = instructions.stream().mapToInt(Instruction::getCodeUnits).toArray();
+        var labels = new HashMap<Integer,Integer>();
+        var switches = new HashMap<Integer,List<Integer>>();
+        int address = 0, index = 0;
+        for (Instruction instruction : instructions) {
+            labels.put(address, index);
+            if (instruction.getOpcode() == Opcode.PACKED_SWITCH || instruction.getOpcode() == Opcode.SPARSE_SWITCH) {
+                int payload = address + ((OffsetInstruction) instruction).getCodeOffset();
+                switches.computeIfAbsent(payload, k -> new ArrayList<>()).add(address);
+            }
+            address += instruction.getCodeUnits();
+            if (instruction.getOpcode() != Opcode.NOP) index++;
+        }
+        labels.put(address, index);
+        var nodes = new ArrayList<String>();
+        address = 0;
+        boolean changed = false;
+        for (int i = 0; i < instructions.size(); i++) {
+            var instruction = instructions.get(i);
+            if (instruction.getOpcode() != Opcode.NOP) nodes.add(node(instruction, address, labels, switches));
+            if (expectedChange != null && address == expectedChange.offset()) {
+                need(instruction.getOpcode() == Opcode.INVOKE_STATIC, "Original policy call changed");
+                var target = (MethodReference) ((ReferenceInstruction) instruction).getReference();
+                need(signature(target).equals("Lr8/hg6;->p(Landroid/content/Context;)Z"), "Different policy helper");
+                var result = instructions.get(i + 1);
+                need(result.getOpcode() == Opcode.MOVE_RESULT &&
+                     ((OneRegisterInstruction) result).getRegisterA() == expectedChange.register(), "Different original result register");
+                instructions.set(i + 1, new BuilderInstruction21s(Opcode.CONST_16, expectedChange.register(), 0));
+                changed = true;
+            }
+            // Original addresses/labels are needed even after replacing the next node.
+            address += originalWidths[i];
+        }
+        if (expectedChange != null) need(changed, "Missing expected audio policy call");
+        var handlers = new ArrayList<String>();
+        for (var block : implementation.getTryBlocks()) {
+            var row = new StringBuilder();
+            token(row, label(labels, block.getStartCodeAddress()));
+            token(row, label(labels, block.getStartCodeAddress() + block.getCodeUnitCount()));
+            for (var handler : block.getExceptionHandlers()) {
+                token(row, handler.getExceptionType()); token(row, label(labels, handler.getHandlerCodeAddress()));
+            }
+            handlers.add(row.toString());
+        }
+        return new Body(implementation.getRegisterCount(), nodes, handlers);
+    }
+    static Snapshot snapshot(File apk, boolean expectedChanges) throws Exception {
+        var methods = new TreeMap<String, MethodState>();
+        var classes = new TreeMap<String, ClassState>();
+        var dex = DexFileFactory.loadDexContainer(apk, Opcodes.getDefault());
+        for (String entryName : dex.getDexEntryNames()) {
+            var entry = dex.getEntry(entryName);
+            need(entry != null, "Missing DEX");
+            for (var clazz : entry.getDexFile().getClasses()) {
+                var fields = new TreeMap<String, FieldState>();
+                for (var field : clazz.getFields()) fields.put(field.getName() + ':' + field.getType(),
+                    new FieldState(field.getAccessFlags(), field.getInitialValue(), field.getAnnotations()));
+                need(classes.put(clazz.getType(), new ClassState(clazz.getAccessFlags(), clazz.getSuperclass(),
+                     clazz.getInterfaces(), clazz.getAnnotations(), fields)) == null, "Duplicate class");
+                for (var method : clazz.getMethods()) {
+                    String key = signature(method);
+                    Site site = expectedChanges ? SITES.stream().filter(x -> x.method().equals(key)).findFirst().orElse(null) : null;
+                    need(methods.put(key, new MethodState(method.getAccessFlags(), method.getAnnotations(), body(method, site))) == null,
+                         "Duplicate method");
+                }
+            }
+        }
+        return new Snapshot(methods, classes);
+    }
+    public static void main(String[] args) throws Exception {
+        var expected = snapshot(new File(args[0]), true);
+        var actual = snapshot(new File(args[1]), false);
+        need(expected.classes().equals(actual.classes()), "Class/field/annotation structure changed");
+        need(expected.methods().keySet().equals(actual.methods().keySet()), "Method set changed");
+        for (String name : expected.methods().keySet())
+            need(expected.methods().get(name).equals(actual.methods().get(name)), "Unexpected method semantics: " + name);
+        for (Site site : SITES) need(expected.methods().containsKey(site.method()), "Missing audio site");
+        int nativeFiles = 0, assets = 0;
+        try (var source = new ZipFile(args[0]); var patched = new ZipFile(args[1])) {
+            var entries = source.entries();
+            while (entries.hasMoreElements()) {
+                var entry = entries.nextElement();
+                String name = entry.getName();
+                if (entry.isDirectory() || !(name.startsWith("lib/") || name.startsWith("assets/"))) continue;
+                var retained = patched.getEntry(name);
+                need(retained != null, "Original asset missing");
+                byte[] a, b;
+                try (var input = source.getInputStream(entry)) { a = MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()); }
+                try (var input = patched.getInputStream(retained)) { b = MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()); }
+                need(MessageDigest.isEqual(a, b), "Original asset bytes changed");
+                if (name.startsWith("lib/")) nativeFiles++; else assets++;
+            }
+        }
+        System.out.println("Verified exact five audio result overrides; global low-data helper and every other method preserved.");
+        System.out.println("Classes=" + expected.classes().size() + "; methods=" + expected.methods().size() +
+            "; retained native files=" + nativeFiles + "; retained assets=" + assets);
+        System.out.println("Compared instructions/references/registers/constants/branch targets/try handlers, class and field metadata; debug items and APK signing are outside this comparison.");
+    }
+}
