@@ -48,6 +48,8 @@ final class BridgeClient {
         JSONObject health = request("GET", "/health", null, null);
         if (!"memory-only-v1".equals(health.optString("keyboard_data_path")))
             throw new IllegalStateException("Update the local bridge before using keyboard text or audio");
+        if (voice && !SessionPolicy.whisperPreflightSupported(health.optString("whisper_preflight")))
+            throw new IllegalStateException("Update the local bridge before using Whisper 3");
         if (voice && !"whisper-large-v3".equals(health.optString("whisper_family")))
             throw new IllegalStateException("Whisper 3 is not configured; another model will not be substituted");
     }

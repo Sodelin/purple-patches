@@ -15,7 +15,7 @@ public class SessionPolicyCheck {
         }
         public CharSequence after() { return after; }
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         for (int value:new int[]{0,1|128,1|144,1|224,2|16}) check(SessionPolicy.sensitive(value,0));
         check(SessionPolicy.sensitive(1,0x1000000));check(!SessionPolicy.sensitive(1,0));
         check(SessionPolicy.localEndpoint("http://127.0.0.1:12345"));
@@ -53,6 +53,11 @@ public class SessionPolicyCheck {
         Reader multibyte=new Reader(); multibyte.first=multibyte.last=new SessionPolicy.EditorPosition(0,3000,0);
         multibyte.selected="界".repeat(3000); check(SessionPolicy.captureEditor(multibyte)==null);
         check(SessionPolicy.bootstrapSuccess(0,-1));
+        check(SessionPolicy.whisperPreflightSupported("full-v3-pin-engine-sha-v1"));
+        for (String value : new String[]{null,"","full-v3-pin-engine-sha-v0","memory-only-v1"})
+            check(!SessionPolicy.whisperPreflightSupported(value));
+        String companion = java.nio.file.Files.readString(java.nio.file.Path.of("companion/src/whisper.rs"));
+        check(companion.contains("pub const PREFLIGHT_CAPABILITY: &str = \"" + SessionPolicy.WHISPER_PREFLIGHT + "\";"));
         for (Object err:new Object[]{null,0,1,"-1"}) check(!SessionPolicy.bootstrapSuccess(0,err));
         for (Object exit:new Object[]{null,1,-1,"0"}) check(!SessionPolicy.bootstrapSuccess(exit,-1));
         check(SessionPolicy.bounded("hello"));check(!SessionPolicy.bounded(" "));check(!SessionPolicy.bounded("界".repeat(3000)));

@@ -7,6 +7,7 @@ use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
 use std::sync::atomic::AtomicBool;
 
 pub const AUDIO_CAP: usize = 10 * 1024 * 1024;
+pub const PREFLIGHT_CAPABILITY: &str = "full-v3-pin-engine-sha-v1";
 // Nolan selected the official full large-v3 model, not turbo or a substituted variant.
 // The primary repository metadata and source revision are retained in docs/whisper-model.json.
 const SELECTED_MODEL_SHA256: &str = "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2";

@@ -4,6 +4,7 @@ package dev.purple.patches.gboard;
 public final class SessionPolicy {
     public static final int TEXT_BYTES = 8192;
     public static final int AUDIO_SECONDS = 60;
+    public static final String WHISPER_PREFLIGHT = "full-v3-pin-engine-sha-v1";
     private SessionPolicy() {}
     public static boolean sensitive(int inputType, int imeOptions) {
         int cls = inputType & 15, variation = inputType & 4080;
@@ -15,6 +16,9 @@ public final class SessionPolicy {
     public static boolean bootstrapSuccess(Object exitCode, Object err) {
         return exitCode instanceof Integer && ((Integer)exitCode) == 0
                 && err instanceof Integer && ((Integer)err) == -1;
+    }
+    public static boolean whisperPreflightSupported(String advertised) {
+        return WHISPER_PREFLIGHT.equals(advertised);
     }
     public static boolean bounded(String value) {
         return value != null && !value.trim().isEmpty()
