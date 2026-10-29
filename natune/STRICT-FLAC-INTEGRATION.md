@@ -59,6 +59,17 @@ below CacheDataSource can miss existing cached bytes. DataSpec field names and
 types are pinned, but position/length semantics need constructor/use binding;
 do not infer those semantics from field letters alone.
 
+The source's remaining low-data call in `MusicService.kt:8673–8683` controls
+`createPlayerCacheDataSourceFactory(cacheWriteEnabled=...)`, rather than the
+selected audio quality. Keep that distinction when reviewing `Lr8/py7;`;
+removing every remaining low-data result globally is not strict codec validation.
+The cache factory also has concrete return methods
+`Lr8/ae1;->a()Lr8/be1;` and `b()Lr8/be1;`. A dynamic interface proxy cannot
+replace those final concrete return types. The next adapter must preserve real
+class/field contracts and validate above any reused-cache bypass, including the
+offline downloader's own cache path. Factory names alone are not an admission
+boundary.
+
 `FlacPrefixProbe.java` is implemented pure Java for eventual Android extension
 integration, using actual byte arrays only. It has no I/O, caller authentication
 or persistence. `flac-prefix-verification.json` records hosted run40867651333
