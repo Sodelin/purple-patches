@@ -78,6 +78,7 @@ public final class OfflineSelectionPlan {
      * removal of the former collection. Changed source revisions refuse. */
     public static ReadyDelta readyDelta(Selection plan,String currentSourceRevision,Collection<Held> fresh) {
         if(!plan.revision.equals(currentSourceRevision))throw new IllegalStateException("Source selection changed");
+        if(!plan.unknownSize.isEmpty())throw new IllegalStateException("Unresolved candidate sizes: retain old collection");
         var held=snapshot(fresh);long actual=0;
         for(Key key:plan.selected) {
             Held h=held.get(key);
@@ -89,6 +90,10 @@ public final class OfflineSelectionPlan {
         var wanted=new HashSet<>(plan.selected);var claim=new ArrayList<Key>();var release=new ArrayList<Key>();var retire=new ArrayList<Key>();
         for(Key key:plan.selected)if(!held.get(key).owners.contains(plan.owner))claim.add(key);
         for(Held h:held.values())if(h.owners.contains(plan.owner) && !wanted.contains(h.key)) {
+            // Keep the collection reference as well as the bytes while in use.
+            // Otherwise a later snapshot cannot identify who should retire the
+            // now-unreferenced previous-track resource when its hold ends.
+            if(h.protectedUse)continue;
             release.add(h.key);
             // Another playlist, permanent manual save, playback, recovery or
             // unknown in-flight use keeps the actual bytes. No broad cache purge.
