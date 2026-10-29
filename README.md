@@ -27,7 +27,8 @@ Longer dictation and Android validation remain open. See [long dictation](docs/L
 Alpha.9 retains the result preview after an insertion request. Alpha.10 binds a
 pending local-tools connection to the offered keyboard session; its [hosted
 bundle and synthetic controls](docs/gboard-alpha10-build-verification.json)
-passed. These source/build checks do not establish Android behavior or resolve
+passed, as did [exact-APK static checks](docs/gboard-alpha10-apk-verification.json).
+These source/build checks do not establish Android behavior or resolve
 the bearer-output privacy blocker. The public Gboard feed still points to the
 older alpha.1 and warns against installing it.
 
