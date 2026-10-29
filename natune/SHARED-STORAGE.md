@@ -126,6 +126,17 @@ byte-stream failure cases against the actual copy core and compiles the SAF
 adapter against a real Android SDK. It performs no APK build or phone action.
 Its actual run/result must be recorded before claiming those checks passed.
 
+Hosted run40886068466 at972a1a48e9b0c6b75d0a8cf989f4e8089ed24be6 passed49
+actual core controls and real Android SDK compilation; complete artifact and
+source SHA verification is retained in shared-storage-verification.json.
+Hosted inspection40886323108 located both exact export coroutine bodies and
+their captured original Context, download utility, destination/tree and song
+fields. Its complete artifact hashes and selected public code metadata are
+retained in storage-hook-inspection.json. The optimized cache receiver is
+td1.p(String)TreeSet; an assumed NavigableSet-returning Media3 interface was not
+found. This is evidence to inspect and bind the actual receiver before making
+an extension call, not a reason to loosen its type/lock checks.
+
 ## Reproducible source evidence
 
 `shared-storage-source-review.json` pins the inspected public file bodies.

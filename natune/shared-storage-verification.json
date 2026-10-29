@@ -1,0 +1,21 @@
+{
+  "schema": "purple.shared-storage-verification.v1",
+  "run_id": 40886068466,
+  "source_commit": "972a1a48e9b0c6b75d0a8cf989f4e8089ed24be6",
+  "artifact_id": 12902078581,
+  "artifact_zip_sha256": "d1b9a211bd5c9222b9e1b7248916e735d19bfa9df46e1e30d22332e104d39b02",
+  "artifact_files_sha256": {
+    "SHA256SUMS": "11881646fa5cd46f79518c7ffa8cfbcc5027138217466eccb8a469c3537d7386",
+    "android-saf-compile.txt": "b04a0cf11547b7270e83647fbc377a616ef977edc530214304ce30b50fa5eedd",
+    "source-SHA256SUMS": "58de83ca502fa9a0793bfb29127c0ea841fcd1a5a3bf9f7431ed3a16c2702984",
+    "stream-copy-controls.txt": "934db12090b7e8c2b12b375c3d7b6a0ded5aba4b20367aa343acb7cf5a8c0305"
+  },
+  "reports": {
+    "stream-copy-controls.txt": "VERIFIED_STREAM_COPY_CONTROLS passed=49 android_owner_binding=false source_removal=false installed_ui=false",
+    "android-saf-compile.txt": "ANDROID_SAF_COMPILE passed=true device_provider_test=false apk_binding=false"
+  },
+  "apk_binding": false,
+  "android_owner_binding": false,
+  "source_removal": false,
+  "phone_acceptance": false
+}

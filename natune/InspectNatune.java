@@ -200,6 +200,23 @@ public final class InspectNatune {
                 System.out.println("STORAGE_OWNER_FIELD\t" + owner + "->" + field.getName() + ":" + field.getType() +
                     "\tflags=" + field.getAccessFlags());
         }
+        // The actual export call is td1.p(String)TreeSet after optimization;
+        // the original NavigableSet interface shape alone found no cache type.
+        // Inspect the observed receiver and its original owner, not an assumed
+        // public Media3 ABI. No field values or app objects are accessed.
+        for (String type : List.of("Lr8/td1;", "Lmoe/rukamori/archivetune/playback/g;")) {
+            var clazz = classes.get(type);
+            if (clazz == null) throw new IllegalStateException("Observed storage receiver missing");
+            System.out.println("STORAGE_RECEIVER\t" + type + "\tflags=" + clazz.getAccessFlags() +
+                "\tsuper=" + clazz.getSuperclass() + "\tinterfaces=" + clazz.getInterfaces());
+            for (var field : clazz.getFields())
+                System.out.println("STORAGE_RECEIVER_FIELD\t" + type + "->" + field.getName() + ":" + field.getType() +
+                    "\tflags=" + field.getAccessFlags());
+            for (var method : clazz.getMethods()) {
+                System.out.println("STORAGE_RECEIVER_METHOD\t" + signature(method) + "\tflags=" + method.getAccessFlags());
+                if (type.equals("Lr8/td1;")) codecBody(method, 45);
+            }
+        }
         // Resolve the actual optimized Cache-like interface, rather than
         // compiling an assumed upstream Media3 class name into an extension.
         for (var clazz : classes.values()) {
