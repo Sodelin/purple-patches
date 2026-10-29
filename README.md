@@ -7,9 +7,10 @@ Gboard candidate; strict FLAC/provider integration remains in development. This 
 
 The published Gboard alpha.1 candidate can mistake an unavailable editor response
 for empty context. Alpha.3 corrects this in source; alpha.4 also adds bounded
-microphone capture. Both passed hosted bundle and APK checks. The alpha.5 hosted
-bundle passed its checks and requires the newer companion's explicit
-voice-preflight capability. These
+microphone capture. Both passed hosted bundle and APK checks. Alpha.5 also passed
+its [hosted bundle](docs/gboard-alpha5-build-verification.json) and
+[exact-APK static checks](docs/gboard-alpha5-apk-verification.json), and requires
+the newer companion's explicit voice-preflight capability. These
 candidates have not passed device acceptance or replaced the public feed.
 See [editor snapshot safety](docs/EDITOR-SNAPSHOT.md) before using the candidate.
 
