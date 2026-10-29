@@ -1,0 +1,21 @@
+{
+  "schema": "purple.natune-media-store-journal-selection-verification.v1",
+  "hosted_run": 40927602612,
+  "hosted_source_commit": "ca5847147b75c60911ccf88bc26f3a916fe66150",
+  "local_source_commit_with_identical_tree": "7bf8a8738b8b87bd20e2b4210fb220369edf6739",
+  "source_tree": "dc36e9a7b5c064b19cb3bf546f246e168d5fb67b",
+  "artifact_id": 12920892845,
+  "artifact_zip_bytes": 4256,
+  "artifact_zip_sha256": "df0c6f421fd432303c27eb3191c3e7b7fa643c7770e088237883c8f99bf0bd17",
+  "artifact_members_checked": 9,
+  "source_hashes_checked": 31,
+  "synthetic_folder_copy_controls_passed": 96,
+  "synthetic_media_store_controls_passed": 52,
+  "synthetic_cache_source_controls_passed": 57,
+  "real_android_sdk_compilation": true,
+  "real_encrypted_journal_bound": false,
+  "actual_app_bound": false,
+  "device_provider_test": false,
+  "original_media_accessed": false,
+  "limits": "Public synthetic owner, cache and provider fixtures. The journal schema and actual caller, encrypted owner, destination, codec and receiver require separate verification and binding."
+}

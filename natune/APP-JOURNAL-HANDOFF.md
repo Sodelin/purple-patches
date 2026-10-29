@@ -43,8 +43,9 @@ reports no qualifying selected receiver in the sources it checked. It also
 identified the original-ID and MediaStore-destination representation gaps.
 The successor source validates the journal's 64-lowercase-hex original ID before
 reservation, and adds a schema 3 MediaStore selection with volume, normalized
-folder, MIME and actual collection URI. See `MOVE-JOURNAL.md`; these source
-changes still need hosted verification and a real authenticated owner binding.
+folder, MIME and actual collection URI. See `MOVE-JOURNAL.md` and the separate
+hosted Java/Rust source verification records. These use simulated owners and
+still need a real authenticated owner binding.
 
 Primary source: [Termux RUN_COMMAND documentation](https://github.com/termux/termux-app/wiki/RUN_COMMAND-Intent)
 

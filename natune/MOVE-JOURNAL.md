@@ -186,6 +186,17 @@ The production backend calls the retained real vault, not fixture encryption.
 
 ## Retained hosted verification
 
+Hosted runs `40927602612` and `40927869285` validated the selected MediaStore
+source increment on the same source tree. The first passed 96 simulated
+folder-copy controls and 52 simulated provider controls, and compiled the
+Android adapter. The second passed 46 Rust library controls, including 18
+journal controls, and cross-built the checker for Android AArch64. Exact
+artifact/source readback and limitations are in
+`media-store-journal-selection-verification.json` and
+`media-store-journal-rust-verification.json`. The Rust build used this branch's
+older companion manifest; it is not a joint build with the Gboard owner's newer
+source. Neither run used the real encrypted backend, app or phone.
+
 Run40903101938 at957a94037e01c965fd01f5e56289fc4073d98a0f passed36 Rust library
 tests, including all8 new journal tests, and the hosted aarch64-linux-android
 cross-build. move-journal-verification.json retains full artifact/member/source
