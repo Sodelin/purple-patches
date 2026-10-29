@@ -1,0 +1,32 @@
+{
+  "schema": "purple.natune-runtime-settings-navigation-verification.v1",
+  "hosted_run": 40923338143,
+  "hosted_source_commit": "1404a89bdfe54969aa91792a094e06f17496d4a0",
+  "local_source_commit_with_identical_tree": "33b7bdb31aef57138e9df4094340ab87c01ed4f1",
+  "source_tree": "c0df2afab4d277f31a3e645d067ecf828d6067fa",
+  "artifact_id": 12919317535,
+  "artifact_zip_bytes": 95590,
+  "artifact_zip_sha256": "27017b9d8b3e084fcceeccb1a8c7ec1e47d506a63ffebeadd6383210f1fa7116",
+  "mpp_name": "patches-0.3.0-dev.1.mpp",
+  "mpp_bytes": 74757,
+  "mpp_sha256": "f7862d2cb3845687897d251fff26d7a8cc02227dda670c06777e5a791c32daf2",
+  "artifact_member_hashes_checked": 10,
+  "selected_source_hashes_checked": 6,
+  "synthetic_settings_model_controls": 11,
+  "synthetic_preference_controls": 13,
+  "original_classes_compared": 27129,
+  "original_methods_compared": 114583,
+  "original_non_dex_entries_compared": 1884,
+  "prior_failed_run": {
+    "id": 40922971301,
+    "reason": "Hosted dependency resolution failed before source compilation; the pinned template lacked an explicit Maven Central plugin repository. The successor adds it without changing dependency pins."
+  },
+  "scope": "Inspects the original settings model ABI, exact injected list/context call, bootstrap, stock-result wrapper and optional decoder guards; compares the remainder of the original code, handlers, resources, native files and assets. Debug items and signing are outside the comparison.",
+  "limits": [
+    "Synthetic callback and preferences stand-ins are not an Android UI or player test",
+    "No phone installation, playback, device acceptance, model or personal media operation",
+    "No complete FLAC download/provider acceptance or whole-file codec proof",
+    "No same-signer update or verified handoff of installed private downloads",
+    "Hosted prototype only; existing public release/feed was not changed"
+  ]
+}

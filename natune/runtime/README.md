@@ -15,10 +15,12 @@ program and resources after checking those additions. It did not execute the
 Android settings or player. See `../runtime-settings-verification.json`. The original application
 entry was inspected at 22 registers, 813 code units and four try blocks; the
 new verifier checks handler boundaries as well as the added prefix. That earlier
-run had no settings navigation. A successor source candidate adds a settings
-section at the original list's remembered-construction boundary and opens a
-dialog using the original UI context, so no extra Activity is needed. Its
-updated APK comparison and controls are still pending. No settings UI has been
+run had no settings navigation. The successor adds a settings section at the
+original list's remembered-construction boundary and opens a dialog using the
+original UI context, so no extra Activity is needed. Hosted run 40923338143
+passed the updated original/patched APK comparison, 11 synthetic model/callback
+controls and 13 synthetic preference controls. See
+`../runtime-settings-navigation-verification.json`. No settings UI has been
 installed or accepted on a phone.
 
 `materialize.py --local-flac --runtime-settings` selects the development profile

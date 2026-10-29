@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 
 /**
@@ -29,11 +30,37 @@ public final class NatuneCachedSource {
     public static <T> T withSource(Object cache, String exactCacheKey,
             VerifiedStreamCopy.StopCheck stop, ReadAction<T> action)
             throws IOException {
+        if (exactCacheKey == null || exactCacheKey.isEmpty())
+            throw new IOException("Exact cache key required");
+        return withSource(cache, exactCacheKey, null, stop, action);
+    }
+
+    /**
+     * Bind the original single-song export resolver's returned span set to the
+     * exact still-current cache objects. The key comes from those spans, not a
+     * guessed song ID, preferred codec, filename, or a second resolver call.
+     * A stale/replaced selection refuses before the caller can open output.
+     * The caller must pass the actual result from the original invocation and
+     * keep its own destination/admission/recovery and user-selection duties.
+     */
+    public static <T> T withSelectedSpans(Object cache, NavigableSet<?> selected,
+            VerifiedStreamCopy.StopCheck stop, ReadAction<T> action)
+            throws IOException {
+        // The inspected pinned resolver returns the TreeSet produced by the
+        // original cache API (or an empty TreeSet). Do not execute an arbitrary
+        // collection implementation inside the original cache monitors.
+        if (selected == null || selected.getClass() != TreeSet.class)
+            throw new IOException("Original export selection required");
+        return withSource(cache, null, selected, stop, action);
+    }
+
+    private static <T> T withSource(Object cache, String exactCacheKey,
+            NavigableSet<?> selected, VerifiedStreamCopy.StopCheck stop,
+            ReadAction<T> action) throws IOException {
         Objects.requireNonNull(action, "action");
         Objects.requireNonNull(stop, "stop");
         stop.check();
-        if (cache == null || exactCacheKey == null || exactCacheKey.isEmpty())
-            throw new IOException("Selected cache and key required");
+        if (cache == null) throw new IOException("Selected cache required");
         Binding binding = new Binding(cache.getClass().getClassLoader());
         if (cache.getClass() != binding.wrapper) throw new IOException("Unsupported cache owner");
         Object lock = get(binding.lock, cache);
@@ -46,7 +73,26 @@ public final class NatuneCachedSource {
                 throw new IOException("Initialized original cache required");
             synchronized (delegate) {
                 stop.check();
-                try (Snapshot source = new Snapshot(binding, cache, lock, delegate, exactCacheKey, stop)) {
+                Object[] original = selected == null ? null : selected.toArray();
+                String key = exactCacheKey;
+                if (original != null) {
+                    if (original.length == 0 || original[0] == null || original[0].getClass() != binding.span)
+                        throw new IOException("Selected cached rendition unavailable");
+                    Object chosen = get(binding.key, original[0]);
+                    if (!(chosen instanceof String) || ((String) chosen).isEmpty())
+                        throw new IOException("Selected cache key unavailable");
+                    key = (String) chosen;
+                }
+                stop.check();
+                try (Snapshot source = new Snapshot(binding, cache, lock, delegate, key, stop)) {
+                    if (original != null) {
+                        if (original.length != source.segments.length)
+                            throw new IOException("Original export selection changed");
+                        for (int i = 0; i < original.length; i++)
+                            if (original[i] != source.segments[i].original)
+                                throw new IOException("Original export selection changed");
+                        source.assertUnchanged();
+                    }
                     return action.run(source);
                 }
             }

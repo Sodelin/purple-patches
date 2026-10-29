@@ -67,6 +67,20 @@ proof about arbitrary same-process/same-UID writers. File length/time is not a
 cryptographic file-identity proof. The byte verification and actual known cache
 lock ownership must remain separate from any stronger all-writer privacy claim.
 
+## Binding the existing export selection
+
+The source now provides `withSelectedSpans` for the exact `TreeSet` returned by
+the pinned stock export resolver. It obtains the key from those actual selected
+spans under the original cache locks and requires the current complete span
+objects to be the same objects in the same order. A stale, mixed, partial,
+empty or foreign selection refuses before its callback can open a destination.
+This closes the source-interface gap between the observed resolver output and
+the existing copy lease; it does not call or alter the stock export. The actual
+app hook, original cancellation, destination admission and recovery still need
+to be bound. The resolver can select a bare key before another rendition, so
+matching its exact selection is not proof that the user intended that rendition.
+The successor controls for this addition are pending their hosted run.
+
 ## Remaining move integration
 
 Holding the cache owner during disk/provider IO can delay another cache caller.
