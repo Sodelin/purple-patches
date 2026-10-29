@@ -4,6 +4,9 @@ Research checked 2026-10-29. The current Gboard candidate and companion implemen
 only Nolan's explicitly selected full Whisper large-v3 F16 model. The choices
 below are design candidates, not supported or tested settings in that build.
 No model has been downloaded or executed as part of this research.
+The [metadata-only candidate catalog](whisper-model-catalog-research.json)
+records exact upstream revisions, file sizes and SHA-256 values for these options;
+it is not a runtime selection or an engine-compatibility proof.
 
 ## Choices worth evaluating
 

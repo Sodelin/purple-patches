@@ -1,0 +1,27 @@
+{
+  "schema": "purple.companion-hosted-verification.v1",
+  "run": 40924924721,
+  "source_commit": "275d12e05151c90a0df097d49aa4e3255a7ac5f2",
+  "version": "0.2.2-dev.4",
+  "artifact_id": 12920665233,
+  "artifact_zip_bytes": 728903,
+  "artifact_zip_sha256": "c7b6789a9d795f2200dbfda118bb68a11b72c6bad9dcacd975ecb0e78ea7eec3",
+  "members_sha256": {
+    "SHA256SUMS": "cbba6d4b18f24a0c888e134267af6c6fda597ed4e33d9ee72f79690a05b6e793",
+    "native-controls.txt": "325fabeed4e41b00293c09580a58e9702d15ccf13c66277cee99d7199cfa9a2a",
+    "natune-journal-check": "1b66892d0b634a96c1b1e06aeffa9551a73163081d2822e904e133c4114556a9",
+    "purple-gboard-service": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91",
+    "purple-keyboard-bridge": "85ae7d865bd6f712f432a840387b2bae930fdee0fcb77cfa10c5202af4afbca6",
+    "response-schema.json": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
+    "source-SHA256SUMS": "b04742c8d7d451dd02dbcd9b5fc18ee0380bde8bc4450feaf9040498db6b5b4d"
+  },
+  "all_sha256sums_match": true,
+  "source_files_match_commit": 13,
+  "native_controls_summary": [
+    "test result: ok. 44 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s"
+  ],
+  "cancellable_hash_control": "test cli::tests::hashing_stops_between_reads_and_preserves_exact_digest ... ok",
+  "target_binary": "ELF64 AArch64; not executed on phone",
+  "model_or_device_tested": false,
+  "cancellation_limit": "Cooperative between reads; lost-start-response and device behavior remain open."
+}

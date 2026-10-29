@@ -8,10 +8,12 @@ This was a source-level finding; no real model or phone cancellation was run.
 
 The `0.2.2-dev.4` source adds a cancellable streaming hash for the worker's
 model and final engine integrity checks. It checks the existing owned-job stop
-flag before and after each read and refuses to start inference when cancelled.
+flag before and after each read; the runner also checks before spawning the
+engine. Cancellation can still race with process startup.
 The ordinary non-cancellable file hash remains available for existing callers.
 Synthetic controls cover cancellation before the first read and during a read,
-plus a known SHA-256 digest. The tests do not substitute a different model.
+plus a known SHA-256 digest. The [hosted controls and Android cross-build](companion-022-dev4-verification.json)
+passed. The tests do not substitute a different model.
 
 This is cooperative cancellation between reads: a blocked filesystem call or
 an operating-system scheduling pause is not a hard real-time guarantee. The

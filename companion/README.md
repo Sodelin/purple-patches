@@ -56,8 +56,9 @@ voice-preflight contract. No phone installation or model test is established.
 The `0.2.2-dev.4` source also checks the job's cancellation flag while reading
 the model for its full SHA-256 verification. This is cooperative, and does not
 resolve the separate lost-start-response race. See
-[hash cancellation](../docs/WHISPER-HASH-CANCELLATION.md). Dev.4 needs its own
-hosted verification and phone acceptance.
+[hash cancellation](../docs/WHISPER-HASH-CANCELLATION.md). Its
+[hosted controls and Android cross-build](../docs/companion-022-dev4-verification.json)
+passed; phone acceptance remains open.
 
 
 Companion0.2.1 corrects an actual Android transport failure: `/proc/self/fd/N`

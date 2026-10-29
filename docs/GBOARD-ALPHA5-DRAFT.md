@@ -3,6 +3,8 @@
 An attempted GitHub draft release was refused; no alpha.5 draft release was
 created. The exact main MPP and companion ZIP are preserved separately in the
 user's private Drive, with full byte/hash readback and actual file restoration.
+The later companion dev.4 build, including cooperative cancellation during the
+full model hash, has the same private readback and restore evidence.
 The larger Gboard workflow ZIP was uploaded there too, but only its metadata
 was checked: two raw readback attempts returned a closed transport. It must not
 be treated as a verified recovery copy. The private file references and proof
@@ -23,6 +25,9 @@ The matching `0.2.2-dev.3` companion is built from source
 its source and artifact hashes are in
 [`companion-022-dev3-verification.json`](companion-022-dev3-verification.json).
 Both source snapshots have the same companion code and manifest for this build.
+The newer `0.2.2-dev.4` companion is built from source
+`275d12e05151c90a0df097d49aa4e3255a7ac5f2` in hosted run `40924924721`; its
+verification is [`companion-022-dev4-verification.json`](companion-022-dev4-verification.json).
 
 Important remaining gates include the lost-start-response cancellation design,
 actual privacy-writer coverage, the selected full large-v3 model and engine,
