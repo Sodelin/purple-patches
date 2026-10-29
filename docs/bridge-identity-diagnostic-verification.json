@@ -6,6 +6,19 @@
   "job": "https://github.com/Sodelin/purple-patches/actions/runs/40959549174/job/123748416756",
   "result": "One intentionally ignored diagnostic was selected and passed because it reproduced the defect: a live same-UID parent with a repeatedly matching Identity was classified as not current by a copy of the test executable at a different path.",
   "counts": {"selected": 1, "passed": 1, "failed": 0, "filtered_out": 45},
+  "normal_workflow_recheck": {
+    "observed_utc": "2026-10-29T21:43:18Z",
+    "source_commit": "8dbfd76cc5fcc60c17f36ceb91f9e1654e07436f",
+    "run": "https://github.com/Sodelin/purple-patches/actions/runs/40959950306",
+    "artifact_id": 12934209856,
+    "artifact_zip_bytes": 729876,
+    "artifact_zip_sha256": "f31405085eb7ae9e502e6c6cb5dcf9ee82599ad7b9cfaa45adacdb56270a2ecd",
+    "native_controls": "45 passed, 0 failed, 1 intentionally ignored",
+    "android_cross_build": "The ordinary workflow succeeded; the bridge header was independently checked as ELF AArch64 in memory and was not executed.",
+    "artifact_readback": "All six SHA256SUMS entries matched the in-memory ZIP members; 13 source files and two deployment files matched the checked-out commit.",
+    "bridge_sha256": "34fc643a7472695024ff6e5e859cb4bbaa04285b6fc0d4c9ab9c9acaa35dd0cd",
+    "bridge_comparison": "The bridge hash equals the earlier 0.2.2-dev.6 artifact. No runtime fix, publication, installation or device acceptance follows."
+  },
   "limits": [
     "The fixture observes public Linux runner processes, not the phone.",
     "It calls actual Identity::read and Identity::current but does not call bootstrap, stop, serve or the encrypted vault.",

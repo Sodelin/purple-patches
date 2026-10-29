@@ -11,7 +11,10 @@ Errors reading those fields also produce `false`; they do not prove exit.
 In that situation `bootstrap` can remove the old encrypted `bridge.age` and
 attempt to start a service. `stop` can remove the record and report a stale
 record removed without stopping the old service. The shutdown wait likewise
-interprets an observation failure as absence. `serve` separately holds a
+interprets an observation failure as absence. `status` also reports both
+`running` and `owned_identity_alive` as false when the record cannot be read,
+so a missing or unreadable record is not evidence of a stopped server.
+`serve` separately holds a
 `server.lock` for its lifetime: if the original process continues to hold the
 same effective lock, that lock should refuse a second server. The source does
 not prove a second server starts, and no real service or incident was observed.
@@ -28,12 +31,16 @@ executed exactly that diagnostic at source `aeb34e8e2a60df6e12feb20b33cf2c62cd28
 the live fixture owner was classified as not current. The test passes because it
 reproduces the defect, not because the defect is fixed. The run skipped the
 normal suite and Android cross-build. See [the bounded evidence](bridge-identity-diagnostic-verification.json).
+The regular workflow was then run separately: 45 controls passed, this defect
+diagnostic remained ignored, and the Android ARM64 binaries cross-built. The
+bridge bytes match the previous dev.6 build. This verifies the workflow's
+normal path, not a change to the vulnerable lifecycle behavior.
 
 Review must distinguish a matching live owner, a conclusively different or
 exited owner, and unknown observation; preserve records on uncertainty; and
 address process/lock races, changed executable paths, scope of stop, version
 compatibility, crash recovery, and the actual encrypted record owner. A simple
 removal of the caller-path comparison would not settle the errors-as-absence
-problem. Synthetic controls and later separately authorized device acceptance
+problem; status must communicate uncertainty as well. Synthetic controls and later separately authorized device acceptance
 are required. The existing Dot review is prepared but the route to it is not
 verified; no peer approval or fix is claimed.
