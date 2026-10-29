@@ -1,0 +1,61 @@
+{
+  "source_commit": "9e3add758d52319962bd6f81c933ff6dce104821",
+  "tag": "natune-patches-v0.1.0-alpha.1",
+  "release_id": 427777784,
+  "published_prerelease": true,
+  "assets": {
+    "SHA256SUMS": {
+      "bytes": 1010,
+      "sha256": "eed0fee911bb20f4613e85232894507a054ee2800fc8f8432261025f2afbfdb0"
+    },
+    "build-verification.json": {
+      "bytes": 2059,
+      "sha256": "93656ae7ad259ef66012eb0c66f0001fd01786ae59b0f0886a49d62fea0d14db"
+    },
+    "morphe-template-source.tar.gz": {
+      "bytes": 119399,
+      "sha256": "494a8ed831cfedc50c02852ce69342984c415ea0d426163d0e2717764faa54cc"
+    },
+    "patch-result.json": {
+      "bytes": 316,
+      "sha256": "8d0e7842c227882f5cb005d117c669eb0ddf03d19fb131921d6572fecf8dab5f"
+    },
+    "patches-0.1.0-alpha.1-javadoc.mpp": {
+      "bytes": 475,
+      "sha256": "6f31970f54f6b4262ddf80cb00c2a6b3275498bbb1f4a63c64d886370124399c"
+    },
+    "patches-0.1.0-alpha.1-sources.mpp": {
+      "bytes": 672166,
+      "sha256": "6a78856ac442b2532419930e64dfd64e5435dfd1cd6763c8fc418fb0ce104a1e"
+    },
+    "patches-0.1.0-alpha.1.mpp": {
+      "bytes": 700410,
+      "sha256": "add08ea656297afe6e1a9e5657c9bf106ce93edff5f9caf44d0ebd2fc2afb8a7"
+    },
+    "patches-list.json": {
+      "bytes": 1174,
+      "sha256": "ca9b2cf7dc53a22acb4bb5d06eb93df0bc277720786e0250b88606ba00f9b7bf"
+    },
+    "purple-natune-provenance.json": {
+      "bytes": 1366,
+      "sha256": "152c87ee058abf2cf51c4a4882901ddb2c0cec93d08ea49a866c1c083ab1ddbe"
+    },
+    "purple-natune-source.tar.gz": {
+      "bytes": 112903,
+      "sha256": "a0bcdc1154044571c913fcc77b9fb4e2567c348ce5224adb8aaa464955b5ca87"
+    },
+    "static-preservation.txt": {
+      "bytes": 432,
+      "sha256": "f179c6f21ece0b16bfa3969b28ba19d9146a0ed981c2deea711a818a13d44101"
+    },
+    "target-proof.json": {
+      "bytes": 1234,
+      "sha256": "020f6c7f6703a66cda30d9ba6c048e46c508187700135d2153c0b2877b1d33f2"
+    }
+  },
+  "all_remote_assets_full_readback_passed_by_publisher": true,
+  "phone_acceptance": false,
+  "strict_flac_implemented": false,
+  "additional_providers_implemented": false,
+  "preflight_failure": "Initial publication member allowlist omitted the template source/javadoc MPP files; refused before release mutation, corrected to the already-pinned exact artifact set."
+}

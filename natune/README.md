@@ -78,3 +78,17 @@ Workflow registration originally failed using the existing development OAuth
 credential. The already-connected GitHub application created the reviewed
 workflow without any credential scope change. Inspection/build jobs subsequently
 ran through the existing hosted route. No phone SDK/compiler was installed.
+
+## Versioned distribution
+
+Experimental prerelease `natune-patches-v0.1.0-alpha.1` preserves all12published
+assets, corresponding overlay and pinned upstream template source, generated
+compatibility list, build proof and hashes. The publisher checked complete
+remote bytes before publishing; it never overwrites a published asset.
+`published-candidate.json` pins those exact bytes. No APK is distributed.
+
+The separate public Manager JSON feed is `channels/natune-candidate.json`.
+`python tools/verify_candidate_source.py --component natune --visibility public`
+verifies the anonymous feed, release tag and complete main MPP against source
+pins. A successful HTTP check does not prove an actual Manager import/update.
+The remaining FLAC/provider and phone-acceptance gates remain open.

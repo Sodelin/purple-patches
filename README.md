@@ -54,3 +54,20 @@ public downloads. Its earlier private authenticated feed/tag/full-asset proof
 is retained as dated history in [network proof](docs/candidate-source-verification.json).
 No Manager credential or device setting was changed. Older documents describing
 private custody refer to the state before the repository became public.
+
+## Natune candidate
+
+The separate [Natune prerelease](https://github.com/Sodelin/purple-patches/releases/tag/natune-patches-v0.1.0-alpha.1)
+contains the optional, default-off **Allow full-quality audio on mobile data**
+patch for `moe.rukamori.archivetune` version `N202610191717`. It removes five
+audio-specific low-data results while retaining unrelated low-data behavior.
+Exact APK patching and independent DEX/manifest/resource preservation passed
+off phone. It does **not yet enforce FLAC or add providers**, and phone
+behavior/Manager import have not been verified.
+
+Use the component's own JSON source so it selects the Natune bundle rather than
+the Gboard bundle or an auxiliary source/documentation MPP:
+`https://raw.githubusercontent.com/Sodelin/purple-patches/main/channels/natune-candidate.json`.
+This feed is public; no GitHub token is required. See
+[Natune source and verification](natune/README.md) and
+[remaining FLAC integration](natune/STRICT-FLAC-INTEGRATION.md).

@@ -17,7 +17,10 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise RuntimeError('Unexpected raw-feed redirect; credentials not forwarded')
 
 
-def verify(visibility='public'):
+def verify(visibility='public', component='gboard'):
+    assert component in ('gboard', 'natune')
+    feed_path = 'channels/candidate.json' if component == 'gboard' else 'channels/natune-candidate.json'
+    url = f'https://raw.githubusercontent.com/{REPO}/main/{feed_path}'
     assert visibility in ('public', 'private')
     private = visibility == 'private'
     def metadata(path):
@@ -29,7 +32,7 @@ def verify(visibility='public'):
     opener = urllib.request.build_opener(NoRedirect)
     body = None
     try:
-        with opener.open(URL, timeout=30) as response:
+        with opener.open(url, timeout=30) as response:
             anonymous_status = response.status
             body = response.read(16385)
     except urllib.error.HTTPError as error:
@@ -37,17 +40,20 @@ def verify(visibility='public'):
     if private:
         assert anonymous_status in (403, 404), 'Private source unexpectedly available anonymously'
         token = gh('auth', 'token').decode().strip()
-        request = urllib.request.Request(URL, headers={'Authorization': 'Bearer ' + token})
+        request = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + token})
         with opener.open(request, timeout=30) as response:
             body = response.read(16385)
     else:
         assert anonymous_status == 200, 'Public feed is not anonymously readable'
-    assert len(body) <= 16384 and body == (ROOT / 'channels/candidate.json').read_bytes()
+    assert len(body) <= 16384 and body == (ROOT / feed_path).read_bytes()
     feed = json.loads(body)
     stamp = datetime.fromisoformat(feed['created_at'])
     assert stamp.tzinfo is None, 'Manager LocalDateTime requires offset-free timestamp'
-    selected = json.loads((ROOT / 'docs/selected-release-assets.json').read_text())
-    candidate = next(c for c in selected['candidates'] if c['tag'].startswith('patches-v'))
+    if component == 'gboard':
+        selected = json.loads((ROOT / 'docs/selected-release-assets.json').read_text())
+        candidate = next(c for c in selected['candidates'] if c['tag'].startswith('patches-v'))
+    else:
+        candidate = json.loads((ROOT / 'natune/published-candidate.json').read_text())
     release = metadata(f"repos/{REPO}/releases/tags/{candidate['tag']}")
     assert release['id'] == candidate['release_id'] and not release['draft'] and release['prerelease']
     name = f"patches-{feed['version']}.mpp"
@@ -64,16 +70,17 @@ def verify(visibility='public'):
             payload = response.read(pin['bytes'] + 1)
     assert len(payload) == pin['bytes'] and hashlib.sha256(payload).hexdigest() == pin['sha256']
     assert metadata(f'repos/{REPO}')['private'] is private
-    return {'source_url': URL, 'private': private, 'anonymous_http_status': anonymous_status,
+    return {'source_url': url, 'component': component, 'private': private, 'anonymous_http_status': anonymous_status,
             'verification_mode': visibility, 'selected_feed_matches_versioned_source': True, 'published_prerelease_tag': candidate['tag'],
             'actual_versioned_release_route_resolves': True, 'main_mpp_full_bytes_verified': pin,
             'credential_profile': 'Existing gh identity; no Manager credential read/copied/changed' if private else 'Anonymous public requests only; no credentials accessed',
             'manager_device_import_verified': False, 'device_actions': False, 'model_invocations': False,
-            'limits': 'Remote feed and exact versioned asset path verified; actual phone Manager import/update and keyboard acceptance remain unverified.'}
+            'limits': 'Remote feed and exact versioned asset path verified; actual phone Manager import/update and app acceptance remain unverified.'}
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--visibility', choices=('public', 'private'), default='public')
+    parser.add_argument('--component', choices=('gboard', 'natune'), default='gboard')
     args = parser.parse_args()
-    print(json.dumps(verify(args.visibility), indent=2))
+    print(json.dumps(verify(args.visibility, args.component), indent=2))
