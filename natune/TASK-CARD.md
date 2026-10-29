@@ -35,9 +35,10 @@ cross-build without touching its index. `companion-source-join-verification.json
 records the exact join and its limits. The uninstalled folder/FLAC carrier
 passed an exact public APK static comparison; its original native library is
 4 KiB aligned. The replacement library now passes 16 KiB ELF layout and the
-existing synthetic checks; Morphe's direct output compressed it, and a separate
-hosted finalization and full ZIP comparison are awaiting verification.
-`flac-carrier-verification.json` and `flac-16k-verification.json` record both.
+existing synthetic checks. A separate hosted finalization produced a stored,
+aligned entry and passed a full ZIP-content and exact-original comparison;
+Morphe's direct MPP output still needs that finalization. The evidence is in
+`flac-finalized-carrier-verification.json` and `flac-16k-verification.json`.
 
 ## Remaining work packages
 
@@ -70,8 +71,7 @@ verified; no decoder selection or new phone dependency is claimed here.
 
 ## Next checkpoint and blockers
 
-Verify the 16 KiB-compatible decoder's APK package layout, then integrate the
-real selected app action and journal/receiver once their original
+Integrate the real selected app action and journal/receiver once their original
 authority and data-continuity interfaces exist. The shared Rust API boundary
 was returned to the Gboard owner. The concrete app-to-journal expert review
 is prepared; the existing Dot route is unverified, so that request remains

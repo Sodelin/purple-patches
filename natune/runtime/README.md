@@ -69,11 +69,14 @@ the decoder and folder-copy fixture checks; `../flac-16k-verification.json`
 records its source, full artifact readback and ELF layout. The successor carrier
 run 40936437037 then found Morphe's raw-resource output compressed the new
 library (ZIP method 8), so it failed the stored-and-aligned check. A hosted
-finalization candidate re-adds only that matching library as stored and uses
-Android `zipalign -P 16` before comparing every ZIP entry and the exact original
-app. This separate post-processing step is not an integrated Morphe Manager
-route and has not yet passed its hosted verification. No app hook, journal owner,
-Android execution or installation is claimed by either carrier.
+finalization re-adds only that matching library as stored and uses Android
+`zipalign -P 16` before comparing every ZIP entry and the exact original app.
+Hosted run 40937127903 passed that comparison, including 1,895 finalization
+entries and the stored, 16 KiB-aligned ARM64 library. The exact source and full
+artifact readback are in `../flac-finalized-carrier-verification.json`. This
+separate post-processing step is not an integrated Morphe Manager route: the
+MPP alone still needs that step. No app hook, journal owner, Android execution
+or installation is claimed by either carrier.
 
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
 provide bounded streaming, full destination readback and the real Android SAF
