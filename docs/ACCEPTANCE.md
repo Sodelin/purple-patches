@@ -17,7 +17,7 @@ must continue working. A successful hosted build is not device acceptance.
 | Android memory transport | Actual public cat fixture: inherited anonymous /proc/self/fd path denied, inherited stdin and pipe stdin succeed. Source0.2.1 corrects both audio and schema routes; see[android-transport-control.json](android-transport-control.json). Rust/app/decoder acceptance remains separate. |
 | Whisper | Existing base multilingual assets do not qualify. User-selected full large-v3 weights, matching architecture, pinned bytes and engine are required. No weights downloaded or live speech tested. |
 | Editor integrity | Device tests must cover selection replacement, cursor movement, editor switch, app switch, cancellation, delayed result and starting another operation before an earlier preview is inserted. Original text must survive every refusal. |
-| Microphone | Device tests must verify stop, cancel,60-second ceiling, permissions, interruptions and release. Health/family validation must precede microphone opening. |
+| Microphone | Alpha.4 source adds an elapsed-time limit, nonblocking reads, worker-owned release and PCM staging cleanup; see [MICROPHONE-CAPTURE.md](MICROPHONE-CAPTURE.md). Its hosted checks and device behavior are separate gates. Device tests must verify stop, cancel, the 60-second ceiling, permissions, interruptions and release. Health/family validation must precede microphone opening. |
 | Translation | One explicit selected-text request, exact gpt-6.1-sol, no context inheritance/fallback, preview and explicit insertion. Live testing remains held. |
 | Regression/rollback | Alongside-stock package option and independent keyboard recovery must work before changing the user's default. No installation/default switch has occurred. |
 | Update feed | The public candidate feed, published Gboard prerelease and complete pinned MPP were rechecked anonymously on 29 October 2026; the separate companion0.2.1 prerelease also resolved anonymously. See [public-feed-check-20261029.json](public-feed-check-20261029.json). Actual phone Manager import/update acceptance remains pending. |
@@ -51,9 +51,11 @@ writers, Android app data or cloud-input invisibility. Resolve those actual
 writer gates before a live translation test. Keep supporting source, public
 fixture checks and packaging work moving while that action is held.
 
-For Morphe input, select exactly `patches-0.1.0-alpha.1.mpp`. The hosted
-archive also contains auxiliary `-sources.mpp` and `-javadoc.mpp` outputs;
-those are not the Manager patch input. The public candidate update feed and selected MPP have been remotely verified; actual Manager import/update remains unperformed.
+The current public feed and historical local deliverable point to alpha.1, which
+has the editor-snapshot issue documented in [EDITOR-SNAPSHOT.md](EDITOR-SNAPSHOT.md).
+Do not treat it as the current activation candidate. The hosted archives also
+contain auxiliary `-sources.mpp` and `-javadoc.mpp` outputs; those are not the
+Manager patch input. Actual Manager import/update remains unperformed.
 
 ## Selected local deliverable
 
@@ -68,8 +70,9 @@ creation and refuses a differing existing file.
 
 ## Companion revision selection
 
-Use the verified0.2.1 companion with the unchanged0.1.0-alpha.1 main MPP for
-future authorized deployment. Its executable, wrapper, fixed schema and exact
+The verified0.2.1 companion is the retained candidate for future authorized
+deployment; the newer Gboard bundle still needs its own complete selection and
+acceptance. Its executable, wrapper, fixed schema and exact
 corresponding source are retained in public prerelease425713896; all six assets
 passed full remote byte readback. See[private-companion-0.2.1.json](private-companion-0.2.1.json).
 The previous0.2.0 artifact/draft is retained history, with a read-back
