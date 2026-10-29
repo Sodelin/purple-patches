@@ -1,4 +1,4 @@
-name: Build and validate Natune local FLAC prototype off phone
+name: Build and validate Natune runtime settings prototype off phone
 on:
   workflow_dispatch:
 permissions:
@@ -25,7 +25,7 @@ jobs:
           git -C "$RUNNER_TEMP/natune-template" remote add origin https://github.com/MorpheApp/morphe-patches-template
           git -C "$RUNNER_TEMP/natune-template" fetch --depth=1 origin e721536ab19e30d16ce9d31ae1830ca299aad383
           git -C "$RUNNER_TEMP/natune-template" checkout --detach FETCH_HEAD
-          python natune/materialize.py "$RUNNER_TEMP/natune-template" --local-flac
+          python natune/materialize.py "$RUNNER_TEMP/natune-template" --local-flac --runtime-settings
       - name: Build real Morphe bundle and generated patch metadata
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -49,20 +49,19 @@ jobs:
       - name: Patch exact APK with validation and inspect expected changes
         run: |
           java -jar "$RUNNER_TEMP/morphe.jar" patch \
-            --patches dist/patches-0.2.0-dev.2.mpp --exclusive \
-            --enable "Allow full-quality audio on mobile data" \
-            --enable "Require FLAC for local audio decoding" \
+            --patches dist/patches-0.3.0-dev.1.mpp --exclusive \
+            --enable "Runtime switches for Natune audio policies" \
             --bytecode-mode FULL --validate --unsigned \
             --result-file dist/patch-result.json \
             --out "$RUNNER_TEMP/natune-patched.apk" "$RUNNER_TEMP/natune-original.apk"
           mkdir -p "$RUNNER_TEMP/natune-verifier"
-          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-verifier" natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneLocalFlacPatch.java
-          java -cp "$RUNNER_TEMP/natune-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneLocalFlacPatch \
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-verifier" natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneLocalFlacPatch.java natune/VerifyNatuneRuntimeSettingsPatch.java
+          java -cp "$RUNNER_TEMP/natune-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneRuntimeSettingsPatch \
             "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-patched.apk" > dist/static-preservation.txt
           cd dist
           sha256sum * > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: purple-natune-local-flac-prototype
+          name: purple-natune-runtime-settings-prototype
           path: dist/
           retention-days: 14

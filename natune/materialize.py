@@ -9,6 +9,7 @@ import sys
 
 PIN = 'e721536ab19e30d16ce9d31ae1830ca299aad383'
 ROOT = Path(__file__).resolve().parent
+SETTINGS_SOURCES = ('RuntimeSettings.java', 'PurpleSettingsActivity.java')
 
 
 def materialize(destination, local_flac=False, runtime_settings=False):
@@ -35,7 +36,10 @@ def materialize(destination, local_flac=False, runtime_settings=False):
         (target.parent / 'NatuneRuntimeSettingsPatch.kt').write_bytes((ROOT / 'NatuneRuntimeSettingsPatch.kt').read_bytes())
         extension = destination / 'extensions/extension'
         shutil.rmtree(extension / 'src/main/java/app/template')
-        shutil.copytree(ROOT / 'runtime/dev', extension / 'src/main/java/dev')
+        settings = extension / 'src/main/java/dev/purple/patches/natune'
+        settings.mkdir(parents=True, exist_ok=False)
+        for name in SETTINGS_SOURCES:
+            shutil.copyfile(ROOT / 'runtime/dev/purple/patches/natune' / name, settings / name)
         (extension / 'build.gradle.kts').write_text("""extension {
     name = "extensions/extension.mpe"
 }
@@ -80,7 +84,8 @@ configurations.configureEach {
              'runtime_settings_app_binding': runtime_settings,
              'runtime_settings_navigation_binding': False,
              'runtime_settings_patch_sha256': hashlib.sha256((ROOT / 'NatuneRuntimeSettingsPatch.kt').read_bytes()).hexdigest() if runtime_settings else None,
-             'runtime_settings_sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted((ROOT / 'runtime').rglob('*.java'))} if runtime_settings else {},
+             'runtime_settings_sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in
+                 (ROOT / 'runtime/dev/purple/patches/natune' / name for name in SETTINGS_SOURCES)} if runtime_settings else {},
              'strict_flac_implemented': False, 'additional_providers_implemented': False,
              'phone_acceptance': False}
     (destination / 'purple-natune-provenance.json').write_text(json.dumps(proof, indent=2) + '\n')

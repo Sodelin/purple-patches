@@ -5,6 +5,8 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21s
 import com.android.tools.smali.dexlib2.iface.Method;
 import com.android.tools.smali.dexlib2.iface.value.*;
 import com.android.tools.smali.dexlib2.immutable.value.*;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction35c;
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference;
 import com.android.tools.smali.dexlib2.iface.instruction.*;
 import com.android.tools.smali.dexlib2.iface.instruction.formats.ArrayPayload;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
@@ -115,14 +117,51 @@ public final class VerifyNatuneMobilePatch {
         return body(method, expectedChange, 0);
     }
     static Body body(Method method, Site expectedChange, int verifiedPrefixInstructions) {
+        return body(method, expectedChange, verifiedPrefixInstructions, null);
+    }
+    // A runtime-settings caller independently verifies its added prefix, then
+    // normalizes only the exact rewritten audio call back to the original.
+    static Body body(Method method, Site expectedChange, int verifiedPrefixInstructions, Site runtimeChange) {
         var implementation = method.getImplementation();
         if (implementation == null) return null;
         var instructions = new ArrayList<Instruction>();
         implementation.getInstructions().forEach(instructions::add);
+        int removedUnits = 0;
         if (verifiedPrefixInstructions > 0) {
-            need(implementation.getTryBlocks().isEmpty(), "Cannot strip a prefix across try handlers");
             need(verifiedPrefixInstructions < instructions.size(), "Missing original method body");
+            for (int i = 0; i < verifiedPrefixInstructions; i++) removedUnits += instructions.get(i).getCodeUnits();
+            for (var block : implementation.getTryBlocks()) {
+                need(block.getStartCodeAddress() >= removedUnits, "Try range overlaps added prefix");
+                for (var handler : block.getExceptionHandlers())
+                    need(handler.getHandlerCodeAddress() >= removedUnits, "Handler targets added prefix");
+            }
             instructions.subList(0, verifiedPrefixInstructions).clear();
+        }
+        if (runtimeChange != null) {
+            int address = 0;
+            boolean changed = false;
+            for (int i = 0; i < instructions.size(); i++) {
+                var instruction = instructions.get(i);
+                if (address == runtimeChange.offset()) {
+                    need(instruction.getOpcode() == Opcode.INVOKE_STATIC && instruction instanceof FiveRegisterInstruction &&
+                        instruction instanceof ReferenceInstruction, "Runtime audio call layout changed");
+                    var call = (FiveRegisterInstruction) instruction;
+                    var reference = ((ReferenceInstruction) instruction).getReference();
+                    need(reference instanceof MethodReference && signature((MethodReference) reference).equals(
+                        "Ldev/purple/patches/natune/RuntimeSettings;->lowData(Landroid/content/Context;)Z") &&
+                        call.getRegisterCount() == 1 && i + 1 < instructions.size(), "Wrong runtime audio target");
+                    var result = instructions.get(i + 1);
+                    need(result.getOpcode() == Opcode.MOVE_RESULT && result instanceof OneRegisterInstruction &&
+                        ((OneRegisterInstruction) result).getRegisterA() == runtimeChange.register(), "Wrong runtime audio result");
+                    instructions.set(i, new ImmutableInstruction35c(Opcode.INVOKE_STATIC, call.getRegisterCount(),
+                        call.getRegisterC(), call.getRegisterD(), call.getRegisterE(), call.getRegisterF(), call.getRegisterG(),
+                        new ImmutableMethodReference("Lr8/hg6;", "p", List.of("Landroid/content/Context;"), "Z")));
+                    changed = true;
+                    break;
+                }
+                address += instruction.getCodeUnits();
+            }
+            need(changed, "Runtime audio call missing at original offset");
         }
         int[] originalWidths = instructions.stream().mapToInt(Instruction::getCodeUnits).toArray();
         var labels = new HashMap<Integer,Integer>();
@@ -161,10 +200,10 @@ public final class VerifyNatuneMobilePatch {
         var handlers = new ArrayList<String>();
         for (var block : implementation.getTryBlocks()) {
             var row = new StringBuilder();
-            token(row, label(labels, block.getStartCodeAddress()));
-            token(row, label(labels, block.getStartCodeAddress() + block.getCodeUnitCount()));
+            token(row, label(labels, block.getStartCodeAddress() - removedUnits));
+            token(row, label(labels, block.getStartCodeAddress() + block.getCodeUnitCount() - removedUnits));
             for (var handler : block.getExceptionHandlers()) {
-                token(row, handler.getExceptionType()); token(row, label(labels, handler.getHandlerCodeAddress()));
+                token(row, handler.getExceptionType()); token(row, label(labels, handler.getHandlerCodeAddress() - removedUnits));
             }
             handlers.add(row.toString());
         }
@@ -176,6 +215,9 @@ public final class VerifyNatuneMobilePatch {
     // A caller must independently verify each exact prefix before supplying its
     // length here. The remaining complete body still uses the ordinary verifier.
     static Snapshot snapshot(File apk, boolean expectedChanges, Map<String,Integer> verifiedPrefixes) throws Exception {
+        return snapshot(apk, expectedChanges, verifiedPrefixes, false);
+    }
+    static Snapshot snapshot(File apk, boolean expectedChanges, Map<String,Integer> verifiedPrefixes, boolean runtimeChanges) throws Exception {
         var methods = new TreeMap<String, MethodState>();
         var classes = new TreeMap<String, ClassState>();
         var dex = DexFileFactory.loadDexContainer(apk, Opcodes.getDefault());
@@ -191,7 +233,8 @@ public final class VerifyNatuneMobilePatch {
                 for (var method : clazz.getMethods()) {
                     String key = signature(method);
                     Site site = expectedChanges ? SITES.stream().filter(x -> x.method().equals(key)).findFirst().orElse(null) : null;
-                    need(methods.put(key, new MethodState(method.getAccessFlags(), method.getAnnotations(), method.getParameters().stream().map(p -> p.getAnnotations()).toList(), body(method, site, verifiedPrefixes.getOrDefault(key, 0)))) == null,
+                    Site runtimeSite = runtimeChanges ? SITES.stream().filter(x -> x.method().equals(key)).findFirst().orElse(null) : null;
+                    need(methods.put(key, new MethodState(method.getAccessFlags(), method.getAnnotations(), method.getParameters().stream().map(p -> p.getAnnotations()).toList(), body(method, site, verifiedPrefixes.getOrDefault(key, 0), runtimeSite))) == null,
                          "Duplicate method");
                 }
             }

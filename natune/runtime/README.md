@@ -7,19 +7,21 @@ original app settings. Disabling the mobile policy is designed to return the
 actual supplied stock result, rather than reconstructing network status.
 
 Patch-presence marker methods intentionally return false until actual selected
-Morphe hooks bind them. These are source hook sites, not claims that features
-are installed. Application bootstrap, exact original-result wrapper, FLAC guard
-switches, marker rewriting, manifest/native settings navigation and independent
-APK/resource comparisons remain required. The original application entry now
-has actual release inspection: App.onCreate22registers/813code units/4try blocks.
-Any added prefix must preserve those original handler boundaries, not loosen
-zero-try guard checks. No app bootstrap or UI has been injected by this source.
+Morphe hooks bind them. The runtime-settings source checkpoint now contains an
+experimental application bootstrap, original-result wrapper, marker rewriting
+and switchable local decoder guards. It has not yet passed a hosted patch build
+or an independent original/patched APK comparison. The original application
+entry was inspected at 22 registers, 813 code units and four try blocks; the
+new verifier must check handler boundaries as well as the added prefix. The
+settings Activity is not yet declared in the target manifest or reachable from
+the original app. No settings UI has been installed or accepted on a phone.
 
-`materialize.py --runtime-settings` selects a new development profile and copies
-only these Android Java sources into the official extension module. It excludes
-an otherwise unnecessary second Kotlin standard library. This profile has not
-yet been built or adopted; current selected feeds and existing patch behavior
-are unchanged. No phone install/UI/permission/model action accompanies it.
+`materialize.py --local-flac --runtime-settings` selects the development profile
+and copies exactly these two Android Java sources into the extension module.
+The incomplete folder-copy components remain source-only until their actual
+host is selected. The settings profile excludes an otherwise unnecessary second
+Kotlin standard library. Current selected feeds and installed behavior are
+unchanged. No phone install/UI/permission/model action accompanies this source.
 
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
 provide bounded streaming, full destination readback and the real Android SAF

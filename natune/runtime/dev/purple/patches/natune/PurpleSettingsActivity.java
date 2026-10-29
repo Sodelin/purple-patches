@@ -36,7 +36,7 @@ public final class PurpleSettingsActivity extends Activity {
                 RuntimeSettings.fullQualityMobile(this), true);
         }
         if(RuntimeSettings.flacPatchPresent()) {
-            toggle("Require FLAC for local playback", "Play verified FLAC formats. If FLAC is unavailable, playback reports an error. Changes apply when the next input format is evaluated.",
+            toggle("Require FLAC for local playback", "Require the local decoder to receive FLAC audio. If unavailable, playback reports an error. This does not verify the whole file or affect remote casting. Changes apply to the next input format.",
                 RuntimeSettings.requireFlac(this), false);
         }
         heading("Troubleshooting");
