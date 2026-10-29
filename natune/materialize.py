@@ -106,7 +106,7 @@ configurations.configureEach {
     proof = {'template_commit': PIN, 'overlay_commit': os.environ['GITHUB_SHA'],
              'patch_source_sha256': hashlib.sha256(source).hexdigest(),
              'target': json.loads((ROOT / 'target.json').read_text()),
-             'feature': 'Allow full-quality audio on mobile data',
+             'feature': 'Uninstalled FLAC folder-copy carrier' if folder_carrier else 'Allow full-quality audio on mobile data',
              'bundle_version': version,
              'local_decoder_guard_included': local_flac,
              'local_decoder_guard_sha256': hashlib.sha256((ROOT / 'NatuneLocalFlacPatch.kt').read_bytes()).hexdigest() if local_flac else None,

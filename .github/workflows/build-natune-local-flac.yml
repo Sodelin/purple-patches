@@ -126,8 +126,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/natune-verifier"
           javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-verifier" \
             natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneFlacCarrier.java
+          python -c 'import os, pathlib, zipfile; z=zipfile.ZipFile("dist/patches-0.4.0-dev.1.mpp"); d=z.read("extensions/extension.mpe"); assert d.startswith(b"dex\n"); pathlib.Path(os.environ["RUNNER_TEMP"], "natune-extension.dex").write_bytes(d)'
           java -cp "$RUNNER_TEMP/natune-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneFlacCarrier \
-            "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-patched.apk" > dist/static-preservation.txt
+            "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-patched.apk" "$RUNNER_TEMP/natune-extension.dex" > dist/static-preservation.txt
           NDK_ROOT="${ANDROID_NDK_HOME:-$ANDROID_NDK_LATEST_HOME}"
           "$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" --dyn-syms --wide \
             "$RUNNER_TEMP/natune-flac-input/libpurple_natune_flac.so" | grep -F 'Java_dev_purple_patches_natune_FlacIntegrity_decode' > /dev/null

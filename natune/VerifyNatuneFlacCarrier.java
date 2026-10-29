@@ -10,25 +10,31 @@ public final class VerifyNatuneFlacCarrier {
     private static void need(boolean value, String reason) { VerifyNatuneMobilePatch.need(value, reason); }
 
     public static void main(String[] args) throws Exception {
-        need(args.length == 2, "Expected original and carrier APK");
+        need(args.length == 3, "Expected original APK, carrier APK and compiled extension DEX");
         VerifyNatuneMobilePatch.initializerControls();
         var original = VerifyNatuneMobilePatch.snapshot(new File(args[0]), false);
         var selected = VerifyNatuneMobilePatch.snapshot(new File(args[1]), false);
+        var extension = VerifyNatuneMobilePatch.snapshot(new File(args[2]), false);
         var classes = new TreeMap<>(selected.classes());
         var bodies = new TreeMap<>(selected.methods());
         Set<String> required = Set.of(PREFIX + "VerifiedStreamCopy;", PREFIX + "NatuneCachedSource;",
             PREFIX + "TemporarySpaceBudget;", PREFIX + "NatuneCoroutineStop;",
             PREFIX + "SharedDocumentDestination;", PREFIX + "MediaStoreAudioDestination;",
             PREFIX + "NatuneFolderCopy;", PREFIX + "FlacIntegrity;");
-        var permitted = new HashSet<>(required); permitted.add(PREFIX + "R;");
-        var found = new HashSet<String>();
-        for (String name : new ArrayList<>(classes.keySet())) {
-            if (original.classes().containsKey(name)) continue;
-            String outer = name.contains("$") ? name.substring(0, name.indexOf('$')) + ";" : name;
-            need(permitted.contains(outer), "Unexpected extension class: " + name);
-            found.add(outer); classes.remove(name);
+        need(extension.classes().keySet().containsAll(required), "Selected folder/FLAC extension classes missing");
+        var additions = new TreeSet<>(classes.keySet());
+        additions.removeAll(original.classes().keySet());
+        need(Collections.disjoint(original.classes().keySet(), extension.classes().keySet()),
+            "Compiled extension collides with an original class");
+        need(additions.equals(extension.classes().keySet()), "Added classes differ from compiled extension");
+        for (String name : additions) {
+            need(extension.classes().get(name).equals(classes.remove(name)), "Compiled extension class changed: " + name);
         }
-        need(found.containsAll(required), "Selected folder/FLAC extension classes missing");
+        var addedMethods = new TreeSet<>(bodies.keySet());
+        addedMethods.removeAll(original.methods().keySet());
+        need(addedMethods.equals(extension.methods().keySet()), "Added methods differ from compiled extension");
+        for (String name : extension.methods().keySet())
+            need(extension.methods().get(name).equals(bodies.get(name)), "Compiled extension method changed: " + name);
         bodies.keySet().removeIf(name -> {
             int separator = name.indexOf("->");
             return separator > 0 && !original.classes().containsKey(name.substring(0, separator));
@@ -48,11 +54,12 @@ public final class VerifyNatuneFlacCarrier {
         need(methods.keySet().stream().anyMatch(name -> name.startsWith(PREFIX + "NatuneFolderCopy$Attempt;->runFlac(")),
             "Strict folder-copy entry missing");
 
-        Map<String,String> additions = Map.of(
+        Map<String,String> resourceAdditions = Map.of(
             "lib/arm64-v8a/libpurple_natune_flac.so", "72ee124f75f3be57c18df3a542076f126a3e5c3e477bf368ef4fcc6e2e9b8244",
             "assets/purple/natune/FLAC-LICENSE.txt", "7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c");
         VerifyNatuneMobilePatch.compare(original, new VerifyNatuneMobilePatch.Snapshot(bodies, classes), args,
-            "Verified carrier entries and JNI names; original program semantics and non-DEX resource bytes preserved within the stated comparison.", additions);
+            "Verified compiled extension, carrier entries and JNI names; original program semantics and non-DEX resource bytes preserved within the stated comparison.", resourceAdditions);
+        System.out.println("Compiled extension classes=" + extension.classes().size() + "; methods=" + extension.methods().size());
         System.out.println("NATUNE_FLAC_CARRIER_STATIC app_hook=false encrypted_owner=false android_execution=false");
     }
 }

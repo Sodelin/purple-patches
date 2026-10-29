@@ -39,6 +39,12 @@ valid checksum. A fresh memory-only download of the original public artifact
 matched all 15 member checksums and all 37 source hashes; the library fingerprint
 and packaging pins have been corrected in the successor source. That failure did
 not reach compilation or app patching and did not affect the earlier decoder tests.
+Successor run 40934083058 built the bundle and applied it to the pinned public
+APK, but its comparison refused the generated `FlacIntegrity-IA` DEX class.
+The next verifier compares every added class and method to the actual compiled
+extension DEX, including compiler-generated classes, and still requires all
+original program and non-DEX resources to match. That run did not establish a
+complete static-preservation result or any Android execution.
 
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
 provide bounded streaming, full destination readback and the real Android SAF
