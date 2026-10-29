@@ -95,7 +95,7 @@ dependencies = [
 
 [[package]]
 name = "purple-keyboard-bridge"
-version = "0.2.2-dev.5"
+version = "0.2.2-dev.6"
 dependencies = [
  "libc",
  "serde",

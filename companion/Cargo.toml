@@ -1,6 +1,6 @@
 [package]
 name = "purple-keyboard-bridge"
-version = "0.2.2-dev.5"
+version = "0.2.2-dev.6"
 edition = "2021"
 description = "Finite authenticated phone-local keyboard adapter for the installed Codex CLI"
 

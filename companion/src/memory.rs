@@ -71,6 +71,9 @@ fn run_with_progress<F: FnMut(usize,u32)>(command:&mut Command,input:&[u8],cance
             // Do not let Drop signal a reaped/reused PID.
             owned.1=false;
             if !status.success(){return Err("Engine did not complete successfully".into())}
+            // A successful exit cannot make a partial input write successful.
+            // A completed pipe write still does not prove application-level consumption.
+            if sent!=input.len(){return Err("Engine exited before all input was sent".into())}
             return Ok(output);
         }
         if result!=0 && std::io::Error::last_os_error().kind()!=std::io::ErrorKind::Interrupted{return Err("Owned supervision failed".into())}
@@ -105,6 +108,6 @@ fn run_with_progress<F: FnMut(usize,u32)>(command:&mut Command,input:&[u8],cance
   if result.is_ok(){
    let _=std::io::stderr().write_all(b"PUBLIC_EARLY_EXIT_REPRO: successful child accepted with unsent input\n");
   }
-  assert!(result.is_err(),"successful child exit must not accept unsent input");
+  assert_eq!(result.unwrap_err(),"Engine exited before all input was sent");
  }
 }
