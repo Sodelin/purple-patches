@@ -25,8 +25,11 @@ installed or accepted on a phone.
 
 `materialize.py --local-flac --runtime-settings` selects the development profile
 and copies exactly these three Android Java sources into the extension module.
-The incomplete folder-copy components remain source-only until their actual
-host is selected. The settings profile excludes an otherwise unnecessary second
+The incomplete folder-copy components have a separate, uninstalled development
+carrier profile in `materialize.py --folder-carrier`; its first hosted package
+verification remains pending. It embeds the already-tested ARM64 FLAC decoder
+and the folder-copy classes without adding an app action or a journal connection.
+Their actual app host still needs to be selected. The settings profile excludes an otherwise unnecessary second
 Kotlin standard library. Current selected feeds and installed behavior are
 unchanged. No phone install/UI/permission/model action accompanies this source.
 

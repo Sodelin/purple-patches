@@ -248,6 +248,10 @@ public final class VerifyNatuneMobilePatch {
         compare(expected, actual, args, "Verified exact five audio result overrides; global low-data helper and every other method preserved.");
     }
     static void compare(Snapshot expected, Snapshot actual, String[] args, String report) throws Exception {
+        compare(expected, actual, args, report, Map.of());
+    }
+    static void compare(Snapshot expected, Snapshot actual, String[] args, String report,
+            Map<String,String> permittedAdditions) throws Exception {
         need(expected.classes().keySet().equals(actual.classes().keySet()), "Class set changed");
         int classDifferences = 0;
         for (String name : expected.classes().keySet()) {
@@ -279,6 +283,7 @@ public final class VerifyNatuneMobilePatch {
         for (Site site : SITES) need(expected.methods().containsKey(site.method()), "Missing audio site");
         int nativeFiles = 0, assets = 0, preservedEntries = 0;
         try (var source = new ZipFile(args[0]); var patched = new ZipFile(args[1])) {
+            var foundAdditions = new HashSet<String>();
             var entries = source.entries();
             while (entries.hasMoreElements()) {
                 var entry = entries.nextElement();
@@ -297,10 +302,18 @@ public final class VerifyNatuneMobilePatch {
             }
             var outputEntries = patched.entries();
             while (outputEntries.hasMoreElements()) {
-                String name = outputEntries.nextElement().getName();
-                need(source.getEntry(name) != null || name.matches("classes(?:[2-9][0-9]*|1[0-9]+)?\\.dex"),
-                     "Unexpected non-DEX entry added");
+                var entry = outputEntries.nextElement();
+                String name = entry.getName();
+                if (source.getEntry(name) != null || name.matches("classes(?:[2-9][0-9]*|1[0-9]+)?\\.dex")) continue;
+                if (entry.isDirectory() && permittedAdditions.keySet().stream().anyMatch(p -> p.startsWith(name))) continue;
+                String expectedHash = permittedAdditions.get(name);
+                need(expectedHash != null && foundAdditions.add(name), "Unexpected or duplicate non-DEX entry added");
+                try (var input = patched.getInputStream(entry)) {
+                    String actualHash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()));
+                    need(expectedHash.equals(actualHash), "Added carrier entry differs");
+                }
             }
+            need(foundAdditions.equals(permittedAdditions.keySet()), "Selected carrier entries missing");
         }
         System.out.println(report);
         System.out.println("Classes=" + expected.classes().size() + "; methods=" + expected.methods().size() +

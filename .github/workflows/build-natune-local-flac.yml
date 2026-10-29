@@ -1,9 +1,16 @@
 name: Build and validate Natune runtime settings prototype off phone
 on:
   workflow_dispatch:
+    inputs:
+      folder_carrier:
+        description: Build the separate uninstalled folder/FLAC carrier
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: read
   packages: read
+  actions: read
 concurrency:
   group: purple-natune-local-flac-prototype
   cancel-in-progress: false
@@ -17,15 +24,37 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - uses: actions/download-artifact@v4
+        if: ${{ inputs.folder_carrier }}
+        with:
+          name: natune-shared-storage-controls
+          run-id: 40932326604
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/natune-flac-input
+      - name: Verify selected public native carrier input
+        if: ${{ inputs.folder_carrier }}
+        run: |
+          (cd "$RUNNER_TEMP/natune-flac-input" && sha256sum -c SHA256SUMS)
+          sha256sum -c "$RUNNER_TEMP/natune-flac-input/source-SHA256SUMS"
+          echo "72ee124f75f3be57c18df3a542076f126a3e5c3f6e477bf368ef4fcc6e2e9b8244  $RUNNER_TEMP/natune-flac-input/libpurple_natune_flac.so" | sha256sum -c -
+          echo "7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c  $RUNNER_TEMP/natune-flac-input/FLAC-LICENSE.txt" | sha256sum -c -
       - name: DEX input-boundary controls
         run: python -m unittest discover -s natune -p 'test_*.py' -v
       - name: Materialize official template at reviewed revision
+        env:
+          FOLDER_CARRIER: ${{ inputs.folder_carrier }}
+          NATUNE_FLAC_LIBRARY: ${{ runner.temp }}/natune-flac-input/libpurple_natune_flac.so
+          NATUNE_FLAC_LICENSE: ${{ runner.temp }}/natune-flac-input/FLAC-LICENSE.txt
         run: |
           git init "$RUNNER_TEMP/natune-template"
           git -C "$RUNNER_TEMP/natune-template" remote add origin https://github.com/MorpheApp/morphe-patches-template
           git -C "$RUNNER_TEMP/natune-template" fetch --depth=1 origin e721536ab19e30d16ce9d31ae1830ca299aad383
           git -C "$RUNNER_TEMP/natune-template" checkout --detach FETCH_HEAD
-          python natune/materialize.py "$RUNNER_TEMP/natune-template" --local-flac --runtime-settings
+          if [ "$FOLDER_CARRIER" = "true" ]; then
+            python natune/materialize.py "$RUNNER_TEMP/natune-template" --folder-carrier
+          else
+            python natune/materialize.py "$RUNNER_TEMP/natune-template" --local-flac --runtime-settings
+          fi
       - name: Build real Morphe bundle and generated patch metadata
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -37,6 +66,7 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/dist"
           cp patches/build/libs/*.mpp patches-list.json purple-natune-provenance.json "$GITHUB_WORKSPACE/dist/"
       - name: Exercise settings entry against synthetic release ABI
+        if: ${{ !inputs.folder_carrier }}
         run: |
           mkdir -p "$RUNNER_TEMP/settings-controls"
           javac -Xlint:all -Werror -d "$RUNNER_TEMP/settings-controls" \
@@ -70,6 +100,7 @@ jobs:
           curl -fL https://github.com/MorpheApp/morphe-desktop/releases/download/v1.19.1/morphe-desktop-1.19.1-all.jar -o "$RUNNER_TEMP/morphe.jar"
           echo "a51472252cd63b2eac635dbb5a154ff918bfc15268da89679feb3d760230c573  $RUNNER_TEMP/morphe.jar" | sha256sum -c -
       - name: Patch exact APK with validation and inspect expected changes
+        if: ${{ !inputs.folder_carrier }}
         run: |
           java -jar "$RUNNER_TEMP/morphe.jar" patch \
             --patches dist/patches-0.3.0-dev.1.mpp --exclusive \
@@ -83,8 +114,40 @@ jobs:
             "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-patched.apk" > dist/static-preservation.txt
           cd dist
           sha256sum * > SHA256SUMS
+      - name: Patch exact APK with the uninstalled FLAC folder carrier
+        if: ${{ inputs.folder_carrier }}
+        run: |
+          java -jar "$RUNNER_TEMP/morphe.jar" patch \
+            --patches dist/patches-0.4.0-dev.1.mpp --exclusive \
+            --enable "NaTune FLAC folder carrier (development)" \
+            --bytecode-mode FULL --validate --unsigned \
+            --result-file dist/patch-result.json \
+            --out "$RUNNER_TEMP/natune-patched.apk" "$RUNNER_TEMP/natune-original.apk"
+          mkdir -p "$RUNNER_TEMP/natune-verifier"
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-verifier" \
+            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneFlacCarrier.java
+          java -cp "$RUNNER_TEMP/natune-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneFlacCarrier \
+            "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-patched.apk" > dist/static-preservation.txt
+          NDK_ROOT="${ANDROID_NDK_HOME:-$ANDROID_NDK_LATEST_HOME}"
+          "$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" --dyn-syms --wide \
+            "$RUNNER_TEMP/natune-flac-input/libpurple_natune_flac.so" | grep -F 'Java_dev_purple_patches_natune_FlacIntegrity_decode' > /dev/null
+          printf '%s\n' 'FLAC_JNI_SYMBOL present=true device_execution=false' > dist/native-jni-symbol.txt
+          sha256sum .github/workflows/build-natune-local-flac.yml natune/materialize.py \
+            natune/NatuneMobileDataPatch.kt natune/NatuneFlacFolderCarrierPatch.kt \
+            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneFlacCarrier.java \
+            natune/target.json natune/fetch_target.py natune/verify_apk_metadata.py \
+            natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
+            natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
+            natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java \
+            natune/runtime/dev/purple/patches/natune/NatuneCoroutineStop.java \
+            natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java \
+            natune/runtime/dev/purple/patches/natune/MediaStoreAudioDestination.java \
+            natune/runtime/dev/purple/patches/natune/NatuneFolderCopy.java \
+            natune/runtime/dev/purple/patches/natune/FlacIntegrity.java > dist/source-SHA256SUMS
+          cd dist
+          sha256sum * > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: purple-natune-runtime-settings-prototype
+          name: ${{ inputs.folder_carrier && 'purple-natune-folder-carrier-prototype' || 'purple-natune-runtime-settings-prototype' }}
           path: dist/
           retention-days: 14

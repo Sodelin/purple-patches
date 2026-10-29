@@ -10,9 +10,14 @@ import sys
 PIN = 'e721536ab19e30d16ce9d31ae1830ca299aad383'
 ROOT = Path(__file__).resolve().parent
 SETTINGS_SOURCES = ('RuntimeSettings.java', 'PurpleSettingsPage.java', 'NatuneSettingsNavigation.java')
+FOLDER_SOURCES = ('VerifiedStreamCopy.java', 'NatuneCachedSource.java', 'TemporarySpaceBudget.java',
+                  'NatuneCoroutineStop.java', 'SharedDocumentDestination.java', 'MediaStoreAudioDestination.java',
+                  'NatuneFolderCopy.java', 'FlacIntegrity.java')
+FLAC_LIBRARY_SHA256 = '72ee124f75f3be57c18df3a542076f126a3e5c3f6e477bf368ef4fcc6e2e9b8244'
+FLAC_LICENSE_SHA256 = '7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c'
 
 
-def materialize(destination, local_flac=False, runtime_settings=False):
+def materialize(destination, local_flac=False, runtime_settings=False, folder_carrier=False):
     if os.environ.get('GITHUB_ACTIONS') != 'true' or os.environ.get('RUNNER_OS') != 'Linux':
         raise RuntimeError('Off-phone hosted materialization only')
     destination = destination.resolve()
@@ -43,11 +48,27 @@ def materialize(destination, local_flac=False, runtime_settings=False):
         if not local_flac:
             raise RuntimeError('Runtime settings currently bind both selected audio dependencies')
         (target.parent / 'NatuneRuntimeSettingsPatch.kt').write_bytes((ROOT / 'NatuneRuntimeSettingsPatch.kt').read_bytes())
+    if folder_carrier:
+        (target.parent / 'NatuneFlacFolderCarrierPatch.kt').write_bytes((ROOT / 'NatuneFlacFolderCarrierPatch.kt').read_bytes())
+        resource = destination / 'patches/src/main/resources/purple/natune'
+        resource.mkdir(parents=True, exist_ok=False)
+        for env_name, filename, expected in (
+            ('NATUNE_FLAC_LIBRARY', 'libpurple_natune_flac.so', FLAC_LIBRARY_SHA256),
+            ('NATUNE_FLAC_LICENSE', 'FLAC-LICENSE.txt', FLAC_LICENSE_SHA256),
+        ):
+            source_path = Path(os.environ[env_name]).resolve()
+            if not source_path.is_relative_to(runner) or not source_path.is_file():
+                raise RuntimeError('Expected selected carrier input inside runner temporary storage')
+            data = source_path.read_bytes()
+            if hashlib.sha256(data).hexdigest() != expected:
+                raise RuntimeError('Selected carrier input hash differs')
+            (resource / filename).write_bytes(data)
+    if runtime_settings or folder_carrier:
         extension = destination / 'extensions/extension'
         shutil.rmtree(extension / 'src/main/java/app/template')
         settings = extension / 'src/main/java/dev/purple/patches/natune'
         settings.mkdir(parents=True, exist_ok=False)
-        for name in SETTINGS_SOURCES:
+        for name in (SETTINGS_SOURCES if runtime_settings else ()) + (FOLDER_SOURCES if folder_carrier else ()):
             shutil.copyfile(ROOT / 'runtime/dev/purple/patches/natune' / name, settings / name)
         (extension / 'build.gradle.kts').write_text("""extension {
     name = "extensions/extension.mpe"
@@ -63,7 +84,7 @@ configurations.configureEach {
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
 }
 """)
-    version = '0.3.0-dev.1' if runtime_settings else '0.2.0-dev.2' if local_flac else '0.1.0-alpha.1'
+    version = '0.4.0-dev.1' if folder_carrier else '0.3.0-dev.1' if runtime_settings else '0.2.0-dev.2' if local_flac else '0.1.0-alpha.1'
     build = destination / 'patches/build.gradle.kts'
     text = build.read_text()
     for old, new in {
@@ -96,10 +117,18 @@ configurations.configureEach {
              'runtime_settings_patch_sha256': hashlib.sha256((ROOT / 'NatuneRuntimeSettingsPatch.kt').read_bytes()).hexdigest() if runtime_settings else None,
              'runtime_settings_sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in
                  (ROOT / 'runtime/dev/purple/patches/natune' / name for name in SETTINGS_SOURCES)} if runtime_settings else {},
+             'folder_carrier_included': folder_carrier,
+             'folder_carrier_patch_sha256': hashlib.sha256((ROOT / 'NatuneFlacFolderCarrierPatch.kt').read_bytes()).hexdigest() if folder_carrier else None,
+             'folder_carrier_sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in
+                 (ROOT / 'runtime/dev/purple/patches/natune' / name for name in FOLDER_SOURCES)} if folder_carrier else {},
+             'flac_native_sha256': FLAC_LIBRARY_SHA256 if folder_carrier else None,
+             'flac_license_sha256': FLAC_LICENSE_SHA256 if folder_carrier else None,
+             'folder_action_bound': False,
              'strict_flac_implemented': False, 'additional_providers_implemented': False,
              'phone_acceptance': False}
     (destination / 'purple-natune-provenance.json').write_text(json.dumps(proof, indent=2) + '\n')
 
 
 if __name__ == '__main__':
-    materialize(Path(sys.argv[1]), local_flac='--local-flac' in sys.argv[2:], runtime_settings='--runtime-settings' in sys.argv[2:])
+    materialize(Path(sys.argv[1]), local_flac='--local-flac' in sys.argv[2:],
+                runtime_settings='--runtime-settings' in sys.argv[2:], folder_carrier='--folder-carrier' in sys.argv[2:])
