@@ -159,7 +159,31 @@ public final class VerifyNatuneMobilePatch {
     public static void main(String[] args) throws Exception {
         var expected = snapshot(new File(args[0]), true);
         var actual = snapshot(new File(args[1]), false);
-        need(expected.classes().equals(actual.classes()), "Class/field/annotation structure changed");
+        need(expected.classes().keySet().equals(actual.classes().keySet()), "Class set changed");
+        int classDifferences = 0;
+        for (String name : expected.classes().keySet()) {
+            var before = expected.classes().get(name);
+            var after = actual.classes().get(name);
+            if (before.equals(after)) continue;
+            if (++classDifferences <= 8) {
+                System.err.println("CLASS_DIFF " + name + " flags=" + (before.flags() != after.flags()) +
+                    " parent=" + !Objects.equals(before.superclass(), after.superclass()) +
+                    " interfaces=" + !before.interfaces().equals(after.interfaces()) +
+                    " annotations=" + !before.annotations().equals(after.annotations()) +
+                    " field_set=" + !before.fields().keySet().equals(after.fields().keySet()));
+                for (String field : before.fields().keySet()) {
+                    var a = before.fields().get(field); var b = after.fields().get(field);
+                    if (b != null && !a.equals(b)) {
+                        System.err.println("FIELD_DIFF " + field + " flags=" + (a.flags() != b.flags()) +
+                            " annotations=" + !a.annotations().equals(b.annotations()) +
+                            " initial_representation=" + (a.initialValue() == null ? "absent" : a.initialValue().getClass().getSimpleName()) +
+                            "->" + (b.initialValue() == null ? "absent" : b.initialValue().getClass().getSimpleName()));
+                        break;
+                    }
+                }
+            }
+        }
+        need(classDifferences == 0, "Class/field/annotation structure changed: " + classDifferences + " classes");
         need(expected.methods().keySet().equals(actual.methods().keySet()), "Method set changed");
         for (String name : expected.methods().keySet())
             need(expected.methods().get(name).equals(actual.methods().get(name)), "Unexpected method semantics: " + name);

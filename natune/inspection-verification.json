@@ -1,0 +1,22 @@
+{
+  "run_id": 40862971246,
+  "url": "https://github.com/Sodelin/purple-patches/actions/runs/40862971246",
+  "source_commit": "8e876ac8871b8f857a63eb8e2291bb86781a33c0",
+  "result": "success",
+  "artifact_id": 12892128170,
+  "artifact_zip_sha256": "fdc0cf14afb7454007edc78f677f64fa6224f443da4d88e2f55639d75aeede2d",
+  "artifact_files_sha256": {
+    "target-proof.json": "22415aa948823ac3ef1d33b5ea6e0145884972321b8f5dcb3585cb2d61a3f93d",
+    "policy-hooks.txt": "0b54dc7f4256e20df6909de9e2df9e652f031301c336a630ec1e27a87b2afe4a"
+  },
+  "original_digest_signer_package_verified": true,
+  "independent_dexlib_candidates_match_local_reader": true,
+  "matched_candidate_count": 6,
+  "dexlib_summary": "TOTAL\tclasses=27129\tmethods=114583\tcandidates=6",
+  "app_executed": false,
+  "device_acceptance": false,
+  "previous_failed_run": {
+    "id": 40861857077,
+    "reason": "Signer label parser expected old format; certificate pin unchanged; new/old labels now controlled."
+  }
+}
