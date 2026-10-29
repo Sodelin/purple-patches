@@ -49,6 +49,22 @@ companion versions are independent; a native-only correction need not repatch
 or relabel an unchanged MPP. Stable promotion still requires actual phone
 acceptance and rollback proof.
 
+## Release checks and optimized Python
+
+The Gboard staging, private publication, feed-verification and local export
+tools use explicit runtime checks for repository visibility, selected bytes,
+release state and output preservation. These checks do not disappear under
+`python -O` or `PYTHONOPTIMIZE=1`. Offline controls exercise refusal and
+successful synthetic readback in both interpreter modes. The controls make no
+real publication, credential, Manager, phone or model calls.
+
+Previously those checks used Python `assert`. A mocked run against a synthetic
+public-repository response refused normally but reached a simulated creation
+when optimized; this is evidence of a source-level failure mode, not a claim
+that a real release was created. The separate NaTune publication script also
+uses assertions and remains under its owner's scope. Tests and this correction
+do not prove race-free remote publication or actual Manager/device acceptance.
+
 ## Manager 2.2.0 contract
 
 Reviewed official tagv2.2.0, commit`2c2bdc6a8368fa790ca2e3a57b050070a2c36eea`:

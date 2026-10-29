@@ -1,0 +1,34 @@
+name: Offline release and feed controls
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/release_checks.py'
+      - 'tools/stage_candidate_release.py'
+      - 'tools/publish_private_candidates.py'
+      - 'tools/verify_candidate_source.py'
+      - 'tools/export_patch_bundle.py'
+      - 'tools/test_release_checks.py'
+      - '.github/workflows/release-controls.yml'
+  pull_request:
+    paths:
+      - 'tools/release_checks.py'
+      - 'tools/stage_candidate_release.py'
+      - 'tools/publish_private_candidates.py'
+      - 'tools/verify_candidate_source.py'
+      - 'tools/export_patch_bundle.py'
+      - 'tools/test_release_checks.py'
+      - '.github/workflows/release-controls.yml'
+permissions:
+  contents: read
+jobs:
+  controls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # observed v4
+      - name: Exercise synthetic gates in normal and optimized Python
+        run: |
+          python -B tools/test_release_checks.py
+          python -B -O tools/test_release_checks.py
+          PYTHONOPTIMIZE=1 python -B tools/test_release_checks.py

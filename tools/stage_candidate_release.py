@@ -13,6 +13,7 @@ import subprocess
 import urllib.parse
 import urllib.request
 import zipfile
+from release_checks import require
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = 'Sodelin/purple-patches'
@@ -38,7 +39,7 @@ def digest(body):
 def verified_members(record, selected):
     record = json.loads((ROOT / 'docs' / record).read_text())
     body = gh('api', f"repos/{REPO}/actions/artifacts/{record['artifact_id']}/zip")
-    assert len(body) == record['zip_bytes'], 'Artifact size changed'
+    require(len(body) == record['zip_bytes'], 'Artifact size changed')
     with zipfile.ZipFile(io.BytesIO(body)) as archive:
         pins = record['files']
         if isinstance(pins, list):
@@ -46,8 +47,8 @@ def verified_members(record, selected):
         result = {}
         for name in selected:
             payload = archive.read(name)
-            assert len(payload) == pins[name]['bytes'], 'Member size changed'
-            assert digest(payload) == pins[name]['sha256'], 'Member SHA256 changed'
+            require(len(payload) == pins[name]['bytes'], 'Member size changed')
+            require(digest(payload) == pins[name]['sha256'], 'Member SHA256 changed')
             result[name] = payload
     return result, record['source_commit']
 
@@ -85,7 +86,8 @@ def collect_patches_only():
     historical = api(f'repos/{REPO}/releases/425693294')
     original = next(a for a in historical['assets'] if a['name'] == 'gboard-upstream-source.tar.gz')
     upstream = gh('api', f"repos/{REPO}/releases/assets/{original['id']}", '-H', 'Accept: application/octet-stream')
-    assert digest(upstream) == '1de222040b1ac8afa592b9db679b205e683016da9fe63a1f4461e6ff60622639'
+    require(digest(upstream) == '1de222040b1ac8afa592b9db679b205e683016da9fe63a1f4461e6ff60622639',
+            'Upstream source SHA256 changed')
     assets['gboard-upstream-source.tar.gz'] = upstream
     manifest = {'version': '0.1.0-alpha.1', 'component': 'Morphe patch bundle',
         'source_commit': source, 'upstream_commit': UPSTREAM,
@@ -113,10 +115,10 @@ def collect_native():
 
 def stage(assets, tag=TAG, name=None, body=None):
     repo = api(f'repos/{REPO}')
-    assert repo['private'] is True, 'Refuse public repository'
+    require(repo['private'] is True, 'Refuse public repository')
     releases = api(f'repos/{REPO}/releases?per_page=100')
     existing = [r for r in releases if r['tag_name'] == tag]
-    assert len(existing) <= 1, 'Ambiguous release'
+    require(len(existing) <= 1, 'Ambiguous release')
     if existing:
         release = existing[0]
     else:
@@ -129,15 +131,15 @@ def stage(assets, tag=TAG, name=None, body=None):
                     'Exact stable APKMirror Gboard release patched and statically checked off phone. '
                     'Phone connection, privacy writer coverage, full Whisper large-v3 and device regression remain pending. '
                     'This private draft is not a working Morphe update source. No APK, model weights or keys included.')})
-    assert release['draft'] is True and release['prerelease'] is True, 'Refuse changing published release'
+    require(release['draft'] is True and release['prerelease'] is True, 'Refuse changing published release')
     current = {a['name']: a for a in release['assets']}
-    assert not set(current) - set(assets), 'Unexpected existing assets'
+    require(not set(current) - set(assets), 'Unexpected existing assets')
     # Check all existing assets before adding any missing asset; never overwrite.
     for name, asset in current.items():
         body = gh('api', f"repos/{REPO}/releases/assets/{asset['id']}", '-H', 'Accept: application/octet-stream')
-        assert body == assets[name], 'Existing draft asset differs: ' + name
+        require(body == assets[name], 'Existing draft asset differs: ' + name)
     endpoint = release['upload_url'].split('{', 1)[0]
-    assert endpoint.startswith(f'https://uploads.github.com/repos/{REPO}/releases/'), 'Unexpected upload host/path'
+    require(endpoint.startswith(f'https://uploads.github.com/repos/{REPO}/releases/'), 'Unexpected upload host/path')
     for name, body in assets.items():
         if name not in current:
             # No automatic retry after an uncertain mutation. Re-run verifies custody.
@@ -153,13 +155,14 @@ def stage(assets, tag=TAG, name=None, body=None):
                     raise RuntimeError('Unexpected upload redirect')
             with urllib.request.build_opener(NoRedirect).open(request, timeout=120) as stream:
                 response = json.load(stream)
-            assert response['name'] == name and response['size'] == len(body), 'Upload metadata mismatch'
+            require(response['name'] == name and response['size'] == len(body), 'Upload metadata mismatch')
     final = api(f"repos/{REPO}/releases/{release['id']}")
-    assert final['draft'] is True and {a['name'] for a in final['assets']} == set(assets)
+    require(final['draft'] is True and {a['name'] for a in final['assets']} == set(assets),
+            'Final draft or asset set differs')
     # Independent full remote readback, not only returned metadata or server digest.
     for asset in final['assets']:
         body = gh('api', f"repos/{REPO}/releases/assets/{asset['id']}", '-H', 'Accept: application/octet-stream')
-        assert body == assets[asset['name']], 'Remote readback mismatch'
+        require(body == assets[asset['name']], 'Remote readback mismatch')
     print(json.dumps({'release_id': final['id'], 'tag': tag, 'draft': True,
         'private': True, 'assets_verified': len(assets), 'total_bytes': sum(map(len, assets.values())),
         'sha256': {n: digest(b) for n, b in sorted(assets.items())}}, indent=2))
@@ -172,7 +175,7 @@ if __name__ == '__main__':
     group.add_argument('--stage-native-021', action='store_true')
     group.add_argument('--stage-patches-only', action='store_true')
     args=parser.parse_args()
-    assert not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'Commit source first'
+    require(not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'Commit source first')
     if args.stage_patches_only:
         stage(collect_patches_only(), tag='patches-v0.1.0-alpha.1',
               name='Purple Gboard patches 0.1.0-alpha.1 — private candidate',

@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+from release_checks import require
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = 'Sodelin/purple-patches'
@@ -16,7 +17,7 @@ def export(folder):
     asset = next(a for a in release['assets'] if a['name'] == NAME)
     body = subprocess.check_output(['gh', 'api', f"repos/{REPO}/releases/assets/{asset['id']}",
                                     '-H', 'Accept: application/octet-stream'])
-    assert len(body) == 8205100 and hashlib.sha256(body).hexdigest() == PIN
+    require(len(body) == 8205100 and hashlib.sha256(body).hexdigest() == PIN, 'Selected bundle bytes differ')
     def free():
         v = os.statvfs(folder.parent)
         return v.f_bavail * v.f_frsize
@@ -25,7 +26,7 @@ def export(folder):
     for name, data in [(NAME, body), ('SHA256SUMS', (PIN + '  ' + NAME + '\n').encode())]:
         target = folder / name
         if target.exists():
-            assert target.read_bytes() == data, 'Refuse differing existing deliverable'
+            require(target.read_bytes() == data, 'Refuse differing existing deliverable')
         else:
             # Exclusive creation preserves user files. A failed write is retained
             # for explicit inspection and is never silently accepted or replaced.
@@ -33,7 +34,7 @@ def export(folder):
                 stream.write(data)
                 stream.flush()
                 os.fsync(stream.fileno())
-        assert target.read_bytes() == data, 'Local readback mismatch'
+        require(target.read_bytes() == data, 'Local readback mismatch')
     return {'file': str(folder / NAME), 'bytes': len(body), 'sha256': PIN,
             'source_private_release_id': release['id'], 'full_local_readback_verified': True,
             'free_before_bytes': before, 'free_after_bytes': free(),
