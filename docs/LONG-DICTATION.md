@@ -27,6 +27,20 @@ Audio, result and IPC overhead also affect memory. The pinned upstream
 passes a decoded sample vector to its full inference call, but that source
 fact does not establish acceptable memory, latency or performance on the phone.
 
+There are two separate 120-second timers with different starting points. After
+the client receives the job ID, `BridgeClient.execute` starts its wait timer.
+The worker can still be hashing the selected 3.1 GB model before it invokes
+`memory::run`; that subprocess supervisor starts its own 120-second timer only
+after spawning the engine. A slow remaining hash plus inference can therefore
+exhaust the client's timer while the engine's separate allowance has not yet
+expired. On timeout the client attempts cancellation in its `finally` block;
+the outcome can remain uncertain if cancellation or the response is lost.
+This is a source-level timing mismatch, not a measured device latency or a
+claim that an actual transcription was cancelled. A usable design needs one
+explicitly owned end-to-end deadline or a justified coordination protocol,
+covering verification, inference, cancellation and result recovery; changing
+either timer in isolation does not establish that behavior.
+
 The current keyboard clears its in-memory WAV in a `finally` block even if the
 engine request fails or times out. It therefore cannot offer a retry of that
 recording. A lost start response can also leave the original job's outcome

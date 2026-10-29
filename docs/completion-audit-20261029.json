@@ -1,7 +1,7 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: a hosted public fixture reproduced the companion's cross-executable live-owner identity defect; recovery design and expert review remain open",
+  "current_turn_classification": "progress: a hosted public fixture reproduced the cross-executable live-owner identity defect, and source review identified uncoordinated Whisper client and engine deadlines; recovery design and expert review remain open",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",
@@ -28,7 +28,7 @@
     "A caller-bound Termux handoff that does not expose the bearer through loggable stdout, plus actual privacy-writer and tool-boundary evidence.",
     "Bridge owner lifecycle: a changed command executable can misclassify a live owner, and observation errors collapse into absence; preserve the encrypted record and distinguish UNKNOWN before safe update or stop. See bridge-identity-diagnostic-verification.json.",
     "Original job identity, cancellation, encrypted settlement and no-replay recovery when a start response or process is lost; the Dot review request is prepared but its route is unverified.",
-    "Full large-v3 acquisition and exact engine/model acceptance when the model hold is released, including meaningful latency, memory and cancellation checks.",
+    "Full large-v3 acquisition and exact engine/model acceptance when the model hold is released, including coordinated model-hash/client/engine deadlines and meaningful latency, memory and cancellation checks; see LONG-DICTATION.md.",
     "Editor composition, result retention across session ends, long dictation and actual user-directed preview/insertion behavior; alpha.12 copy-only behavior remains untested on Android.",
     "A finite authorized install/alongside-stock regression and rollback window with adequate measured storage headroom.",
     "A verified maintained Morphe feed for the accepted version and actual Manager import/update; the currently published alpha.1 feed has a warning and is not alpha.18."
