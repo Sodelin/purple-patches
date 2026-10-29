@@ -1,0 +1,43 @@
+{
+  "schema": "purple.natune-flac-folder-recovery-verification.v1",
+  "hosted_source_commit": "68acdc1ce156cb31aa825995bf0f731302b4e80f",
+  "local_source_commit_with_identical_tree": "93409a4b307bd53a03c5ac741e5cfc3c8e21a0ff",
+  "source_tree": "a465cf3664cbfc71ec70adb68ad392d2d065fec3",
+  "decoder_repository": "xiph/flac",
+  "decoder_version": "1.5.0",
+  "decoder_commit": "1507800de4b70e21be71f38caa0d9079d0bc6e45",
+  "storage_and_flac": {
+    "hosted_run": 40932326604,
+    "artifact_id": 12921819852,
+    "artifact_zip_bytes": 148272,
+    "artifact_zip_sha256": "a278eab8498b1f72199b78a9a1f106aa71a0f9f7f19efc8546ec65e019de3e8c",
+    "artifact_members_checked": 15,
+    "source_hashes_checked": 37,
+    "native_decoder_controls_passed": 42,
+    "strict_folder_copy_controls_passed": 17,
+    "missing_decoder_preflight_controls_passed": 2,
+    "tested_sample_bit_depths": [4, 8, 12, 16, 20, 24, 31, 32],
+    "independent_pcm_digest_checked_for_each_depth": true,
+    "android_aarch64_library_bytes": 378256,
+    "android_aarch64_library_sha256": "72ee124f75f3be57c18df3a542076f126a3e5c3f6e477bf368ef4fcc6e2e9b8244"
+  },
+  "shared_companion": {
+    "hosted_run": 40932569868,
+    "artifact_id": 12923761348,
+    "artifact_zip_bytes": 742341,
+    "artifact_zip_sha256": "7f6d30a1ccc3578427897e504251cbad19159358fff8607f824a1c35aadb86d6",
+    "artifact_members_checked": 6,
+    "source_hashes_checked": 13,
+    "manifest_version": "0.2.2-dev.5",
+    "journal_source_sha256": "053a8bd46725807eb01e0ae12d05ff5c75d64e5cc7a4c04fc610b75b4f244e28",
+    "journal_checker_source_sha256": "c5c6dadb1c6d0205d7200cb4c42185ee759087d92d0ab4ca09d2dd201c9a903f",
+    "library_tests_passed": 51,
+    "journal_tests_passed": 21,
+    "android_aarch64_cross_build": true
+  },
+  "actual_app_bound": false,
+  "real_encrypted_journal_bound": false,
+  "phone_execution": false,
+  "original_media_accessed": false,
+  "limits": "Public synthetic owner/cache/provider and in-memory journal controls. Fixture encoding and decoding use the same pinned reference project; independent Python-computed source PCM digests were checked, not an independent decoder conformance suite. The actual app, JNI packaging, encrypted owner, complete source/rendition, Fuji receiver, source removal and phone/user acceptance remain unbound. Native FLAC only; no claim about other containers or audio provenance."
+}

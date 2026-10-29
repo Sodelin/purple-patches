@@ -249,8 +249,21 @@ reservation, requires a selected FLAC MIME, and refuses publication if the
 complete decode/checksum or sample count is unavailable or invalid. Ordinary
 copies of other formats keep their separate path. A real owner must retain the
 FLAC result along with its actual encrypted operation evidence; a callback or
-in-memory result alone does not do so. The integrated successor still needs its
-own hosted verification and the real app, receiver and recovery bindings.
+in-memory result alone does not do so. Hosted run `40932326604` exercised this
+joined path, including missing decoder, cancellation, damaged audio, absent
+checksum and retained original; it passed 17 integrated synthetic controls and
+two missing-library preflight controls. Its 42 native decoder controls include
+4-, 8-, 12-, 16-, 20-, 24-, 31- and 32-bit synthetic samples with separately
+computed source-PCM digests. The reference encoder and decoder still come from
+the same project. `flac-folder-recovery-verification.json` records exact source,
+artifact and the companion journal checks. Real app, receiver and recovery
+bindings remain unverified.
+
+Source review of the pinned libFLAC frame scanner found that an end of input
+after a lone frame-sync byte can precede a lost-sync callback. The successor
+also checks that the last decoded frame ends at the actual input length; its
+hosted controls reject trailing partial sync and other trailing bytes. This is
+synthetic source/build evidence, not a claim about a user's file.
 
 Hosted attempt `40931041024` stopped during reference-decoder CMake
 configuration because the runner had neither Pandoc nor prebuilt manpages.

@@ -24,8 +24,9 @@ be demonstrated; a hosted build is not a release.
 
 Runtime audio settings have an off-phone exact-APK build/static proof, but no
 phone installation or playback proof. The selected-cache reader, local
-MediaStore copy and journal have separate synthetic checks; the latest results
-are in `media-store-name-verification.json`. They do not supply the actual
+MediaStore copy, full-stream native-FLAC verifier and journal have synthetic
+joined-path checks; the latest results are in
+`flac-folder-recovery-verification.json`. They do not supply the actual
 app/journal/receiver binding or removal. The original app's private downloaded
 cache is not accessible to a differently signed patch by assumption. No
 current music copy, deletion or storage gain is claimed. Gboard is separately

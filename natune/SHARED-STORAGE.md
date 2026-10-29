@@ -172,8 +172,10 @@ The uninstalled successor adds a distinct `runFlac` attempt which requires the
 selected native-FLAC verifier before any reservation, then validates the full
 copied stream against the same source/destination proof before publishing it.
 Missing checksums or unknown sample counts refuse that strict path; an ordinary
-copy of another format remains separate. Its host controls are pending and the
-real journal owner must retain the actual FLAC result with the operation.
+copy of another format remains separate. Hosted run `40932326604` passed the
+synthetic integrated and missing-library controls; the real journal owner must
+retain the actual FLAC result with the operation. See
+`flac-folder-recovery-verification.json` for the exact source and limitations.
 
 The copy result is in-memory byte evidence, not a deletion permit or completed
 move. The source lease/coverage reader is now implemented against the exact

@@ -105,9 +105,11 @@ A strict MediaStore claim requires an `audio/flac` destination and will not
 accept `Verified` without the decoder owner's sample count, sample rate,
 channel count and original bit depth. An ordinary copy may omit those fields;
 legacy claims/documents retain their original serialized form. This structured
-observation is not itself proof that the real app ran the verifier. The
-integrated source and changed Rust constructor fields require their own hosted
-checks and a real encrypted owner before deployment.
+observation is not itself proof that the real app ran the verifier. Hosted
+`40932569868` passed the updated journal controls and Android cross-build using
+the joined Gboard companion manifest; `flac-folder-recovery-verification.json`
+records its source and artifact. The changed Rust constructor fields and real
+encrypted owner still require actual app integration before deployment.
 
 Hosted [run 40911881847](https://github.com/Sodelin/purple-patches/actions/runs/40911881847)
 at `ef58831a2e18bb966f173ac6ca394c4b2537fba4` passed 42 Rust library
