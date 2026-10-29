@@ -157,7 +157,12 @@ deletes a source, transfers to a computer or releases a reservation. Its owner
 callbacks are not an authentication mechanism or an implementation of the
 Termux-owned journal. App selection, original cancellation/headroom, journal
 IPC and recovery, actual codec/recording identity, UI and device acceptance
-remain unbound. Successor hosted controls are pending.
+remain unbound. Hosted run 40925574995 passed 68 integrated synthetic-owner
+controls and compiled the actual Android source against the SDK;
+`folder-copy-verification.json` records its exact source and full artifact
+readback. A later source change adds an original-stop check after the cache
+lease closes; its successor controls are pending. This is not an app, device
+or real journal test.
 
 The copy result is in-memory byte evidence, not a deletion permit or completed
 move. The source lease/coverage reader is now implemented against the exact

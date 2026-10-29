@@ -177,6 +177,14 @@ public final class NatuneFolderCopyControls {
             "Stop after verified retention cannot report success");
         need(lateStop.attempt.phase() == NatuneFolderCopy.Phase.VERIFIED_RETAINED && lateStop.attempt.failed() &&
             lateStop.budget.reservedBytes() > 0, "Late stop preserves verified event for reconciliation");
+
+        Fixture afterClose = new Fixture();
+        refuses(() -> afterClose.run(() -> {
+            if (afterClose.owner.calls.contains("verified") && !Thread.holdsLock(afterClose.cache.b))
+                throw new IOException("Original stopped while the lease closed");
+        }), "Stop after lease close cannot report success");
+        need(afterClose.attempt.phase() == NatuneFolderCopy.Phase.VERIFIED_RETAINED && afterClose.attempt.failed() &&
+            afterClose.budget.reservedBytes() > 0, "Post-close stop retains original verified state");
     }
     public static void main(String[] args) throws Exception {
         for (int i = 0; i < BYTES.length; i++) BYTES[i] = (byte)(i * 29 + i / 7);

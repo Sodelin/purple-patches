@@ -83,8 +83,9 @@ Hosted run 40924852938 passed 56 source controls against public fixture
 stand-ins; `selected-spans-verification.json` records its exact source and
 artifact. These controls do not execute the app or establish a device cache.
 The later source also passes the selected key to its owning callback so the
-existing encrypted journal can bind the real rendition; that interface change
-requires its own successor verification and has no installed caller.
+existing encrypted journal can bind the real rendition. Hosted run 40925574995
+passed 57 source controls for this successor; `folder-copy-verification.json`
+records its exact source. It has no installed caller.
 
 ## Remaining move integration
 

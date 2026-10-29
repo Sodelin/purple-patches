@@ -134,6 +134,9 @@ public final class NatuneFolderCopy {
                         source.assertUnchanged();
                         return copy;
                     });
+                // The lease's close and monitor release can themselves return
+                // after cancellation. Do not report local success on that path.
+                stop.check();
                 phase = Phase.LOCAL_VERIFIED;
                 return result;
             } catch (IOException | RuntimeException | Error failure) {

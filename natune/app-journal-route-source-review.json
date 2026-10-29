@@ -1,0 +1,26 @@
+{
+  "schema": "purple.natune-app-journal-route-source-review.v1",
+  "repository": "termux/termux-app",
+  "source_commit": "8629e632fcb95da272221be327db653fb24befe9",
+  "files": [
+    {
+      "path": "app/src/main/java/com/termux/app/RunCommandService.java",
+      "url": "https://github.com/termux/termux-app/blob/8629e632fcb95da272221be327db653fb24befe9/app/src/main/java/com/termux/app/RunCommandService.java",
+      "bytes": 18064,
+      "sha256": "42bfc1720519f4a91bdb0229e745142730a6c041354c3cb2db842bf6e573b019"
+    },
+    {
+      "path": "termux-shared/src/main/java/com/termux/shared/data/IntentUtils.java",
+      "url": "https://github.com/termux/termux-app/blob/8629e632fcb95da272221be327db653fb24befe9/termux-shared/src/main/java/com/termux/shared/data/IntentUtils.java",
+      "bytes": 6526,
+      "sha256": "e468a250ceb092244961a93ddcb6c71997be7ec222a5f2fae8819512a097d7bc"
+    },
+    {
+      "path": "termux-shared/src/main/java/com/termux/shared/shell/command/ExecutionCommand.java",
+      "url": "https://github.com/termux/termux-app/blob/8629e632fcb95da272221be327db653fb24befe9/termux-shared/src/main/java/com/termux/shared/shell/command/ExecutionCommand.java",
+      "bytes": 27209,
+      "sha256": "dc58c99e5e4e9eeabd98c5c212bbcbbe48947c1d4e3e2e41d98d286f600d5049"
+    }
+  ],
+  "scope": "Public upstream source review only. The installed Termux version, configuration, runtime logging, app permission and receiver have not been inspected or tested. No intent, service, grant, key, identity or device action occurred."
+}
