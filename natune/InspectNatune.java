@@ -36,6 +36,66 @@ public final class InspectNatune {
             if (inheritedMethod(parent, parameters, result, classes, seen)) return true;
         return clazz.getSuperclass() != null && inheritedMethod(clazz.getSuperclass(), parameters, result, classes, seen);
     }
+    static final Set<String> CODEC_ANCHORS = Set.of("audio", "video", "audio/raw", "audio/flac", "audio/ac4");
+    static void codecBody(Method method, int maximum) {
+        var body=method.getImplementation();
+        if(body==null)return;
+        System.out.println("CODEC_METHOD\t"+signature(method)+"\tflags="+method.getAccessFlags()+
+            "\tregisters="+body.getRegisterCount()+"\tunits="+
+            java.util.stream.StreamSupport.stream(body.getInstructions().spliterator(),false).mapToInt(x->x.getCodeUnits()).sum()+
+            "\ttry_blocks="+body.getTryBlocks().size());
+        int offset=0,index=0;
+        for(var instruction:body.getInstructions()) {
+            if(index++>=maximum)break;
+            var row=new StringBuilder("CODEC_NODE\t"+offset+"\t"+instruction.getOpcode().name());
+            if(instruction instanceof OneRegisterInstruction r)row.append("\tA=").append(r.getRegisterA());
+            if(instruction instanceof TwoRegisterInstruction r)row.append("\tB=").append(r.getRegisterB());
+            if(instruction instanceof WideLiteralInstruction r)row.append("\tliteral=").append(r.getWideLiteral());
+            if(instruction instanceof OffsetInstruction r)row.append("\ttarget=").append(offset+r.getCodeOffset());
+            if(instruction instanceof ReferenceInstruction r) {
+                var ref=r.getReference();
+                if(ref instanceof FieldReference f)row.append("\tfield=").append(f);
+                if(ref instanceof MethodReference m)row.append("\tmethod=").append(signature(m));
+                if(ref instanceof StringReference s && CODEC_ANCHORS.contains(s.getString()))row.append("\tanchor=").append(s.getString());
+            }
+            System.out.println(row);offset+=instruction.getCodeUnits();
+        }
+    }
+    static void inspectCodecHooks(Map<String,ClassDef> classes) {
+        var formatTypes=new TreeSet<String>();var owners=new TreeSet<String>();
+        for(var clazz:classes.values())for(var method:clazz.getMethods()) {
+            var args=method.getParameterTypes();
+            if(method.getReturnType().equals("V") && args.size()==2 && args.get(0).toString().startsWith("Lr8/") &&
+                args.get(1).toString().equals("Landroid/media/MediaFormat;")) {
+                owners.add(clazz.getType());formatTypes.add(args.get(0).toString());
+                System.out.println("CODEC_OUTPUT_FORMAT\t"+signature(method));
+            }
+        }
+        var predicates=new TreeSet<String>();
+        for(String owner:owners) {
+            var clazz=classes.get(owner);
+            System.out.println("CODEC_CLASS\t"+owner+"\tsuper="+clazz.getSuperclass());
+            for(var method:clazz.getMethods()) {
+                if(!method.getReturnType().equals("I") || method.getParameterTypes().size()>3 ||
+                    method.getParameterTypes().stream().noneMatch(p->formatTypes.contains(p.toString())))continue;
+                codecBody(method,40);
+                if(method.getImplementation()!=null)for(var instruction:method.getImplementation().getInstructions())
+                    if(instruction instanceof ReferenceInstruction r && r.getReference() instanceof MethodReference m &&
+                       m.getReturnType().equals("Z") && String.join("",m.getParameterTypes()).equals("Ljava/lang/String;"))
+                        predicates.add(signature(m));
+            }
+        }
+        for(String type:formatTypes) {
+            var clazz=classes.get(type);if(clazz==null)continue;
+            for(var field:clazz.getFields())if(field.getType().equals("Ljava/lang/String;"))
+                System.out.println("CODEC_FORMAT_STRING_FIELD\t"+type+"->"+field.getName()+":"+field.getType());
+        }
+        for(var clazz:classes.values())for(var method:clazz.getMethods())
+            if(predicates.contains(signature(method)))codecBody(method,20);
+        for(String type:List.of("Landroidx/media3/decoder/ffmpeg/FfmpegAudioRenderer;",
+            "Landroidx/media3/decoder/flac/LibflacAudioRenderer;","Landroidx/media3/decoder/opus/LibopusAudioRenderer;"))
+            System.out.println("CODEC_NAMED_EXTENSION\t"+type+"\tpresent="+classes.containsKey(type));
+    }
     static void inspectStreamTypes(File apk) throws Exception {
         var classes = new TreeMap<String,ClassDef>();
         var dex = DexFileFactory.loadDexContainer(apk, Opcodes.getDefault());
@@ -94,6 +154,7 @@ public final class InspectNatune {
         if (interfaces != 1 || !sources.contains("Lr8/dm2;"))
             throw new IllegalStateException("Pinned stream interface hierarchy changed");
         System.out.println("STREAM_TOTAL\tsources=" + sources.size() + "\tinterfaces=" + interfaces + "\tfactories=" + factories);
+        inspectCodecHooks(classes);
     }
     static final Set<String> ANCHORS = Set.of(
         "Low-data mode active; skipping Tidal/Qobuz for %s",
