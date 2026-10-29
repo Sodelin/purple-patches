@@ -1,7 +1,7 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: alpha.20 confines an optional access-point linkage failure; hosted integration controls, two reproducible builds and exact-APK static checks passed. Gboard privacy, recovery, model and device gates remain open.",
+  "current_turn_classification": "progress: source and existing hosted controls establish that Whisper engine identity is config-supplied and checked paths are reopened for use; the additional release gap and review request are recorded. Gboard privacy, recovery, model and device gates remain open.",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",
@@ -29,6 +29,7 @@
     "A caller-bound Termux handoff that does not expose the bearer through loggable stdout, plus actual privacy-writer and tool-boundary evidence.",
     "Bridge owner lifecycle: a changed command executable can misclassify a live owner, and observation errors collapse into absence; preserve the encrypted record and distinguish UNKNOWN before safe update or stop. See bridge-identity-diagnostic-verification.json.",
     "Original job identity, cancellation, encrypted settlement and no-replay recovery when a start response or process is lost; the Dot review request is prepared but its route is unverified.",
+    "Whisper engine origin is not independently bound: the binary hash and revision come from its own private config, and the hashed paths are not bound to subsequent execution/model load. See WHISPER-ENGINE-BOUNDARY.md.",
     "Full large-v3 acquisition and exact engine/model acceptance when the model hold is released, including coordinated model-hash/client/engine deadlines and meaningful latency, memory and cancellation checks; see LONG-DICTATION.md.",
     "The requested model choices for other users remain unimplemented; the current candidate admits only Nolan's selected full large-v3. Alternative selection, acquisition, engine compatibility and device evidence remain open; see WHISPER-MODEL-OPTIONS.md.",
     "Editor composition, result retention across session ends, long dictation and actual user-directed preview/insertion behavior; alpha.12 copy-only behavior remains untested on Android.",

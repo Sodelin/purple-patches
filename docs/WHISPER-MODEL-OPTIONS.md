@@ -15,7 +15,7 @@ it is not a runtime selection or an engine-compatibility proof.
 | Whisper large-v3, F16 | Full multilingual model selected for Nolan | 2.9 GiB | File size is not total running memory; phone latency and battery use are unmeasured. |
 | Whisper large-v3, q5 | The same model with lower-precision weights | 1.1 GiB | Quantization can affect accuracy and performance; do not describe it as identical output to F16. |
 | Whisper large-v3 Turbo, F16 / q5 | Faster multilingual transcription candidate | 1.5 GiB / 547 MiB | Turbo is not trained for Whisper's speech-translation task. Sol text translation is a separate feature. |
-| Distil-Whisper large-v3.5, GGML | English-focused distilled candidate | 1.52 GB (about 1.42 GiB) | Authors document whisper.cpp support, but our pinned engine and Android build have not been checked with these weights. |
+| Distil-Whisper large-v3.5, GGML | English-focused distilled candidate | 1.52 GB (about 1.42 GiB) | Authors document whisper.cpp support, but the researched engine and Android build have not been checked with these weights. |
 | Small/base/tiny | Much smaller multilingual or English-only models | See model list | Accuracy depends on language, acoustics and model; not all smaller phones have identical constraints. |
 
 Published sizes come from [whisper.cpp's model list](https://huggingface.co/ggerganov/whisper.cpp/blob/main/README.md)
@@ -46,6 +46,10 @@ before microphone use, with full integrity verification before inference. A
 missing, corrupt or unsupported selection must fail clearly without falling back
 to a different model. Keep model acquisition optional, user-initiated and subject
 to actual free space and existing privacy/model holds.
+
+The current companion checks an engine hash supplied by its own configuration;
+that alone does not establish a trusted engine profile or checked-byte
+continuity. See [the engine boundary](WHISPER-ENGINE-BOUNDARY.md).
 
 Before advertising a choice, verify its engine compatibility and accuracy,
 latency, memory, battery and cancellation behavior on representative authorized

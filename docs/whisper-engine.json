@@ -11,7 +11,8 @@
     "stdin_audio_decoder": "https://github.com/ggml-org/whisper.cpp/blob/2eeeba56e9edd762b4b38467bab96c2517163158/examples/common-whisper.cpp#L52",
     "no_prints_preserves_results": "https://github.com/ggml-org/whisper.cpp/blob/2eeeba56e9edd762b4b38467bab96c2517163158/examples/cli/cli.cpp#L263"
   },
-  "decision": "Reuse retained byte-verified engine when activation is authorized; pinned loader recognizes large-v3, and -f - decodes audio from stdin. No new engine build is required by source evidence. Current base weights remain separately protected and do not qualify as full-v3.",
+  "decision": "The retained byte-verified engine is a reuse candidate when activation is authorized; reviewed source recognizes large-v3 and supports -f - stdin. Its binary-to-source provenance, current companion selection and actual full-v3 runtime compatibility still need acceptance. Current base weights remain separately protected and do not qualify as full-v3.",
+  "companion_boundary": "The current companion verifies an engine hash declared in its own private config and only checks the declared source revision's shape; it does not independently bind that config to this recorded binary or prove checked-byte continuity. See WHISPER-ENGINE-BOUNDARY.md.",
   "observed_transport_issue": "Actual Android public child cannot reopen inherited anonymous input via /proc/self/fd/N; pipe stdin succeeds. Companion0.2.1 source changes audio to stdin and uses fixed authored schema beside executable for the path-only Codex flag.",
   "new_static_schema_sha256": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
   "runtime_acceptance": "Not achieved. Engine was hashed, not executed. No inference, microphone, model download, installation, controller or keyboard change."

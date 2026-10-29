@@ -42,8 +42,10 @@ source.
 
 The `0.2.2-dev.3` source changes the health preflight: it requires a valid
 private config, the selected official full-large-v3 SHA declaration and size,
-the full-v3 header, and a present nonempty executable engine with matching SHA
-inside the owned Whisper directory. This preflight deliberately does not hash
+the full-v3 header, and a present nonempty executable engine matching the SHA
+declared in that config inside the owned Whisper directory. The engine hash and
+revision are not independently pinned by this source; see [engine identity and
+checked-byte boundary](../docs/WHISPER-ENGINE-BOUNDARY.md). This preflight deliberately does not hash
 the entire model on every health request. The owned worker checks the complete
 model hash once and rechecks the engine before inference, after audio capture. Removing the
 duplicate full-model hash from request admission avoids reading the same 3.1 GB
@@ -68,7 +70,7 @@ passed; phone acceptance remains open.
 
 Companion0.2.1 corrects an actual Android transport failure: `/proc/self/fd/N`
 reopening is denied for the tested inherited anonymous file. Audio is now sent
-to the pinned engine's `-f -` stdin reader. The Codex `--output-schema` path
+to the configured engine's `-f -` stdin reader. The Codex `--output-schema` path
 names only `response-schema.json` beside the actual companion executable. That
 file is fixed authored source, not a prompt, result or runtime observation. Its
 bytes must equal the compiled template; it must be owner-private mode0600 and
