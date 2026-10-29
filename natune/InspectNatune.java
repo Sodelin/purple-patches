@@ -190,6 +190,49 @@ public final class InspectNatune {
         inspectStorageHooks(classes);
         inspectRemovalGraph(classes);
         inspectLibraryHooks(classes);
+        inspectCompiledManifest(apk);
+    }
+
+    /** Use the hosted SDK to inspect only this public APK's MusicService. */
+    static void inspectCompiledManifest(File apk) throws Exception {
+        String sdk = System.getenv("ANDROID_HOME");
+        if (sdk == null || sdk.isEmpty()) throw new IllegalStateException("Hosted Android SDK unavailable");
+        File[] versions = new File(sdk, "build-tools").listFiles(File::isDirectory);
+        if (versions == null) throw new IllegalStateException("Hosted Android build tools unavailable");
+        java.util.Arrays.sort(versions, java.util.Comparator.comparing(File::getName));
+        File aapt2 = null;
+        for (File version : versions) {
+            File candidate = new File(version, "aapt2");
+            if (candidate.isFile() && candidate.canExecute()) aapt2 = candidate;
+        }
+        if (aapt2 == null) throw new IllegalStateException("Hosted manifest reader unavailable");
+        Process process = new ProcessBuilder(aapt2.getAbsolutePath(), "dump", "xmltree",
+            apk.getAbsolutePath(), "--file", "AndroidManifest.xml").redirectErrorStream(true).start();
+        byte[] bytes = process.getInputStream().readNBytes(2_000_001);
+        if (bytes.length > 2_000_000) { process.destroyForcibly(); throw new IllegalStateException("Manifest output too large"); }
+        if (process.waitFor() != 0) throw new IllegalStateException("Public APK manifest inspection failed");
+        String[] lines = new String(bytes, java.nio.charset.StandardCharsets.UTF_8).split("\\R");
+        int found = 0;
+        for (int i = 0; i < lines.length; i++) {
+            if (!lines[i].trim().startsWith("E: service")) continue;
+            int indentation = lines[i].length() - lines[i].stripLeading().length();
+            int end = i + 1;
+            while (end < lines.length) {
+                String line = lines[end];
+                if (line.trim().startsWith("E: ") && line.length() - line.stripLeading().length() <= indentation) break;
+                end++;
+            }
+            boolean target = false;
+            for (int j = i; j < end; j++) if (lines[j].contains(".playback.MusicService")) target = true;
+            if (target) {
+                System.out.println("LIBRARY_MANIFEST_BEGIN");
+                for (int j = i; j < end; j++) System.out.println("LIBRARY_MANIFEST_LINE\t" + lines[j].trim());
+                System.out.println("LIBRARY_MANIFEST_END");
+                found++;
+            }
+            i = end - 1;
+        }
+        System.out.println("LIBRARY_MANIFEST_TOTAL\t" + found);
     }
 
     /** Inspect publicly compiled browser entrypoints, without opening the app. */
