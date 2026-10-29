@@ -49,6 +49,16 @@ Run 40934581669 matched the compiled extension but stopped when an original
 non-DEX APK entry differed after resource patching. The next run records all
 changed public APK entry names/hashes and compares the Android manifest's
 compiled XML tree; the byte-preservation check has not been weakened.
+Run 40935053892 identified exactly two changed original entries: the compiled
+manifest and `resources.arsc`, both re-encoded by Morphe's full-resource path.
+The sampled manifest diff included source-line metadata changes, but the full
+semantic difference was not established. The successor carrier uses Morphe's
+`rawResourcePatch` for its library and license entries. Morphe v2.0.0 selects
+RAW_ONLY when no full resource patch is present, so this avoids requesting the
+resource-table encoder. The exact-input byte comparison remains mandatory;
+this source-based expectation is not itself a successful packaging result.
+See the [resource mode selection](https://github.com/MorpheApp/morphe-patcher/blob/v2.0.0/src/main/kotlin/app/morphe/patcher/Patcher.kt#L50-L57)
+and [raw resource patch API](https://github.com/MorpheApp/morphe-patcher/blob/v2.0.0/src/main/kotlin/app/morphe/patcher/patch/Patch.kt#L751-L767).
 
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
 provide bounded streaming, full destination readback and the real Android SAF

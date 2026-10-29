@@ -4,10 +4,10 @@ import app.morphe.patcher.patch.ApkFileType
 import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.rawResourcePatch
 
 private object NatuneFlacCarrierResources
-private val natuneFlacCarrierResources = resourcePatch {
+private val natuneFlacCarrierResources = rawResourcePatch {
     execute {
         val entries = listApkEntries()
         val additions = mapOf(
