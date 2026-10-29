@@ -120,7 +120,15 @@ def materialize(destination):
     replace(build,'description = "Morphe patches for Gboard."','description = "Optional Gboard Whisper 3 dictation and AI translation; based on Jason Wu Gboard patches."')
     # Retain upstream license/notices; identify our distinct distribution source.
     text=build.read_text().replace('https://github.com/jasonwu1994/gboard-patches','https://github.com/Sodelin/purple-patches').replace('author = "Jason Wu"','author = "Purple Patches contributors; upstream Jason Wu"')
-    build.write_text(text+manifest_timestamp_override(timestamp))
+    # Morphe's pinned plugin targets JVM 11 but leaves Java source level to the
+    # JDK. The patch-time helper needs the same source/API/bytecode target.
+    java_target=('\n// Align patch-time Java source with Morphe JVM 11.\n'
+                 'tasks.named<org.gradle.api.tasks.compile.JavaCompile>("compileJava") {\n'
+                 '    sourceCompatibility = "11"\n'
+                 '    targetCompatibility = "11"\n'
+                 '    options.release.set(11)\n'
+                 '}\n')
+    build.write_text(text+manifest_timestamp_override(timestamp)+java_target)
     manifest={'upstream_commit':PIN,'version':version,'overlay_commit':source_commit,
               'manifest_timestamp_ms':timestamp,'manifest_timestamp_basis':'source commit time',
               'overlay':[{'path':name,'sha256':hashlib.sha256(body).hexdigest()} for name,body in snapshot.items() if name.startswith('gboard/')],
