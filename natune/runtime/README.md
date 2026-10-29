@@ -36,3 +36,20 @@ Run40889712120 passes46 public-fixture cache-source controls plus49 copy
 controls. It remains unbound to an actual APK UI hook and has no removal path.
 See ../CACHE-SOURCE-BINDING.md for the original broad-purge callback hazard and
 remaining transaction, indexing and phone acceptance requirements.
+
+TemporarySpaceBudget implements synchronized peak-byte admissions for one batch,
+with a1GB default and adaptive file count. Its Reservation.copy calls the actual
+VerifiedStreamCopy only after admission and original owner/length checks, using
+a destination factory so output need not exist before admission. Full known
+staging and rounding overhead belong in the reservation. Neither successful
+readback nor a failed factory releases space. Accepted IDs remain consumed;
+release requires the owner's explicit cleanup-verification callback and is
+refused during copy or another settlement. No automatic timeout/close release.
+
+This is an in-memory counter and copy binding, not an Android scheduler,
+allocation quota, encrypted journal or cache-removal implementation. The host
+must restore unsettled claims before accepting another batch after restart,
+provide real ongoing headroom/cancellation checks, verify/index the retained
+URI and settle exact cache removal. Cleanup callbacks in controls are stand-ins.
+No UI calls this yet. Original monitor serialization still limits cache read
+parallelism. See ../STORAGE-FIRST-PLAN.md for the full deployment/release gates.
