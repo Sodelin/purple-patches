@@ -80,7 +80,7 @@ jobs:
           cmake -S public-flac-source -B "$RUNNER_TEMP/flac-host" \
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DBUILD_SHARED_LIBS=OFF -DBUILD_CXXLIBS=OFF -DBUILD_PROGRAMS=ON \
-            -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DBUILD_DOCS=OFF \
+            -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DBUILD_DOCS=OFF -DINSTALL_MANPAGES=OFF \
             -DWITH_OGG=OFF -DWITH_ASM=OFF -DENABLE_MULTITHREADING=OFF
           cmake --build "$RUNNER_TEMP/flac-host" --target flacapp --parallel
           cc -std=c11 -Wall -Wextra -Werror -fPIC -shared \
@@ -107,7 +107,7 @@ jobs:
             -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-29 \
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DBUILD_SHARED_LIBS=OFF -DBUILD_CXXLIBS=OFF -DBUILD_PROGRAMS=OFF \
-            -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DBUILD_DOCS=OFF \
+            -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DBUILD_DOCS=OFF -DINSTALL_MANPAGES=OFF \
             -DWITH_OGG=OFF -DWITH_ASM=OFF -DENABLE_MULTITHREADING=OFF
           cmake --build "$RUNNER_TEMP/flac-android" --target FLAC --parallel
           "$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang" \

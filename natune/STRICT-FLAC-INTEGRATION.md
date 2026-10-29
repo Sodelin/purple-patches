@@ -240,6 +240,12 @@ format alternatives and phone acceptance remain unbound; the current patch
 materializer does not include this verifier. Nothing was installed or executed
 on the phone.
 
+Hosted attempt `40931041024` stopped during reference-decoder CMake
+configuration because the runner had neither Pandoc nor prebuilt manpages.
+No new decoder controls or Android cross-build ran in that attempt. The
+successor explicitly disables installation of those manuals; it does not alter
+the selected audio source or replace the outstanding verification.
+
 Primary references: [Android MediaCodec raw audio](https://developer.android.com/reference/android/media/MediaCodec#raw-audio-buffers),
 [libFLAC streaming decoder](https://xiph.org/flac/api/group__flac__stream__decoder.html),
 and [RFC 9639 STREAMINFO](https://www.rfc-editor.org/rfc/rfc9639.html#section-8.2).
