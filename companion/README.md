@@ -35,6 +35,16 @@ authorized; full weights must be acquired once at their selected final location.
 No shared external model path or second full weights copy is admitted by this
 source.
 
+The `0.2.2-dev.1` source changes the health preflight: it requires a valid
+private config, the selected official full-large-v3 SHA declaration and size,
+the full-v3 header, and a present nonempty executable engine inside the owned
+Whisper directory. This preflight deliberately does not hash the entire model on
+every health request. Complete model and engine hashes are still checked before
+transcription, after audio capture; metadata preflight alone cannot detect a
+same-size corrupt file or establish phone readiness. The development companion
+is not installed or accepted. The earlier0.2.1 candidate remains the published
+historical artifact and is not silently replaced.
+
 
 Companion0.2.1 corrects an actual Android transport failure: `/proc/self/fd/N`
 reopening is denied for the tested inherited anonymous file. Audio is now sent

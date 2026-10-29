@@ -3,10 +3,24 @@ use serde::Deserialize;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::os::unix::fs::OpenOptionsExt;
+use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
 use std::sync::atomic::AtomicBool;
 
 pub const AUDIO_CAP: usize = 10 * 1024 * 1024;
+// Nolan selected the official full large-v3 model, not turbo or a substituted variant.
+// The primary repository metadata and source revision are retained in docs/whisper-model.json.
+const SELECTED_MODEL_SHA256: &str = "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2";
+const SELECTED_MODEL_BYTES: u64 = 3_095_033_483;
+
+#[derive(Clone, Copy)]
+struct ModelPin<'a> {
+    sha256: &'a str,
+    bytes: u64,
+}
+
+fn selected_model() -> ModelPin<'static> {
+    ModelPin { sha256: SELECTED_MODEL_SHA256, bytes: SELECTED_MODEL_BYTES }
+}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Config {
@@ -81,7 +95,9 @@ pub fn validate_wav(bytes: &[u8]) -> Result<(), String> {
     Ok(())
 }
 
-fn config(state: &Path) -> Result<Config, String> {
+// This metadata preflight avoids a multi-gigabyte hash on every /health call.
+// It does not prove the full model bytes; config_with_pin does that before inference.
+fn preflight_with_pin(state: &Path, pin: ModelPin<'_>) -> Result<Config, String> {
     let root = fs::canonicalize(state.join("whisper"))
         .map_err(|_| "Whisper unavailable: local engine/model is not installed")?;
     let bytes = private::read(&root.join("config.json"), 16384)
@@ -97,6 +113,7 @@ fn config(state: &Path) -> Result<Config, String> {
         || !config.engine_commit.bytes().all(|b| b.is_ascii_hexdigit())
         || !hash_ok(&config.binary_sha256)
         || !hash_ok(&config.model_sha256)
+        || config.model_sha256 != pin.sha256
     {
         return Err("Whisper unavailable: configuration contract mismatch".into());
     }
@@ -112,7 +129,19 @@ fn config(state: &Path) -> Result<Config, String> {
             );
         }
     }
+    let engine = fs::metadata(&config.binary).map_err(|_| "Whisper unavailable: engine metadata missing")?;
+    if engine.len() == 0 || engine.mode() & 0o111 == 0 {
+        return Err("Whisper unavailable: engine is empty or not executable".into());
+    }
+    if fs::metadata(&config.model).map_err(|_| "Whisper unavailable: model metadata missing")?.len() != pin.bytes {
+        return Err("Whisper unavailable: selected model size differs".into());
+    }
     if model_family(&config.model)? != "whisper-large-v3" { return Err("Whisper 3 model architecture required; no fallback".into()); }
+    Ok(config)
+}
+
+fn config_with_pin(state: &Path, pin: ModelPin<'_>) -> Result<Config, String> {
+    let config = preflight_with_pin(state, pin)?;
     // Streaming hashes use bounded memory; no model/audio leaves this device.
     if cli::sha256_file(&config.binary)
         .map_err(|_| "Whisper unavailable: pinned binary cannot be read")?
@@ -126,16 +155,16 @@ fn config(state: &Path) -> Result<Config, String> {
     Ok(config)
 }
 
+fn config(state: &Path) -> Result<Config, String> {
+    config_with_pin(state, selected_model())
+}
+
 pub fn available(state: &Path) -> Result<(), String> {
     config(state).map(|_| ())
 }
 
 pub fn family(state:&Path)->Option<&'static str> {
-    let root=fs::canonicalize(state.join("whisper")).ok()?;
-    let value:Config=serde_json::from_slice(&private::read(&root.join("config.json"),16384).ok()?).ok()?;
-    let model=fs::canonicalize(&value.model).ok()?;
-    if !model.starts_with(root) || value.model_family!="whisper-large-v3" {return None}
-    model_family(&model).ok()
+    preflight_with_pin(state, selected_model()).ok().map(|_| "whisper-large-v3")
 }
 fn model_family(path:&Path)->Result<&'static str,String>{
     use std::io::Read;
@@ -165,6 +194,7 @@ pub fn transcribe(state:&Path,_directory:&Path,cancelled:&AtomicBool,bytes:&[u8]
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::os::unix::fs::PermissionsExt;
     pub fn wav(samples: usize) -> Vec<u8> {
         let n = samples * 2;
         let mut bytes = Vec::new();
@@ -191,6 +221,49 @@ mod tests {
         header[36..40].copy_from_slice(&4i32.to_le_bytes());assert!(classify_header(&header).is_err());
         header[40..44].copy_from_slice(&80i32.to_le_bytes());assert!(classify_header(&header).is_err());
         assert!(classify_header(&[]).is_err());
+    }
+    #[test]
+    fn preflight_checks_selected_model_engine_and_full_hash_separately() {
+        // Tiny public synthetic files; no model or engine is executed.
+        let scratch = private::Scratch::new();
+        let root = scratch.0.join("whisper");
+        private::private_dir(&root).unwrap();
+        let binary = root.join("fixture-engine");
+        let model = root.join("fixture-model");
+        private::create(&binary, b"fixture engine").unwrap();
+        fs::set_permissions(&binary, fs::Permissions::from_mode(0o700)).unwrap();
+        let mut header = [0u8; 48];
+        header[..4].copy_from_slice(&0x67676d6cu32.to_le_bytes());
+        for (offset, value) in [(12,1280i32),(20,32),(36,32),(40,128)] {
+            header[offset..offset+4].copy_from_slice(&value.to_le_bytes());
+        }
+        private::create(&model, &header).unwrap();
+        let model_hash = cli::sha256_file(&model).unwrap();
+        let engine_hash = cli::sha256_file(&binary).unwrap();
+        let pin = ModelPin { sha256: &model_hash, bytes: header.len() as u64 };
+        let record = serde_json::json!({
+            "schema":"purple_keyboard_whisper_v1", "binary":&binary, "model":&model,
+            "binary_sha256":&engine_hash, "model_sha256":&model_hash,
+            "engine_commit":"a".repeat(40), "max_audio_seconds":90, "language":"auto",
+            "model_family":"whisper-large-v3"
+        });
+        private::create(&root.join("config.json"), &serde_json::to_vec(&record).unwrap()).unwrap();
+        assert!(preflight_with_pin(&scratch.0, pin).is_ok());
+        assert!(config_with_pin(&scratch.0, pin).is_ok());
+        assert!(preflight_with_pin(&scratch.0, ModelPin { sha256: &"f".repeat(64), bytes: pin.bytes }).is_err());
+        fs::set_permissions(&binary, fs::Permissions::from_mode(0o600)).unwrap();
+        assert!(preflight_with_pin(&scratch.0, pin).is_err());
+        fs::set_permissions(&binary, fs::Permissions::from_mode(0o700)).unwrap();
+        fs::write(&model, &header[..47]).unwrap();
+        assert!(preflight_with_pin(&scratch.0, pin).is_err());
+        header[47] = 1; // Same-size/header change requires the full hash, not metadata alone.
+        fs::write(&model, header).unwrap();
+        assert!(preflight_with_pin(&scratch.0, pin).is_ok());
+        assert!(config_with_pin(&scratch.0, pin).is_err());
+        fs::remove_file(&binary).unwrap();
+        assert!(preflight_with_pin(&scratch.0, pin).is_err());
+        assert_eq!(selected_model().bytes, 3_095_033_483);
+        assert_eq!(selected_model().sha256, "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2");
     }
     #[test]
     fn wav_validates_duration_rate_channels_format_and_chunk_bounds() {
