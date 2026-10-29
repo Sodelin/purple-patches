@@ -1,0 +1,28 @@
+{
+  "recorded_utc": "2026-10-29T22:20:25Z",
+  "source_commit": "5ad39be1dd63614ddfbd27967566fd7f47044919",
+  "source_tree": "1d4f635169ffead341577f35a008857f9cbedd54",
+  "controls_blob": "626d8f4c730006240c91d1a510f0847da9b5f4e0",
+  "checks_blob": "746ce3ae740b5bee8c32d20c978160c1021fab22",
+  "hosted_run": {
+    "url": "https://github.com/Sodelin/purple-patches/actions/runs/40965068629",
+    "job": 123767353913,
+    "conclusion": "success",
+    "tests_per_mode": 12,
+    "modes": ["normal", "-O", "PYTHONOPTIMIZE=1"]
+  },
+  "local_synthetic_controls": {
+    "tests_per_mode": 12,
+    "modes": ["normal", "-O", "-OO", "PYTHONOPTIMIZE=1"],
+    "prior_reproduction": "A mocked public-repository response was refused normally but reached one simulated draft creation under -O before this change."
+  },
+  "scope": [
+    "Explicit checks in Gboard staging, private publication, feed verification, and local export remain active under optimization.",
+    "Fixtures replace GitHub and network calls with in-memory responses and use only temporary synthetic files."
+  ],
+  "not_established": [
+    "Actual publication, Manager import/update, APK installation or phone/model acceptance.",
+    "Race-free publication if repository state changes between checks.",
+    "Correction of assertions in the separate NaTune owner publication script."
+  ]
+}

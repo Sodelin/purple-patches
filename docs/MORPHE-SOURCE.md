@@ -56,7 +56,9 @@ tools use explicit runtime checks for repository visibility, selected bytes,
 release state and output preservation. These checks do not disappear under
 `python -O` or `PYTHONOPTIMIZE=1`. Offline controls exercise refusal and
 successful synthetic readback in both interpreter modes. The controls make no
-real publication, credential, Manager, phone or model calls.
+real publication, credential, Manager, phone or model calls. The exact source
+and hosted run are recorded in
+[release-controls-verification.json](release-controls-verification.json).
 
 Previously those checks used Python `assert`. A mocked run against a synthetic
 public-repository response refused normally but reached a simulated creation
