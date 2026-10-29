@@ -1,6 +1,6 @@
 # Review of public chess and Discord patch candidates
 
-Nolan described a local Stockfish chess patch and a Discord Bluetooth-audio patch. Their installed patch sources and versions have not been established. The following public candidates match those descriptions; this review does not identify either one as his installed patch.
+The following public candidates provide a local Stockfish chess patch and a Discord Bluetooth-audio patch. This source review does not establish which patch sources or versions are installed on any particular phone.
 
 ## Stockfish candidate
 
@@ -12,6 +12,6 @@ The `stockfish-timeout.yml` workflow fetches the exact Noam source above, verifi
 
 ## Discord candidate
 
-The public [Venus source at commit `ade5ae6`](https://github.com/VenusIsJaded/Venus-Patches/blob/ade5ae67b394af7f7e836e671eb3a66e6a6fa9ae/extensions/audio/src/main/kotlin/app/venus/audio/Handsfree.kt) describes a switch that, when enabled and an A2DP output is present, suppresses Bluetooth hands-free routing and intends to use the phone microphone. Its source passes other choices through and rereads the setting at call start. This is an explanation of that source, not a claim that Nolan has this version or that his phone, microphone, reconnect behavior, or call quality has been tested.
+The public [Venus source at commit `ade5ae6`](https://github.com/VenusIsJaded/Venus-Patches/blob/ade5ae67b394af7f7e836e671eb3a66e6a6fa9ae/extensions/audio/src/main/kotlin/app/venus/audio/Handsfree.kt) describes a switch that, when enabled and an A2DP output is present, suppresses Bluetooth hands-free routing and intends to use the phone microphone. Its source passes other choices through and rereads the setting at call start. This is an explanation of that source, not a claim that any particular phone, microphone, reconnect behavior, or call quality has been tested.
 
 Before choosing or changing a patch, identify the actual configured source and installed version. Do not inspect credentials or change the phone merely to complete this review.
