@@ -1,8 +1,9 @@
 package dev.purple.patches.gboard;
 
-/** Reports failure to create/start a worker before any worker action is dispatched. */
+/** Does not dispatch a worker action until the thread start has returned successfully. */
 final class WorkerStart {
     interface Starter { void start(Runnable work, String name); }
+    private static final class Gate { boolean accepted; }
 
     private WorkerStart() {}
 
@@ -10,11 +11,19 @@ final class WorkerStart {
         return launch(null, work, name);
     }
 
-    // A starter must either start the worker or throw before starting it.
+    // A starter must schedule asynchronously and return without waiting for the work.
     static boolean launch(Starter starter, Runnable work, String name) {
         try {
-            if (starter == null) new Thread(work, name).start();
-            else starter.start(work, name);
+            Gate gate = new Gate();
+            Runnable guarded = () -> {
+                synchronized (gate) { if (!gate.accepted) return; }
+                work.run();
+            };
+            synchronized (gate) {
+                if (starter == null) new Thread(guarded, name).start();
+                else starter.start(guarded, name);
+                gate.accepted = true;
+            }
         } catch (RuntimeException | OutOfMemoryError failure) {
             return false;
         }

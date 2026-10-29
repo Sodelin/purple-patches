@@ -7,12 +7,14 @@ start failed at that point, the optional action could crash the keyboard or
 leave its progress/busy state reserved. This is a source-level failure mode;
 there is no observed incident or device test.
 
-Alpha.22 handles a runtime exception or `OutOfMemoryError` raised while starting
+Alpha.23 handles a runtime exception or `OutOfMemoryError` raised while starting
 either worker. Its failure path marks the action stopped, clears the matching
 capture and progress dialog when possible, releases the busy flag, and reports
-the failure when the UI is available. No job or microphone work is dispatched
-by that worker. An unexpected VM error is not suppressed. Severe memory
-exhaustion or a failure before this narrow start guard may still affect the
+the failure when the UI is available. The worker waits for the start call to
+return successfully before dispatching its action; if startup throws after the
+thread was scheduled, it exits without running the action. An unexpected VM
+error is not suppressed. Severe memory exhaustion or a failure before this
+narrow start guard may still affect the
 keyboard. Cancellation or shutdown after a worker starts is a separate contract.
 
 The [reviewed AOSP ART source](https://android.googlesource.com/platform/art/+/refs/heads/main/runtime/thread.cc)
@@ -21,8 +23,8 @@ failure when its JNI environment or thread creation fails. That source explains
 the particular guarded path; it is not a verification of the installed Android
 version or every possible runtime failure.
 
-Hosted synthetic controls inject start refusals and thread exhaustion before
-dispatch, and also start one ordinary test thread. Those controls exercise the
-worker-start helper, not Android's actual UI cleanup, the installed keyboard,
+Synthetic controls inject start refusals and thread exhaustion both before and
+after a worker is scheduled, and also start one ordinary test thread. They
+exercise the worker-start helper, not Android's actual UI cleanup, the installed keyboard,
 microphone, local companion or model. A full hosted build and device regression
 are separate evidence and remain pending until actually performed.
