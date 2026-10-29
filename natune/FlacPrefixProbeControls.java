@@ -14,7 +14,7 @@ public final class FlacPrefixProbeControls {
         for(int i=0;i<b.length;i++) b[i]=(byte)Integer.parseInt(s.substring(i*2,i*2+2),16);
         return b;
     }
-    private static byte[] example() {
+    static byte[] example() {
         // RFC9639 AppendixD.1, one interchannel sample, stereo16-bit44100Hz.
         return hex("664c6143800000221000100000000f00000f0ac442f0000000013e84b41807dc690307586a3dad1a2e0ffff869180000bf0358fd03128baa9a");
     }
