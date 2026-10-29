@@ -344,7 +344,7 @@ public final class PurpleAiRuntime {
                         insert.setOnClickListener(v -> {
                             insert.setEnabled(false);
                             SessionPolicy.InsertionOutcome outcome = insertion.attempt(
-                                    () -> request == operation && !stopped.get() && SessionPolicy.bounded(text)
+                                    () -> request == operation && !stopped.get() && SessionPolicy.boundedResult(text)
                                             && anchor.matches(service.get(), generation),
                                     () -> anchor.connection.commitText(text, 1));
                             if (outcome == SessionPolicy.InsertionOutcome.REQUEST_SENT)

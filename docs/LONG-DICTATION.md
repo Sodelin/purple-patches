@@ -20,7 +20,9 @@ Simply increasing one number does not provide complete long-form support. The
 companion currently validates at most 90 seconds per WAV; its HTTP request has a
 10 MiB ceiling; engine supervision has a 120-second timeout; the engine result
 has a 64 KiB limit; and the keyboard currently accepts at most 8 KiB of result
-text. Audio, result and IPC overhead also affect memory. The pinned upstream
+text through alpha.16. Alpha.17 source separately accepts a completed result up
+to the companion's 64 KiB ceiling; see [result preview](RESULT-PREVIEW-BOUNDARY.md).
+Audio, result and IPC overhead also affect memory. The pinned upstream
 [whisper.cpp CLI source](https://github.com/ggml-org/whisper.cpp/blob/2eeeba56e9edd762b4b38467bab96c2517163158/examples/cli/cli.cpp)
 passes a decoded sample vector to its full inference call, but that source
 fact does not establish acceptable memory, latency or performance on the phone.

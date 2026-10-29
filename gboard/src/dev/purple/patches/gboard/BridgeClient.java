@@ -11,6 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Memory-only transport; a bridge must attest the selected data-path contract. */
 final class BridgeClient {
+    private static final int ORDINARY_RESPONSE_BYTES = 131072;
+    // JSON may escape one input byte as six bytes. The rest covers the fixed
+    // completed-job fields and the companion's 64-character job identity.
+    private static final int JOB_RESPONSE_BYTES = 6 * SessionPolicy.RESULT_BYTES + 1024;
     private final String endpoint, token;
     private volatile HttpURLConnection connection;
     private volatile String job;
@@ -34,16 +38,23 @@ final class BridgeClient {
             }
             if (http.getResponseCode() != 200 && http.getResponseCode() != 202)
                 throw new IllegalStateException("The local bridge rejected this request");
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             try (InputStream input = http.getInputStream()) {
-                byte[] chunk = new byte[4096]; int count;
-                while ((count = input.read(chunk)) != -1) {
-                    if (bytes.size() + count > 131072) throw new IllegalStateException("Response too large");
-                    bytes.write(chunk, 0, count);
-                }
+                return new JSONObject(responseText(input, responseLimit(method, path)));
             }
-            return new JSONObject(bytes.toString(StandardCharsets.UTF_8.name()));
         } finally { http.disconnect(); if (connection == http) connection = null; }
+    }
+    static int responseLimit(String method, String path) {
+        return "GET".equals(method) && path != null && path.startsWith("/jobs/")
+                ? JOB_RESPONSE_BYTES : ORDINARY_RESPONSE_BYTES;
+    }
+    static String responseText(InputStream input, int limit) throws Exception {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        byte[] chunk = new byte[4096]; int count;
+        while ((count = input.read(chunk)) != -1) {
+            if (count > limit - bytes.size()) throw new IllegalStateException("Response too large");
+            bytes.write(chunk, 0, count);
+        }
+        return bytes.toString(StandardCharsets.UTF_8.name());
     }
     void verify(boolean voice) throws Exception {
         JSONObject health = request("GET", "/health", null, null);
@@ -77,6 +88,13 @@ final class BridgeClient {
             }
         });
     }
+    /** Keep uncertain-outcome warning armed until the completed text is accepted. */
+    static String completedResult(JSONObject result, AtomicBoolean possibleStart) throws Exception {
+        String value = result.getString("text");
+        if (!SessionPolicy.boundedResult(value)) throw new IllegalStateException("Empty or oversized result");
+        possibleStart.set(false);
+        return value;
+    }
     String execute(String text, String language, String effort, byte[] wav, AtomicBoolean cancelled,
             AtomicBoolean possibleStart) throws Exception {
         if (wav == null && !SessionPolicy.translationEffortAllowed(effort))
@@ -99,10 +117,7 @@ final class BridgeClient {
                 JSONObject result = request("GET", "/jobs/" + job, null, null);
                 switch (result.getString("state")) {
                     case "completed":
-                        possibleStart.set(false);
-                        String value = result.getString("text");
-                        if (!SessionPolicy.bounded(value)) throw new IllegalStateException("Empty or oversized result");
-                        return value;
+                        return completedResult(result, possibleStart);
                     case "failed": possibleStart.set(false); throw new IllegalStateException("The local text/audio request failed");
                     case "cancelled": possibleStart.set(false); throw new InterruptedException();
                     default: Thread.sleep(250);

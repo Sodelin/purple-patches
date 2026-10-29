@@ -3,6 +3,8 @@ package dev.purple.patches.gboard;
 /** Pure policy shared by real IME actions and off-device regression checks. */
 public final class SessionPolicy {
     public static final int TEXT_BYTES = 8192;
+    // The companion caps Whisper output at 64 KiB and Codex output slightly below it.
+    public static final int RESULT_BYTES = 64 * 1024;
     public static final int AUDIO_SECONDS = 60;
     public static final String WHISPER_PREFLIGHT = "full-v3-pin-engine-sha-v1";
     public static final String PERMISSION_LOCAL_TOOLS = "local-tools";
@@ -132,6 +134,11 @@ public final class SessionPolicy {
     public static boolean bounded(String value) {
         return value != null && !value.trim().isEmpty()
                 && value.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= TEXT_BYTES;
+    }
+    /** Output has the companion's result bound, independent of the smaller input bound. */
+    public static boolean boundedResult(String value) {
+        return value != null && !value.trim().isEmpty()
+                && value.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= RESULT_BYTES;
     }
     public static boolean localEndpoint(String value) {
         if (value == null) return false;

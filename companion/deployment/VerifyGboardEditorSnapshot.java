@@ -109,6 +109,20 @@ public final class VerifyGboardEditorSnapshot {
         require(cancelNotice && uncertainNotice, "Missing potential-start warning text");
     }
 
+    /** Reference checks only; they do not establish Android rendering or insertion. */
+    private static void verifyResultBound(Map<String, ClassDef> classes) {
+        method(classes, POLICY, "boundedResult");
+        require(!positions(calls(method(classes, BRIDGE, "completedResult")), POLICY, "boundedResult").isEmpty(),
+                "Completed result does not reference the output-size policy");
+        require(!positions(calls(method(classes, BRIDGE, "execute")), BRIDGE, "completedResult").isEmpty(),
+                "Job execution does not reference completed-result validation");
+        boolean runtimeBound = false;
+        for (ClassDef type : classes.values()) if (type.getType().startsWith("Ldev/purple/patches/gboard/PurpleAiRuntime"))
+            for (Method candidate : type.getMethods()) if (candidate.getImplementation() != null)
+                runtimeBound |= !positions(calls(candidate), POLICY, "boundedResult").isEmpty();
+        require(runtimeBound, "Runtime does not reference the output-size policy");
+    }
+
     /** Linkage only: presence of references is not control-flow or Android execution proof. */
     private static void verifyBootstrap(Map<String, ClassDef> classes) {
         for (String name : new String[]{"begin", "invalidate", "consume", "pending"})
@@ -211,6 +225,14 @@ public final class VerifyGboardEditorSnapshot {
             try { verifyStartWarning(missing); } catch (IllegalStateException expected) { refused = true; }
             require(refused, "Potential-start checker accepted a missing bridge");
             System.out.println("Verified potential-start warning references and missing-bridge negative control; no cancellation or recovery is proved.");
+        }
+        if (revision >= 17) {
+            verifyResultBound(classes);
+            var missing = new HashMap<>(classes); missing.remove(POLICY);
+            boolean refused = false;
+            try { verifyResultBound(missing); } catch (IllegalStateException expected) { refused = true; }
+            require(refused, "Result checker accepted an absent policy class");
+            System.out.println("Verified completed-result and insertion-policy references; no Android behavior is proved.");
         }
     }
 }

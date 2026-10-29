@@ -120,6 +120,40 @@ public class SessionPolicyCheck {
                 Object wrong=arr.getConstructor().newInstance(); append.invoke(wrong,7); put.invoke(sol,"efforts",wrong);
                 rejectsBridgeCatalog(parse,response);
                 rejectsBridgeCatalog(parse,obj.getConstructor().newInstance());
+
+                var completed=bridge.getDeclaredMethod("completedResult",obj,java.util.concurrent.atomic.AtomicBoolean.class);
+                completed.setAccessible(true);
+                Object result=obj.getConstructor().newInstance();
+                String longText="界".repeat(3000); // 9,000 UTF-8 bytes; valid server output, larger than an input.
+                put.invoke(result,"text",longText);
+                var possible=new java.util.concurrent.atomic.AtomicBoolean(true);
+                check(completed.invoke(null,result,possible).equals(longText) && !possible.get());
+                put.invoke(result,"text","x".repeat(SessionPolicy.RESULT_BYTES+1));
+                possible.set(true);
+                try { completed.invoke(null,result,possible); throw new AssertionError("Accepted oversized result"); }
+                catch (java.lang.reflect.InvocationTargetException problem) {
+                    check(problem.getCause() instanceof IllegalStateException && possible.get());
+                }
+
+                String escaped="\\u0001".repeat(SessionPolicy.RESULT_BYTES-1)+"X";
+                String job="{\"id\":\""+"a".repeat(64)+"\",\"state\":\"completed\",\"text\":\""
+                        +escaped+"\",\"error\":null}";
+                check(job.getBytes(java.nio.charset.StandardCharsets.UTF_8).length>131072);
+                var limit=bridge.getDeclaredMethod("responseLimit",String.class,String.class); limit.setAccessible(true);
+                var read=bridge.getDeclaredMethod("responseText",java.io.InputStream.class,int.class); read.setAccessible(true);
+                int jobLimit=(Integer)limit.invoke(null,"GET","/jobs/"+"a".repeat(64));
+                int ordinaryLimit=(Integer)limit.invoke(null,"GET","/health");
+                check(ordinaryLimit==131072 && (Integer)limit.invoke(null,"POST","/jobs/x")==ordinaryLimit);
+                Object received=read.invoke(null,new java.io.ByteArrayInputStream(
+                        job.getBytes(java.nio.charset.StandardCharsets.UTF_8)),jobLimit);
+                check(job.equals(received));
+                for (int maximum:new int[]{ordinaryLimit,jobLimit}) {
+                    try { read.invoke(null,new java.io.ByteArrayInputStream(new byte[maximum+1]),maximum);
+                        throw new AssertionError("Accepted oversized response"); }
+                    catch (java.lang.reflect.InvocationTargetException problem) {
+                        check(problem.getCause() instanceof IllegalStateException);
+                    }
+                }
             }
         } finally {
             try (java.util.stream.Stream<java.nio.file.Path> paths=java.nio.file.Files.walk(temp)) {
@@ -370,6 +404,12 @@ public class SessionPolicyCheck {
         }) == SessionPolicy.InsertionOutcome.REQUEST_SENT);
         check(sent[0]==4);
         check(SessionPolicy.bounded("hello"));check(!SessionPolicy.bounded(" "));check(!SessionPolicy.bounded("界".repeat(3000)));
+        check(SessionPolicy.boundedResult("界".repeat(3000)));
+        check(SessionPolicy.boundedResult("🦀".repeat(16384)));
+        check(!SessionPolicy.boundedResult("🦀".repeat(16384)+"x"));
+        check(!SessionPolicy.boundedResult(" ") && !SessionPolicy.boundedResult(null));
+        check(java.nio.file.Files.readString(java.nio.file.Path.of("companion/src/cli.rs"))
+                .contains("pub const RESULT_CAP: usize = 64 * 1024;"));
         checkPermissionActivity();
         checkBridgeCatalog();
         System.out.println("Editor privacy, localhost, stale selection and UTF-8 limits passed");
@@ -379,5 +419,6 @@ public class SessionPolicyCheck {
         System.out.println("Bootstrap session, deadline, replacement and one-shot controls passed");
         System.out.println("Scoped permission activity JVM fixture passed");
         System.out.println("Actual bridge catalogue adapter with controlled JSON stubs passed");
+        System.out.println("Companion-sized result and bounded HTTP response controls passed");
     }
 }
