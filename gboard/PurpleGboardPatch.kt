@@ -23,7 +23,8 @@ resourcePatch(
         gboardEditingAccessPointsLifecyclePatch)
     finalize {
         var networkResource = ""
-        var baseCleartext = "false"
+        var baseCleartext = ""
+        var networkPlan: PurpleNetworkResource.Plan? = null
         document("AndroidManifest.xml").use { doc ->
             val root = doc.documentElement
             val app = root.childElements("application").single()
@@ -54,36 +55,22 @@ resourcePatch(
                 marker.setAttributeNS(ANDROID_NS,"android:value","true")
                 app.appendChild(marker)
             }
-            networkResource=app.getAttributeNS(ANDROID_NS,"networkSecurityConfig")
-            baseCleartext=app.getAttributeNS(ANDROID_NS,"usesCleartextTraffic").ifBlank { "false" }
-            check(baseCleartext in setOf("true","false")) { "Unsupported referenced cleartext policy; preserve original and port explicitly" }
-            if (networkResource.isBlank()) {
-                networkResource="@xml/purple_keyboard_network"
+            val existingNetworkResource=app.getAttributeNS(ANDROID_NS,"networkSecurityConfig")
+            baseCleartext=app.getAttributeNS(ANDROID_NS,"usesCleartextTraffic")
+            networkPlan=PurpleNetworkResource.select(existingNetworkResource, get("res"))
+            networkResource=networkPlan!!.resource
+            if (networkPlan!!.create) {
+                // Validate before changing the manifest; the platform decides absent defaults.
+                PurpleNetworkResource.initialXml(baseCleartext)
                 app.setAttributeNS(ANDROID_NS,"android:networkSecurityConfig",networkResource)
             }
         }
         check(networkResource.matches(Regex("@xml/[A-Za-z0-9_]+"))) { "Unsupported network resource" }
-        val path="res/xml/${networkResource.removePrefix("@xml/")}.xml"
         // Preserve stock trust anchors, domain policies and certificate pins.
-        if (networkResource=="@xml/purple_keyboard_network") {
-            get(path).apply { parentFile.mkdirs(); writeText("<network-security-config><base-config cleartextTrafficPermitted=\"$baseCleartext\"/></network-security-config>") }
-        }
-        document(path).use { doc ->
-            val root=doc.documentElement
-            check(root.tagName=="network-security-config")
-            val existing=root.childElements("domain-config").firstOrNull { config ->
-                config.childElements("domain").any { it.textContent=="127.0.0.1" }
-            }
-            check(existing == null || (existing.childElements("domain").count() == 1
-                && existing.childElements("domain-config").none())) {
-                "Loopback shares a broader network policy; preserve it and port explicitly"
-            }
-            val local=existing ?: doc.createElement("domain-config").also(root::appendChild)
-            local.setAttribute("cleartextTrafficPermitted","true")
-            if (existing==null) {
-                val domain=doc.createElement("domain"); domain.textContent="127.0.0.1"
-                domain.setAttribute("includeSubdomains","false"); local.appendChild(domain)
-            }
+        PurpleNetworkResource.prepare(get("res"), networkPlan!!, baseCleartext)
+        val resourceName=networkResource.removePrefix("@xml/")
+        for (path in PurpleNetworkResource.variants(get("res"), resourceName)) {
+            document(path).use { doc -> PurpleNetworkResource.allowLoopback(doc.documentElement) }
         }
     }
 }

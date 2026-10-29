@@ -84,6 +84,9 @@ def materialize(destination):
     replace(lifecycle,'        SESSION.end();','        dev.purple.patches.gboard.PurpleAiRuntime.end();\n        SESSION.end();')
     patch=destination/'patches/src/main/kotlin/dev/purple/patches/gboard/PurpleGboardPatch.kt'
     patch.parent.mkdir(parents=True,exist_ok=True);patch.write_bytes(snapshot['gboard/PurpleGboardPatch.kt'])
+    resource_helper=destination/'patches/src/main/java/dev/purple/patches/gboard/PurpleNetworkResource.java'
+    if resource_helper.exists():raise ValueError('Existing patch-time resource helper')
+    resource_helper.parent.mkdir(parents=True,exist_ok=True);resource_helper.write_bytes(snapshot['gboard/PurpleNetworkResource.java'])
     registry=destination/'patches/src/main/kotlin/dev/jason/gboardpatches/patches/gboard/registry/GboardPatchRegistry.kt'
     replace(registry,'    val morpheRegistrations: Set<Patch<*>> = linkedSetOf(',
             '    val morpheRegistrations: Set<Patch<*>> = linkedSetOf(\n        dev.purple.patches.gboard.purpleGboardActionsPatch,')
