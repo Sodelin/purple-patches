@@ -1,0 +1,22 @@
+{
+  "run_id": 40869558381,
+  "source_commit": "74a93761f4d8740141d858d168d48d9a4edcae59",
+  "artifact_id": 12895311490,
+  "artifact_zip_sha256": "171ab55f5b11c2ef8c509d1fc8597955948b2a7eefc30538e3cf4a7b1d6d0fcc",
+  "artifact_files_sha256": {
+    "target-proof.json": "c5e605069b80c2d778282ec28592952cd4837120a3f16eee292d8b86cb5c14cb",
+    "policy-hooks.txt": "fc4c231b2274b945498c78b2be8c0d2b3505ee08e0a1fdb59fd1e443fef53d86",
+    "flac-prefix-controls.txt": "10cb5097e2ee2b69251943d433916b218a9b7e8e0267d323b5316c8881c82a18",
+    "flac-stream-controls.txt": "663c5cd868d984ab0419e188863fb5bb0c6748c574d944ca736c9746472fa7b3"
+  },
+  "controls_report": "FLAC_STREAM_CONTROLS\tpassed=46\tapp_binding=false\tfull_codec_admission=false",
+  "prefix_controls_report": "FLAC_PREFIX_CONTROLS\tpassed=129\tfull_media_admission=false",
+  "adapter_java_compiled": true,
+  "source_stop_identity_bindings_in_controls": "Controlled sources/stops, not actual Android host authority",
+  "app_binding_verified": false,
+  "full_codec_admission_verified": false,
+  "apk_executed": false,
+  "model_invocations": false,
+  "device_actions": false,
+  "limitation": "Decoder-input byte preservation and range/stop/response-lifetime checks only. Real Natune cache/DataSpec provenance and complete decoder/source policy still require integration."
+}

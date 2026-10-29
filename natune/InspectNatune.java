@@ -3,6 +3,12 @@ import com.android.tools.smali.dexlib2.Opcodes;
 import com.android.tools.smali.dexlib2.iface.Method;
 import com.android.tools.smali.dexlib2.iface.ClassDef;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction;
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
 import com.android.tools.smali.dexlib2.iface.reference.StringReference;
 import java.io.File;
@@ -63,6 +69,28 @@ public final class InspectNatune {
         if (spec == null) throw new IllegalStateException("Exact DataSpec class missing");
         for (var field : spec.getFields())
             System.out.println("STREAM_SPEC_FIELD\t" + field.getName() + ':' + field.getType() + "\tflags=" + field.getAccessFlags());
+        for (var method : spec.getMethods()) {
+            var body = method.getImplementation();
+            if (body == null) continue;
+            System.out.println("SPEC_METHOD\t" + signature(method) + "\tflags=" + method.getAccessFlags() +
+                               "\tregisters=" + body.getRegisterCount());
+            int offset = 0;
+            for (var instruction : body.getInstructions()) {
+                var row = new StringBuilder("SPEC_NODE\t" + offset + "\t" + instruction.getOpcode().name());
+                if (instruction instanceof OneRegisterInstruction r) row.append("\tA=").append(r.getRegisterA());
+                if (instruction instanceof TwoRegisterInstruction r) row.append("\tB=").append(r.getRegisterB());
+                if (instruction instanceof ThreeRegisterInstruction r) row.append("\tC=").append(r.getRegisterC());
+                if (instruction instanceof WideLiteralInstruction r) row.append("\tliteral=").append(r.getWideLiteral());
+                if (instruction instanceof OffsetInstruction r) row.append("\ttarget=").append(offset + r.getCodeOffset());
+                if (instruction instanceof ReferenceInstruction r) {
+                    var reference = r.getReference();
+                    if (reference instanceof FieldReference f) row.append("\tfield=").append(f);
+                    if (reference instanceof MethodReference m) row.append("\tmethod=").append(signature(m));
+                    // No arbitrary string constants, URI/header values or app data.
+                }
+                System.out.println(row);offset += instruction.getCodeUnits();
+            }
+        }
         if (interfaces != 1 || !sources.contains("Lr8/dm2;"))
             throw new IllegalStateException("Pinned stream interface hierarchy changed");
         System.out.println("STREAM_TOTAL\tsources=" + sources.size() + "\tinterfaces=" + interfaces + "\tfactories=" + factories);
