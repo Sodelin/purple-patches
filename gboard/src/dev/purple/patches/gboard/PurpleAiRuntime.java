@@ -277,13 +277,14 @@ public final class PurpleAiRuntime {
         if (ime == null || !anchor.matches(ime, generation) || !busy.compareAndSet(false, true)) return;
         final long request = ++operation;
         AtomicBoolean stopped = new AtomicBoolean(); cancellation = stopped;
+        AtomicBoolean possibleStart = new AtomicBoolean();
         boolean voice = language == null;
         WhisperCapture recorder = voice ? new WhisperCapture() : null; capture = recorder;
         AlertDialog progress = new AlertDialog.Builder(ime).setTitle(voice ? "Whisper 3 dictation" : "AI Translate")
                 .setMessage(voice ? "Preparing microphone…" : "Translating selected text…")
-                .setNegativeButton("Cancel", (d,w) -> cancel())
+                .setNegativeButton("Cancel", (d,w) -> cancelAction(request, possibleStart))
                 .setPositiveButton(voice ? "Stop recording" : "Working…", null).create();
-        progress.setOnCancelListener(d -> cancel());
+        progress.setOnCancelListener(d -> cancelAction(request, possibleStart));
         progress.setOnShowListener(d -> {
             progress.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(voice);
             progress.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -311,7 +312,7 @@ public final class PurpleAiRuntime {
                     }});
                 }
                 final boolean recordingLimited = reachedLimit;
-                String text = currentBridge.execute(anchor.selected, language, effort, audio, stopped);
+                String text = currentBridge.execute(anchor.selected, language, effort, audio, stopped, possibleStart);
                 MAIN.post(() -> {
                     InputMethodService current = service.get(); if (current == null) return;
                     boolean safe = anchor.previewEligible(current, generation);
@@ -358,7 +359,10 @@ public final class PurpleAiRuntime {
                 });
             } catch (Exception failure) {
                 MAIN.post(() -> { if (request == operation && !stopped.get() && anchor.session == generation) {
-                    dismiss(); notifyUser(failure instanceof IllegalStateException ? failure.getMessage() : "Local action unavailable; original text preserved");
+                    dismiss();
+                    notifyUser(possibleStart.get()
+                            ? "The local job may still be running or its outcome is unknown. Check before retrying."
+                            : failure instanceof IllegalStateException ? failure.getMessage() : "Local action unavailable; original text preserved");
                 }});
             } finally {
                 if (audio != null) java.util.Arrays.fill(audio, (byte)0);
@@ -368,6 +372,11 @@ public final class PurpleAiRuntime {
                 MAIN.post(() -> busy.set(false));
             }
         }, "purple-gboard-action").start();
+    }
+    private static void cancelAction(long request, AtomicBoolean possibleStart) {
+        if (request != operation) return;
+        cancel();
+        if (possibleStart.get()) notifyUser("Stop requested. The local job may still be running; check before retrying.");
     }
     private static final class Snapshot {
         final InputConnection connection;

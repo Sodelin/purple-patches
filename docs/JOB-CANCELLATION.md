@@ -20,6 +20,16 @@ TCP write success is not evidence that the client received the returned ID.
 The encrypted intent is useful recovery evidence; it does not by itself give
 the client a handle or prove that an unknown job was cancelled and reaped.
 
+Alpha.13 source marks a possible start before sending the POST. If the user
+cancels while a start may have been sent, the keyboard warns that stopping was
+requested and the job may still be running. A transport/error result after a
+possible start similarly warns that the outcome may be unknown. A cancel that
+wins before dispatch does not issue that warning; the worker rechecks the stop
+flag before sending. Terminal job states clear the marker. These are
+conservative, in-memory notices, not a job ID, durable recovery, confirmed
+cancellation or a way to inspect an unknown job. Session loss can still hide
+the notice. The source change has not yet been built or tested on Android.
+
 The success path has a related recovery boundary. At source `6926a11`, the
 worker seals a failure/cancellation receipt when its engine outcome is an
 error, but on success it puts the completed job and result in the in-memory

@@ -20,6 +20,7 @@ public final class VerifyGboardEditorSnapshot {
     private static final String BOOTSTRAP = "Ldev/purple/patches/gboard/SessionPolicy$BootstrapAttempt;";
     private static final String RECEIVER = "Ldev/purple/patches/gboard/PurpleBootstrapReceiver;";
     private static final String PREVIEW = "Ldev/purple/patches/gboard/SessionPolicy$PreviewDisposition;";
+    private static final String BRIDGE = "Ldev/purple/patches/gboard/BridgeClient;";
 
     private static void require(boolean condition, String detail) {
         if (!condition) throw new IllegalStateException(detail);
@@ -85,6 +86,27 @@ public final class VerifyGboardEditorSnapshot {
                 }
             }
         require(policy && eligibility && notice && enabled, "Missing copy-only preview references");
+    }
+
+    /** Linkage and notice presence only: this does not prove cancellation or recovery. */
+    private static void verifyStartWarning(Map<String, ClassDef> classes) {
+        require(!positions(calls(method(classes, BRIDGE, "execute")), POLICY, "markPotentialStart").isEmpty(),
+                "Bridge lacks potential-start marker reference");
+        var cancel = calls(method(classes, RUNTIME, "cancelAction"));
+        require(!positions(cancel, RUNTIME, "cancel").isEmpty()
+                        && !positions(cancel, RUNTIME, "notifyUser").isEmpty(),
+                "Cancel action lacks stop or notice reference");
+        boolean cancelNotice = false, uncertainNotice = false;
+        for (ClassDef type : classes.values()) if (type.getType().startsWith("Ldev/purple/patches/gboard/PurpleAiRuntime"))
+            for (Method candidate : type.getMethods()) {
+                if (candidate.getImplementation() == null) continue;
+                for (var instruction : candidate.getImplementation().getInstructions())
+                    if (instruction instanceof ReferenceInstruction ref && ref.getReference() instanceof StringReference value) {
+                        cancelNotice |= value.getString().contains("Stop requested. The local job may still be running");
+                        uncertainNotice |= value.getString().contains("The local job may still be running or its outcome is unknown");
+                    }
+            }
+        require(cancelNotice && uncertainNotice, "Missing potential-start warning text");
     }
 
     /** Linkage only: presence of references is not control-flow or Android execution proof. */
@@ -181,6 +203,14 @@ public final class VerifyGboardEditorSnapshot {
             try { verifyCopyOnlyPreview(missing); } catch (IllegalStateException expected) { refused = true; }
             require(refused, "Copy-only preview checker accepted a missing disposition");
             System.out.println("Verified changed-anchor copy-only preview references and missing-class negative control; no Android behavior is proved.");
+        }
+        if (revision >= 13) {
+            verifyStartWarning(classes);
+            var missing = new HashMap<>(classes); missing.remove(BRIDGE);
+            boolean refused = false;
+            try { verifyStartWarning(missing); } catch (IllegalStateException expected) { refused = true; }
+            require(refused, "Potential-start checker accepted a missing bridge");
+            System.out.println("Verified potential-start warning references and missing-bridge negative control; no cancellation or recovery is proved.");
         }
     }
 }

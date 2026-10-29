@@ -1,6 +1,26 @@
 import dev.purple.patches.gboard.SessionPolicy;
 public class SessionPolicyCheck {
     private static void check(boolean value) { if (!value) throw new AssertionError(); }
+    /** A cancel racing dispatch must see the possible-start marker if dispatch proceeds. */
+    private static void checkPotentialStart() throws Exception {
+        var executor=java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            for (int i=0;i<300;i++) {
+                var stopped=new java.util.concurrent.atomic.AtomicBoolean();
+                var possible=new java.util.concurrent.atomic.AtomicBoolean();
+                var start=new java.util.concurrent.CountDownLatch(1);
+                var dispatch=executor.submit(() -> {
+                    start.await(); return SessionPolicy.markPotentialStart(stopped,possible);
+                });
+                var cancel=executor.submit(() -> {
+                    start.await(); stopped.set(true); return possible.get();
+                });
+                start.countDown();
+                boolean mayDispatch=dispatch.get(), warning=cancel.get();
+                check(!mayDispatch || warning);
+            }
+        } finally { executor.shutdownNow(); }
+    }
     private static SessionPolicy.TranslationCatalogReader catalog(String[] ids, String[][] efforts) {
         return new SessionPolicy.TranslationCatalogReader() {
             public int size() { return ids.length; }
@@ -312,6 +332,7 @@ public class SessionPolicyCheck {
         check(SessionPolicy.previewDisposition(false,false,true,true)==SessionPolicy.PreviewDisposition.REFUSE);
         check(SessionPolicy.previewDisposition(true,true,true,true)==SessionPolicy.PreviewDisposition.REFUSE);
         check(SessionPolicy.previewDisposition(true,false,false,false)==SessionPolicy.PreviewDisposition.REFUSE);
+        checkPotentialStart();
         String[] tools = SessionPolicy.permissionsFor(SessionPolicy.PERMISSION_LOCAL_TOOLS);
         check(tools.length == 1 && tools[0].equals("com.termux.permission.RUN_COMMAND"));
         String[] microphone = SessionPolicy.permissionsFor(SessionPolicy.PERMISSION_MICROPHONE);
@@ -354,6 +375,7 @@ public class SessionPolicyCheck {
         System.out.println("Editor privacy, localhost, stale selection and UTF-8 limits passed");
         System.out.println("One-shot insertion request and uncertain-result controls passed");
         System.out.println("Same-session changed-anchor copy-only preview controls passed");
+        System.out.println("Potential-start cancellation ordering controls passed");
         System.out.println("Bootstrap session, deadline, replacement and one-shot controls passed");
         System.out.println("Scoped permission activity JVM fixture passed");
         System.out.println("Actual bridge catalogue adapter with controlled JSON stubs passed");

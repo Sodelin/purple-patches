@@ -77,12 +77,13 @@ final class BridgeClient {
             }
         });
     }
-    String execute(String text, String language, String effort, byte[] wav, AtomicBoolean cancelled) throws Exception {
+    String execute(String text, String language, String effort, byte[] wav, AtomicBoolean cancelled,
+            AtomicBoolean possibleStart) throws Exception {
         if (wav == null && !SessionPolicy.translationEffortAllowed(effort))
             throw new IllegalArgumentException("Choose Medium or Max reasoning");
         if (wav != null && effort != null) throw new IllegalArgumentException("Unexpected dictation reasoning");
         verify(wav != null);
-        if (cancelled.get()) throw new InterruptedException();
+        if (!SessionPolicy.markPotentialStart(cancelled, possibleStart)) throw new InterruptedException();
         JSONObject started;
         if (wav == null) {
             JSONObject data = new JSONObject().put("mode", "translate").put("prompt", text)
@@ -98,11 +99,12 @@ final class BridgeClient {
                 JSONObject result = request("GET", "/jobs/" + job, null, null);
                 switch (result.getString("state")) {
                     case "completed":
+                        possibleStart.set(false);
                         String value = result.getString("text");
                         if (!SessionPolicy.bounded(value)) throw new IllegalStateException("Empty or oversized result");
                         return value;
-                    case "failed": throw new IllegalStateException("The local text/audio request failed");
-                    case "cancelled": throw new InterruptedException();
+                    case "failed": possibleStart.set(false); throw new IllegalStateException("The local text/audio request failed");
+                    case "cancelled": possibleStart.set(false); throw new InterruptedException();
                     default: Thread.sleep(250);
                 }
             }

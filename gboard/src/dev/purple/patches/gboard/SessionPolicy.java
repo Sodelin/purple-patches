@@ -53,6 +53,15 @@ public final class SessionPolicy {
         if (!currentRequest || cancelled || !safeSession) return PreviewDisposition.REFUSE;
         return sameAnchor ? PreviewDisposition.INSERTABLE : PreviewDisposition.COPY_ONLY;
     }
+    /** Mark a possible dispatch before sending so a concurrent cancel can warn the user. */
+    public static boolean markPotentialStart(java.util.concurrent.atomic.AtomicBoolean cancelled,
+            java.util.concurrent.atomic.AtomicBoolean possibleStart) {
+        if (cancelled == null || possibleStart == null) throw new IllegalArgumentException();
+        if (cancelled.get()) return false;
+        possibleStart.set(true);
+        if (cancelled.get()) { possibleStart.set(false); return false; }
+        return true;
+    }
     /** One preview may send at most one insertion request, even on a duplicate gesture. */
     public static final class InsertionAttempt {
         private boolean attempted;
