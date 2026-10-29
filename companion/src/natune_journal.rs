@@ -176,6 +176,14 @@ impl<S: Store> Journal<S> {
                 return Err("Competing Move claims require reconciliation".into());
             }
         }
+        let mut owned_documents = BTreeSet::new();
+        for row in journal.rows.values().filter(|r| !r.local_cleaned && r.stage != Stage::Abandoned) {
+            if let Some(uri) = &row.destination {
+                if !owned_documents.insert(uri) {
+                    return Err("One local document is claimed by multiple Move operations".into());
+                }
+            }
+        }
         let mut transfers = BTreeSet::new();
         for row in journal.rows.values() {
             if let Some(remote) = &row.remote {
@@ -244,6 +252,12 @@ impl<S: Store> Journal<S> {
         if !hex64(operation_id) { return Err("Move operation identity invalid".into()); }
         let prior = self.rows.get(operation_id);
         if prior.map(|r| r.generation) != expected_generation { return Err("Move generation conflict".into()); }
+        if let Event::Destination { uri } = &event {
+            if self.rows.values().any(|row| row.claim.operation_id != operation_id && !row.local_cleaned &&
+                row.stage != Stage::Abandoned && row.destination.as_ref() == Some(uri)) {
+                return Err("Local destination already owned by another Move operation".into());
+            }
+        }
         let generation = match expected_generation {
             None => 0,
             Some(g) => g.checked_add(1).ok_or("Move generation overflow")?,
@@ -513,9 +527,27 @@ mod tests {
         }
         assert_eq!(memory.events.lock().unwrap().len(),3);
         step(&mut j,&a,Event::RemoteVerified{receipt:receipt()});
-        let b=claim('d'); begin(&mut j,&b); verify(&mut j,&b);
+        let b=claim('d'); begin(&mut j,&b);
+        let other=Document{uri:"content://fixture.documents/document/other".into(),..document()};
+        step(&mut j,&b,Event::Destination{uri:other.uri.clone()});
+        step(&mut j,&b,Event::Verified{document:other});
         assert!(j.record(&b.operation_id,Some(2),Event::RemoteVerified{receipt:receipt()}).is_err());
         assert_eq!(memory.events.lock().unwrap().len(),7);
+    }
+    #[test]
+    fn live_destination_ownership_refuses_conflicts_and_replays_cleaned_reuse() {
+        let memory=Memory::default(); let mut j=Journal::open(memory.clone(),1000).unwrap();
+        // Old operation sorts AFTER the later one during replay.
+        let old=claim('f'); let later=claim('0'); begin(&mut j,&old); verify(&mut j,&old);
+        begin(&mut j,&later);
+        assert!(j.record(&later.operation_id,Some(0),Event::Destination{uri:document().uri}).is_err());
+        step(&mut j,&old,Event::RemoteVerified{receipt:receipt()}); step(&mut j,&old,Event::StageCleaned);
+        step(&mut j,&later,Event::Destination{uri:document().uri});
+        drop(j);
+        let restored=Journal::open(memory.clone(),1000).unwrap();
+        assert_eq!(restored.snapshot(&old.operation_id).unwrap().unwrap().stage,Stage::StagedRemotely);
+        assert_eq!(restored.snapshot(&later.operation_id).unwrap().unwrap().stage,Stage::Destination);
+        assert_eq!(restored.reserved_bytes().unwrap(),100);
     }
     #[test]
     fn remote_cleanup_unknown_refuses_replay_and_schema_downgrade() {

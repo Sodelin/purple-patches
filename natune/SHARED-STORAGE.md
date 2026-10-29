@@ -58,12 +58,19 @@ admission concurrency alone is not parallel cache-copy implementation.
    by the app. Any failure, cancellation, revoked grant or changed source retains
    the cached original. A flush, file existence, count/toast or free-space delta
    alone is not verification.
-4. Retain the verified content URI and its original song/rendition relationship
-   in the app's offline index before removing the source. Preserve album,
-   playlist, favorite and play-history identity. Stop/cancel the exact download
-   request and wait for the owner to settle it so it cannot recreate cache spans.
-5. Remove only the exact unchanged cached source after verification, indexing
-   and fresh reader/writer checks. Confirm removal and download-state consistency.
+4. For a document intentionally retained on the phone, preserve its URI and
+   original song/rendition relationship in the app's offline index. For a
+   disposable computer-transfer staging document, do not advertise it as a
+   permanent playback URI; independently verify the corresponding saved Fuji
+   copy and confirm temporary cleanup before releasing its budget. Preserve
+   album, playlist, favorite and play-history identity in either lane.
+5. Before removing an original phone song, verify complete matching source and
+   computer-copy evidence and the user's applicable selection. Preserve the
+   three explicit KEEP albums. Nolan's later clarification does not require
+   Screening Room Omni acceptance first for additional music outside the earlier
+   priority list. Stop/cancel the exact download request and wait for owner
+   settlement, then remove only the eligible unchanged cached source after fresh
+   reader/writer checks. Confirm removal and download-state consistency.
    An interrupted removal is an uncertain transaction to reconcile, not a fresh
    request to copy/delete again. Required claim/result/recovery records must use
    the existing encrypted-before-persistence contract; do not add plaintext

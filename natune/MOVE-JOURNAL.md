@@ -58,7 +58,10 @@ owner, not proof of their own truth, permission to remove source music, or a
 working scheduler. Unknown remote completion or cleanup keeps the reservation
 charged until the owner reconciles it. Reusing a receiver/transfer identity for
 another song, mismatched bytes or digest, out-of-order cleanup, and a schema
-downgrade refuse. After confirmed staging cleanup, the document is not returned
+downgrade refuse. Concurrent operations may not claim the same live local
+document; after confirmed cleanup, an owner may select a newly created document
+with the same provider URI and recovery reconciles the final states independent
+of operation sort order. After confirmed staging cleanup, the document is not returned
 as a live local playback mapping. The original song remains claimed and its
 operation ID consumed; moving it later still requires an actual bound removal
 and selection path.
