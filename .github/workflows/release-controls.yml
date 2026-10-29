@@ -1,6 +1,12 @@
 name: Offline release and feed controls
 on:
   workflow_dispatch:
+    inputs:
+      worker_ui_diagnostic:
+        description: Run the pinned alpha.23 worker cleanup diagnostic
+        type: boolean
+        default: false
+        required: false
   push:
     paths:
       - 'tools/release_checks.py'
@@ -33,7 +39,7 @@ jobs:
           python -B -O tools/test_release_checks.py
           PYTHONOPTIMIZE=1 python -B tools/test_release_checks.py
       - name: Diagnose pinned Gboard worker cleanup on a host-only UI
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_ui_diagnostic }}
         run: |
           test "$(git hash-object gboard/src/dev/purple/patches/gboard/PurpleAiRuntime.java)" = 0ebb96c32985cb127a50bd26ec9e120577028b05
           test "$(git hash-object gboard/src/dev/purple/patches/gboard/WorkerStart.java)" = a8b777742f4f66a5e3c1cf7d8bf6764530d793ba
