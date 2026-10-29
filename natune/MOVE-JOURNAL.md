@@ -102,3 +102,8 @@ identity and leaves encrypted proof records under a fresh caller-provided case
 ID. An existing or uncertain case must not be replayed under a new ID. A
 cross-build by itself does not establish that this check ran successfully on
 the phone; actual backend, app-owner and device acceptance remain open.
+
+Hosted run40905442006 at2dd1a59201b4d90d39514365c4f0efe8bdccdc97
+passed36 Rust library controls and cross-built the checker for AArch64 Android.
+`journal-check-verification.json` records complete artifact/member and run-source
+hash readback. The checker was not executed or installed on the phone.
