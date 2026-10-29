@@ -11,7 +11,7 @@ PIN = 'e721536ab19e30d16ce9d31ae1830ca299aad383'
 ROOT = Path(__file__).resolve().parent
 
 
-def materialize(destination):
+def materialize(destination, local_flac=False):
     if os.environ.get('GITHUB_ACTIONS') != 'true' or os.environ.get('RUNNER_OS') != 'Linux':
         raise RuntimeError('Off-phone hosted materialization only')
     destination = destination.resolve()
@@ -27,6 +27,9 @@ def materialize(destination):
     target.parent.mkdir(parents=True, exist_ok=False)
     source = (ROOT / 'NatuneMobileDataPatch.kt').read_bytes()
     target.write_bytes(source)
+    if local_flac:
+        (target.parent / 'NatuneLocalFlacPatch.kt').write_bytes((ROOT / 'NatuneLocalFlacPatch.kt').read_bytes())
+    version = '0.2.0-dev.1' if local_flac else '0.1.0-alpha.1'
     build = destination / 'patches/build.gradle.kts'
     text = build.read_text()
     for old, new in {
@@ -44,15 +47,18 @@ def materialize(destination):
     text = properties.read_text()
     if text.count('version = 1.0.0') != 1:
         raise RuntimeError('Template version hook changed')
-    properties.write_text(text.replace('version = 1.0.0', 'version = 0.1.0-alpha.1'))
+    properties.write_text(text.replace('version = 1.0.0', 'version = ' + version))
     proof = {'template_commit': PIN, 'overlay_commit': os.environ['GITHUB_SHA'],
              'patch_source_sha256': hashlib.sha256(source).hexdigest(),
              'target': json.loads((ROOT / 'target.json').read_text()),
              'feature': 'Allow full-quality audio on mobile data',
+             'bundle_version': version,
+             'local_decoder_guard_included': local_flac,
+             'local_decoder_guard_sha256': hashlib.sha256((ROOT / 'NatuneLocalFlacPatch.kt').read_bytes()).hexdigest() if local_flac else None,
              'strict_flac_implemented': False, 'additional_providers_implemented': False,
              'phone_acceptance': False}
     (destination / 'purple-natune-provenance.json').write_text(json.dumps(proof, indent=2) + '\n')
 
 
 if __name__ == '__main__':
-    materialize(Path(sys.argv[1]))
+    materialize(Path(sys.argv[1]), local_flac='--local-flac' in sys.argv[2:])

@@ -112,10 +112,18 @@ public final class VerifyNatuneMobilePatch {
         return out.toString();
     }
     static Body body(Method method, Site expectedChange) {
+        return body(method, expectedChange, 0);
+    }
+    static Body body(Method method, Site expectedChange, int verifiedPrefixInstructions) {
         var implementation = method.getImplementation();
         if (implementation == null) return null;
         var instructions = new ArrayList<Instruction>();
         implementation.getInstructions().forEach(instructions::add);
+        if (verifiedPrefixInstructions > 0) {
+            need(implementation.getTryBlocks().isEmpty(), "Cannot strip a prefix across try handlers");
+            need(verifiedPrefixInstructions < instructions.size(), "Missing original method body");
+            instructions.subList(0, verifiedPrefixInstructions).clear();
+        }
         int[] originalWidths = instructions.stream().mapToInt(Instruction::getCodeUnits).toArray();
         var labels = new HashMap<Integer,Integer>();
         var switches = new HashMap<Integer,List<Integer>>();
@@ -163,6 +171,11 @@ public final class VerifyNatuneMobilePatch {
         return new Body(implementation.getRegisterCount(), nodes, handlers);
     }
     static Snapshot snapshot(File apk, boolean expectedChanges) throws Exception {
+        return snapshot(apk, expectedChanges, Map.of());
+    }
+    // A caller must independently verify each exact prefix before supplying its
+    // length here. The remaining complete body still uses the ordinary verifier.
+    static Snapshot snapshot(File apk, boolean expectedChanges, Map<String,Integer> verifiedPrefixes) throws Exception {
         var methods = new TreeMap<String, MethodState>();
         var classes = new TreeMap<String, ClassState>();
         var dex = DexFileFactory.loadDexContainer(apk, Opcodes.getDefault());
@@ -178,7 +191,7 @@ public final class VerifyNatuneMobilePatch {
                 for (var method : clazz.getMethods()) {
                     String key = signature(method);
                     Site site = expectedChanges ? SITES.stream().filter(x -> x.method().equals(key)).findFirst().orElse(null) : null;
-                    need(methods.put(key, new MethodState(method.getAccessFlags(), method.getAnnotations(), method.getParameters().stream().map(p -> p.getAnnotations()).toList(), body(method, site))) == null,
+                    need(methods.put(key, new MethodState(method.getAccessFlags(), method.getAnnotations(), method.getParameters().stream().map(p -> p.getAnnotations()).toList(), body(method, site, verifiedPrefixes.getOrDefault(key, 0)))) == null,
                          "Duplicate method");
                 }
             }
@@ -189,6 +202,9 @@ public final class VerifyNatuneMobilePatch {
         initializerControls();
         var expected = snapshot(new File(args[0]), true);
         var actual = snapshot(new File(args[1]), false);
+        compare(expected, actual, args, "Verified exact five audio result overrides; global low-data helper and every other method preserved.");
+    }
+    static void compare(Snapshot expected, Snapshot actual, String[] args, String report) throws Exception {
         need(expected.classes().keySet().equals(actual.classes().keySet()), "Class set changed");
         int classDifferences = 0;
         for (String name : expected.classes().keySet()) {
@@ -243,7 +259,7 @@ public final class VerifyNatuneMobilePatch {
                      "Unexpected non-DEX entry added");
             }
         }
-        System.out.println("Verified exact five audio result overrides; global low-data helper and every other method preserved.");
+        System.out.println(report);
         System.out.println("Classes=" + expected.classes().size() + "; methods=" + expected.methods().size() +
             "; retained native files=" + nativeFiles + "; retained assets=" + assets + "; all retained non-DEX/signature entries=" + preservedEntries);
         System.out.println("Compared instructions/references/registers/constants/branch targets/try handlers, class and field metadata; debug items and APK signing are outside this comparison.");

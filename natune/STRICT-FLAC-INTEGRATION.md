@@ -137,3 +137,47 @@ Primary API references:
 
 Primary source:
 https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt
+
+## Local decoder policy prototype 0.2.0-dev.1
+
+`NatuneLocalFlacPatch.kt` adds an optional default-off local decoder policy to
+this exact original build/version code/signer. `codec-entry-verification.json`
+pins the actual release's optimized signatures and original bodies. The guard
+compares extractor-parsed `Format.sampleMimeType` (`Lr8/yf4;->o`) against
+`audio/flac`, rather than relying on a filename, resolver label or HTTP MIME.
+It preserves the complete original method on a match and refuses other codecs:
+
+- `Lr8/ge7;->z0(Lr8/hv3;Lr8/yf4;)I`: unsupported subtype.
+- `Lr8/ge7;->y0(Lr8/yf4;)Z`: disables non-FLAC hardware bypass/offload.
+- `Lr8/ge7;->Q(Lr8/hv3;Lr8/yf4;Z)Ljava/util/ArrayList;`: returns an actual empty
+  ArrayList for non-FLAC decoder selection. R8 narrowed upstream's List return;
+  Collections.emptyList would violate this release's type.
+
+These hooks leave decoded PCM output and the video renderer untouched. Input
+from an existing cache still reaches the parsed decoder format. Upstream
+MediaCodecInfo.canReuseCodec refuses reuse across changed sample MIME types;
+actual release reuse behavior, lifecycle/error presentation and Android decoder
+acceptance remain separate checks, not inferred from the source reference.
+The guard cannot detect audio transcoded to FLAC earlier in its provenance.
+
+The dedicated `build-natune-local-flac.yml` builds a separate development bundle
+and applies both this guard and the five mobile-data overrides to the pinned
+original on a hosted runner. It does not publish or replace the selected0.1.0
+feed. `VerifyNatuneLocalFlacPatch.java` independently checks the exact emitted
+prefixes and branch-to-original targets, runs decisions/negative controls over
+those actual instructions, then removes only verified prefixes for the existing
+complete program/metadata/resource comparison. It rejects guard try handlers or
+changed register layout; unsupported extra changes still fail the full verifier.
+Its small interpreter proves dispatch/refusal of the prefix, not actual decoding.
+
+This remains an increment toward the requested strict FLAC/download/provider
+feature. Whole-download integrity, correct recording/full-length matching,
+source retry/quality-tier selection, remote Cast and additional provider adapters
+remain unfinished. No phone install/playback or provider/model request is part
+of this source/build step. Existing selected public bundles are unchanged.
+
+Primary pinned implementation references:
+
+- https://github.com/androidx/media/blob/1.10.1/libraries/exoplayer/src/main/java/androidx/media3/exoplayer/audio/MediaCodecAudioRenderer.java
+- https://github.com/androidx/media/blob/1.10.1/libraries/exoplayer/src/main/java/androidx/media3/exoplayer/mediacodec/MediaCodecInfo.java
+- https://github.com/MorpheApp/morphe-patcher/blob/v2.0.0/src/main/kotlin/app/morphe/patcher/patch/Compatibility.kt
