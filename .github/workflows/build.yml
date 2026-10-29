@@ -60,9 +60,10 @@ jobs:
       - name: Pure editor/session policy controls
         run: |
           mkdir -p "$RUNNER_TEMP/purple-policy"
-          javac -d "$RUNNER_TEMP/purple-policy" gboard/src/dev/purple/patches/gboard/SessionPolicy.java gboard/src/dev/purple/patches/gboard/CaptureSession.java gboard/SessionPolicyCheck.java gboard/CaptureSessionCheck.java gboard/PurpleNetworkResource.java gboard/PurpleNetworkResourceCheck.java
+          javac -d "$RUNNER_TEMP/purple-policy" gboard/src/dev/purple/patches/gboard/SessionPolicy.java gboard/src/dev/purple/patches/gboard/CaptureSession.java gboard/src/dev/purple/patches/gboard/WorkerStart.java gboard/SessionPolicyCheck.java gboard/CaptureSessionCheck.java gboard/WorkerStartCheck.java gboard/PurpleNetworkResource.java gboard/PurpleNetworkResourceCheck.java
           java -cp "$RUNNER_TEMP/purple-policy" SessionPolicyCheck
           java -cp "$RUNNER_TEMP/purple-policy" dev.purple.patches.gboard.CaptureSessionCheck
+          java -cp "$RUNNER_TEMP/purple-policy" dev.purple.patches.gboard.WorkerStartCheck
           java -cp "$RUNNER_TEMP/purple-policy" dev.purple.patches.gboard.PurpleNetworkResourceCheck
       - name: Materialize pinned mature upstream
         run: |

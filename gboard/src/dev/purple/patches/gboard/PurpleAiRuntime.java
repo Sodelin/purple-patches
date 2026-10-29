@@ -176,15 +176,8 @@ public final class PurpleAiRuntime {
                 });
             }
         };
-        try { new Thread(lookup, "purple-gboard-catalog").start(); }
-        catch (RuntimeException unavailable) {
-            if (request == operation) {
-                cancel();
-                if (dialog == progress) dismiss();
-                notifyUser("Local reasoning choices are unavailable");
-            }
-            busy.set(false);
-        }
+        if (!WorkerStart.launch(lookup, "purple-gboard-catalog"))
+            workerStartFailed(request, stopped, progress, null, "Local reasoning choices are unavailable");
     }
     private static void showTranslationEfforts(Snapshot anchor, String language, String[] efforts, long request) {
         InputMethodService ime = service.get();
@@ -293,7 +286,7 @@ public final class PurpleAiRuntime {
         });
         if (!show(progress)) { cancel(); capture = null; busy.set(false); return; }
         BridgeClient currentBridge = bridge;
-        new Thread(() -> {
+        Runnable work = () -> {
             byte[] audio = null;
             try {
                 // Check exact Whisper family and memory-only bridge before opening the microphone.
@@ -371,7 +364,28 @@ public final class PurpleAiRuntime {
                 // Keep the action reserved until its queued UI result has been handled.
                 MAIN.post(() -> busy.set(false));
             }
-        }, "purple-gboard-action").start();
+        };
+        if (!WorkerStart.launch(work, "purple-gboard-action"))
+            workerStartFailed(request, stopped, progress, recorder, "Could not start the local action; original text preserved");
+    }
+
+    /** Only for a worker that failed before starting; no local job was dispatched. */
+    private static void workerStartFailed(long request, AtomicBoolean stopped, AlertDialog progress,
+            WhisperCapture recorder, String message) {
+        stopped.set(true);
+        boolean current = request == operation;
+        try {
+            if (recorder != null && capture == recorder) { capture = null; recorder.stop(); }
+            if (current) {
+                operation++;
+                if (dialog == progress) dismiss();
+            }
+        } catch (RuntimeException | OutOfMemoryError ignored) {
+            // Retain the stock keyboard even if optional UI cleanup is unavailable.
+        } finally {
+            busy.set(false);
+        }
+        if (current) try { notifyUser(message); } catch (RuntimeException | OutOfMemoryError ignored) {}
     }
     private static void cancelAction(long request, AtomicBoolean possibleStart) {
         if (request != operation) return;

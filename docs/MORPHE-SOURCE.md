@@ -63,9 +63,15 @@ and hosted run are recorded in
 Previously those checks used Python `assert`. A mocked run against a synthetic
 public-repository response refused normally but reached a simulated creation
 when optimized; this is evidence of a source-level failure mode, not a claim
-that a real release was created. The separate NaTune publication script also
-uses assertions and remains under its owner's scope. Tests and this correction
-do not prove race-free remote publication or actual Manager/device acceptance.
+that a real release was created. The NaTune publisher in this worktree still
+uses assertions. Its owner corrected that script in separate source commit
+`39198539c2818fdf501baad8b348c62245f7985d`; that fix has not been joined here.
+The shared helper was identical, and both owners' offline mocked controls
+passed together in a temporary source fixture under normal and optimized
+Python. A future source join must retain this worktree's newer Gboard staging
+module and companion manifest while integrating the owner's NaTune fix.
+These controls do not prove race-free remote publication or actual
+Manager/device acceptance.
 
 ## Manager 2.2.0 contract
 
