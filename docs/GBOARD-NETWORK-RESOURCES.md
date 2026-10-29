@@ -41,10 +41,13 @@ loopback, duplicates and refusal of broader policies. Hosted run
 passed those controls but failed the full build: the pinned Morphe plugin
 targets JVM 11 while the added Java source inherited the runner's JDK 21 source
 level. The subsequent source explicitly aligns this compile task with Java 11;
-that correction still requires a successful build. Its run and any
-exact-APK verification must be recorded separately; source alone is not proof
-of successful patching, an Android parser result, stock network behavior, or
-Manager compatibility. A review of alternative safe handling for shared and
-nested policies, the original target's actual XML, and authorized device
-regression remains open. Existing bootstrap, bearer, model and install holds
-remain in force.
+that correction passed two subsequent hosted builds. The exact selected APK's
+original manifest had target SDK 37, no explicit network-security resource and
+`usesCleartextTraffic=false`. Its patched compiled XML has a false base policy
+and one true, non-subdomain `127.0.0.1` rule. See the [build](gboard-alpha19-build-verification.json)
+and [APK evidence](gboard-alpha19-apk-verification.json). The hosted desktop
+patcher produced an unsigned APK. That result and static inspection do not prove
+Android parser behavior, stock networking, or Manager compatibility. Review of
+alias collisions, alternative handling for shared and nested policies, other
+supported APK resource configurations, and authorized device regression remains
+open. Existing bootstrap, bearer, model and install holds remain in force.

@@ -1,0 +1,45 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40962960374,
+  "workflow_source_commit": "a722a2e5cba4c798d5746352db3dcf32a45c6109",
+  "bundle_build_run": 40961689590,
+  "bundle_source_commit": "03b4c2e9eb30d2e25e5d57060784764a4b4fa802",
+  "bundle_version": "0.1.0-alpha.19",
+  "bundle_sha256": "82494785661ec05a0d4da6d7fd53ab50a26b3c855c4df6024741cdc3365ebb70",
+  "artifact_id": 12936542324,
+  "artifact_zip_bytes": 49125120,
+  "artifact_zip_sha256": "c5b6cd4bf094a1c25d5b28765754a9742ed73882d74cfef28bceac56eb2c3fc5",
+  "unsigned_apk_bytes": 84558464,
+  "unsigned_apk_sha256": "91bd1db4bf6de923cfead3b651d324b894c89eed6589c21e19cf5aca1cc7632b",
+  "network_observation_sha256": "7406390ad62b83d7988ffe0ad5564ac022d509552d05e1a812b358e81565b802",
+  "input": {
+    "origin": "APKMirror supported release; Google signature checked by workflow",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402"
+  },
+  "applied_patches": ["Add Gboard Signature Bypass", "Whisper 3 dictation and AI Translate", "Package Rename"],
+  "output_clone_package": "dev.jason.com.google.android.inputmethod.latin",
+  "static_preservation": {
+    "minimum_android_api": 26,
+    "original_classes_retained": 22860,
+    "output_classes": 26031,
+    "original_method_signatures_retained": 118230,
+    "original_field_signatures_retained": 85104,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140
+  },
+  "network_observation": {
+    "original_target_sdk": 37,
+    "original_manifest_cleartext": false,
+    "original_manifest_network_security_config": "not present in AAPT2 manifest output",
+    "patched_manifest_cleartext": false,
+    "patched_network_resource": "res/xml/purple_keyboard_network.xml",
+    "compiled_xml": "base-config cleartextTrafficPermitted=false; domain-config cleartextTrafficPermitted=true; domain 127.0.0.1 includeSubdomains=false"
+  },
+  "independent_readback": "Complete ZIP checked in memory; all five checksum-listed members streamed and verified, with source/version provenance checked.",
+  "limitations": "The original/output manifests and compiled XML were inspected, not Android's effective network-policy runtime. The verifier does not compare every original resource or method body. No Manager-on-Android execution, signing, install, model, microphone or live keyboard acceptance occurred. The alternate XML alias collision remains open.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false
+}
