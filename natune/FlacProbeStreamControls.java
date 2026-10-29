@@ -59,6 +59,9 @@ public final class FlacProbeStreamControls {
         FlacProbeStream stream(long start,int limit) throws IOException {
             return FlacProbeStream.open(this,start,limit,()->{if(cancelled[0])throw new IOException("Original stopped");});
         }
+        FlacProbeStream bounded(long start,long count,int limit) throws IOException {
+            return FlacProbeStream.open(this,start,count,limit,()->{if(cancelled[0])throw new IOException("Original stopped");});
+        }
     }
     static byte[] consume(FlacProbeStream stream,int chunk) throws Exception {
         ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] scratch=new byte[chunk];
@@ -83,8 +86,22 @@ public final class FlacProbeStreamControls {
             need(Arrays.equals(consume(s,4),Arrays.copyOfRange(range.bytes,50,range.bytes.length)),"range has no prepended metadata bytes");
         }
         Factory changed=new Factory();changed.changedRange=true;
+        Factory shortRange=new Factory();
+        try(FlacProbeStream s=shortRange.bounded(0,7,256)) {
+            need(Arrays.equals(consume(s,128),Arrays.copyOf(shortRange.bytes,7)),"prefix replay honors original short request length");
+            need(s.requestedRangeEnded() && !s.responseEnded(),"range completion is not source EOF");
+            need(shortRange.readers.get(0).cursor<shortRange.bytes.length,"no full-body read to fake range completion");
+        }
+        Factory shortSeek=new Factory();
+        try(FlacProbeStream s=shortSeek.bounded(50,2,256)) {
+            need(Arrays.equals(consume(s,128),Arrays.copyOfRange(shortSeek.bytes,50,52)),"nonzero bounded seek bytes");
+            need(shortSeek.readers.get(1).cursor==52 && s.requestedRangeEnded() && !s.responseEnded(),"no read beyond requested range");
+        }
         refuses(()->changed.stream(50,256),"changed range rendition");
         need(changed.readers.stream().allMatch(r->r.closes==1),"both failed-range readers closed");
+        Factory beyond=new Factory();
+        refuses(()->beyond.stream(58,256),"known end bounds checked before range open");
+        need(beyond.opens.equals(List.of(0L)) && beyond.readers.get(0).closes==1,"no invalid second open or leaked reader");
         Factory wrong=new Factory();wrong.wrongRange=true;
         refuses(()->wrong.stream(50,256),"server ignored requested range");
         Factory resized=new Factory();resized.totalAdjustment=1;

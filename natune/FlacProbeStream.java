@@ -30,17 +30,21 @@ public final class FlacProbeStream extends InputStream {
     private final Stop stop;
     private final String rendition;
     private final long start, total, expectedResponse;
+    private final long requestedLength;
     private byte[] replay;
+    private byte[] scratch;
     private final int replayLength;
     private int replayOffset;
     private long sourceBytes;
-    private boolean closed, eof;
+    private long delivered;
+    private boolean closed, eof, rangeEnded;
 
     private FlacProbeStream(Source source, Stop stop, String rendition, long start,
                             long total, byte[] replay, int replayLength,
-                            FlacPrefixProbe.Result evidence) throws IOException {
+                            FlacPrefixProbe.Result evidence,long requestedLength) throws IOException {
         this.source=source;this.stop=stop;this.rendition=rendition;this.start=start;
         this.total=total;this.expectedResponse=source.responseLength();
+        this.requestedLength=requestedLength;
         if(expectedResponse < -1 || (expectedResponse>=0 && replayLength>expectedResponse))
             throw new IOException("Invalid original response length");
         this.replay=replay;this.replayLength=replayLength;this.sourceBytes=replayLength;
@@ -57,15 +61,21 @@ public final class FlacProbeStream extends InputStream {
         return key;
     }
     private static void closeOnFailure(Source source, Throwable failure) {
-        if(source!=null) try { source.close(); } catch(Throwable closing) { failure.addSuppressed(closing); }
+        if(source!=null) try { source.close(); } catch(Throwable closing) { if(closing!=failure)failure.addSuppressed(closing); }
     }
     public static FlacProbeStream open(Factory factory, long start, int prefixLimit, Stop stop) throws IOException {
-        if(factory==null || stop==null || start<0 || prefixLimit<49)
+        return open(factory,start,-1,prefixLimit,stop);
+    }
+    public static FlacProbeStream open(Factory factory,long start,long requestedLength,int prefixLimit,Stop stop) throws IOException {
+        if(factory==null || stop==null || start<0 || prefixLimit<49 ||
+           (requestedLength<=0 && requestedLength!=-1) ||
+           (requestedLength>0 && start>Long.MAX_VALUE-requestedLength))
             throw new IllegalArgumentException("Original stream bindings/budget required");
         Source owned=null;
         try {
             stop.check();owned=factory.open(0);stop.check();
             String key=identity(owned,0,null,-1);long total=owned.totalLength();
+            if(total>=0 && start>total)throw new IOException("Requested range exceeds original rendition length");
             byte[] prefix=new byte[Math.min(prefixLimit,256)];int used=0;
             FlacPrefixProbe.Result evidence;
             while(true) {
@@ -92,7 +102,7 @@ public final class FlacProbeStream extends InputStream {
                 owned=factory.open(start);stop.check();identity(owned,start,key,total);
                 prefix=new byte[0];used=0;
             }
-            FlacProbeStream result=new FlacProbeStream(owned,stop,key,start,total,prefix,used,evidence);
+            FlacProbeStream result=new FlacProbeStream(owned,stop,key,start,total,prefix,used,evidence,requestedLength);
             owned=null;return result;
         } catch(IOException|RuntimeException|Error error) { closeOnFailure(owned,error);throw error; }
     }
@@ -106,16 +116,19 @@ public final class FlacProbeStream extends InputStream {
         if(length==0) return 0;
         try {
             current();
+            if(requestedLength>=0 && delivered==requestedLength){rangeEnded=true;return -1;}
+            int allowed=requestedLength<0?length:(int)Math.min((long)length,requestedLength-delivered);
             if(replayOffset<replayLength) {
-                int n=Math.min(length,replayLength-replayOffset);
-                System.arraycopy(replay,replayOffset,buffer,offset,n);replayOffset+=n;return n;
+                int n=Math.min(allowed,replayLength-replayOffset);
+                System.arraycopy(replay,replayOffset,buffer,offset,n);replayOffset+=n;delivered+=n;return n;
             }
             if(eof) return -1;
             // Keep data private until the original stop/identity is rechecked.
             // Bounded per-read scratch is buffering, not an input/file-size cap.
-            byte[] scratch=new byte[Math.min(length,65536)];
-            int n=source.read(scratch,0,scratch.length);current();
-            if(n==0 || n < -1 || n>scratch.length) throw new IOException("Original source violated blocking read contract");
+            int requested=Math.min(allowed,65536);
+            if(scratch==null || scratch.length<requested)scratch=new byte[requested];
+            int n=source.read(scratch,0,requested);current();
+            if(n==0 || n < -1 || n>requested) throw new IOException("Original source violated blocking read contract");
             if(n==-1) {
                 if(expectedResponse>=0 && sourceBytes!=expectedResponse)
                     throw new IOException("Original response length mismatch");
@@ -123,9 +136,9 @@ public final class FlacProbeStream extends InputStream {
             }
             if(expectedResponse>=0 && n>expectedResponse-sourceBytes)
                 throw new IOException("Original response exceeded its declared length");
-            sourceBytes+=n;System.arraycopy(scratch,0,buffer,offset,n);return n;
+            sourceBytes+=n;delivered+=n;System.arraycopy(scratch,0,buffer,offset,n);return n;
         } catch(IOException|RuntimeException|Error error) {
-            try { close(); } catch(Throwable closing) { error.addSuppressed(closing); }
+            try { close(); } catch(Throwable closing) { if(closing!=error)error.addSuppressed(closing); }
             throw error;
         }
     }
@@ -133,8 +146,11 @@ public final class FlacProbeStream extends InputStream {
         byte[] one=new byte[1];return read(one,0,1)==-1?-1:one[0]&255;
     }
     @Override public void close() throws IOException {
-        if(closed) return;closed=true;Arrays.fill(replay,(byte)0);source.close();
+        if(closed) return;closed=true;Arrays.fill(replay,(byte)0);
+        if(scratch!=null)Arrays.fill(scratch,(byte)0);source.close();
     }
     /** Response EOF only; never a complete codec/recording admission claim. */
     public boolean responseEnded() { return eof; }
+    /** Original requested range ended; distinct from source EOF/codec proof. */
+    public boolean requestedRangeEnded() { return rangeEnded; }
 }
