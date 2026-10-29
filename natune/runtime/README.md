@@ -63,10 +63,12 @@ See the [resource mode selection](https://github.com/MorpheApp/morphe-patcher/bl
 and [raw resource patch API](https://github.com/MorpheApp/morphe-patcher/blob/v2.0.0/src/main/kotlin/app/morphe/patcher/patch/Patch.kt#L751-L767).
 The successful successor retained all original non-DEX entry bytes and matched
 the compiled extension and JNI names. The previously built native library has
-4 KiB ELF load alignment, so this carrier is not suitable as a 16 KiB-device
-release. A replacement 16 KiB native build and APK ZIP layout verification are
-in progress. No app hook, journal owner, Android execution or installation is
-claimed by the carrier.
+4 KiB ELF load alignment, so that carrier is not suitable as a 16 KiB-device
+release. Hosted run 40936010048 built a 16 KiB-aligned replacement and passed
+the decoder and folder-copy fixture checks; `../flac-16k-verification.json`
+records its source, full artifact readback and ELF layout. The successor carrier
+still needs its APK ZIP compression/alignment check. No app hook, journal owner,
+Android execution or installation is claimed by either carrier.
 
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
 provide bounded streaming, full destination readback and the real Android SAF

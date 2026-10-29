@@ -13,7 +13,7 @@ SETTINGS_SOURCES = ('RuntimeSettings.java', 'PurpleSettingsPage.java', 'NatuneSe
 FOLDER_SOURCES = ('VerifiedStreamCopy.java', 'NatuneCachedSource.java', 'TemporarySpaceBudget.java',
                   'NatuneCoroutineStop.java', 'SharedDocumentDestination.java', 'MediaStoreAudioDestination.java',
                   'NatuneFolderCopy.java', 'FlacIntegrity.java')
-FLAC_LIBRARY_SHA256 = '72ee124f75f3be57c18df3a542076f126a3e5c3e477bf368ef4fcc6e2e9b8244'
+FLAC_LIBRARY_SHA256 = 'a13763b6b5638d4d7e9a9bb53876841b72a65875e2760fad9f6d1480cb673ae7'
 FLAC_LICENSE_SHA256 = '7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c'
 
 
@@ -84,7 +84,7 @@ configurations.configureEach {
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
 }
 """)
-    version = '0.4.0-dev.1' if folder_carrier else '0.3.0-dev.1' if runtime_settings else '0.2.0-dev.2' if local_flac else '0.1.0-alpha.1'
+    version = '0.4.0-dev.2' if folder_carrier else '0.3.0-dev.1' if runtime_settings else '0.2.0-dev.2' if local_flac else '0.1.0-alpha.1'
     build = destination / 'patches/build.gradle.kts'
     text = build.read_text()
     for old, new in {

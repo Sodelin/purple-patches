@@ -33,9 +33,10 @@ current music copy, deletion or storage gain is claimed. Gboard is separately
 owned; a pinned source join passed hosted library checks and an Android
 cross-build without touching its index. `companion-source-join-verification.json`
 records the exact join and its limits. The uninstalled folder/FLAC carrier
-passed an exact public APK static comparison; its existing native library is
-4 KiB aligned, so a 16 KiB-compatible successor and package-layout check remain
-necessary. `flac-carrier-verification.json` records the package and limitation.
+passed an exact public APK static comparison; its original native library is
+4 KiB aligned. The replacement library now passes 16 KiB ELF layout and the
+existing synthetic checks, while its APK package layout remains to be verified.
+`flac-carrier-verification.json` and `flac-16k-verification.json` record both.
 
 ## Remaining work packages
 
@@ -68,8 +69,8 @@ verified; no decoder selection or new phone dependency is claimed here.
 
 ## Next checkpoint and blockers
 
-Build and verify the 16 KiB-compatible decoder and its APK package layout, then
-integrate the real selected app action and journal/receiver once their original
+Verify the 16 KiB-compatible decoder's APK package layout, then integrate the
+real selected app action and journal/receiver once their original
 authority and data-continuity interfaces exist. The shared Rust API boundary
 was returned to the Gboard owner. The concrete app-to-journal expert review
 is prepared; the existing Dot route is unverified, so that request remains
