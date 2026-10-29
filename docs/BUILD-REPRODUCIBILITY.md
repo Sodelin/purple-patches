@@ -31,3 +31,9 @@ matching artifacts on one runner image would not pin every SDK, JDK, action or
 transitive dependency, or prove cross-platform reproducibility. The existing
 public alpha.1 feed, device/model/privacy holds and original artifacts are not
 changed by this source work.
+
+The first alpha.14 build attempt, run `40948310599` from source `e0edeeb`,
+failed its synthetic timestamp test because Git rendered UTC as `Z` rather
+than `+00:00`. Its source-integrity refusal fixture passed; no bundle was
+built. The corrected test compares parsed instants and keeps this failure as
+history rather than counting it as a successful build.

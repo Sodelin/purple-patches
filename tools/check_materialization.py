@@ -1,5 +1,6 @@
 """Public synthetic controls for committed overlay input and timestamp selection."""
 import os
+from datetime import datetime
 from pathlib import Path
 import subprocess
 import tempfile
@@ -37,7 +38,8 @@ class SourceSnapshotControls(unittest.TestCase):
     def test_exact_source_and_commit_timestamp(self):
         commit,created,timestamp,contents=snapshot_source(self.root)
         self.assertEqual(commit,self.git('rev-parse','HEAD').decode().strip())
-        self.assertEqual(created,'2026-10-29T01:02:03+00:00')
+        self.assertEqual(datetime.fromisoformat(created.replace('Z','+00:00')).isoformat(),
+                         '2026-10-29T01:02:03+00:00')
         self.assertEqual(timestamp,1793235723000)
         self.assertEqual(contents['gboard/src/Test.java'],b'class Test {}\n')
         self.assertIn('manifest.attributes["Timestamp"] = "1793235723000"',
