@@ -46,6 +46,8 @@ model twice for each transcription. Metadata preflight alone cannot detect a
 same-size corrupt model or establish phone readiness. The development companion
 is not installed or accepted. The earlier0.2.1 candidate remains the published
 historical artifact and is not silently replaced.
+Hosted synthetic controls and the Android ARM64 cross-build passed for the
+development source; see [verification](../docs/companion-022-dev2-verification.json).
 
 
 Companion0.2.1 corrects an actual Android transport failure: `/proc/self/fd/N`

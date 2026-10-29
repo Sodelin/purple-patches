@@ -1,0 +1,26 @@
+{
+  "schema": "purple.companion-hosted-verification.v1",
+  "run": 40920867733,
+  "source_commit": "2c17952f2eceedbee59800faf3b578ac22db04b7",
+  "version": "0.2.2-dev.2",
+  "artifact_id": 12918790601,
+  "artifact_zip_bytes": 728055,
+  "artifact_zip_sha256": "d3192d90ce2868133d8ae10cfd0bfa0c21f883a2b865c2a9dafbfa8d8f353e35",
+  "members_sha256": {
+    "SHA256SUMS": "7fb457579f876402f6f57617eefc5114b8f2e8a636b53077801ca6ec585d3309",
+    "native-controls.txt": "4d63ea58e389ef71ca89b01876248d906c5d8c3ffad5c34019b15a28b8bdbc09",
+    "natune-journal-check": "4247f96fe4416c900c38f408cf768d706b3d99c326d74d8ce93b532ce6084ccc",
+    "purple-gboard-service": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91",
+    "purple-keyboard-bridge": "4f18c5409cf7decbf38296c41dccc2ecb0ea07af55fb8fb68e40394d0228755d",
+    "response-schema.json": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
+    "source-SHA256SUMS": "5a278ffb3acafa709daa79bd28ddce572733cf49209c550f9bc57aa81c9fb638"
+  },
+  "all_sha256sums_match": true,
+  "source_files_match_commit": 13,
+  "native_controls_summary": [
+    "test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s"
+  ],
+  "preflight_fixture_test_passed": true,
+  "target_binary": "ELF64 AArch64; not executed on phone",
+  "model_or_device_tested": false
+}
