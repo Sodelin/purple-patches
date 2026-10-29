@@ -232,9 +232,12 @@ separately sandboxed NaTune app or a stable deployment dependency. The new
 decode to the existing copy proof, checks original-source/stop/byte identity,
 and uses pinned reference libFLAC 1.5.0 for decoded PCM/CRC validation. Missing
 STREAMINFO checksum or total samples produces an explicitly indeterminate state.
-The intended hosted workflow builds this decoder and public synthetic fixtures
-off-phone, then cross-builds its Android ARM64 library. These new source changes
-are not verified until that run completes. Native library packaging, R8/JNI
+Hosted run `40931287508` built the selected decoder, passed 21 public synthetic
+controls including 8-, 16-, 24- and 32-bit inputs and damaged/unknown-metadata
+cases, and cross-built its Android ARM64 library. Exact source and artifact
+readback is recorded in `flac-integrity-verification.json`. Encoding and
+decoding in that check used the same pinned reference project; it is not an
+independent conformance suite. Native library packaging, R8/JNI
 keep rules, the actual app callsite, recording/source selection, full-file
 format alternatives and phone acceptance remain unbound; the current patch
 materializer does not include this verifier. Nothing was installed or executed
