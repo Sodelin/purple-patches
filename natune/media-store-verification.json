@@ -1,0 +1,27 @@
+{
+  "schema": "purple.natune-media-store-verification.v1",
+  "hosted_run": 40921635909,
+  "hosted_source_commit": "2d96cbe19b537d1fe5501d332ded836533bc16eb",
+  "local_source_commit_with_identical_tree": "19840249cc6eef36c77b32ca2c2eb317752dc638",
+  "source_tree": "a42feb9578189943d41139f6f89aa543627f3f03",
+  "artifact_id": 12918931294,
+  "artifact_zip_bytes": 3823,
+  "artifact_zip_sha256": "37955483c6470dc094249ab5dad2f9e8f49c1dd9595043ac958c7c426680b7dd",
+  "member_hashes_checked": 8,
+  "source_hashes_checked": 28,
+  "synthetic_media_store_controls_passed": 44,
+  "other_existing_controls_passed": {
+    "cache_source": 46,
+    "coroutine_stop": 10,
+    "data_spec": 43,
+    "stream_copy": 49,
+    "temporary_budget": 57
+  },
+  "real_android_sdk_compilation": true,
+  "device_provider_test": false,
+  "apk_hooked": false,
+  "installed": false,
+  "original_removed": false,
+  "computer_copy_verified": false,
+  "limits": "Synthetic Android owner/provider stand-ins; actual selection, provider behavior, journal, headroom, source/rendition and receiver must be bound and accepted separately."
+}

@@ -15,6 +15,28 @@ public final class InspectNatuneSettings {
         return method.getDefiningClass()+"->"+method.getName()+"("+String.join("",method.getParameterTypes())+")"+method.getReturnType();
     }
     static void need(boolean value,String why){if(!value)throw new IllegalStateException(why);}
+    static void dump(Method method,int from,int to){
+        if(method.getImplementation()==null)return;
+        var code=new ArrayList<Instruction>();method.getImplementation().getInstructions().forEach(code::add);
+        int offset=0;
+        for(int i=0;i<code.size();i++){
+            var ins=code.get(i);
+            if(i>=from&&i<to){
+                var out=new StringBuilder("SETTINGS_CODE\t"+sig(method)+"\t"+offset+"\t"+ins.getOpcode());
+                if(ins instanceof OneRegisterInstruction x)out.append("\tA=").append(x.getRegisterA());
+                if(ins instanceof TwoRegisterInstruction x)out.append("\tB=").append(x.getRegisterB());
+                if(ins instanceof ThreeRegisterInstruction x)out.append("\tC=").append(x.getRegisterC());
+                if(ins instanceof FiveRegisterInstruction x)out.append("\targc=").append(x.getRegisterCount())
+                    .append("\tregs=").append(List.of(x.getRegisterC(),x.getRegisterD(),x.getRegisterE(),x.getRegisterF(),x.getRegisterG()));
+                if(ins instanceof RegisterRangeInstruction x)out.append("\targc=").append(x.getRegisterCount()).append("\tstart=").append(x.getStartRegister());
+                if(ins instanceof WideLiteralInstruction x)out.append("\tliteral=").append(x.getWideLiteral());
+                if(ins instanceof OffsetInstruction x)out.append("\ttarget=").append(offset+x.getCodeOffset());
+                if(ins instanceof ReferenceInstruction x && !(x.getReference() instanceof StringReference))out.append("\tref=").append(x.getReference());
+                System.out.println(out);
+            }
+            offset+=ins.getCodeUnits();
+        }
+    }
     public static void main(String[] args)throws Exception{
         need(args.length==1,"Expected pinned original APK");
         var classes=new TreeMap<String,ClassDef>();
@@ -55,14 +77,29 @@ public final class InspectNatuneSettings {
                 for(var m:selected.getMethods())if(m.getName().equals("<init>"))
                     System.out.println("SETTINGS_INIT\t"+sig(m)+"\tflags="+m.getAccessFlags());
             }
+            for(String type:List.of("Lr8/b0b;","Lr8/c0b;")){
+                var selected=classes.get(type);if(selected==null)continue;
+                for(var constructor:selected.getMethods())if(constructor.getName().equals("<init>"))dump(constructor,0,200);
+            }
+            int end=instructions.size();dump(method,Math.max(0,end-16),end);
         }
         need(!candidates.isEmpty(),"Reviewed source anchors did not survive in one method");
+        for(String type:List.of("Lr8/si4;","Lr8/gj4;")){
+            var clazz=classes.get(type);if(clazz==null)continue;
+            System.out.println("SETTINGS_INTERFACE\t"+type+"\tflags="+clazz.getAccessFlags()+"\tsuper="+clazz.getSuperclass()+"\tinterfaces="+clazz.getInterfaces());
+            for(var method:clazz.getMethods())System.out.println("SETTINGS_INTERFACE_METHOD\t"+sig(method)+"\tflags="+method.getAccessFlags());
+        }
         for(var clazz:classes.values())for(var method:clazz.getMethods()){
             if(method.getImplementation()==null)continue;
-            for(var ins:method.getImplementation().getInstructions())
+            var code=new ArrayList<Instruction>();method.getImplementation().getInstructions().forEach(code::add);
+            for(int i=0;i<code.size();i++){
+                var ins=code.get(i);
                 if(ins instanceof ReferenceInstruction ref && ref.getReference() instanceof MethodReference target &&
-                    candidates.stream().anyMatch(c->sig(c).equals(sig(target))))
+                    candidates.stream().anyMatch(c->sig(c).equals(sig(target)))){
                     System.out.println("SETTINGS_CALLER\t"+sig(method)+"\t"+sig(target));
+                    dump(method,Math.max(0,i-6),Math.min(code.size(),i+8));
+                }
+            }
         }
         System.out.println("SETTINGS_INSPECTION\tcandidates="+candidates.size()+"\tdevice_execution=false");
     }

@@ -138,8 +138,10 @@ an uncertain publication is not automatically retried. It never removes a
 source or claims a computer copy. The actual app still must select a folder,
 admit peak space, bind a durable encrypted operation and reconcile uncertain
 rows before this can serve as a Move or future-download route. It does not make
-an arbitrary SAF folder or Fuji receiver equivalent to MediaStore. Synthetic
-controls and real SDK compilation, if passed, are not device/provider proof.
+an arbitrary SAF folder or Fuji receiver equivalent to MediaStore. Hosted run
+40921635909 passed 44 synthetic MediaStore/copy controls and compiled the
+adapter against the real Android SDK; `media-store-verification.json` pins the
+artifact and source. This is not a device/provider or Move acceptance test.
 
 The copy result is in-memory byte evidence, not a deletion permit or completed
 move. The source lease/coverage reader is now implemented against the exact
