@@ -78,11 +78,12 @@ separate post-processing step is not an integrated Morphe Manager route: the
 MPP alone still needs that step. No app hook, journal owner, Android execution
 or installation is claimed by either carrier.
 
-The next `--folder-carrier` hosted profile selects the existing audio runtime
-settings and the folder/FLAC carrier together. Its verifier checks their full
-compiled extension, the deliberate settings/decoder hooks, and the original
-APK, in addition to the stored native library. This combined profile is under
-verification; it does not yet add a folder action or an encrypted owner.
+The `--folder-carrier` hosted profile now selects the existing audio runtime
+settings and the folder/FLAC carrier together. Hosted run 40938519005 passed
+their combined exact-APK check, the synthetic settings controls and the stored
+native-library finalization. `../combined-dev-verification.json` records the
+full source/artifact readback and limits. This combined profile still needs the
+separate finalization step and does not add a folder action or encrypted owner.
 
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
 provide bounded streaming, full destination readback and the real Android SAF
