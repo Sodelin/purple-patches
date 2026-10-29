@@ -15,6 +15,15 @@ has not yet been established for every difference, so the gate remains failed.
 No candidate from that run was accepted or installed. Full FLAC enforcement
 and additional providers remain unfinished.
 
+Later Natune run40864921834 at9e3add7 PASSED the independent preservation gate,
+including all27129classes/114583methods,24native libraries,12assets and1884
+non-DEX/signature files. Source-backed static-default normalization and14
+refusal/positive controls resolve the earlier representation mismatch without
+ignoring changed field values. `natune/build-verification.json` retains the
+selected build and failures. The experimental prerelease and separate Natune
+feed were subsequently published and anonymously verified in
+`natune/public-source-verification.json`. Phone acceptance remains unverified.
+
 The unique migration `parent-routing-and-cache-return1` message was consumed
 during this PATCHES turn. This proves inbound delivery of that message through
 the reported CLI route, not universal delivery or old-queue replay. Existing

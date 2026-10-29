@@ -1,0 +1,21 @@
+{
+  "source_url": "https://raw.githubusercontent.com/Sodelin/purple-patches/main/channels/natune-candidate.json",
+  "source_commit": "704cc799673e8db343113a03ea5997d9e697c49e",
+  "component": "natune",
+  "private": false,
+  "anonymous_http_status": 200,
+  "verification_mode": "public",
+  "selected_feed_matches_versioned_source": true,
+  "published_prerelease_tag": "natune-patches-v0.1.0-alpha.1",
+  "release_id": 427777784,
+  "actual_versioned_release_route_resolves": true,
+  "main_mpp_full_bytes_verified": {
+    "bytes": 700410,
+    "sha256": "add08ea656297afe6e1a9e5657c9bf106ce93edff5f9caf44d0ebd2fc2afb8a7"
+  },
+  "credential_profile": "Anonymous public requests only; no credentials accessed",
+  "manager_device_import_verified": false,
+  "device_actions": false,
+  "model_invocations": false,
+  "limits": "Exact source feed/tag/full bundle HTTP route verified; actual Manager import/update and app behavior remain unverified. Strict FLAC and extra providers are not implemented by this increment."
+}
