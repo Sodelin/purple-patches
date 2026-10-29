@@ -190,3 +190,20 @@ prefixes and the full27129class/114583method preservation result, including
 24native libraries,12assets and1884non-DEX/signature entries. All current patch
 source hashes matched the build provenance. These are static APK/build results;
 no Android decoder, lifecycle, next-track transition or phone UI was exercised.
+
+Transition follow-up `codec-transition-verification.json` pins hosted inspection
+40876305620. The actual optimized `Lr8/je7;->b(Format,Format)` reads both parsed
+sample MIME fields, compares them with Objects.equals and sets discard bit8 on
+mismatch before the audio/video branch. This supports the upstream reuse mapping;
+the bounded report stops before the entire368code-unit method ends, so it is not
+a complete release control-flow or next-track playback proof.
+
+The actual audio input-change entry is now identified too:
+`Lr8/ge7;->e0(Lr8/ie3;)Lr8/bt2;`, flags17/registers6/29code units/no try blocks.
+It takes `FormatHolder.z:Object`, casts/checks it, writes the input Format to
+`ge7.l1` and calls `ne7.e0` before posting its original event. A next source
+increment can enforce parsed FLAC at this lifecycle boundary with the original
+renderer error mechanism, independently of initial format support/decoder reuse.
+It must preserve FLAC's original event/lifecycle path and refuse unsupported
+input explicitly. No such fourth guard or device-transition acceptance is claimed
+by the three-guard0.2.0-dev.1 build.
