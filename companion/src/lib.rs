@@ -292,6 +292,44 @@ mod tests {
         identity.boot.push('x');
         assert!(!identity.current());
     }
+
+    // Diagnostic for a known defect, not an acceptance test. Replace it with
+    // a safety regression after the owner-identity and recovery design is fixed.
+    #[test]
+    #[ignore = "reproduces the existing cross-executable owner identity defect"]
+    fn reproduce_live_owner_misidentified_by_updated_command() {
+        const OWNER_PID: &str = "PURPLE_IDENTITY_TEST_OWNER_PID";
+        const TEST_NAME: &str = "tests::reproduce_live_owner_misidentified_by_updated_command";
+        const MARKER: &str = "PUBLIC_REPRO: live same-UID owner classified as not current";
+
+        if let Some(pid) = std::env::var_os(OWNER_PID) {
+            let pid: u32 = pid.into_string().unwrap().parse().unwrap();
+            let owner = Identity::read(pid).unwrap();
+            assert_eq!(Identity::read(pid).unwrap(), owner);
+            assert_eq!(owner.uid, unsafe { libc::getuid() });
+            assert_ne!(std::env::current_exe().unwrap(), owner.executable);
+            assert!(!owner.current(), "existing defect was not reproduced");
+            println!("{MARKER}");
+            return;
+        }
+
+        // The copied test executable and parent are public fixture processes on
+        // a hosted runner. This does not start or inspect a phone bridge.
+        let scratch = private::Scratch::new();
+        let original = std::env::current_exe().unwrap();
+        let copy = scratch.0.join("other-test-executable");
+        fs::copy(&original, &copy).unwrap();
+        fs::set_permissions(&copy, fs::metadata(&original).unwrap().permissions()).unwrap();
+        let output = Command::new(&copy)
+            .env(OWNER_PID, std::process::id().to_string())
+            .args(["--ignored", "--exact", TEST_NAME, "--nocapture"])
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "fixture child failed: {}", String::from_utf8_lossy(&output.stderr));
+        assert!(String::from_utf8_lossy(&output.stdout).contains(MARKER));
+        println!("{MARKER}");
+    }
+
     #[test]
     fn plaintext_predecessor_is_not_adopted() {
         let scratch=private::Scratch::new();

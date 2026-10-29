@@ -1,6 +1,12 @@
 name: Verify and cross-build local companion
 on:
   workflow_dispatch:
+    inputs:
+      identity_diagnostic:
+        description: Run only the public owner-identity defect reproduction
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: read
 concurrency:
@@ -12,11 +18,21 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Reproduce the known owner-identity defect only
+        if: ${{ inputs.identity_diagnostic }}
+        env:
+          CARGO_INCREMENTAL: 0
+          CARGO_PROFILE_TEST_DEBUG: 0
+        run: |
+          cargo test --locked --manifest-path companion/Cargo.toml --lib -- \
+            --ignored --exact tests::reproduce_live_owner_misidentified_by_updated_command --nocapture
       - name: Native controls without any model invocation
+        if: ${{ !inputs.identity_diagnostic }}
         run: |
           mkdir -p dist
           cargo test --locked --manifest-path companion/Cargo.toml --lib > dist/native-controls.txt
       - name: Android cross-build on hosted runner
+        if: ${{ !inputs.identity_diagnostic }}
         run: |
           rustup target add aarch64-linux-android
           NDK_ROOT="${ANDROID_NDK_HOME:-$ANDROID_NDK_LATEST_HOME}"
@@ -31,6 +47,7 @@ jobs:
           cd dist
           sha256sum * > SHA256SUMS
       - uses: actions/upload-artifact@v4
+        if: ${{ !inputs.identity_diagnostic }}
         with:
           name: purple-gboard-companion-candidate
           path: dist/
