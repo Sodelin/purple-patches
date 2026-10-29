@@ -89,8 +89,9 @@ Drive copies with full readback and actual restoration; see
 [candidate custody](GBOARD-ALPHA5-DRAFT.md). The newer alpha.8 build archive
 has also passed full Drive byte/hash readback and in-memory MPP extraction, but
 has not had a physical disk restore; see [alpha.8 custody](GBOARD-ALPHA8-CUSTODY.md).
-The newer alpha.10 and dev.6 hosted artifacts have not yet been copied to the
-private archive; see [alpha.10 custody](GBOARD-ALPHA10-CUSTODY.md). Public
+The alpha.10 build ZIP now has a private full-readback archive; the dev.6 upload
+outcome is uncertain, and the patched APK has not been archived. See
+[alpha.10 custody](GBOARD-ALPHA10-CUSTODY.md). Public
 deployment and update custody still need to be established. The previously published0.2.1
 companion remains historical evidence for earlier candidates; it does not
 satisfy alpha.5's voice-preflight contract. Its earlier readback is retained in

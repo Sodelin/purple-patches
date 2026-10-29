@@ -8,17 +8,21 @@ memory against their recorded checksums and source. On 29 October their hosted
 expiration times were, respectively, 2026-11-05 19:18:44 UTC, 19:20:24 UTC,
 and 19:09:13 UTC. These are provider metadata, not permanent custody.
 
-An existing private Drive folder was found and its unshared metadata was
-rechecked. No alpha.10 or dev.6 archive has yet been uploaded there. The phone
-was below the user's 20 GiB engineering reserve. A small public fixture showed
-that the available libc can create a memory-backed file, but another same-UID
-process was denied access through `/proc/<pid>/fd`; the Python build does not
-expose `os.memfd_create` and `/dev/shm` is absent. This does not prove every
-streamed upload route impossible. No phone archive or user original was created
-or removed for this check. The bounded next custody step is a verified streaming
-upload through the existing private Drive route, or an authorized off-device
-restore-and-upload route, followed by full remote byte/hash readback; retain
-the source and exact recorded hashes while that is unresolved.
+The alpha.10 build ZIP was copied directly between the GitHub and Drive
+connectors to the existing unshared private folder, with no large phone file.
+Its full Drive readback and extracted main MPP matched the independently
+verified hosted SHA-256 values in memory. The exact private file identity and
+readback are held in an encrypted receipt using the existing identity. An actual
+restored file on disk has not been verified; no original was deleted.
+
+The separate dev.6 companion upload returned a tool error. Its outcome is
+uncertain; a subsequent exact-name search found no match, but that does not by
+itself prove no upload occurred. It was not retried. The unsigned patched APK
+has not been archived. The phone was below the user's 20 GiB engineering
+reserve; an attempted memory-file route was also denied across same-UID
+processes. The bounded next step is to reconcile the companion upload outcome
+through the existing Drive route, then verify any actual remote copy in full.
+Retain the source and exact recorded hashes while that remains unresolved.
 
 The public source commits and reproducible hosted workflow remain available.
 An artifact, backup or static inspection does not establish the bearer-privacy,
