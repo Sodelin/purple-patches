@@ -102,6 +102,9 @@ fn run_with_progress<F: FnMut(usize,u32)>(command:&mut Command,input:&[u8],cance
    observed=true;
   });
   assert!(observed);
+  if result.is_ok(){
+   let _=std::io::stderr().write_all(b"PUBLIC_EARLY_EXIT_REPRO: successful child accepted with unsent input\n");
+  }
   assert!(result.is_err(),"successful child exit must not accept unsent input");
  }
 }
