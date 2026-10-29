@@ -1,7 +1,7 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: companion dev.7 makes selected translation text explicit source data and passed hosted synthetic controls and an Android cross-build; alias, privacy, recovery, model and device gates remain open",
+  "current_turn_classification": "progress: companion dev.7 passed hosted controls and a cross-build; a separate public chess source timeout was reproduced. Gboard privacy, recovery, model and device gates remain open.",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",
@@ -22,7 +22,7 @@
   },
   "other_requested_patches": {
     "mpv_subtitles": "Idea retained; exact installed target, supported provider interface and acceptance still unverified.",
-    "discord_and_chess": "User reports existing modifications; their actual selected patch sources and review remain unverified."
+    "discord_and_chess": "Public candidate sources reviewed in research/stockfish-timeout/README.md; a silent-stream timeout was reproduced for one pinned chess source. The user's actual selected patch sources and device behavior remain unverified."
   },
   "remaining_gboard_gates": [
     "Network resource name allocation must account for aliases in res/values*, and shared or nested domain-policy handling needs review and actual Android acceptance. See GBOARD-NETWORK-RESOURCES.md.",
