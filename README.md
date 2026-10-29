@@ -46,6 +46,11 @@ occurs. Its [hosted bundle and cancellation-ordering controls](docs/gboard-alpha
 and [exact-APK static inspection](docs/gboard-alpha13-apk-verification.json)
 passed. This warning does not provide durable job recovery or prove that a
 cancelled job stopped; the candidate remains uninstalled.
+Alpha.14 replaces the build-clock manifest timestamp with the source commit
+time and refuses uncommitted or extra overlay inputs. Two [hosted builds](docs/gboard-alpha14-reproducibility.json)
+produced identical patch bytes on the observed runner image; a separate
+[static APK inspection](docs/gboard-alpha14-apk-verification.json) passed.
+The wider privacy, recovery, phone and release gates remain open.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining

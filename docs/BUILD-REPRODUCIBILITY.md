@@ -25,12 +25,34 @@ that replaces already-loaded build code or modifies the runner. The new
 timestamp's intended meaning is **source commit time**, not build completion
 time; Manager's separate feed `created_at` remains commit-derived as before.
 
-The alpha.14 source change needs two independent hosted builds and a fresh
-patched-APK inspection before any reproducibility or compatibility claim. Even
-matching artifacts on one runner image would not pin every SDK, JDK, action or
-transitive dependency, or prove cross-platform reproducibility. The existing
-public alpha.1 feed, device/model/privacy holds and original artifacts are not
-changed by this source work.
+Two hosted alpha.14 builds of exact source `81f042630155be28730f6c0f08c9912d6b8c6b33`
+produced byte-identical main, source and documentation MPPs and identical
+contents for every artifact member. The GitHub download wrappers differed in
+entry order and timestamps, while their compressed member streams matched.
+Both runs used the same observed runner image and JDK; this is a scoped
+repeatability result, not proof of future or cross-platform reproducibility.
+The separate [patched-APK static inspection](gboard-alpha14-apk-verification.json)
+passed; it does not establish phone behavior. Full comparison and controls are
+in [gboard-alpha14-reproducibility.json](gboard-alpha14-reproducibility.json).
+
+To repeat the read-only artifact comparison from a checkout with the exact
+source commit and GitHub access, run:
+
+```sh
+python tools/compare_gboard_builds.py --first-run 40948413452 --second-run 40948916651 \
+  --source-commit 81f042630155be28730f6c0f08c9912d6b8c6b33 --version 0.1.0-alpha.14
+```
+
+The command verifies run identities, checksums, exact committed overlay and
+build-input hashes, timestamp and feed metadata before comparing bytes. It reads
+artifacts in memory and does not publish them. This command uses GitHub's
+temporary artifacts; both ZIPs have also been privately archived as recorded
+in [GBOARD-ALPHA14-CUSTODY.md](GBOARD-ALPHA14-CUSTODY.md), but the command
+does not yet read those Drive copies. Its in-memory fixture controls also
+passed. The runner image, action references, SDK, JDK patch version and
+transitive dependencies are not all independently pinned by this change;
+future builds still need their own verification. The existing public alpha.1
+feed, device/model/privacy holds and original artifacts remain unchanged.
 
 The first alpha.14 build attempt, run `40948310599` from source `e0edeeb`,
 failed its synthetic timestamp test because Git rendered UTC as `Z` rather

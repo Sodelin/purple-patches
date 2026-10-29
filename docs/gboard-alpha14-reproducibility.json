@@ -1,0 +1,52 @@
+{
+  "schema": "purple.gboard.reproducibility-verification.v1",
+  "all_members_identical": true,
+  "artifact_ids": [
+    12929702855,
+    12930506985
+  ],
+  "build_inputs_verified": 5,
+  "different_members": [],
+  "limits": "Two hosted runs on one observed image and dependency state; not proof of future or cross-platform reproducibility, actual device behavior, privacy, signing or release readiness.",
+  "main_mpp_identical": true,
+  "manifest_timestamp_ms": 1793305328000,
+  "members_sha256": {
+    "SHA256SUMS": "c0bc0014b7fde600319cb308882bd82c8854c198e7854440e771a1e3b0bdcacb",
+    "patches-0.1.0-alpha.14-javadoc.mpp": "aa5cc48388204c382ddd750e7c2c904bd7d94c69bef4647f0d15f6f056474498",
+    "patches-0.1.0-alpha.14-sources.mpp": "d033e5ed27f24f72319d3fe84b2163b2a6416cf65ad752639c3ff22a9384eb8d",
+    "patches-0.1.0-alpha.14.mpp": "79602143224e21af60ec9eb780a86c785b4b7693b945a8d6c4a475b51ef49181",
+    "patches-bundle.json": "aa3cd6f4ae0f38f323b93d2add58cad1a19b586d5b79ff40c58b3f8cf52bfaa9",
+    "patches-list.json": "7cca0b4718eb3e226a83bd14012c69542d15aad7b57c6c0371f8f1f5f608bd7d",
+    "purple-provenance.json": "5970ec49790448be8d4ad543f23131cfc70db91da87dc42c4a7fd8e1cec9f88d"
+  },
+  "outer_zip_bytes": [
+    15478707,
+    15478707
+  ],
+  "outer_zip_bytes_identical": false,
+  "outer_zip_sha256": [
+    "e486651f9f08f2fe12d39c82820c8e786ac260ce1b205860cf3bfed27460ff35",
+    "18a4785ac54e3398dedb5ec8ecd9f98dd07bdec764a70bf867d70effaa1b4939"
+  ],
+  "overlay_files_verified": 11,
+  "phone_or_model_action": false,
+  "release_published": false,
+  "source_commit": "81f042630155be28730f6c0f08c9912d6b8c6b33",
+  "version": "0.1.0-alpha.14",
+  "workflow_runs": [
+    40948413452,
+    40948916651
+  ],
+  "runner_observation": "Both runs reported ubuntu-24.04 image 20261025.353.1, Temurin 21.0.13+9 and Gradle 9.6.1; action references resolve to the same hashes in the recorded logs.",
+  "wrapper_comparison": {
+    "entry_order_identical": false,
+    "zip_entry_timestamp_differences": 7,
+    "other_zip_metadata_differences": {},
+    "different_compressed_streams": []
+  },
+  "source_control_tests": "Hosted synthetic controls passed for exact source/timestamp and refusal of modified, missing, ignored or linked overlay inputs.",
+  "verification_command": "tools/compare_gboard_builds.py --first-run 40948413452 --second-run 40948916651 --source-commit 81f042630155be28730f6c0f08c9912d6b8c6b33 --version 0.1.0-alpha.14",
+  "comparison_tool_sha256": "9dfefffac6f3ada937c2c2adfc3bd119845794d2eb7d9ef3ca0b06f8d9e7fbac",
+  "comparison_control_source_sha256": "4958146e9ee43f1461460852ca2084b82c113c910e08403d1e84e33739a4d35b",
+  "comparison_controls": "Three in-memory public fixtures passed: matching member bytes with different wrappers, two valid differing bundles, and refusal of bad checksums, uncommitted input hashes, extra provenance, wrong timestamps and nonblank unpublished feed URLs. The comparator was authored after the tested build and was not a build input."
+}

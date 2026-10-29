@@ -1,0 +1,30 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40948413452,
+  "artifact_id": 12929702855,
+  "source_commit": "81f042630155be28730f6c0f08c9912d6b8c6b33",
+  "version": "0.1.0-alpha.14",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15478707,
+  "artifact_zip_sha256": "e486651f9f08f2fe12d39c82820c8e786ac260ce1b205860cf3bfed27460ff35",
+  "members_sha256": {
+    "SHA256SUMS": "c0bc0014b7fde600319cb308882bd82c8854c198e7854440e771a1e3b0bdcacb",
+    "patches-0.1.0-alpha.14-javadoc.mpp": "aa5cc48388204c382ddd750e7c2c904bd7d94c69bef4647f0d15f6f056474498",
+    "patches-0.1.0-alpha.14-sources.mpp": "d033e5ed27f24f72319d3fe84b2163b2a6416cf65ad752639c3ff22a9384eb8d",
+    "patches-0.1.0-alpha.14.mpp": "79602143224e21af60ec9eb780a86c785b4b7693b945a8d6c4a475b51ef49181",
+    "patches-bundle.json": "aa3cd6f4ae0f38f323b93d2add58cad1a19b586d5b79ff40c58b3f8cf52bfaa9",
+    "patches-list.json": "7cca0b4718eb3e226a83bd14012c69542d15aad7b57c6c0371f8f1f5f608bd7d",
+    "purple-provenance.json": "5970ec49790448be8d4ad543f23131cfc70db91da87dc42c4a7fd8e1cec9f88d"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "build_input_files_matched_git_commit": 5,
+  "manifest_timestamp_ms": 1793305328000,
+  "checks": "Hosted synthetic source-integrity and timestamp controls, feed, editor/session, copy-only preview, potential-start cancellation ordering, bootstrap, Sol catalog adapter with controlled JSON stubs, capture and upstream patch build passed.",
+  "checks_scope": "Public synthetic policy, concurrency and source controls plus source/bundle build; no actual Android UI, callback, network cancellation, microphone, model, account or phone execution.",
+  "apk_patching_at_build_time": false,
+  "unreleased_feed_has_download_url": false,
+  "privacy_release_gate": "OPEN: Termux command still emits the bearer in stdout; the selected Codex no-tools and writer boundary is also unverified.",
+  "device_accepted": false,
+  "notes": "All archive members were read and hashed in memory. Eleven overlay and five build input hashes matched the exact Git commit. Failed initial timestamp-fixture run 40948310599 is retained in BUILD-REPRODUCIBILITY.md."
+}
