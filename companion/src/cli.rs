@@ -68,15 +68,12 @@ fn models_at(path: &Path) -> Result<Vec<Model>, String> {
     let advertised = entry["supported_reasoning_levels"]
         .as_array()
         .ok_or("Sol 6.1 reasoning choices are unavailable")?;
-    if !ALLOWED_EFFORTS.iter().all(|required| {
-        advertised
-            .iter()
-            .any(|value| value["effort"].as_str() == Some(*required))
-    }) {
-        return Err(
-            "Sol 6.1 medium and max must both be advertised; no effort or model was substituted"
-                .into(),
-        );
+    let efforts: Vec<String> = ALLOWED_EFFORTS.iter()
+        .filter(|required| advertised.iter().any(|value| value["effort"].as_str() == Some(**required)))
+        .map(|value| (*value).into())
+        .collect();
+    if efforts.is_empty() {
+        return Err("Sol 6.1 has no advertised Medium or Max choice; no effort or model was substituted".into());
     }
     let mut tiers = vec![Tier {
         id: "standard".into(),
@@ -96,11 +93,8 @@ fn models_at(path: &Path) -> Result<Vec<Model>, String> {
     Ok(vec![Model {
         id: ALLOWED_MODEL.into(),
         label: "Sol 6.1".into(),
-        default_effort: "medium".into(),
-        efforts: ALLOWED_EFFORTS
-            .iter()
-            .map(|value| (*value).into())
-            .collect(),
+        default_effort: efforts[0].clone(),
+        efforts,
         tiers,
     }])
 }
@@ -821,7 +815,7 @@ mod tests {
     }
 
     #[test]
-    fn catalogue_requires_visible_sol_and_both_approved_efforts_without_fallback() {
+    fn catalogue_keeps_advertised_approved_efforts_without_fallback() {
         let scratch = Scratch::new();
         let base = json!({"slug":ALLOWED_MODEL,"display_name":"Sol 6.1","visibility":"list",
             "default_reasoning_level":"low", "supported_reasoning_levels":[{"effort":"medium"},{"effort":"max"}],
@@ -830,15 +824,12 @@ mod tests {
         others["slug"] = json!("gpt-6-astra");
         let mut hidden = base.clone();
         hidden["visibility"] = json!("hide");
-        let mut missing_max = base.clone();
-        missing_max["supported_reasoning_levels"] = json!([{"effort":"medium"}]);
-        let mut missing_medium = base.clone();
-        missing_medium["supported_reasoning_levels"] = json!([{"effort":"max"}]);
+        let mut no_approved = base.clone();
+        no_approved["supported_reasoning_levels"] = json!([{"effort":"low"}]);
         for (i, entries) in [
             json!([others]),
             json!([hidden]),
-            json!([missing_max]),
-            json!([missing_medium]),
+            json!([no_approved]),
             json!([base.clone(), base.clone()]),
         ]
         .iter()
@@ -855,7 +846,7 @@ mod tests {
         let path = scratch.0.join("approved.json");
         private::create(
             &path,
-            &serde_json::to_vec(&json!({"models":[base]})).unwrap(),
+            &serde_json::to_vec(&json!({"models":[base.clone()]})).unwrap(),
         )
         .unwrap();
         let allowed = models_at(&path).unwrap();
@@ -865,6 +856,20 @@ mod tests {
         let mut request = query();
         request.tier = Some("priority".into());
         assert!(request.validate(&allowed).is_err());
+
+        for (i, present, absent) in [(0, "medium", "max"), (1, "max", "medium")] {
+            let mut single = base.clone();
+            single["supported_reasoning_levels"] = json!([{"effort":present},{"effort":"low"}]);
+            let path = scratch.0.join(format!("single-{i}.json"));
+            private::create(&path, &serde_json::to_vec(&json!({"models":[single]})).unwrap()).unwrap();
+            let models = models_at(&path).unwrap();
+            assert_eq!(models[0].efforts, vec![present]);
+            assert_eq!(models[0].default_effort, present);
+            let mut request = query(); request.effort = present.into();
+            assert!(request.validate(&models).is_ok());
+            request.effort = absent.into();
+            assert!(request.validate(&models).is_err());
+        }
     }
 
     fn suggestion() -> Query {
