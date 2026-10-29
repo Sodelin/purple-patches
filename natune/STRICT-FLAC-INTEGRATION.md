@@ -208,6 +208,34 @@ It must preserve FLAC's original event/lifecycle path and refuse unsupported
 input explicitly. No such fourth guard or device-transition acceptance is claimed
 by the three-guard0.2.0-dev.1 build.
 
+## Whole-file verifier selection boundary
+
+Android's documented `MediaCodec` raw audio output is signed 16-bit PCM by
+default, with float output only when requested and confirmed in the returned
+format. A generic successful decode therefore does not by itself prove that
+24- or 32-bit source samples were preserved. Do not silently reduce sample
+precision or classify a FLAC solely from that default output.
+
+The reference libFLAC streaming decoder can check decoded PCM against the
+STREAMINFO MD5, but that check is disabled by default and is turned off after
+a seek or when the signature is absent. A successful `finish()` alone can
+therefore mean no comparison happened. The caller must bind uninterrupted
+complete input, actual nonzero expected checksum, decoder error/EOF and the
+original source identity; unknown checksums need a distinct truthful result.
+Even an actual matching PCM checksum does not prove which cache rendition the
+user selected or whether it is the same recording. The FLAC format supports
+4–32 bits per sample; retain the full range in a selected implementation.
+
+An independently installed Termux decoder does not establish access from the
+separately sandboxed NaTune app or a stable deployment dependency. No decoder
+or additional package has been selected, installed or executed for this source
+review. The next implementation must join a real whole-file decoder to the
+actual selected app stream and preserve stop/recovery behavior.
+
+Primary references: [Android MediaCodec raw audio](https://developer.android.com/reference/android/media/MediaCodec#raw-audio-buffers),
+[libFLAC streaming decoder](https://xiph.org/flac/api/group__flac__stream__decoder.html),
+and [RFC 9639 STREAMINFO](https://www.rfc-editor.org/rfc/rfc9639.html#section-8.2).
+
 ## Added requirement: upgrade existing non-FLAC downloads
 
 Nolan29October2026 requests a **Find FLAC upgrades** action on the Downloads page,
