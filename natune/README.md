@@ -92,3 +92,15 @@ The separate public Manager JSON feed is `channels/natune-candidate.json`.
 verifies the anonymous feed, release tag and complete main MPP against source
 pins. A successful HTTP check does not prove an actual Manager import/update.
 The remaining FLAC/provider and phone-acceptance gates remain open.
+
+## Strict-FLAC source work in progress
+
+Memory-only prefix evidence, byte-preserving/range-bounded decoder input and
+the exact native request-copy adapter are implemented and hosted-control-tested.
+See `flac-prefix-verification.json`, `flac-stream-verification.json` and
+`data-spec-verification.json`. They are not wired into an installed app or
+included in the selected mobile-data MPP. The Android classes in
+`test-fixtures/` are explicit test stand-ins and must never enter an APK.
+Real cache identity/lifecycle and complete decoder admission remain the next
+integration gates, with provider work separately tracked in
+`PROVIDER-INTERFACES.md`.

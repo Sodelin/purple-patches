@@ -88,5 +88,52 @@ existing rendition/source-retry policy. The existing PCM spectral authenticity
 analyzer is separate from encoded-codec enforcement and can be unavailable in
 bit-perfect output; it cannot be the only strict-FLAC gate.
 
+## Implemented decoder-input and request-copy adapters
+
+`FlacProbeStream.java` now preserves bytes consumed by prefix inspection and
+replays them unchanged to an owned decoder input. Nonzero ranges inspect the
+canonical prefix, close that reader, then check the requested reader's original
+rendition key/start/known total. Original stops are checked before/after I/O;
+changed source, invalid blocking reads, bad response lengths and exhausted
+caller-selected prefix budgets refuse and close the selected reader. Scratch
+storage is reused per stream and cleared on close; no file-size quota is added.
+
+The bounded overload retains the original requested length. Range completion
+is distinct from actual source EOF and neither means complete codec admission.
+A7byte original range remains7bytes even when a longer prefix was inspected;
+known out-of-bounds seeks refuse before opening the second reader.
+`flac-stream-verification.json` pins hosted run40871952290 with53stream controls
+and23request-copy controls, in addition to the129prefix controls. Source/stop
+stand-ins and Android ABI fixtures are explicitly not actual app authority.
+
+`NatuneDataSpecBinding.java` implements the exact request-copy ABI. Actual DEX
+constructor, buildUpon and subrange observations in `data-spec-verification.json`
+confirm `b=uriPositionOffset`, `f=position`, `g=length` against the app's pinned
+Media3 1.10.1 dependency. URI, headers, body snapshot, key and flags are preserved;
+no replacement URL/credentials or network operation is exposed. Canonical
+resource requests refuse fragmented URIs, non-GET/body replay and explicit Range
+headers instead of silently rewriting their meaning. Ordinary range copies
+preserve resource offsets; the real cache/decryption owner must select the
+canonical resource above a fragment.
+
+Remaining actual host bindings: select the release factory/lifecycle callsite,
+derive a real immutable resource revision/cache-generation or validated entity
+identity, retain original cancellation and per-request bounds, and pair the
+adapter with actual complete container/codec/recording validation. A mediaId or
+URL string alone is not that revision. The Source.responseLength contract means
+an actually known response length, not blindly the requested DataSpec.length
+or an open() return that only repeats that request's ceiling. No adapter test
+certifies a live CDN, a persistent cache entry or an Android decoder.
+
+The classes under `test-fixtures/` are hosted controls ONLY. Do not copy them
+into an extension or APK. The selected published mobile-data MPP and feed remain
+unchanged; these adapters are not yet installed or presented as a strict patch.
+
+Primary API references:
+
+- https://github.com/androidx/media/blob/1.10.1/libraries/datasource/src/main/java/androidx/media3/datasource/DataSpec.java
+- https://developer.android.com/reference/androidx/media3/datasource/DataSource
+- https://developer.android.com/reference/androidx/media3/common/DataReader
+
 Primary source:
 https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt

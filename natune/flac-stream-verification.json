@@ -1,22 +1,28 @@
 {
-  "run_id": 40869558381,
-  "source_commit": "74a93761f4d8740141d858d168d48d9a4edcae59",
-  "artifact_id": 12895311490,
-  "artifact_zip_sha256": "171ab55f5b11c2ef8c509d1fc8597955948b2a7eefc30538e3cf4a7b1d6d0fcc",
+  "run_id": 40871952290,
+  "source_commit": "ff826f69de07a86d0a1d3b2a3b5baa1bac5ba9dd",
+  "artifact_id": 12895977894,
+  "artifact_zip_sha256": "bdfb2544a5a312b4ae199d9f4703c19b67339f579a4ac0516b644d0cbb78578f",
   "artifact_files_sha256": {
-    "target-proof.json": "c5e605069b80c2d778282ec28592952cd4837120a3f16eee292d8b86cb5c14cb",
-    "policy-hooks.txt": "fc4c231b2274b945498c78b2be8c0d2b3505ee08e0a1fdb59fd1e443fef53d86",
+    "target-proof.json": "c8a2805684b6704f3c8855f8e22d40c7aff14fdfce257d31581c93402399f065",
+    "policy-hooks.txt": "5fdc7002978da0ddf5bbefa6388e99faec9f13189f13d4bad9116b91a4be0fc2",
     "flac-prefix-controls.txt": "10cb5097e2ee2b69251943d433916b218a9b7e8e0267d323b5316c8881c82a18",
-    "flac-stream-controls.txt": "663c5cd868d984ab0419e188863fb5bb0c6748c574d944ca736c9746472fa7b3"
+    "flac-stream-controls.txt": "c31f6fdb2c239ace176fa17d95bd025dfbabf19e99ee7bbb607719b5ad7bbc65",
+    "data-spec-controls.txt": "16126529311edf3297c1bb3a3645726b38576c0130c47fcc7defc3b6fd9276e1"
   },
-  "controls_report": "FLAC_STREAM_CONTROLS\tpassed=46\tapp_binding=false\tfull_codec_admission=false",
-  "prefix_controls_report": "FLAC_PREFIX_CONTROLS\tpassed=129\tfull_media_admission=false",
+  "controls_reports": {
+    "flac-prefix-controls.txt": "FLAC_PREFIX_CONTROLS\tpassed=129\tfull_media_admission=false",
+    "flac-stream-controls.txt": "FLAC_STREAM_CONTROLS\tpassed=53\tapp_binding=false\tfull_codec_admission=false",
+    "data-spec-controls.txt": "NATUNE_DATASPEC_CONTROLS\tpassed=23\tandroid_fixture_only=true\tapp_authority=false"
+  },
   "adapter_java_compiled": true,
-  "source_stop_identity_bindings_in_controls": "Controlled sources/stops, not actual Android host authority",
+  "actual_data_spec_code_evidence": "data-spec-verification.json",
+  "source_stop_identity_bindings_in_controls": "Controlled sources/stops; DataSpec reflection controls use explicit hosted ABI fixtures. Not actual Android host authority.",
   "app_binding_verified": false,
   "full_codec_admission_verified": false,
   "apk_executed": false,
   "model_invocations": false,
   "device_actions": false,
-  "limitation": "Decoder-input byte preservation and range/stop/response-lifetime checks only. Real Natune cache/DataSpec provenance and complete decoder/source policy still require integration."
+  "previous_stream_controls_run": 40869558381,
+  "limitation": "Byte-preserving/range-bounded input and exact request-copy adapter only. Native cache-generation/ETag provenance, real factory/lifecycle hook and complete decoder/source policy remain unbound."
 }
