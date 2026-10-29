@@ -19,6 +19,22 @@ public final class SessionPolicy {
         return exitCode instanceof Integer && ((Integer)exitCode) == 0
                 && err instanceof Integer && ((Integer)err) == -1;
     }
+    public interface InsertionAction { boolean run(); }
+    public enum InsertionOutcome { REQUEST_SENT, EDITOR_CHANGED, UNKNOWN, ALREADY_ATTEMPTED }
+    /** One preview may send at most one insertion request, even on a duplicate gesture. */
+    public static final class InsertionAttempt {
+        private boolean attempted;
+        public synchronized InsertionOutcome attempt(InsertionAction eligible, InsertionAction send) {
+            if (attempted) return InsertionOutcome.ALREADY_ATTEMPTED;
+            attempted = true;
+            try {
+                if (eligible == null || !eligible.run()) return InsertionOutcome.EDITOR_CHANGED;
+            } catch (RuntimeException unavailable) { return InsertionOutcome.EDITOR_CHANGED; }
+            try {
+                return send != null && send.run() ? InsertionOutcome.REQUEST_SENT : InsertionOutcome.UNKNOWN;
+            } catch (RuntimeException uncertain) { return InsertionOutcome.UNKNOWN; }
+        }
+    }
     public static boolean whisperPreflightSupported(String advertised) {
         return WHISPER_PREFLIGHT.equals(advertised);
     }

@@ -7,6 +7,17 @@ not been installed, and no log, bearer, installed Termux logging level or actual
 leak was examined. This is a conditional source finding, not evidence that a
 credential was disclosed on a device.
 
+## Additional source-level lifecycle gap
+
+In alpha.8, `PurpleAiRuntime.end()` increments the editor generation and clears
+the service, but it does not invalidate the pending bootstrap nonce or callback.
+`bootstrapResult()` checks the nonce and deadline, not the original editor
+generation or active service. A callback delivered after the session ends can
+therefore still set the in-memory bridge within the deadline. No live callback
+or device incident was observed. Cancellation and acceptance must be coordinated
+with editor generations, concurrent starts, expiry and the pending callback;
+this does not itself solve the separate bearer-output or caller-identity gaps.
+
 ## Source evidence
 
 Purple Patches commit `275d12e05151c90a0df097d49aa4e3255a7ac5f2`

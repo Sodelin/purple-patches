@@ -14,6 +14,7 @@ import java.util.Map;
 public final class VerifyGboardEditorSnapshot {
     private static final String POLICY = "Ldev/purple/patches/gboard/SessionPolicy;";
     private static final String SNAPSHOT = "Ldev/purple/patches/gboard/PurpleAiRuntime$Snapshot;";
+    private static final String INSERTION = "Ldev/purple/patches/gboard/SessionPolicy$InsertionAttempt;";
 
     private static void require(boolean condition, String detail) {
         if (!condition) throw new IllegalStateException(detail);
@@ -76,5 +77,23 @@ public final class VerifyGboardEditorSnapshot {
                 "Expected checks on both sides of snapshot capture");
         require(!positions(matches, POLICY, "sameAnchor").isEmpty(), "Anchor comparison missing");
         System.out.println("Verified editor policy, capture, anchor and post-capture recheck references in APK DEX.");
+        if ("0.1.0-alpha.9".equals(System.getenv("BUNDLE_VERSION"))) {
+            method(classes, INSERTION, "attempt");
+            boolean oneShot = false, commit = false, buttonDisabled = false, showListener = false;
+            for (ClassDef type : classes.values())
+                if (type.getType().startsWith("Ldev/purple/patches/gboard/PurpleAiRuntime"))
+                    for (Method candidate : type.getMethods()) {
+                        if (candidate.getImplementation() == null) continue;
+                        for (MethodReference call : calls(candidate)) {
+                            if (call.getDefiningClass().equals(INSERTION) && call.getName().equals("attempt")) oneShot = true;
+                            if (call.getDefiningClass().equals("Landroid/view/inputmethod/InputConnection;") && call.getName().equals("commitText")) commit = true;
+                            if (call.getName().equals("setEnabled")) buttonDisabled = true;
+                            if (call.getName().equals("setOnShowListener")) showListener = true;
+                        }
+                    }
+            require(oneShot && commit && buttonDisabled && showListener,
+                    "Missing one-shot insertion, editor commit or preview button references");
+            System.out.println("Verified alpha.9 preview and one-shot insertion references; no Android UI behavior is proved.");
+        }
     }
 }

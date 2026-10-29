@@ -43,12 +43,23 @@ selection check therefore does not prove that `commitText` will replace the
 intended selection rather than another active composition. This is a source and
 platform-contract finding, not a demonstrated device incident.
 
-The current positive button also dismisses the preview while ignoring the
+Alpha.8's positive button also dismisses the preview while ignoring the
 `commitText` boolean. If the connection is no longer valid and returns false,
 the user can lose the visible preview even though the input field was not
 updated. Android documents false for an invalid connection. A thrown or delayed
 call may leave a different outcome uncertain; automatic insertion retry is not
 safe without an actual outcome and anchor check.
+
+Alpha.9 source keeps the selectable preview visible after an insertion attempt,
+including when the editor rejects the request or an exception makes the outcome
+uncertain. It disables that preview's Insert button before attempting the call,
+and a one-shot policy refuses duplicate requests. A changed or unavailable anchor
+prevents the request. A `true` return is presented as a request sent, not proof
+that the editor ultimately changed; a false return or exception remains unknown.
+The user can select and copy the displayed result while the preview stays open.
+This source has not yet been built or tested on Android. It does not resolve the
+active-composition, editor-session-dismissal, earlier-result-loss or cross-process
+atomicity gaps described here.
 
 There is an earlier result-loss path as well: when an operation completes, its
 queued UI callback returns without showing the result if the captured editor

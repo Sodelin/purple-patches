@@ -166,9 +166,36 @@ public class SessionPolicyCheck {
         check(companion.contains("pub const PREFLIGHT_CAPABILITY: &str = \"" + SessionPolicy.WHISPER_PREFLIGHT + "\";"));
         for (Object err:new Object[]{null,0,1,"-1"}) check(!SessionPolicy.bootstrapSuccess(0,err));
         for (Object exit:new Object[]{null,1,-1,"0"}) check(!SessionPolicy.bootstrapSuccess(exit,-1));
+        int[] sent={0};
+        var success=new SessionPolicy.InsertionAttempt();
+        check(success.attempt(() -> true, () -> { sent[0]++; return true; }) == SessionPolicy.InsertionOutcome.REQUEST_SENT);
+        check(success.attempt(() -> true, () -> { sent[0]++; return true; }) == SessionPolicy.InsertionOutcome.ALREADY_ATTEMPTED);
+        check(sent[0]==1);
+        var changed=new SessionPolicy.InsertionAttempt();
+        check(changed.attempt(() -> false, () -> { sent[0]++; return true; }) == SessionPolicy.InsertionOutcome.EDITOR_CHANGED);
+        check(sent[0]==1);
+        var missing=new SessionPolicy.InsertionAttempt();
+        check(missing.attempt(() -> { throw new IllegalStateException("editor lost"); },
+                () -> { sent[0]++; return true; }) == SessionPolicy.InsertionOutcome.EDITOR_CHANGED);
+        check(sent[0]==1);
+        var refused=new SessionPolicy.InsertionAttempt();
+        check(refused.attempt(() -> true, () -> { sent[0]++; return false; }) == SessionPolicy.InsertionOutcome.UNKNOWN);
+        check(refused.attempt(() -> true, () -> { sent[0]++; return true; }) == SessionPolicy.InsertionOutcome.ALREADY_ATTEMPTED);
+        var uncertain=new SessionPolicy.InsertionAttempt();
+        check(uncertain.attempt(() -> true, () -> { sent[0]++; throw new IllegalStateException("connection lost"); }) == SessionPolicy.InsertionOutcome.UNKNOWN);
+        check(uncertain.attempt(() -> true, () -> { sent[0]++; return true; }) == SessionPolicy.InsertionOutcome.ALREADY_ATTEMPTED);
+        check(sent[0]==3);
+        var reentrant=new SessionPolicy.InsertionAttempt();
+        check(reentrant.attempt(() -> true, () -> {
+            sent[0]++;
+            check(reentrant.attempt(() -> true, () -> { sent[0]++; return true; }) == SessionPolicy.InsertionOutcome.ALREADY_ATTEMPTED);
+            return true;
+        }) == SessionPolicy.InsertionOutcome.REQUEST_SENT);
+        check(sent[0]==4);
         check(SessionPolicy.bounded("hello"));check(!SessionPolicy.bounded(" "));check(!SessionPolicy.bounded("界".repeat(3000)));
         checkPermissionActivity();
         System.out.println("Editor privacy, localhost, stale selection and UTF-8 limits passed");
+        System.out.println("One-shot insertion request and uncertain-result controls passed");
         System.out.println("Scoped permission activity JVM fixture passed");
     }
 }

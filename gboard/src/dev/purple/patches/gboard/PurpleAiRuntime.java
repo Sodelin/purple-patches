@@ -237,16 +237,28 @@ public final class PurpleAiRuntime {
                     TextView preview = new TextView(current); preview.setText(text); preview.setSaveEnabled(false);
                     preview.setTextIsSelectable(true); preview.setPadding(24,16,24,16);
                     AlertDialog.Builder result = new AlertDialog.Builder(current).setTitle(voice ? "Whisper transcript" : "Translation")
-                            .setView(preview).setNegativeButton("Discard", null);
+                            .setView(preview).setNegativeButton("Close", null);
                     if (recordingLimited) result.setMessage("Recording reached the " + SessionPolicy.AUDIO_SECONDS
                             + "-second limit. Only the captured audio is included.");
-                    show(result
-                            .setPositiveButton("Insert", (d,w) -> {
-                                String replacement = text;
-                                if (request == operation && !stopped.get() && SessionPolicy.bounded(replacement) && anchor.matches(service.get(), generation))
-                                    anchor.connection.commitText(replacement, 1);
-                                else notifyUser("The editor changed; original text was preserved");
-                            }).create());
+                    AlertDialog resultDialog = result.setPositiveButton("Insert", null).create();
+                    SessionPolicy.InsertionAttempt insertion = new SessionPolicy.InsertionAttempt();
+                    resultDialog.setOnShowListener(d -> {
+                        android.widget.Button insert = resultDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        insert.setOnClickListener(v -> {
+                            insert.setEnabled(false);
+                            SessionPolicy.InsertionOutcome outcome = insertion.attempt(
+                                    () -> request == operation && !stopped.get() && SessionPolicy.bounded(text)
+                                            && anchor.matches(service.get(), generation),
+                                    () -> anchor.connection.commitText(text, 1));
+                            if (outcome == SessionPolicy.InsertionOutcome.REQUEST_SENT)
+                                notifyUser("Insertion requested. Check the editor before closing this preview.");
+                            else if (outcome == SessionPolicy.InsertionOutcome.EDITOR_CHANGED)
+                                notifyUser("The editor changed. Your result remains in this preview.");
+                            else if (outcome == SessionPolicy.InsertionOutcome.UNKNOWN)
+                                notifyUser("Insertion was not confirmed. Check the editor before trying again.");
+                        });
+                    });
+                    show(resultDialog);
                 });
             } catch (Exception failure) {
                 MAIN.post(() -> { if (request == operation && !stopped.get() && anchor.session == generation) {

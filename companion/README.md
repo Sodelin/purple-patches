@@ -18,6 +18,11 @@ and owner acceptance are satisfied. No inference or microphone test is run by
 CI. Lifecycle/controller adoption and full writer enforcement are distinct
 acceptance gates; candidate compilation does not clear them.
 
+The translation command's named feature switches and read-only sandbox option
+do not yet prove a tool-free Android Codex profile. A separately retained
+no-tools candidate is not currently selected for this companion; see
+[the execution-boundary review](../docs/CODEX-TRANSLATION-BOUNDARY.md).
+
 Deployment uses the fixed wrapper at ~/.local/bin/purple-gboard-service,
 selected native binary under ~/.local/lib/purple-gboard-companion/current,
 and new scoped state ~/.local/state/purple-gboard-companion-v1. Shared featurectl
