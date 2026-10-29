@@ -1,0 +1,19 @@
+{
+  "run_id": 40867651333,
+  "source_commit": "8b221f3235629673b8ca54c6c2891dd7e1fc0ad2",
+  "artifact_id": 12893833630,
+  "artifact_zip_sha256": "e2f1f0b27ec8dc076bccadcf4dbf6f91cf057d97ebcfa2b6cda99ef4ec5eb41f",
+  "artifact_files_sha256": {
+    "target-proof.json": "770b22a233193375f278eaa2155c4a77d0aad6aaa3e952e7aa450af026fb1e31",
+    "policy-hooks.txt": "fc4c231b2274b945498c78b2be8c0d2b3505ee08e0a1fdb59fd1e443fef53d86",
+    "flac-prefix-controls.txt": "10cb5097e2ee2b69251943d433916b218a9b7e8e0267d323b5316c8881c82a18"
+  },
+  "controls_report": "FLAC_PREFIX_CONTROLS\tpassed=129\tfull_media_admission=false",
+  "independent_stream_inspection_passed": true,
+  "apk_executed": false,
+  "application_state_read": false,
+  "strict_flac_enforcement_integrated": false,
+  "full_payload_integrity_verified": false,
+  "device_acceptance": false,
+  "limitation": "Native FLAC header evidence and malformed/range/container controls only; no complete codec admission or provider/runtime claim."
+}

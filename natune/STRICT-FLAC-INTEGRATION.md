@@ -40,5 +40,42 @@ Additional providers require reviewed public interfaces and authorized access;
 no provider requests or credential acquisition were performed by this review.
 Existing source support is not evidence of current provider health.
 
+## Produced source and exact interface evidence
+
+`stream-inspection-verification.json` binds hosted run40866800058 to source
+273db99 and complete artifact hashes. Independent dexlib and the stdlib DEX
+reader agree on26data-source types and17factory methods. The actual DataSource
+interface is `Lr8/dm2;`, open is `g(Lr8/km2;)J`, and read is inherited from its
+DataReader ancestor. The initial same-declaring-class heuristic missed that
+interface; the corrected hierarchy traversal is retained in `inspect_streams.py`.
+`stream-hooks.json` contains only public APK type/method references, code sizes
+and fingerprints; no arbitrary embedded strings or app state.
+
+Candidate factory methods include `Lr8/kd;->v()Lr8/dm2;`,
+`Lr8/wm5;->v()Lr8/dm2;`, `Lr8/xk1;->v()Lr8/dm2;` and
+`Lr8/py7;->v()Lr8/dm2;`. These are actual release signatures, not yet proof
+of complete playback/download/cache/prefetch coverage. In particular a wrapper
+below CacheDataSource can miss existing cached bytes. DataSpec field names and
+types are pinned, but position/length semantics need constructor/use binding;
+do not infer those semantics from field letters alone.
+
+`FlacPrefixProbe.java` is implemented pure Java for eventual Android extension
+integration, using actual byte arrays only. It has no I/O, caller authentication
+or persistence. `flac-prefix-verification.json` records hosted run40867651333
+with129controls and a standard RFC9639 example. It checks native STREAMINFO,
+metadata traversal and first-frame header properties/CRC8. Nonzero ranges
+require canonical-prefix evidence. Non-native containers require their actual
+container decoder; they are never relabelled FLAC by MIME or filename.
+
+HEADER_VERIFIED explicitly does not verify complete frame payloads, CRC16/PCM
+MD5, recording identity, previews or a whole download. A control deliberately
+shows corrupted later payload retaining header evidence, so no consumer may
+treat that state as full media admission. No strict patch has adopted this probe
+yet. The next runtime join must bind actual DataSource/cached-byte provenance,
+preserve prefix bytes and ranges, and pair complete decoder evidence with the
+existing rendition/source-retry policy. The existing PCM spectral authenticity
+analyzer is separate from encoded-codec enforcement and can be unavailable in
+bit-perfect output; it cannot be the only strict-FLAC gate.
+
 Primary source:
 https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt
