@@ -31,16 +31,16 @@ import org.json.JSONObject;
 public final class PurpleAiRuntime {
     static final String FEATURE = "dev.purple.patches.gboard.enabled";
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
-    private static WeakReference<InputMethodService> service = new WeakReference<>(null);
-    private static long generation;
+    private static volatile WeakReference<InputMethodService> service = new WeakReference<>(null);
+    private static volatile long generation;
     private static long operation;
     private static volatile BridgeClient bridge;
     private static volatile AtomicBoolean cancellation;
     private static volatile WhisperCapture capture;
     private static final AtomicBoolean busy = new AtomicBoolean();
     private static AlertDialog dialog;
-    private static String nonce;
-    private static long connectDeadline;
+    private static final Object BOOTSTRAP_LOCK = new Object();
+    private static final SessionPolicy.BootstrapAttempt bootstrap = new SessionPolicy.BootstrapAttempt();
     private static PendingIntent callback;
     private PurpleAiRuntime() {}
 
@@ -52,15 +52,26 @@ public final class PurpleAiRuntime {
         } catch (Exception ignored) { return false; }
     }
     public static void start(Object receiver) {
-        end();
-        if (receiver instanceof InputMethodService && enabled((Context) receiver))
-            service = new WeakReference<>((InputMethodService) receiver);
+        synchronized (BOOTSTRAP_LOCK) {
+            end();
+            if (receiver instanceof InputMethodService && enabled((Context) receiver))
+                service = new WeakReference<>((InputMethodService) receiver);
+        }
     }
     public static void end() {
-        generation++;
+        synchronized (BOOTSTRAP_LOCK) {
+            generation++;
+            clearPendingBootstrap();
+            service.clear();
+        }
         cancel();
-        service.clear();
         dismiss();
+    }
+    /** Caller owns BOOTSTRAP_LOCK; canceling a callback does not stop an already launched service. */
+    private static void clearPendingBootstrap() {
+        bootstrap.invalidate();
+        PendingIntent pending = callback; callback = null;
+        if (pending != null) try { pending.cancel(); } catch (RuntimeException ignored) {}
     }
     private static void cancel() {
         operation++;
@@ -146,48 +157,59 @@ public final class PurpleAiRuntime {
         }
     }
     private static void offerConnection(InputMethodService ime) {
+        final long offeredSession = generation;
         show(new AlertDialog.Builder(ime).setTitle("Connect local tools")
                 .setMessage("Termux gives this keyboard permission to run commands as Termux. These actions use your existing local Whisper and Codex tools. Dictation asks for microphone access separately.")
-                .setNegativeButton("Cancel", null).setPositiveButton("Connect", (d, w) -> connect(ime)).create());
+                .setNegativeButton("Cancel", null).setPositiveButton("Connect", (d, w) -> connect(ime, offeredSession)).create());
     }
-    private static void connect(InputMethodService ime) {
-        if (ime.checkSelfPermission("com.termux.permission.RUN_COMMAND") != PackageManager.PERMISSION_GRANTED) { permissions(ime, SessionPolicy.PERMISSION_LOCAL_TOOLS); return; }
-        if (callback != null) callback.cancel();
-        nonce = UUID.randomUUID().toString(); connectDeadline = SystemClock.elapsedRealtime() + 30000;
-        Intent result = new Intent().setClassName(ime.getPackageName(), PurpleBootstrapReceiver.class.getName())
-                .setData(Uri.parse("purple-gboard-connect:" + nonce));
-        callback = PendingIntent.getBroadcast(ime, 0, result,
-                PendingIntent.FLAG_ONE_SHOT | (Build.VERSION.SDK_INT >= 31 ? PendingIntent.FLAG_MUTABLE : 0));
-        Intent command = new Intent("com.termux.RUN_COMMAND").setClassName("com.termux", "com.termux.app.RunCommandService")
-                .putExtra("com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/home/.local/bin/purple-gboard-service")
-                .putExtra("com.termux.RUN_COMMAND_ARGUMENTS", new String[]{"bootstrap"})
-                .putExtra("com.termux.RUN_COMMAND_WORKDIR", "/data/data/com.termux/files/home")
-                .putExtra("com.termux.RUN_COMMAND_BACKGROUND", true)
-                // Best effort on reviewed Termux source only; the stdout capability handoff
-                // remains a release blocker until a non-loggable channel is established.
-                .putExtra("com.termux.RUN_COMMAND_BACKGROUND_CUSTOM_LOG_LEVEL", "0")
-                .putExtra("com.termux.RUN_COMMAND_PENDING_INTENT", callback);
-        try { if (ime.startService(command) == null) throw new IllegalStateException(); }
-        catch (RuntimeException ignored) { callback.cancel(); callback = null; nonce = null; notifyUser("Local tools are not available"); }
+    private static void connect(InputMethodService ime, long offeredSession) {
+        synchronized (BOOTSTRAP_LOCK) {
+            if (!SessionPolicy.bootstrapOfferCurrent(offeredSession, generation, ime, service.get())
+                    || !enabled(ime)) return;
+            if (ime.checkSelfPermission("com.termux.permission.RUN_COMMAND") != PackageManager.PERMISSION_GRANTED) { permissions(ime, SessionPolicy.PERMISSION_LOCAL_TOOLS); return; }
+            clearPendingBootstrap();
+            try {
+                String route = "purple-gboard-connect:" + UUID.randomUUID();
+                bootstrap.begin(offeredSession, route, SystemClock.elapsedRealtime() + 30000);
+                Intent result = new Intent().setClassName(ime.getPackageName(), PurpleBootstrapReceiver.class.getName())
+                        .setData(Uri.parse(route));
+                callback = PendingIntent.getBroadcast(ime, 0, result,
+                        PendingIntent.FLAG_ONE_SHOT | (Build.VERSION.SDK_INT >= 31 ? PendingIntent.FLAG_MUTABLE : 0));
+                Intent command = new Intent("com.termux.RUN_COMMAND").setClassName("com.termux", "com.termux.app.RunCommandService")
+                        .putExtra("com.termux.RUN_COMMAND_PATH", "/data/data/com.termux/files/home/.local/bin/purple-gboard-service")
+                        .putExtra("com.termux.RUN_COMMAND_ARGUMENTS", new String[]{"bootstrap"})
+                        .putExtra("com.termux.RUN_COMMAND_WORKDIR", "/data/data/com.termux/files/home")
+                        .putExtra("com.termux.RUN_COMMAND_BACKGROUND", true)
+                        // Best effort on reviewed Termux source only; stdout remains a release blocker.
+                        .putExtra("com.termux.RUN_COMMAND_BACKGROUND_CUSTOM_LOG_LEVEL", "0")
+                        .putExtra("com.termux.RUN_COMMAND_PENDING_INTENT", callback);
+                if (ime.startService(command) == null) throw new IllegalStateException();
+            } catch (RuntimeException ignored) { clearPendingBootstrap(); notifyUser("Local tools are not available"); }
+        }
     }
     static void bootstrapResult(Intent intent) {
-        try {
-            if (intent == null || nonce == null || SystemClock.elapsedRealtime() > connectDeadline
-                    || !Uri.parse("purple-gboard-connect:" + nonce).equals(intent.getData())) return;
-            nonce = null; callback = null; // Consume the one-shot authority before parsing.
-            Bundle result = intent.getBundleExtra("result");
-            if (result == null || !SessionPolicy.bootstrapSuccess(result.get("exitCode"), result.get("err")))
-                throw new IllegalStateException();
-            String output = result.getString("stdout");
-            if (output == null || output.length() > 8192) throw new IllegalStateException();
-            Object original = result.get("stdout_original_length");
-            if (original != null && (!(original instanceof String)
-                    || Long.parseLong((String)original) != output.length())) throw new IllegalStateException();
-            JSONObject data = new JSONObject(output);
-            if (!data.getBoolean("ok") || data.getInt("protocol") != 1) throw new IllegalStateException();
-            bridge = new BridgeClient(data.getString("base_url"), data.getString("token"));
-            notifyUser("Local tools connected. Choose Whisper or Translate.");
-        } catch (Exception ignored) { bridge = null; notifyUser("Local tools could not connect"); }
+        synchronized (BOOTSTRAP_LOCK) {
+            try {
+                String route = intent == null || intent.getData() == null ? null : intent.getData().toString();
+                if (!bootstrap.consume(generation, service.get() != null, route, SystemClock.elapsedRealtime())) {
+                    if (!bootstrap.pending()) clearPendingBootstrap();
+                    return;
+                }
+                callback = null; // Consume the one-shot authority before parsing.
+                Bundle result = intent.getBundleExtra("result");
+                if (result == null || !SessionPolicy.bootstrapSuccess(result.get("exitCode"), result.get("err")))
+                    throw new IllegalStateException();
+                String output = result.getString("stdout");
+                if (output == null || output.length() > 8192) throw new IllegalStateException();
+                Object original = result.get("stdout_original_length");
+                if (original != null && (!(original instanceof String)
+                        || Long.parseLong((String)original) != output.length())) throw new IllegalStateException();
+                JSONObject data = new JSONObject(output);
+                if (!data.getBoolean("ok") || data.getInt("protocol") != 1) throw new IllegalStateException();
+                bridge = new BridgeClient(data.getString("base_url"), data.getString("token"));
+                notifyUser("Local tools connected. Choose Whisper or Translate.");
+            } catch (Exception ignored) { clearPendingBootstrap(); bridge = null; notifyUser("Local tools could not connect"); }
+        }
     }
     private static void submit(Snapshot anchor, String language, String effort) {
         InputMethodService ime = service.get();

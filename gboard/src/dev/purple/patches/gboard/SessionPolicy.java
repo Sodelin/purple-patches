@@ -19,6 +19,31 @@ public final class SessionPolicy {
         return exitCode instanceof Integer && ((Integer)exitCode) == 0
                 && err instanceof Integer && ((Integer)err) == -1;
     }
+    public static boolean bootstrapOfferCurrent(long offered, long current, Object owner, Object active) {
+        return offered == current && owner != null && owner == active;
+    }
+    /** The owner synchronizes this request with the actual IME session and delivery. */
+    public static final class BootstrapAttempt {
+        private long session, deadline;
+        private String route;
+        public void begin(long session, String route, long deadline) {
+            if (route == null || route.isEmpty() || deadline <= 0)
+                throw new IllegalArgumentException("Invalid bootstrap attempt");
+            this.session = session; this.route = route; this.deadline = deadline;
+        }
+        public void invalidate() { route = null; deadline = 0; }
+        public boolean pending() { return route != null; }
+        public boolean consume(long currentSession, boolean ownerPresent, String received, long now) {
+            if (route == null) return false;
+            if (!ownerPresent || session != currentSession || now > deadline) {
+                invalidate();
+                return false;
+            }
+            if (!route.equals(received)) return false;
+            invalidate();
+            return true;
+        }
+    }
     public interface InsertionAction { boolean run(); }
     public enum InsertionOutcome { REQUEST_SENT, EDITOR_CHANGED, UNKNOWN, ALREADY_ATTEMPTED }
     /** One preview may send at most one insertion request, even on a duplicate gesture. */

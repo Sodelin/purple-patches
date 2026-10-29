@@ -9,14 +9,20 @@ credential was disclosed on a device.
 
 ## Additional source-level lifecycle gap
 
-In alpha.8, `PurpleAiRuntime.end()` increments the editor generation and clears
+In alpha.8 and alpha.9, `PurpleAiRuntime.end()` increments the editor generation and clears
 the service, but it does not invalidate the pending bootstrap nonce or callback.
 `bootstrapResult()` checks the nonce and deadline, not the original editor
 generation or active service. A callback delivered after the session ends can
 therefore still set the in-memory bridge within the deadline. No live callback
-or device incident was observed. Cancellation and acceptance must be coordinated
-with editor generations, concurrent starts, expiry and the pending callback;
-this does not itself solve the separate bearer-output or caller-identity gaps.
+or device incident was observed. Alpha.10 source invalidates and cancels the
+pending callback on session end, binds a new request to the offered session and
+owner, and checks session, owner presence, route, deadline and one-shot
+consumption before assigning the result. A shared lock covers initiation,
+session end and response acceptance. The source change and pure policy
+controls have not yet been built or exercised on Android. Canceling the
+PendingIntent does not stop an already launched Termux command or revoke a
+previously issued bearer. The separate bearer-output and caller-identity gaps
+remain open.
 
 ## Source evidence
 

@@ -149,6 +149,29 @@ public class SessionPolicyCheck {
         Reader multibyte=new Reader(); multibyte.first=multibyte.last=new SessionPolicy.EditorPosition(0,3000,0);
         multibyte.selected="界".repeat(3000); check(SessionPolicy.captureEditor(multibyte)==null);
         check(SessionPolicy.bootstrapSuccess(0,-1));
+        Object owner=new Object();
+        check(SessionPolicy.bootstrapOfferCurrent(1,1,owner,owner));
+        check(!SessionPolicy.bootstrapOfferCurrent(1,2,owner,owner));
+        check(!SessionPolicy.bootstrapOfferCurrent(1,1,owner,new Object()));
+        check(!SessionPolicy.bootstrapOfferCurrent(1,1,null,null));
+        var bootstrap=new SessionPolicy.BootstrapAttempt();
+        check(!bootstrap.consume(1,true,"first",20));
+        bootstrap.begin(1,"first",30);
+        check(!bootstrap.consume(1,true,"wrong",20) && bootstrap.pending());
+        check(bootstrap.consume(1,true,"first",30));
+        check(!bootstrap.consume(1,true,"first",30) && !bootstrap.pending());
+        bootstrap.begin(1,"first",30);
+        check(!bootstrap.consume(1,false,"first",20) && !bootstrap.pending());
+        bootstrap.begin(1,"first",30);
+        check(!bootstrap.consume(2,true,"first",20) && !bootstrap.pending());
+        bootstrap.begin(1,"first",30);
+        check(!bootstrap.consume(1,true,"first",31) && !bootstrap.pending());
+        bootstrap.begin(1,"first",30);
+        bootstrap.begin(1,"second",30);
+        check(!bootstrap.consume(1,true,"first",20) && bootstrap.pending());
+        check(bootstrap.consume(1,true,"second",20));
+        bootstrap.begin(1,"first",30); bootstrap.invalidate();
+        check(!bootstrap.consume(1,true,"first",20));
         check(SessionPolicy.whisperPreflightSupported("full-v3-pin-engine-sha-v1"));
         for (String value : new String[]{null,"","full-v3-pin-engine-sha-v0","memory-only-v1"})
             check(!SessionPolicy.whisperPreflightSupported(value));
@@ -196,6 +219,7 @@ public class SessionPolicyCheck {
         checkPermissionActivity();
         System.out.println("Editor privacy, localhost, stale selection and UTF-8 limits passed");
         System.out.println("One-shot insertion request and uncertain-result controls passed");
+        System.out.println("Bootstrap session, deadline, replacement and one-shot controls passed");
         System.out.println("Scoped permission activity JVM fixture passed");
     }
 }
