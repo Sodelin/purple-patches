@@ -60,6 +60,7 @@ public final class InspectNatune {
             var row=new StringBuilder("CODEC_NODE\t"+offset+"\t"+instruction.getOpcode().name());
             if(instruction instanceof OneRegisterInstruction r)row.append("\tA=").append(r.getRegisterA());
             if(instruction instanceof TwoRegisterInstruction r)row.append("\tB=").append(r.getRegisterB());
+            if(instruction instanceof ThreeRegisterInstruction r)row.append("\tC=").append(r.getRegisterC());
             if(instruction instanceof FiveRegisterInstruction r)row.append("\targc=").append(r.getRegisterCount())
                 .append("\tC=").append(r.getRegisterC()).append("\tD=").append(r.getRegisterD())
                 .append("\tE=").append(r.getRegisterE()).append("\tF=").append(r.getRegisterF())
