@@ -35,12 +35,13 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/natune-inspector"
           javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-inspector" natune/*.java natune/test-fixtures/android/net/Uri.java natune/test-fixtures/r8/km2.java
+          java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" OfflineSelectionPlanControls > dist/offline-selection-controls.txt
           java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" FlacPrefixProbeControls > dist/flac-prefix-controls.txt
           java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" FlacProbeStreamControls > dist/flac-stream-controls.txt
           java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" NatuneDataSpecBindingControls > dist/data-spec-controls.txt
           java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" InspectNatune "$RUNNER_TEMP/natune-original.apk" > dist/policy-hooks.txt
           cd dist
-          sha256sum target-proof.json policy-hooks.txt flac-prefix-controls.txt flac-stream-controls.txt data-spec-controls.txt > SHA256SUMS
+          sha256sum target-proof.json policy-hooks.txt flac-prefix-controls.txt flac-stream-controls.txt data-spec-controls.txt offline-selection-controls.txt > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: natune-public-hook-inspection
