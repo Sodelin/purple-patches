@@ -137,6 +137,16 @@ td1.p(String)TreeSet; an assumed NavigableSet-returning Media3 interface was not
 found. This is evidence to inspect and bind the actual receiver before making
 an extension call, not a reason to loosen its type/lock checks.
 
+Follow-up inspection40886659336 confirms td1 is the retained abstract Cache
+interface (flags1537), with sixteen abstract methods, rather than a concrete
+cache owner. The new proof supersedes the first inspection in
+storage-hook-inspection.json, retaining predecessor run40886323108 in history.
+DownloadUtil's actual optimized type is playback/g, capturing two td1 fields
+and its original manager. These descriptors identify hook inputs; they do not
+establish a held read lease, a synchronized concrete implementation or durable
+move custody. The next binding step must resolve the actual implementors and
+their writer/reader lifecycle before any source removal path is admitted.
+
 ## Reproducible source evidence
 
 `shared-storage-source-review.json` pins the inspected public file bodies.

@@ -20,3 +20,12 @@ only these Android Java sources into the official extension module. It excludes
 an otherwise unnecessary second Kotlin standard library. This profile has not
 yet been built or adopted; current selected feeds and existing patch behavior
 are unchanged. No phone install/UI/permission/model action accompanies it.
+
+The separately implemented VerifiedStreamCopy and SharedDocumentDestination
+provide bounded streaming, full destination readback and the real Android SAF
+stream boundary for future Move to folder integration. Hosted run40886068466
+passed49 core controls and real SDK compilation. They are not an installed UI,
+a Media3 source lease, a verified provider grant or a cache-deletion authority.
+See ../SHARED-STORAGE.md and ../shared-storage-verification.json for the exact
+remaining binding and acceptance gates. These classes add no model/network
+client, listener, grant, runtime record or source deletion path.
