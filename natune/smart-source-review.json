@@ -1,0 +1,32 @@
+{
+  "schema": "purple.natune-smart-source-review.v1",
+  "upstream_commit": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+  "files": [
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/utils/SyncUtils.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/utils/SyncUtils.kt",
+      "bytes": 54124,
+      "sha256": "e6bd97a821553507226deaa536b29c87815790f58c70bb9badde1d97ccdf2759"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/viewmodels/LibraryViewModels.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/viewmodels/LibraryViewModels.kt",
+      "bytes": 37384,
+      "sha256": "e3ec6c9a8b2df24c7dc22ecfd7158c230317a35871b1a9d780830609868829ee"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/library/LibraryPlaylistsScreen.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/library/LibraryPlaylistsScreen.kt",
+      "bytes": 44301,
+      "sha256": "00120a3f36415cbaaa8bac2fae67571e51b5d015fd23821e3955fbf1478a28e3"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/library/RefreshLibraryTopMixesUseCase.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/library/RefreshLibraryTopMixesUseCase.kt",
+      "bytes": 16814,
+      "sha256": "6a55e1855b9de99dedbb32fffb66921f1c198f4f6818fb99dfbb34eb8e651292"
+    }
+  ],
+  "actual_account_state_or_playlists_read": false,
+  "actual_smart_download_feed_bound": false
+}

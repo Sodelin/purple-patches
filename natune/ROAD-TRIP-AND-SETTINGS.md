@@ -104,3 +104,18 @@ Morphe source with versioned settings/migrations and actual regression checks.
 
 Gboard's separate action/settings/control scope remains unchanged; don't reuse
 its keyboard capability as a Natune settings or account delegation.
+
+## Later user clarification,29October2026
+
+Prioritize Smart Downloads as the primary rotating offline collection with an
+explicit GB limit; retain Road Trip as the optional queue-buffer behavior.
+SMART-DOWNLOADS.md records the exact source/account gaps and the correction that
+only user-downloaded playlists should follow edits, not auto-download every list.
+
+Road Trip must retain the current AND previous played song. After A->B retainA
+for replay/back/liking; after B->C olderA may become eligible whileB/C stay. Use
+actual transitions, including going back and repeat callbacks, rather than queue
+position arithmetic. Only eligible temporary ownership can be retired; permanent
+saves, other playlists and external holds remain. The produced pure lookback/
+selection policy is described in SMART-DOWNLOADS.md; actual app/cache/UI binding
+and phone acceptance remain open.
