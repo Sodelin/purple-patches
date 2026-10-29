@@ -5,6 +5,8 @@ public final class SessionPolicy {
     public static final int TEXT_BYTES = 8192;
     public static final int AUDIO_SECONDS = 60;
     public static final String WHISPER_PREFLIGHT = "full-v3-pin-engine-sha-v1";
+    public static final String PERMISSION_LOCAL_TOOLS = "local-tools";
+    public static final String PERMISSION_MICROPHONE = "microphone";
     private SessionPolicy() {}
     public static boolean sensitive(int inputType, int imeOptions) {
         int cls = inputType & 15, variation = inputType & 4080;
@@ -22,6 +24,14 @@ public final class SessionPolicy {
     }
     public static boolean translationEffortAllowed(String effort) {
         return "medium".equals(effort) || "max".equals(effort);
+    }
+    /** Each explicit action requests only its own Android permission. */
+    public static String[] permissionsFor(String scope) {
+        if (PERMISSION_LOCAL_TOOLS.equals(scope))
+            return new String[]{"com.termux.permission.RUN_COMMAND"};
+        if (PERMISSION_MICROPHONE.equals(scope))
+            return new String[]{"android.permission.RECORD_AUDIO"};
+        return new String[0];
     }
     public static boolean bounded(String value) {
         return value != null && !value.trim().isEmpty()

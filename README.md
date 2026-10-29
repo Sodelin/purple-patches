@@ -16,9 +16,10 @@ See [editor snapshot safety](docs/EDITOR-SNAPSHOT.md) before using the candidate
 The alpha.6 source adds a per-translation Medium/Max reasoning choice. Its
 [hosted bundle](docs/gboard-alpha6-build-verification.json) passed; phone
 acceptance remains open.
-Alpha.7 adds a source-level mitigation for a Termux bootstrap logging risk;
-the mitigation and a replacement capability handoff remain unverified. See
-[bootstrap privacy](docs/BOOTSTRAP-PRIVACY.md). Do not activate the candidate.
+Alpha.7 adds a source-level mitigation for a Termux bootstrap logging risk and
+separates the microphone request from the local-tools request. The mitigation
+and a replacement capability handoff remain unverified. See [bootstrap privacy](docs/BOOTSTRAP-PRIVACY.md)
+and [permission flow](docs/PERMISSION-FLOW.md). Do not activate the candidate.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining

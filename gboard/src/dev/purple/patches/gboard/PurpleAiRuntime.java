@@ -104,7 +104,7 @@ public final class PurpleAiRuntime {
         if (anchor == null) { notifyUser("This editor does not expose a stable text selection"); return; }
         if (whisper) {
             if (ime.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                permissions(ime); return;
+                permissions(ime, SessionPolicy.PERMISSION_MICROPHONE); return;
             }
             submit(anchor, null, null);
         } else {
@@ -134,18 +134,24 @@ public final class PurpleAiRuntime {
                     else notifyUser("The selection changed; select text again");
                 }).setNegativeButton("Cancel", null).create());
     }
-    private static void permissions(Context context) {
+    private static void permissions(Context context, String scope) {
+        if (SessionPolicy.permissionsFor(scope).length != 1) return;
         try { context.startActivity(new Intent().setClassName(context.getPackageName(),
-                PurplePermissionActivity.class.getName()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
-        catch (RuntimeException ignored) { notifyUser("Grant microphone and local-tools access in app permissions"); }
+                PurplePermissionActivity.class.getName()).putExtra(PurplePermissionActivity.EXTRA_SCOPE, scope)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
+        catch (RuntimeException ignored) {
+            notifyUser(SessionPolicy.PERMISSION_MICROPHONE.equals(scope)
+                    ? "Allow microphone access for dictation in app permissions"
+                    : "Allow local-tools access in app permissions");
+        }
     }
     private static void offerConnection(InputMethodService ime) {
         show(new AlertDialog.Builder(ime).setTitle("Connect local tools")
-                .setMessage("Connect to your existing local Whisper and Codex tools. Normal Gboard continues working without them.")
+                .setMessage("Termux gives this keyboard permission to run commands as Termux. These actions use your existing local Whisper and Codex tools. Dictation asks for microphone access separately.")
                 .setNegativeButton("Cancel", null).setPositiveButton("Connect", (d, w) -> connect(ime)).create());
     }
     private static void connect(InputMethodService ime) {
-        if (ime.checkSelfPermission("com.termux.permission.RUN_COMMAND") != PackageManager.PERMISSION_GRANTED) { permissions(ime); return; }
+        if (ime.checkSelfPermission("com.termux.permission.RUN_COMMAND") != PackageManager.PERMISSION_GRANTED) { permissions(ime, SessionPolicy.PERMISSION_LOCAL_TOOLS); return; }
         if (callback != null) callback.cancel();
         nonce = UUID.randomUUID().toString(); connectDeadline = SystemClock.elapsedRealtime() + 30000;
         Intent result = new Intent().setClassName(ime.getPackageName(), PurpleBootstrapReceiver.class.getName())

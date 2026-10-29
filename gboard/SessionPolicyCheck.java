@@ -1,6 +1,102 @@
 import dev.purple.patches.gboard.SessionPolicy;
 public class SessionPolicyCheck {
     private static void check(boolean value) { if (!value) throw new AssertionError(); }
+    /** Run the actual permission activity against small JVM-only Android stubs. */
+    private static void checkPermissionActivity() throws Exception {
+        java.nio.file.Path temp=java.nio.file.Files.createTempDirectory("purple-permission-control-");
+        try {
+            java.nio.file.Path activity=temp.resolve("android/app/Activity.java");
+            java.nio.file.Path intent=temp.resolve("android/content/Intent.java");
+            java.nio.file.Path packages=temp.resolve("android/content/pm/PackageManager.java");
+            java.nio.file.Path bundle=temp.resolve("android/os/Bundle.java");
+            for (java.nio.file.Path path:new java.nio.file.Path[]{activity,intent,packages,bundle})
+                java.nio.file.Files.createDirectories(path.getParent());
+            java.nio.file.Files.writeString(bundle, "package android.os; public class Bundle {}\n");
+            java.nio.file.Files.writeString(packages,
+                    "package android.content.pm; public class PackageManager { public static final int PERMISSION_GRANTED=0; }\n");
+            java.nio.file.Files.writeString(intent, """
+                    package android.content;
+                    public class Intent {
+                        private final java.util.Map<String,String> values=new java.util.HashMap<>();
+                        public Intent putExtra(String key,String value) { values.put(key,value); return this; }
+                        public String getStringExtra(String key) { return values.get(key); }
+                    }
+                    """);
+            java.nio.file.Files.writeString(activity, """
+                    package android.app;
+                    public class Activity {
+                        public android.content.Intent intent;
+                        public boolean granted, failRequest, finished;
+                        public String[] requested;
+                        public int requestCode;
+                        public void onCreate(android.os.Bundle state) {}
+                        public android.content.Intent getIntent() { return intent; }
+                        public int checkSelfPermission(String permission) { return granted ? 0 : -1; }
+                        public void requestPermissions(String[] permissions,int code) {
+                            if (failRequest) throw new IllegalStateException("fixture");
+                            requested=permissions.clone(); requestCode=code;
+                        }
+                        public void onRequestPermissionsResult(int code,String[] permissions,int[] results) {}
+                        public void finish() { finished=true; }
+                    }
+                    """);
+            javax.tools.JavaCompiler compiler=javax.tools.ToolProvider.getSystemJavaCompiler();
+            check(compiler!=null);
+            int status=compiler.run(null,null,null,"-classpath",System.getProperty("java.class.path"),
+                    "-d",temp.toString(),activity.toString(),intent.toString(),packages.toString(),bundle.toString(),
+                    "gboard/src/dev/purple/patches/gboard/PurplePermissionActivity.java");
+            check(status==0);
+            try (java.net.URLClassLoader loader=new java.net.URLClassLoader(
+                    new java.net.URL[]{temp.toUri().toURL()}, SessionPolicyCheck.class.getClassLoader())) {
+                Class<?> base=loader.loadClass("android.app.Activity");
+                Class<?> intentType=loader.loadClass("android.content.Intent");
+                Class<?> bundleType=loader.loadClass("android.os.Bundle");
+                Class<?> actual=loader.loadClass("dev.purple.patches.gboard.PurplePermissionActivity");
+                java.lang.reflect.Method create=actual.getMethod("onCreate",bundleType);
+                java.lang.reflect.Method result=actual.getMethod("onRequestPermissionsResult",int.class,String[].class,int[].class);
+                for (String scope:new String[]{"local-tools","microphone"}) {
+                    Object instance=actual.getConstructor().newInstance();
+                    Object input=intentType.getConstructor().newInstance();
+                    intentType.getMethod("putExtra",String.class,String.class).invoke(input,
+                            "dev.purple.patches.gboard.permission_scope",scope);
+                    base.getField("intent").set(instance,input);
+                    create.invoke(instance,(Object)null);
+                    String[] requested=(String[])base.getField("requested").get(instance);
+                    String expected=scope.equals("local-tools") ? "com.termux.permission.RUN_COMMAND" : "android.permission.RECORD_AUDIO";
+                    check(requested!=null && requested.length==1 && requested[0].equals(expected));
+                    check(base.getField("requestCode").getInt(instance)==7);
+                    check(!base.getField("finished").getBoolean(instance));
+                    result.invoke(instance,7,requested,new int[]{-1}); // Refusal closes the activity.
+                    check(base.getField("finished").getBoolean(instance));
+                }
+                for (String scope:new String[]{null,"", "android.permission.CAMERA"}) {
+                    Object instance=actual.getConstructor().newInstance();
+                    if (scope!=null) {
+                        Object input=intentType.getConstructor().newInstance();
+                        intentType.getMethod("putExtra",String.class,String.class).invoke(input,
+                                "dev.purple.patches.gboard.permission_scope",scope);
+                        base.getField("intent").set(instance,input);
+                    }
+                    create.invoke(instance,(Object)null);
+                    check(base.getField("requested").get(instance)==null && base.getField("finished").getBoolean(instance));
+                }
+                for (String field:new String[]{"granted","failRequest"}) {
+                    Object instance=actual.getConstructor().newInstance();
+                    Object input=intentType.getConstructor().newInstance();
+                    intentType.getMethod("putExtra",String.class,String.class).invoke(input,
+                            "dev.purple.patches.gboard.permission_scope","microphone");
+                    base.getField("intent").set(instance,input); base.getField(field).setBoolean(instance,true);
+                    create.invoke(instance,(Object)null);
+                    check(base.getField("requested").get(instance)==null && base.getField("finished").getBoolean(instance));
+                }
+            }
+        } finally {
+            try (java.util.stream.Stream<java.nio.file.Path> paths=java.nio.file.Files.walk(temp)) {
+                for (java.nio.file.Path path:paths.sorted(java.util.Comparator.reverseOrder()).toList())
+                    java.nio.file.Files.delete(path);
+            }
+        }
+    }
     private static final class Reader implements SessionPolicy.EditorReader {
         SessionPolicy.EditorPosition first=new SessionPolicy.EditorPosition(3,5,0), last=first;
         CharSequence selected="ok", before="left", after="right";
@@ -60,11 +156,19 @@ public class SessionPolicyCheck {
         check(SessionPolicy.translationEffortAllowed("max"));
         for (String value : new String[]{null,"","low","high","MAX","ultra"})
             check(!SessionPolicy.translationEffortAllowed(value));
+        String[] tools = SessionPolicy.permissionsFor(SessionPolicy.PERMISSION_LOCAL_TOOLS);
+        check(tools.length == 1 && tools[0].equals("com.termux.permission.RUN_COMMAND"));
+        String[] microphone = SessionPolicy.permissionsFor(SessionPolicy.PERMISSION_MICROPHONE);
+        check(microphone.length == 1 && microphone[0].equals("android.permission.RECORD_AUDIO"));
+        for (String value : new String[]{null,"","unknown","android.permission.CAMERA", "local-tools,microphone"})
+            check(SessionPolicy.permissionsFor(value).length == 0);
         String companion = java.nio.file.Files.readString(java.nio.file.Path.of("companion/src/whisper.rs"));
         check(companion.contains("pub const PREFLIGHT_CAPABILITY: &str = \"" + SessionPolicy.WHISPER_PREFLIGHT + "\";"));
         for (Object err:new Object[]{null,0,1,"-1"}) check(!SessionPolicy.bootstrapSuccess(0,err));
         for (Object exit:new Object[]{null,1,-1,"0"}) check(!SessionPolicy.bootstrapSuccess(exit,-1));
         check(SessionPolicy.bounded("hello"));check(!SessionPolicy.bounded(" "));check(!SessionPolicy.bounded("界".repeat(3000)));
+        checkPermissionActivity();
         System.out.println("Editor privacy, localhost, stale selection and UTF-8 limits passed");
+        System.out.println("Scoped permission activity JVM fixture passed");
     }
 }
