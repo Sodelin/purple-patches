@@ -1,0 +1,45 @@
+name: Verify Natune shared-folder copy core off phone
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: purple-natune-shared-storage
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Compile and exercise actual stream-copy implementation
+        run: |
+          mkdir -p "$RUNNER_TEMP/copy-core" dist
+          javac -Xlint:all -Werror -d "$RUNNER_TEMP/copy-core" \
+            natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
+            natune/storage-tests/VerifiedStreamCopyControls.java
+          java -cp "$RUNNER_TEMP/copy-core" VerifiedStreamCopyControls > dist/stream-copy-controls.txt
+      - name: Compile SAF adapter against real Android SDK
+        run: |
+          ANDROID_JAR="$(find "$ANDROID_HOME/platforms" -name android.jar -type f | sort -V | tail -1)"
+          test -f "$ANDROID_JAR"
+          javac -Xlint:all -Werror -cp "$ANDROID_JAR:$RUNNER_TEMP/copy-core" \
+            -d "$RUNNER_TEMP/copy-core" \
+            natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java
+          printf '%s\n' 'ANDROID_SAF_COMPILE passed=true device_provider_test=false apk_binding=false' > dist/android-saf-compile.txt
+      - name: Retain compact public verification
+        run: |
+          sha256sum natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
+            natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java \
+            natune/storage-tests/VerifiedStreamCopyControls.java > dist/source-SHA256SUMS
+          cd dist
+          sha256sum stream-copy-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: natune-shared-storage-controls
+          path: dist/
+          retention-days: 14
