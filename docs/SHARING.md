@@ -1,8 +1,10 @@
 # Sharing Purple Patches through Morphe
 
 Research checked 2026-10-29 against Manager 2.2.0 source and Morphe's official
-patch template. The existing repository `Sodelin/purple-patches` is private.
-No repository visibility or app credential was changed by this investigation.
+patch template. The repository `Sodelin/purple-patches` became public later that day at Nolan’s
+explicit request. Anonymous feed and full-bundle access were verified. No app
+credential was inspected or changed. The earlier private-source findings remain
+applicable to private sources, not the current visibility of this repository.
 
 Morphe accepts GitHub/GitLab repository sources, direct bundle JSON URLs, and
 local `.mpp` files. Remote sources can update automatically; local bundles need

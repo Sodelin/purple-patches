@@ -1,21 +1,19 @@
-# Private candidate update source
+# Candidate update source
 
 The selected Morphe JSON source is:
 
 `https://raw.githubusercontent.com/Sodelin/purple-patches/main/channels/candidate.json`
 
-The repository and both selected releases remain private. The source requires
-an existing GitHub credential with repository access in Manager's PAT setting.
-No Manager credential was inspected, copied or configured by this work. This
-channel does not automatically grant friends access.
+The repository became **public** on29October2026 at Nolan's request. The
+candidate feed and complete selected MPP passed anonymous full-byte verification;
+no GitHub token is required for this public download. See
+[PUBLIC-VERIFICATION.md](PUBLIC-VERIFICATION.md) and
+[public-source-verification.json](public-source-verification.json).
+Actual Manager import/update and keyboard acceptance remain unverified.
 
-The actual remote route is verified: anonymous feed access returned404,
-authenticated feed bytes matched versioned source, the published component tag
-resolved through GitHub's release API, and its complete main MPP downloaded
-with the pinned hash. See[candidate-source-verification.json](candidate-source-verification.json).
-This used the existing gh identity, not Manager on the phone. Actual Manager
-source import/update acceptance, keyboard installation and live testing remain
-unverified and held separately.
+The private verification described below records the earlier distribution epoch;
+its original receipts remain evidence of those earlier checks, not current
+visibility. Credentials were never embedded in the feed.
 
 ## Selected components
 
@@ -24,7 +22,7 @@ unverified and held separately.
 | Morphe main MPP | `0.1.0-alpha.1`, release425723616, tag`patches-v0.1.0-alpha.1`, seven full-byte-verified assets including corresponding source. Exact main MPP SHA256`af2077907783247f667940e02659fe8b574ec36fd26df8af67e22469de3f11fe`. This is the existing full-APK-tested bundle. |
 | Companion | `0.2.1`, release425713896, tag`companion-v0.2.1-candidate`, six full-byte-verified assets including source and the fixed authored schema.28 public controls and Android ARM64 cross-build passed. |
 
-Both are published **private prereleases**, not phone-accepted stable releases.
+Both are now published **public prereleases**, not phone-accepted stable releases.
 Source-controlled pins for every selected asset are in
 [selected-release-assets.json](selected-release-assets.json). No APK, model
 weights or signing keys were distributed. No asset was replaced beneath an
@@ -36,7 +34,7 @@ asset bytes against source pins before any publication mutation, refuses a
 public repository or stable-release promotion, publishes only private
 prereleases, and checks the actual tag routes. Repeating it on the same
 published versions verifies custody without replacing assets.
-`tools/verify_candidate_source.py` verifies the authenticated raw-feed and actual
+`tools/verify_candidate_source.py --visibility public` verifies the anonymous raw-feed and actual
 versioned asset-download route without device/model calls. Credentials remain
 in RAM and are never embedded in the feed URL.
 

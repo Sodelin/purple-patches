@@ -218,25 +218,34 @@ public final class VerifyNatuneMobilePatch {
         for (String name : expected.methods().keySet())
             need(expected.methods().get(name).equals(actual.methods().get(name)), "Unexpected method semantics: " + name);
         for (Site site : SITES) need(expected.methods().containsKey(site.method()), "Missing audio site");
-        int nativeFiles = 0, assets = 0;
+        int nativeFiles = 0, assets = 0, preservedEntries = 0;
         try (var source = new ZipFile(args[0]); var patched = new ZipFile(args[1])) {
             var entries = source.entries();
             while (entries.hasMoreElements()) {
                 var entry = entries.nextElement();
                 String name = entry.getName();
-                if (entry.isDirectory() || !(name.startsWith("lib/") || name.startsWith("assets/"))) continue;
+                if (entry.isDirectory() || name.matches("classes(?:[2-9][0-9]*|1[0-9]+)?\\.dex") ||
+                    name.equals("META-INF/MANIFEST.MF") || name.matches("META-INF/[^/]+\\.(SF|RSA|DSA|EC)")) continue;
                 var retained = patched.getEntry(name);
                 need(retained != null, "Original asset missing");
                 byte[] a, b;
                 try (var input = source.getInputStream(entry)) { a = MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()); }
                 try (var input = patched.getInputStream(retained)) { b = MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()); }
                 need(MessageDigest.isEqual(a, b), "Original asset bytes changed");
-                if (name.startsWith("lib/")) nativeFiles++; else assets++;
+                preservedEntries++;
+                if (name.startsWith("lib/")) nativeFiles++;
+                if (name.startsWith("assets/")) assets++;
+            }
+            var outputEntries = patched.entries();
+            while (outputEntries.hasMoreElements()) {
+                String name = outputEntries.nextElement().getName();
+                need(source.getEntry(name) != null || name.matches("classes(?:[2-9][0-9]*|1[0-9]+)?\\.dex"),
+                     "Unexpected non-DEX entry added");
             }
         }
         System.out.println("Verified exact five audio result overrides; global low-data helper and every other method preserved.");
         System.out.println("Classes=" + expected.classes().size() + "; methods=" + expected.methods().size() +
-            "; retained native files=" + nativeFiles + "; retained assets=" + assets);
+            "; retained native files=" + nativeFiles + "; retained assets=" + assets + "; all retained non-DEX/signature entries=" + preservedEntries);
         System.out.println("Compared instructions/references/registers/constants/branch targets/try handlers, class and field metadata; debug items and APK signing are outside this comparison.");
     }
 }
