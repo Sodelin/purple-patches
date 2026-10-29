@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,7 +25,8 @@ final class BridgeClient {
         this.endpoint = endpoint; this.token = token;
     }
     private JSONObject request(String method, String path, byte[] body, String contentType) throws Exception {
-        HttpURLConnection http = (HttpURLConnection) new URL(endpoint + path).openConnection();
+        // The capability and keyboard payload are intended only for the local bridge.
+        HttpURLConnection http = (HttpURLConnection) new URL(endpoint + path).openConnection(Proxy.NO_PROXY);
         connection = http;
         try {
             http.setInstanceFollowRedirects(false);

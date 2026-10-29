@@ -96,7 +96,9 @@ public class SessionPolicyCheck {
         request.setAccessible(true);
         request.invoke(client,"GET","/health",null,null);
         request.invoke(client,"POST","/query","{}".getBytes(java.nio.charset.StandardCharsets.UTF_8),"application/json");
-        check(defaultCalls[0]==0 && directCalls[0]==2 && selected[0]==java.net.Proxy.NO_PROXY);
+        if (defaultCalls[0]!=0 || directCalls[0]!=2 || selected[0]!=java.net.Proxy.NO_PROXY)
+            throw new AssertionError("Loopback requests did not explicitly select NO_PROXY: default="
+                    +defaultCalls[0]+", direct="+directCalls[0]);
         System.out.println("GBOARD_LOOPBACK_DIRECT_PROXY_CONTROLS_PASSED");
     }
     /** Run the actual bridge catalogue adapter against controlled JVM-only JSON stubs. */
