@@ -63,6 +63,42 @@ public class SessionPolicyCheck {
             check(failure.getCause() instanceof IllegalStateException);
         }
     }
+    /** Intercepts the actual client's URL handler without opening a socket or listener. */
+    private static void checkBridgeDirectTransport(Class<?> bridge) throws Exception {
+        final int[] defaultCalls={0}, directCalls={0};
+        final java.net.Proxy[] selected={null};
+        final class FakeHttp extends java.net.HttpURLConnection {
+            FakeHttp(java.net.URL url) { super(url); }
+            public void connect() { }
+            public void disconnect() { }
+            public boolean usingProxy() { return false; }
+            public int getResponseCode() { return 200; }
+            public java.io.InputStream getInputStream() {
+                return new java.io.ByteArrayInputStream("{}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+            public java.io.OutputStream getOutputStream() { return new java.io.ByteArrayOutputStream(); }
+        }
+        java.net.URL.setURLStreamHandlerFactory(protocol -> {
+            if (!"http".equals(protocol)) return null;
+            return new java.net.URLStreamHandler() {
+                protected java.net.URLConnection openConnection(java.net.URL url) {
+                    defaultCalls[0]++; return new FakeHttp(url);
+                }
+                protected java.net.URLConnection openConnection(java.net.URL url, java.net.Proxy proxy) {
+                    directCalls[0]++; selected[0]=proxy; return new FakeHttp(url);
+                }
+            };
+        });
+        var constructor=bridge.getDeclaredConstructor(String.class,String.class);
+        constructor.setAccessible(true);
+        Object client=constructor.newInstance("http://127.0.0.1:12345", "x".repeat(32));
+        var request=bridge.getDeclaredMethod("request",String.class,String.class,byte[].class,String.class);
+        request.setAccessible(true);
+        request.invoke(client,"GET","/health",null,null);
+        request.invoke(client,"POST","/query","{}".getBytes(java.nio.charset.StandardCharsets.UTF_8),"application/json");
+        check(defaultCalls[0]==0 && directCalls[0]==2 && selected[0]==java.net.Proxy.NO_PROXY);
+        System.out.println("GBOARD_LOOPBACK_DIRECT_PROXY_CONTROLS_PASSED");
+    }
     /** Run the actual bridge catalogue adapter against controlled JVM-only JSON stubs. */
     private static void checkBridgeCatalog() throws Exception {
         java.nio.file.Path temp=java.nio.file.Files.createTempDirectory("purple-catalog-control-");
@@ -122,6 +158,7 @@ public class SessionPolicyCheck {
                     new java.net.URL[]{temp.toUri().toURL()}, SessionPolicyCheck.class.getClassLoader())) {
                 Class<?> obj=loader.loadClass("org.json.JSONObject"), arr=loader.loadClass("org.json.JSONArray");
                 Class<?> bridge=loader.loadClass("dev.purple.patches.gboard.BridgeClient");
+                checkBridgeDirectTransport(bridge);
                 var parse=bridge.getDeclaredMethod("translationCatalog",obj); parse.setAccessible(true);
                 var put=obj.getMethod("put",String.class,Object.class); var append=arr.getMethod("put",Object.class);
                 Object other=obj.getConstructor().newInstance(); put.invoke(other,"id","other");
