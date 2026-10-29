@@ -227,10 +227,18 @@ user selected or whether it is the same recording. The FLAC format supports
 4–32 bits per sample; retain the full range in a selected implementation.
 
 An independently installed Termux decoder does not establish access from the
-separately sandboxed NaTune app or a stable deployment dependency. No decoder
-or additional package has been selected, installed or executed for this source
-review. The next implementation must join a real whole-file decoder to the
-actual selected app stream and preserve stop/recovery behavior.
+separately sandboxed NaTune app or a stable deployment dependency. The new
+`FlacIntegrity.java` and `flac_integrity_jni.c` source candidate binds a complete
+decode to the existing copy proof, checks original-source/stop/byte identity,
+and uses pinned reference libFLAC 1.5.0 for decoded PCM/CRC validation. Missing
+STREAMINFO checksum or total samples produces an explicitly indeterminate state.
+The intended hosted workflow builds this decoder and public synthetic fixtures
+off-phone, then cross-builds its Android ARM64 library. These new source changes
+are not verified until that run completes. Native library packaging, R8/JNI
+keep rules, the actual app callsite, recording/source selection, full-file
+format alternatives and phone acceptance remain unbound; the current patch
+materializer does not include this verifier. Nothing was installed or executed
+on the phone.
 
 Primary references: [Android MediaCodec raw audio](https://developer.android.com/reference/android/media/MediaCodec#raw-audio-buffers),
 [libFLAC streaming decoder](https://xiph.org/flac/api/group__flac__stream__decoder.html),

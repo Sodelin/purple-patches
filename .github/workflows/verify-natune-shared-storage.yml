@@ -65,8 +65,56 @@ jobs:
             -d "$RUNNER_TEMP/copy-core" \
             natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java \
             natune/runtime/dev/purple/patches/natune/MediaStoreAudioDestination.java \
-            natune/runtime/dev/purple/patches/natune/NatuneFolderCopy.java
+            natune/runtime/dev/purple/patches/natune/NatuneFolderCopy.java \
+            natune/runtime/dev/purple/patches/natune/FlacIntegrity.java
           printf '%s\n' 'ANDROID_SAF_COMPILE passed=true device_provider_test=false apk_binding=false' > dist/android-saf-compile.txt
+      - uses: actions/checkout@v4
+        with:
+          repository: xiph/flac
+          ref: 1507800de4b70e21be71f38caa0d9079d0bc6e45
+          path: public-flac-source
+          persist-credentials: false
+      - name: Build selected reference decoder and exercise full FLAC verification
+        run: |
+          test "$(git -C public-flac-source rev-parse HEAD)" = 1507800de4b70e21be71f38caa0d9079d0bc6e45
+          cmake -S public-flac-source -B "$RUNNER_TEMP/flac-host" \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DBUILD_SHARED_LIBS=OFF -DBUILD_CXXLIBS=OFF -DBUILD_PROGRAMS=ON \
+            -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DBUILD_DOCS=OFF \
+            -DWITH_OGG=OFF -DWITH_ASM=OFF -DENABLE_MULTITHREADING=OFF
+          cmake --build "$RUNNER_TEMP/flac-host" --target flacapp --parallel
+          cc -std=c11 -Wall -Wextra -Werror -fPIC -shared \
+            -I "$JAVA_HOME/include" -I "$JAVA_HOME/include/linux" -I public-flac-source/include \
+            natune/runtime/native/flac_integrity_jni.c "$RUNNER_TEMP/flac-host/src/libFLAC/libFLAC.a" \
+            -lm -o "$RUNNER_TEMP/libpurple_natune_flac.so"
+          mkdir -p "$RUNNER_TEMP/flac-classes"
+          javac -Xlint:all -Werror -d "$RUNNER_TEMP/flac-classes" \
+            natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
+            natune/runtime/dev/purple/patches/natune/FlacIntegrity.java \
+            natune/storage-tests/FlacIntegrityControls.java
+          python3 natune/storage-tests/generate-flac-wav-fixtures.py "$RUNNER_TEMP/flac-fixtures"
+          for bits in 8 16 24 32; do
+            "$RUNNER_TEMP/flac-host/src/flac/flac" --silent --force \
+              -o "$RUNNER_TEMP/flac-fixtures/fixture-$bits.flac" "$RUNNER_TEMP/flac-fixtures/fixture-$bits.wav"
+          done
+          java -Djava.library.path="$RUNNER_TEMP" -cp "$RUNNER_TEMP/flac-classes" \
+            FlacIntegrityControls "$RUNNER_TEMP/flac-fixtures" > dist/flac-integrity-controls.txt
+      - name: Cross-build FLAC verifier for Android ARM64
+        run: |
+          NDK_ROOT="${ANDROID_NDK_HOME:-$ANDROID_NDK_LATEST_HOME}"
+          cmake -S public-flac-source -B "$RUNNER_TEMP/flac-android" \
+            -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-29 \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DBUILD_SHARED_LIBS=OFF -DBUILD_CXXLIBS=OFF -DBUILD_PROGRAMS=OFF \
+            -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF -DBUILD_DOCS=OFF \
+            -DWITH_OGG=OFF -DWITH_ASM=OFF -DENABLE_MULTITHREADING=OFF
+          cmake --build "$RUNNER_TEMP/flac-android" --target FLAC --parallel
+          "$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang" \
+            -std=c11 -Wall -Wextra -Werror -fPIC -shared -I public-flac-source/include \
+            natune/runtime/native/flac_integrity_jni.c "$RUNNER_TEMP/flac-android/src/libFLAC/libFLAC.a" \
+            -lm -o dist/libpurple_natune_flac.so
+          printf '%s\n' 'xiph/flac 1.5.0 commit 1507800de4b70e21be71f38caa0d9079d0bc6e45; native FLAC only; Android ARM64 API 29' > dist/flac-upstream.txt
       - name: Retain compact public verification
         run: |
           sha256sum natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
@@ -80,6 +128,10 @@ jobs:
             natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
             natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java \
             natune/runtime/dev/purple/patches/natune/NatuneCoroutineStop.java \
+            natune/runtime/dev/purple/patches/natune/FlacIntegrity.java \
+            natune/runtime/native/flac_integrity_jni.c \
+            natune/storage-tests/FlacIntegrityControls.java \
+            natune/storage-tests/generate-flac-wav-fixtures.py \
             natune/storage-tests/VerifiedStreamCopyControls.java \
             natune/storage-tests/NatuneCachedSourceControls.java \
             natune/storage-tests/TemporarySpaceBudgetControls.java \
@@ -92,7 +144,7 @@ jobs:
             natune/storage-tests/MediaStoreAudioDestinationControls.java \
             natune/storage-tests/NatuneFolderCopyControls.java > dist/source-SHA256SUMS
           cd dist
-          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt coroutine-stop-controls.txt media-store-controls.txt folder-copy-controls.txt shared-document-request-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
+          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt coroutine-stop-controls.txt media-store-controls.txt folder-copy-controls.txt shared-document-request-controls.txt android-saf-compile.txt flac-integrity-controls.txt flac-upstream.txt libpurple_natune_flac.so source-SHA256SUMS > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: natune-shared-storage-controls
