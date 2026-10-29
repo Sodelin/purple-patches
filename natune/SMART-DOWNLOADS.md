@@ -77,3 +77,48 @@ Actual app source/receiver, complete codec/recording verification, scheduler,
 privacy-preserving durable ownership, cache locks/commit/recovery, new settings
 UI and Morphe insertion remain required. No user media was read, staged or deleted
 by implementing these pure policy classes.
+
+## Screenshot transcription and confirmed target
+
+Nolan confirmed the target is Natune (formerly ArchiveTune), resolving the
+relay's Notion/Natune ambiguity. Only a textual transcription was supplied; no
+image bytes were accessed. The exact private reference/transcription is retained
+encrypted. Its displayed capacity is historical screenshot text, not a current
+phone free-space measurement. No toggle state is established by the relay.
+
+The reference Downloads & storage controls include Show device files, Download
+over Wi-Fi only, Audio quality, Video quality, Smart downloads with a song-count/
+approximate-byte display, and a separate Recently played songs collection.
+Its example Smart Downloads count is500; recently played describes up to200.
+Those are product-reference values, not hardcoded new limits or a trustworthy
+FLAC bytes-per-song conversion. Keep the user's byte ceiling and actual original
+quality/source policies authoritative. The new settings should show meaningful
+estimates from actual candidate/complete-file sizes and distinguish GB/GiB.
+
+Preserve separate choices for recommendations and recent playback. They may
+share actual files, which must not be downloaded or charged twice in the common
+managed storage total. Candidate reservations and final unique physical bytes
+need a shared admission check across collections; per-collection policy calls
+alone do not prove that shared global bound. Wi-Fi/battery conditions belong to
+the automatic scheduling policy, with explicit permitted-network choices rather
+than assuming a carrier plan from a5G label. Defaults/configuration still require
+user setup; screenshot text does not authorize toggling or downloading anything.
+
+Pinned Natune DownloadsSettings.kt currently exposes auto-download-on-like,
+source order, external downloader and export/clear UI; that file has no Smart
+Downloads or Recently Played scheduling/control implementation. Reuse its real
+settings navigation and original preference ownership while adding the actual
+patch runtime receiver. Do not relabel auto-download-on-like or one-song URL
+prefetch as the requested Smart Downloads feature.
+
+## Current policy verification
+
+Hosted run40879354779 at source4e0fef4 passed37controlled selection/retention
+checks. offline-selection-verification.json retains full artifact/member hashes.
+Cases include byte overflow/budgets, missing candidate sizes, incomplete sources,
+not-ready replacements, changed source revision, shared/manual ownership,
+protected current/previous tracks, repeated transitions and going back. Protected
+resources retain their collection reference until the protection ends, so later
+retirement can still be attributed to the correct collection. Actual Android
+owner/source authentication, common scheduler admission, persistence/cache commit,
+UI and deletion authority remain unbound; these tests confer none of them.

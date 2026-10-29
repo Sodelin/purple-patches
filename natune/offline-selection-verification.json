@@ -1,0 +1,23 @@
+{
+  "schema": "purple.offline-selection-verification.v1",
+  "run_id": 40879354779,
+  "source_commit": "4e0fef4c905ac0371ccc1295ace396a281bab323",
+  "artifact_id": 12899272680,
+  "artifact_zip_sha256": "1c253740563356a8705aa25678fa62e6941ef5c71b33774fcb036f81613aaec4",
+  "artifact_files_sha256": {
+    "SHA256SUMS": "590f97ab3d8ffdff6cb75adf563630bd99f7a93218514f7637a95007fc5f7945",
+    "data-spec-controls.txt": "16126529311edf3297c1bb3a3645726b38576c0130c47fcc7defc3b6fd9276e1",
+    "flac-prefix-controls.txt": "10cb5097e2ee2b69251943d433916b218a9b7e8e0267d323b5316c8881c82a18",
+    "flac-stream-controls.txt": "c31f6fdb2c239ace176fa17d95bd025dfbabf19e99ee7bbb607719b5ad7bbc65",
+    "offline-selection-controls.txt": "5b60384fc600ab091787b77aa693d6d82f7c3bf49f3ed79d8b4abbcb0ec64fde",
+    "policy-hooks.txt": "4f1a89c6180b68f5e275b0eedcbd04f407930e0f36cd66485c97631d7191577d",
+    "target-proof.json": "d879c5c93370bace1e95cb99aa327a0988446ca22d1827c0a7b33de1bcf4b536"
+  },
+  "offline_selection_report": [
+    "OFFLINE_SELECTION_CONTROLS passed=37 android_owner_binding=false source_authentication=false deletion_authority=false"
+  ],
+  "android_owner_binding": false,
+  "source_authentication": false,
+  "deletion_authority": false,
+  "phone_acceptance": false
+}
