@@ -1,0 +1,67 @@
+name: Build and validate exact Natune mobile-data patch off phone
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: purple-natune-mobile-candidate
+  cancel-in-progress: false
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: DEX input-boundary controls
+        run: python -m unittest discover -s natune -p 'test_*.py' -v
+      - name: Materialize official template at reviewed revision
+        run: |
+          git init "$RUNNER_TEMP/natune-template"
+          git -C "$RUNNER_TEMP/natune-template" remote add origin https://github.com/MorpheApp/morphe-patches-template
+          git -C "$RUNNER_TEMP/natune-template" fetch --depth=1 origin e721536ab19e30d16ce9d31ae1830ca299aad383
+          git -C "$RUNNER_TEMP/natune-template" checkout --detach FETCH_HEAD
+          python natune/materialize.py "$RUNNER_TEMP/natune-template"
+      - name: Build real Morphe bundle and generated patch metadata
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          cd "$RUNNER_TEMP/natune-template"
+          chmod +x gradlew
+          ./gradlew --no-daemon :patches:buildAndroid :patches:generatePatchesList
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          cp patches/build/libs/*.mpp patches-list.json purple-natune-provenance.json "$GITHUB_WORKSPACE/dist/"
+      - name: Acquire exact verified public original and proven patching tool
+        run: |
+          python natune/fetch_target.py "$RUNNER_TEMP/natune-original.apk"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)"
+          AAPT2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -1)"
+          "$APKSIGNER" verify --print-certs "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-signers.txt"
+          "$AAPT2" dump badging "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-badging.txt"
+          python natune/verify_apk_metadata.py "$RUNNER_TEMP/natune-signers.txt" "$RUNNER_TEMP/natune-badging.txt" > dist/target-proof.json
+          curl -fL https://github.com/MorpheApp/morphe-desktop/releases/download/v1.19.1/morphe-desktop-1.19.1-all.jar -o "$RUNNER_TEMP/morphe.jar"
+          echo "a51472252cd63b2eac635dbb5a154ff918bfc15268da89679feb3d760230c573  $RUNNER_TEMP/morphe.jar" | sha256sum -c -
+      - name: Patch exact APK with validation and inspect expected changes
+        run: |
+          java -jar "$RUNNER_TEMP/morphe.jar" patch \
+            --patches dist/patches-0.1.0-alpha.1.mpp --exclusive \
+            --enable "Allow full-quality audio on mobile data" \
+            --bytecode-mode FULL --validate --unsigned \
+            --result-file dist/patch-result.json \
+            --out "$RUNNER_TEMP/natune-patched.apk" "$RUNNER_TEMP/natune-original.apk"
+          mkdir -p "$RUNNER_TEMP/natune-verifier"
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-verifier" natune/VerifyNatuneMobilePatch.java
+          java -cp "$RUNNER_TEMP/natune-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneMobilePatch \
+            "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-patched.apk" > dist/static-preservation.txt
+          cd dist
+          sha256sum * > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: purple-natune-mobile-candidate
+          path: dist/
+          retention-days: 14
