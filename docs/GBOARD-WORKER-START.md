@@ -31,3 +31,11 @@ identical artifact members; the exact supported public APK was patched and
 statically inspected. See the [build](gboard-alpha23-build-verification.json)
 and [APK](gboard-alpha23-apk-verification.json) records. Device regression is
 still pending.
+
+A later [host UI diagnostic](gboard-worker-ui-diagnostic.json) invoked the
+actual cleanup method with synthetic state. A current request and a fake
+dismiss failure passed. When supplied a stale request and a simulated newer
+busy owner, the method preserved the newer capture and dialog but cleared the
+shared busy flag. The test does not establish that Android can reach this
+ordering. Treat the ownership invariant as open until its lifecycle is reviewed
+and corrected; the diagnostic is not device acceptance.

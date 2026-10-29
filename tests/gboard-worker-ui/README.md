@@ -11,4 +11,4 @@ failure. The `stale` probe supplies a deliberately stale request alongside a
 simulated newer owner and checks that the newer busy state is retained. This is
 a source-level state probe: it does not prove that Android's actual event order
 can reach that state. A known alpha.23 failure is captured as an expected
-diagnostic in the specifically pinned hosted workflow, not counted as a fix.
+diagnostic in the specifically pinned [hosted run](https://github.com/Sodelin/purple-patches/actions/runs/40976428811), not counted as a fix.

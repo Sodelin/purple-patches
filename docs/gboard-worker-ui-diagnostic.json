@@ -1,0 +1,15 @@
+{
+  "schema": "purple.gboard-worker-ui-diagnostic.v1",
+  "gboard_source": "42de89706d8c326ab1074670dc87de689b876f60",
+  "harness_source": "6d3cbb300f5e892db72ab587e718d85897c5f90b",
+  "local_harness_source": "a098ddd47899b9bdbddc60f1fc34b950b188d8bb",
+  "runtime_git_blob": "0ebb96c32985cb127a50bd26ec9e120577028b05",
+  "worker_git_blob": "a8b777742f4f66a5e3c1cf7d8bf6764530d793ba",
+  "hosted_run": 40976428811,
+  "current_request": "The real private cleanup method stopped the synthetic request and recorder, cleared the matching capture/dialog and busy state, and advanced the operation. The same control passed when the fake dialog dismiss raised OutOfMemoryError.",
+  "stale_request_diagnostic": "The real cleanup method was invoked with an artificially stale request and a simulated newer capture, dialog and busy state. It preserved the newer capture and dialog but cleared the shared busy flag. The intended newer-busy preservation assertion failed with STALE_REQUEST_RELEASED_NEWER_BUSY; the workflow treats this pinned failure as a diagnostic, not acceptance.",
+  "scope": "The actual Java method was compiled against Android 36 SDK and invoked by reflection on a host JVM with small UI stand-ins. The test supplies the stale state directly; it does not establish that the installed Android lifecycle can reach it. No Android app, device, microphone, network, companion or model was run.",
+  "workflow_history": "The initial new diagnostic workflow could not be dispatched because it was absent from the default branch (GitHub API 404). The existing release-controls workflow on the development branch was then used. A normal push run 40976396035 passed; the manually dispatched diagnostic run is recorded above.",
+  "fix_accepted": false,
+  "device_accepted": false
+}
