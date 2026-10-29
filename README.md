@@ -5,6 +5,11 @@ Published components are experimental prereleases, not phone-accepted stable
 releases. The Natune mobile-data patch has a verified off-phone build alongside the
 Gboard candidate; strict FLAC/provider integration remains in development. This project is independent of the Morphe maintainers.
 
+The published Gboard alpha.1 candidate can mistake an unavailable editor response
+for empty context. Alpha.3 corrects this in source and passed hosted bundle and
+APK checks, but has not passed device acceptance or replaced the public feed.
+See [editor snapshot safety](docs/EDITOR-SNAPSHOT.md) before using the candidate.
+
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
 stock Gboard. No chat window, automatic per-keystroke inference or replacement

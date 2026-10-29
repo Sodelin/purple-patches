@@ -10,6 +10,9 @@ no GitHub token is required for this public download. See
 [PUBLIC-VERIFICATION.md](PUBLIC-VERIFICATION.md) and
 [public-source-verification.json](public-source-verification.json).
 Actual Manager import/update and keyboard acceptance remain unverified.
+The feed still selects alpha.1, which can mistake an unavailable editor
+response for empty context. Alpha.3 has a hosted-verified correction but is not
+yet published on this feed; see [editor snapshot safety](EDITOR-SNAPSHOT.md).
 
 The private verification described below records the earlier distribution epoch;
 its original receipts remain evidence of those earlier checks, not current

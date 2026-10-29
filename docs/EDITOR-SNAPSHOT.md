@@ -26,5 +26,8 @@ The original session/editor/content checks still run before preview and before
 explicit insertion. Multiple editor IPC calls and the later `commitText` are
 not an atomic compare-and-replace; an editor can change between the last check
 and insertion. This source change is not an installed keyboard or device
-acceptance. The exact new bundle, supported APK patch, selection behavior and
-rollback must still be verified separately before release or activation.
+acceptance. The alpha.3 bundle and supported APK patch passed the hosted checks
+recorded in [gboard-alpha3-build-verification.json](gboard-alpha3-build-verification.json)
+and [gboard-alpha3-apk-verification.json](gboard-alpha3-apk-verification.json).
+Actual editor behavior and rollback remain to be verified before release or
+activation.

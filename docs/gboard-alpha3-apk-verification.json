@@ -1,0 +1,45 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40916679024,
+  "workflow_source_commit": "e9b58f8148dd09a9c29aad8a086da5f3f7d49bd2",
+  "bundle_build_run": 40916090931,
+  "bundle_source_commit": "a1187d3b12c3a36e0f12745cee892b42f57d5c51",
+  "bundle_version": "0.1.0-alpha.3",
+  "bundle_sha256": "587e772dd9c347abf5fdaca5a824ab6a32b1116da9fc21aaa0f4eba0ef984627",
+  "artifact_id": 12915654057,
+  "artifact_zip_bytes": 49112772,
+  "artifact_zip_sha256": "ac56a74048c091195d22b7ca1dd1efbc6eceff5dfb5e8945a53726fe1443d1b9",
+  "members": {
+    "SHA256SUMS": {"bytes": 354, "sha256": "f40e3bfb8186e272c199ff5fe1bf085f0ce25f6f67ae973a57dba00a1127e667"},
+    "build-run.json": {"bytes": 152, "sha256": "1c96fa091c1d0126c716dbce2d7c7cd1c37c3e685a97d17642dc203162fc98bc"},
+    "gboard-patch-result.json": {"bytes": 401, "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"},
+    "gboard-purple-unsigned.apk": {"bytes": 84548505, "sha256": "dec62c3cae5d9d1f21cdc0e1c882c33e461c2d65688cbff2d5adbe6f8d77c33f"},
+    "purple-provenance.json": {"bytes": 1677, "sha256": "f13960d8d2192466c5ef24a5209c270508e35f93068f495614d5cfa9f2a1dbda"}
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified": true
+  },
+  "patch_result": {
+    "success": true,
+    "applied_patches": ["Add Gboard Signature Bypass", "Whisper 3 dictation and AI Translate", "Package Rename"],
+    "failed_patches": []
+  },
+  "hosted_static_verification": {
+    "output_package": "dev.jason.com.google.android.inputmethod.latin",
+    "original_classes_retained": 22860,
+    "output_classes": 26006,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "dexopt_assets_excluded": true,
+    "editor_policy_and_post_capture_recheck_references_present": true
+  },
+  "independent_artifact_verification": "ZIP hash and all member bytes/hashes checked in memory; the original successful build and bundle provenance matched. This is static hosted evidence.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7
+}
