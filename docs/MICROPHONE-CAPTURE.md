@@ -28,7 +28,9 @@ The reusable controller is `CaptureSession.java`; the actual Android adapter is
 fake monotonic clock, without opening a microphone or running a model. The
 hosted build and checks passed; their exact source and artifact hashes are in
 [gboard-alpha4-build-verification.json](gboard-alpha4-build-verification.json).
-This is not a phone microphone test.
+The exact supported APK was also patched and statically inspected as recorded in
+[gboard-alpha4-apk-verification.json](gboard-alpha4-apk-verification.json).
+Neither result is a phone microphone test.
 
 Android references:
 

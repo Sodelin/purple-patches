@@ -6,8 +6,9 @@ releases. The Natune mobile-data patch has a verified off-phone build alongside 
 Gboard candidate; strict FLAC/provider integration remains in development. This project is independent of the Morphe maintainers.
 
 The published Gboard alpha.1 candidate can mistake an unavailable editor response
-for empty context. Alpha.3 corrects this in source and passed hosted bundle and
-APK checks, but has not passed device acceptance or replaced the public feed.
+for empty context. Alpha.3 corrects this in source; alpha.4 also adds bounded
+microphone capture. Both passed hosted bundle and APK checks, but neither has
+passed device acceptance or replaced the public feed.
 See [editor snapshot safety](docs/EDITOR-SNAPSHOT.md) before using the candidate.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
