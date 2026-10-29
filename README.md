@@ -33,7 +33,8 @@ the bearer-output privacy blocker. The public Gboard feed still points to the
 older alpha.1 and warns against installing it.
 Alpha.11 uses the local Sol catalog to show only advertised Medium/Max options;
 its [hosted bundle and synthetic catalog controls](docs/gboard-alpha11-build-verification.json)
-passed. No live account or Android behavior has been verified.
+and [exact-APK static checks](docs/gboard-alpha11-apk-verification.json) passed.
+No live account or Android behavior has been verified.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
