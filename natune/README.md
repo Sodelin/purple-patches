@@ -33,3 +33,8 @@ already verified Gboard overlay's upstream pin merely to add another app.
 
 Current target source commit: `b7e4dd444fea202a5c32e96f7b1199a74fe3ae70`.
 Current state: binary hook reconnaissance prepared; actual hosted result pending.
+The 2026-10-29 push was refused because the existing GitHub development OAuth
+credential lacks permission to create/update workflow files. No workflow was
+created remotely and no hosted inspection job started. This is separate from
+Morphe's read-only download PAT. Neither credential was inspected or broadened.
+The prior verified hosted Gboard/native results remain at their original epochs.
