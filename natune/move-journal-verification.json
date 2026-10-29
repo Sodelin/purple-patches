@@ -1,0 +1,57 @@
+{
+  "schema": "purple.natune.move-journal-verification.v1",
+  "source_commit": "957a94037e01c965fd01f5e56289fc4073d98a0f",
+  "run_id": 40903101938,
+  "run_url": "https://github.com/Sodelin/purple-patches/actions/runs/40903101938",
+  "conclusion": "success",
+  "artifact_id": 12909349917,
+  "artifact_zip_sha256": "9e309ddbb55551eae3572dc4f39acf7d25891562fe839c2a488e10ddafdcc158",
+  "member_sha256": {
+    "SHA256SUMS": "d8331fe6588308ac6f16ddbde1800cc3f767b80608107a86596b3c61f3c7ae23",
+    "purple-gboard-service": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91",
+    "native-controls.txt": "d23bb6f8495bcc4cbc3a5fc875a47a217135ff50b7395023f6e12c4576f6b766",
+    "purple-keyboard-bridge": "012728a807914932b6c95c9d9bd2d1777a88dd8ab5a313bd17063437db774ffa",
+    "response-schema.json": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
+    "source-SHA256SUMS": "1b4628200383e22e5042dbc8055fdd8c7e24ec04ba9fe545ba9b71474ca9d553"
+  },
+  "source_hashes_verified_against_run_commit": {
+    "companion/Cargo.toml": "e6cab69c08a51d51b936d6739b33b03e3cc05b4acd0f152adcdf9aa6b687d5e0",
+    "companion/Cargo.lock": "bb0b1fc7d4611d120a39afbf107238ea22034ef9bd65995e336519ec693a32e3",
+    "companion/src/cli.rs": "504ca36c12a8627b00a7e2f33d8ed9f829ad1e499da2d363b72f72e9ea4d7546",
+    "companion/src/http.rs": "2933781ca9e8e785c598ee3ccec4266bf628dedca19ceed43c338f55a6eacfea",
+    "companion/src/jobs.rs": "2be689495355610f9075e05eb4de1e6e09cd01d4da573c01c7baf18560fd4abd",
+    "companion/src/lib.rs": "01c94b9939ec65148683a221ea0fa0bd55b7f9d4a03483a0a4fafb3ce9bad068",
+    "companion/src/main.rs": "16147887864ab191726a910759f90abf2ef365ee11960b534928f03e87d25667",
+    "companion/src/memory.rs": "caf71a444975569fac7e97d677eeffca3caa53e2ae242ac7a2d6932592131419",
+    "companion/src/natune_journal.rs": "0e635626e50bb5c09ae149e8e7ad46bd35483ec6b8d851be3dca7adb75258891",
+    "companion/src/private.rs": "8262df14c2cfe673b7d927f8e3119c50986b193afee2db3feeb3ef926b4e36c1",
+    "companion/src/vault.rs": "c30cb1e4556dc809003a18965dbbcf70f10facc917899b3bcde5b96af9990683",
+    "companion/src/whisper.rs": "c350f8023c3f47840a8dbc4d330d4a12beccd5468c98191ece70cc45a641bfc3"
+  },
+  "native_test_summary": "test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s",
+  "journal_tests": [
+    "test natune_journal::tests::abandoned_original_id_stays_consumed_but_a_new_authorized_attempt_can_recover ... ok",
+    "test natune_journal::tests::accepted_but_uncertain_persistence_poisoned_until_explicit_recovery ... ok",
+    "test natune_journal::tests::complete_lifecycle_keeps_identity_and_charge_until_actual_owner_result ... ok",
+    "test natune_journal::tests::restart_reconstructs_every_unsettled_charge_without_side_effect_replay ... ok",
+    "test natune_journal::tests::size_admission_happens_before_persistence_and_is_adaptive ... ok",
+    "test natune_journal::tests::missing_middle_chain_modified_record_and_wrong_filename_refuse_recovery ... ok",
+    "test natune_journal::tests::source_claim_and_planned_destination_validation_precedes_any_write ... ok",
+    "test natune_journal::tests::wrong_generation_destination_length_digest_or_transition_never_persist ... ok"
+  ],
+  "cross_build": {
+    "architecture": "AArch64 Android",
+    "elf_class": 64,
+    "machine": 183,
+    "bytes": 751368,
+    "sha256": "012728a807914932b6c95c9d9bd2d1777a88dd8ab5a313bd17063437db774ffa",
+    "executed_on_phone": false
+  },
+  "limits": [
+    "Eight journal tests exercise the real Rust state machine against a RAM-only public fixture store, not an actual phone vault or Android owner.",
+    "Production EncryptedFiles reuses retained vault::retain/open source, but actual sealing/decrypting for this app lane has not been executed or accepted.",
+    "Library source is cross-checked; no journal CLI, HTTP endpoint, Android delegation or Move UI dispatch has been exposed.",
+    "No source cache removal, media copy, model test, new identity/listener/security setting or installed binary change.",
+    "Hash chains do not prove external anti-rollback or sender authentication; actual app/host and owner admissions remain unbound."
+  ]
+}

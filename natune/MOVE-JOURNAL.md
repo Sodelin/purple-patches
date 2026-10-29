@@ -80,3 +80,14 @@ Controls use a RAM-only Store with public synthetic events. They exercise the
 actual Rust state machine, recovery, ordering, pool and uncertainty behavior;
 they do not claim actual vault encryption or Android/provider acceptance.
 The production backend calls the retained real vault, not fixture encryption.
+
+## Retained hosted verification
+
+Run40903101938 at957a94037e01c965fd01f5e56289fc4073d98a0f passed36 Rust library
+tests, including all8 new journal tests, and the hosted aarch64-linux-android
+cross-build. move-journal-verification.json retains full artifact/member/source
+hash readback and the checked AArch64 ELF metadata. The binary was not executed
+or installed on the phone. Generic library/source compilation does not establish
+an externally callable journal command; no new command/endpoint was exposed.
+The tests use the RAM Store; production vault/file backend acceptance remains
+open and must not be inferred from those tests or the successful cross-build.
