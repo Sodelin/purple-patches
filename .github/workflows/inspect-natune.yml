@@ -24,17 +24,9 @@ jobs:
           AAPT2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -1)"
           "$APKSIGNER" verify --print-certs "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-signers.txt"
           "$AAPT2" dump badging "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-badging.txt"
-          python - <<'PY'
-          import json, os, pathlib, re
-          pin = json.loads(pathlib.Path('natune/target.json').read_text())
-          tmp = pathlib.Path(os.environ['RUNNER_TEMP'])
-          signers = re.findall(r'Signer #\d+ certificate SHA-256 digest: ([0-9a-f]{64})', (tmp/'natune-signers.txt').read_text())
-          assert signers == [pin['signer_sha256']], 'Original signer mismatch'
-          match = re.search(r"^package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'", (tmp/'natune-badging.txt').read_text(), re.M)
-          assert match and match.groups() == (pin['package'], str(pin['version_code']), pin['version_name']), 'Wrong APK target'
-          pathlib.Path('dist').mkdir()
-          pathlib.Path('dist/target-proof.json').write_text(json.dumps({'source_commit':os.environ['GITHUB_SHA'], 'public_input':pin, 'original_signature_verified':True, 'package_version_verified':True, 'apk_executed':False}, indent=2)+'\n')
-          PY
+          mkdir -p dist
+          python -m unittest discover -s natune -p test_apk_metadata.py -v
+          python natune/verify_apk_metadata.py "$RUNNER_TEMP/natune-signers.txt" "$RUNNER_TEMP/natune-badging.txt" > dist/target-proof.json
       - name: Acquire proven hash-pinned DEX reader
         run: |
           curl -fL https://github.com/MorpheApp/morphe-desktop/releases/download/v1.19.1/morphe-desktop-1.19.1-all.jar -o "$RUNNER_TEMP/morphe.jar"
