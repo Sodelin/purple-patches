@@ -66,6 +66,12 @@ picker, so choices such as Simplified and Traditional Chinese need not collapse
 to the same language code. [Hosted controls](docs/gboard-alpha18-build-verification.json)
 and [static APK checks](docs/gboard-alpha18-apk-verification.json) passed;
 actual Android selection and translation quality remain unverified.
+Alpha.19 improves preservation of existing network-security resources. Two
+[hosted builds](docs/gboard-alpha19-build-verification.json) matched, and the
+[selected public APK](docs/gboard-alpha19-apk-verification.json) passed static
+patch and compiled loopback-policy checks. General resource-alias handling,
+private bootstrap, companion recovery and real device acceptance remain open;
+alpha.19 has not been published to the candidate feed.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
@@ -106,11 +112,10 @@ Native controls and the Android cross-build are verified separately from the
 Gboard bundle and actual phone behavior. The candidate has its own version;
 its selected update feed points only at the exact own versioned MPP, never an upstream binary.
 
-The verified main MPP is retained in a candidate prerelease alongside its
-corresponding source and hashes. A verified local copy is in the phone's
-`Download/Purple-Patches/` folder. This does not install the keyboard or turn
-on the companion. See [candidate delivery](docs/MORPHE-SOURCE.md) and the
-[local readback record](docs/local-patch-delivery.json).
+The published candidate prerelease and the verified local copy in
+`Download/Purple-Patches/` are the older alpha.1, not alpha.19. The public feed
+warns against installing alpha.1. See [candidate delivery](docs/MORPHE-SOURCE.md)
+and the [local readback record](docs/local-patch-delivery.json).
 
 The candidate source URL is
 `https://raw.githubusercontent.com/Sodelin/purple-patches/main/channels/candidate.json`.
