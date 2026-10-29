@@ -91,3 +91,14 @@ or installed on the phone. Generic library/source compilation does not establish
 an externally callable journal command; no new command/endpoint was exposed.
 The tests use the RAM Store; production vault/file backend acceptance remains
 open and must not be inferred from those tests or the successful cross-build.
+
+## Finite backend-check candidate
+
+`companion/src/bin/natune-journal-check.rs` is a separate, finite candidate
+for checking the existing encrypted backend with synthetic public fixtures.
+It does not access app data, music or a provider, and does not authorize or
+perform an Android Move. It uses the existing Termux record
+identity and leaves encrypted proof records under a fresh caller-provided case
+ID. An existing or uncertain case must not be replayed under a new ID. A
+cross-build by itself does not establish that this check ran successfully on
+the phone; actual backend, app-owner and device acceptance remain open.
