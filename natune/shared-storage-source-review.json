@@ -1,0 +1,71 @@
+{
+  "schema": "purple.public-source-review.v1",
+  "source_only": true,
+  "date": "2026-10-29",
+  "files": [
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/storage/StorageLocationRepository.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/storage/StorageLocationRepository.kt",
+      "bytes": 38337,
+      "sha256": "d91cbaf9463e63918356fc3f70644a1373132d22629e8303bb2e1b17dd1bac33"
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/settings/StorageSettings.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/settings/StorageSettings.kt",
+      "bytes": 39754,
+      "sha256": "a2a135db62c9de50ecb8bc28090b58e4d9e89cfa52a81d2b28806927dd81e273"
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/settings/DownloadsSettings.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/settings/DownloadsSettings.kt",
+      "bytes": 19802,
+      "sha256": "2f7d5a573ec84a15cef2c54c7c840be419ade1a2656a43eed3d558238f630842"
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/settings/ExportDownloadedSongsScreen.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/settings/ExportDownloadedSongsScreen.kt",
+      "bytes": 42780,
+      "sha256": "36cf0734b3ba5fb9f79571ad12e4ecb7fae497eae8424e5009f004a88d78761d"
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt",
+      "bytes": 65834,
+      "sha256": "a68822b3d885aff03097eb2df3c416ad77c7ccd03a591c031d2158d208189222"
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/ui/menu/SongMenu.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/menu/SongMenu.kt",
+      "bytes": 72136,
+      "sha256": "0037ac16e5cac8cf96913ffa6b745f2a33c31ec5c6c05004fc07fc27726a3167"
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/di/AppModule.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/di/AppModule.kt",
+      "bytes": 8038,
+      "sha256": "dcbb1e7230d22e2d86173477649ed0e2471df594a8e8a96b6ed5f91f2ede59e6"
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/localmedia/LocalSongScanner.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/localmedia/LocalSongScanner.kt",
+      "bytes": 44431,
+      "sha256": "c755ecd05bbb448aae4fe215aa8cd02cbf31e666a30d7d4cc337cfa82b819775"
+    }
+  ]
+}
