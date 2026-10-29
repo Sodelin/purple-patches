@@ -95,6 +95,37 @@ playlist/history identity or downloaded badge. Keep the original source/cache
 only if it has an independently owned runtime role; do not silently retain a
 second full download copy after the new destination has been adopted.
 
+## Implemented streaming increment
+
+`runtime/dev/purple/patches/natune/VerifiedStreamCopy.java` implements actual
+fixed32KiB-buffer copy, complete expected-length checks, full destination
+readback and SHA-256 comparison. Missing/short/extra/corrupted streams, source
+revision changes, original cancellation and stream close failures refuse a
+verification result. It creates no temp file, logs or persistent record and
+has no source-removal method. Source ownership must be an actual held native
+lease, not just a caller claiming a length or complete flag.
+
+`SharedDocumentDestination.java` supplies the real ContentResolver and
+DocumentsContract stream boundary for a newly created document under an
+already-authorized SAF tree. It obtains no grant. It reserves output opening
+before attempting it, so an uncertain open does not automatically retry, and
+reopens that exact content URI for verification. Incomplete created documents
+remain for the owning job's explicit recovery/cleanup; no old user file or
+source can be deleted by this adapter.
+
+The copy result is in-memory byte evidence, not a deletion permit or completed
+move. Exact Media3 source lease/coverage, original caller serialization, durable
+encrypted transaction custody, song-ID/content-URI index, UI entry and settled
+DownloadManager/cache removal are still unbound. Real Android provider/grant,
+low-space interruption/restart and playback/playlist retention acceptance are
+not established by host controls or SDK compilation. The current public feed
+and installed app do not include a Move to folder button.
+
+The separate hosted verify-natune-shared-storage workflow exercises synthetic
+byte-stream failure cases against the actual copy core and compiles the SAF
+adapter against a real Android SDK. It performs no APK build or phone action.
+Its actual run/result must be recorded before claiming those checks passed.
+
 ## Reproducible source evidence
 
 `shared-storage-source-review.json` pins the inspected public file bodies.
