@@ -20,6 +20,16 @@ TCP write success is not evidence that the client received the returned ID.
 The encrypted intent is useful recovery evidence; it does not by itself give
 the client a handle or prove that an unknown job was cancelled and reaped.
 
+The success path has a related recovery boundary. At source `6926a11`, the
+worker seals a failure/cancellation receipt when its engine outcome is an
+error, but on success it puts the completed job and result in the in-memory
+queue without a corresponding success-settlement write in `jobs.rs`.
+`Service::new` starts that queue empty. After a companion restart, this service
+therefore cannot itself recover the earlier volatile result or establish a
+terminal state from that queue. The previously sealed intent remains evidence
+to preserve; this observation does not claim that an independent owner cannot
+provide a recovery interface. No user request or model was run for this review.
+
 Before device activation, the client and existing companion need a versioned,
 authenticated way to bind an operation identity before the uncertain POST,
 handle cancellation that races acceptance, and reconcile an unknown response
