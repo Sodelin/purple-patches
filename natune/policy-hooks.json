@@ -1,0 +1,517 @@
+{
+  "apk_sha256": "b5dc57b49bc049ea9afa9230a0fb859e754a9fff226d8a2ffc8fedfdcad2814f",
+  "apk_executed": false,
+  "dex_files": [
+    "classes.dex",
+    "classes2.dex",
+    "classes3.dex"
+  ],
+  "methods_with_code": 110490,
+  "candidates": [
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/hg6;->q(Landroid/content/Context;Z)Z",
+      "flags": 25,
+      "registers": 4,
+      "code_sha256": "448722ec4678473aadd6af2de0fb65dc0fc45703b73c1f18818138e7346d68ba",
+      "code_units": 47,
+      "network_pair": true,
+      "anchors": [],
+      "network_calls": [
+        "Landroid/net/ConnectivityManager;->getActiveNetwork()Landroid/net/Network;",
+        "Landroid/net/ConnectivityManager;->getNetworkCapabilities(Landroid/net/Network;)Landroid/net/NetworkCapabilities;",
+        "Landroid/net/ConnectivityManager;->isActiveNetworkMetered()Z",
+        "Landroid/net/NetworkCapabilities;->hasTransport(I)Z"
+      ]
+    },
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/vm;->invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 22,
+      "code_sha256": "aca76dd9aaf9af5d64be326d35ed14101d6a8c98421373c170dd15f6fae40b2d",
+      "code_units": 2008,
+      "network_pair": false,
+      "anchors": [
+        {
+          "code_unit": 234,
+          "anchor": "low_data_mode"
+        }
+      ],
+      "network_calls": []
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/b;->a(Lr8/km2;)Lr8/km2;",
+      "flags": 17,
+      "registers": 21,
+      "code_sha256": "687a56c275abdc5eecd39904b64a6ac5912fa14db4024c0a329626e3d06da340",
+      "code_units": 491,
+      "network_pair": false,
+      "anchors": [
+        {
+          "code_unit": 473,
+          "anchor": "No enabled download source resolved "
+        }
+      ],
+      "network_calls": [
+        "Landroid/net/Uri;->getHost()Ljava/lang/String;",
+        "Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;"
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/r;->a()Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 60,
+      "code_sha256": "552341861af5a14f3d613664bcc790bab05bbfe9d54ddf0a3f1d6c93fdbaa284",
+      "code_units": 2683,
+      "network_pair": false,
+      "anchors": [
+        {
+          "code_unit": 1033,
+          "anchor": "Low-data mode active; skipping Tidal/Qobuz for %s"
+        }
+      ],
+      "network_calls": [
+        "Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;"
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lr8/g79;->invoke(Ljava/lang/Object;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 57,
+      "code_sha256": "04eb18f1b574547a534e03220694aeb35d06cc2f7bdb4f23aa8b326f6e1a9fa4",
+      "code_units": 399,
+      "network_pair": false,
+      "anchors": [
+        {
+          "code_unit": 54,
+          "anchor": "low_data_mode"
+        }
+      ],
+      "network_calls": []
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lr8/ld6;->p(Lr8/f48;ZZLandroid/content/Context;Lr8/ry1;)Ljava/util/List;",
+      "flags": 25,
+      "registers": 201,
+      "code_sha256": "d9faca4dd8651ad345d8282a8752ad8a23b37286d155a80e06420339fc173804",
+      "code_units": 16320,
+      "network_pair": false,
+      "anchors": [
+        {
+          "code_unit": 3946,
+          "anchor": "low_data_mode"
+        },
+        {
+          "code_unit": 9847,
+          "anchor": "low_data_mode"
+        }
+      ],
+      "network_calls": []
+    }
+  ],
+  "policy_callers": [
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/jg6;->j(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lr8/cf2;)Ljava/lang/Object;",
+      "flags": 25,
+      "registers": 15,
+      "code_sha256": "58d6d3659c04c9ee3139e89215710b7000fd4eded89ad6ae4a717f848ec4789a",
+      "calls": [
+        {
+          "code_unit": 39,
+          "target": "Lr8/hg6;->p(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 9
+        }
+      ]
+    },
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/g27;->onAvailable(Landroid/net/Network;)V",
+      "flags": 17,
+      "registers": 3,
+      "code_sha256": "1bfe931f2017bc80025f00a504d23e8a48a519a98e1f1ff2e40be186084f3131",
+      "calls": [
+        {
+          "code_unit": 7,
+          "target": "Lr8/hg6;->q(Landroid/content/Context;Z)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 2
+        }
+      ]
+    },
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/g27;->onCapabilitiesChanged(Landroid/net/Network;Landroid/net/NetworkCapabilities;)V",
+      "flags": 17,
+      "registers": 3,
+      "code_sha256": "493e3b45f2096c328e04b21d4d30fceeec5ec42f208e7e7a0a99118cd73c1f77",
+      "calls": [
+        {
+          "code_unit": 10,
+          "target": "Lr8/hg6;->q(Landroid/content/Context;Z)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 1
+        }
+      ]
+    },
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/g27;->onLost(Landroid/net/Network;)V",
+      "flags": 17,
+      "registers": 3,
+      "code_sha256": "1bfe931f2017bc80025f00a504d23e8a48a519a98e1f1ff2e40be186084f3131",
+      "calls": [
+        {
+          "code_unit": 7,
+          "target": "Lr8/hg6;->q(Landroid/content/Context;Z)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 2
+        }
+      ]
+    },
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/hg6;->p(Landroid/content/Context;)Z",
+      "flags": 25,
+      "registers": 4,
+      "code_sha256": "fb3dd51daa3c52ba2b443ccc83d3318b8ca84c6c8fc461f0dcf7a1e62f03870a",
+      "calls": [
+        {
+          "code_unit": 21,
+          "target": "Lr8/hg6;->q(Landroid/content/Context;Z)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 3
+        }
+      ]
+    },
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/hg6;->v(Lr8/o72;)Z",
+      "flags": 25,
+      "registers": 8,
+      "code_sha256": "1defe81e643a5009a34ac9666effe66240b75211c142aa8163847646db91bd00",
+      "calls": [
+        {
+          "code_unit": 51,
+          "target": "Lr8/hg6;->q(Landroid/content/Context;Z)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 3
+        }
+      ]
+    },
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/q63;->invoke(Ljava/lang/Object;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 24,
+      "code_sha256": "453065385723f5f7871fbbd80678805d6c67c9dd746ab2636adceda2102cb6cc",
+      "calls": [
+        {
+          "code_unit": 750,
+          "target": "Lr8/hg6;->q(Landroid/content/Context;Z)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 0
+        },
+        {
+          "code_unit": 791,
+          "target": "Lr8/hg6;->q(Landroid/content/Context;Z)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 0
+        }
+      ]
+    },
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/yt;-><init>(Ljava/lang/String;Lr8/qcc;Ljava/util/List;Ljava/util/List;Lr8/ke4;Lr8/k13;Z)V",
+      "flags": 65537,
+      "registers": 46,
+      "code_sha256": "7a41c8cab56e1861421d9ba054e9bb43ef9d139f928b127c3ec13f1317d3b989",
+      "calls": [
+        {
+          "code_unit": 58,
+          "target": "Lr8/hg6;->f(Lr8/qcc;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 7
+        }
+      ]
+    },
+    {
+      "dex": "classes.dex",
+      "signature": "Lr8/yt;->c()Z",
+      "flags": 17,
+      "registers": 3,
+      "code_sha256": "7cae8973eeb218008d494ea3b839f4a416e2cdff1b49e7040886c691fb6a989c",
+      "calls": [
+        {
+          "code_unit": 19,
+          "target": "Lr8/hg6;->f(Lr8/qcc;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 2
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/MusicService$prefetchNextMediaItemStream$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 23,
+      "code_sha256": "56f2536464510ff0ef5b73364d253bc10a9c129e545f7e2da3ce61cddd75ea89",
+      "calls": [
+        {
+          "code_unit": 73,
+          "target": "Lr8/hg6;->p(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 20
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/MusicService;->k2(Lr8/km2;Z)Lr8/km2;",
+      "flags": 17,
+      "registers": 58,
+      "code_sha256": "8e8da9cf040dc376062a93c9d5ce3c56d4fa27044c94f2a7ec684a3687169c09",
+      "calls": [
+        {
+          "code_unit": 26,
+          "target": "Lr8/hg6;->p(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 4
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/MusicService;->onMediaItemTransition(Lr8/yh7;I)V",
+      "flags": 17,
+      "registers": 20,
+      "code_sha256": "8d3d80b6480419b88b39f3b56803da2c73a8cc4a995071c9aa27b7ff3a4b200b",
+      "calls": [
+        {
+          "code_unit": 1216,
+          "target": "Lr8/hg6;->p(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 2
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/b;->a(Lr8/km2;)Lr8/km2;",
+      "flags": 17,
+      "registers": 21,
+      "code_sha256": "687a56c275abdc5eecd39904b64a6ac5912fa14db4024c0a329626e3d06da340",
+      "calls": [
+        {
+          "code_unit": 196,
+          "target": "Lr8/hg6;->p(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 1
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/g;->g(Ljava/lang/String;Lr8/cf2;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 25,
+      "code_sha256": "dac6236a30c1eef35cd75dd5c8c8dc11b88403d78801de902e6ec50ec922c94c",
+      "calls": [
+        {
+          "code_unit": 290,
+          "target": "Lr8/hg6;->p(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 2
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/ui/menu/k0;->a(Lmoe/rukamori/archivetune/models/MediaMetadata;Lr8/f48;Lmoe/rukamori/archivetune/ui/component/i;Ljava/lang/Boolean;Lr8/si4;Lr8/si4;Lr8/si4;Lr8/si4;Lr8/o72;II)V",
+      "flags": 25,
+      "registers": 91,
+      "code_sha256": "f11638f54aa9b1f505e1ec62d58da42981e7bbdf6217dffde7eee5e3102bb735",
+      "calls": [
+        {
+          "code_unit": 692,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 0
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/ui/player/e1;->F(Lmoe/rukamori/archivetune/models/MediaMetadata;IZZZZLjava/lang/Long;JJLmoe/rukamori/archivetune/playback/y1;Lr8/f48;Lmoe/rukamori/archivetune/ui/component/i;JJJLjava/lang/String;Ljava/lang/String;Lr8/si4;Lr8/si4;Lr8/si4;Lr8/vi4;Lr8/si4;Lr8/ct7;ZLr8/o72;III)V",
+      "flags": 25,
+      "registers": 76,
+      "code_sha256": "66c4216dc7335d39f00815dcb1c8303074428f5784b5b24a0f9861f3c7133394",
+      "calls": [
+        {
+          "code_unit": 451,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 15
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/ui/player/e1;->a(Lmoe/rukamori/archivetune/constants/PlayerBackgroundStyle;Lmoe/rukamori/archivetune/models/MediaMetadata;Ljava/util/List;ZFLjava/lang/String;FFFLr8/o72;I)V",
+      "flags": 25,
+      "registers": 31,
+      "code_sha256": "31f28af49c54f5284f72769d8e8cd12ecc543d4a39e0de9937fd7690c6ee4cd6",
+      "calls": [
+        {
+          "code_unit": 252,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 6
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/ui/player/e1;->s(Lmoe/rukamori/archivetune/models/MediaMetadata;Ljava/lang/String;IZZZZZLjava/lang/Long;JJFZLmoe/rukamori/archivetune/playback/y1;Lr8/f48;Lmoe/rukamori/archivetune/ui/component/i;Lr8/cg4;Ljava/lang/String;Ljava/lang/String;Lr8/vi4;Lr8/si4;Lr8/vi4;Lr8/ct7;ZLr8/o72;III)V",
+      "flags": 25,
+      "registers": 70,
+      "code_sha256": "437c4306ef200d73ea34c9249b1adcae48c963e6453833f64066b75f12a173ff",
+      "calls": [
+        {
+          "code_unit": 467,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 1
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/ui/player/flamingo/d;->invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 96,
+      "code_sha256": "405a51e72aee745972592027a5827eb3a8e6cfef19c4a84230abe68bd6870605",
+      "calls": [
+        {
+          "code_unit": 1903,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 10
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/ui/player/o2;->a(ILr8/o72;Lr8/si4;Lr8/si4;Lr8/ct7;Z)V",
+      "flags": 25,
+      "registers": 67,
+      "code_sha256": "82df7d1c6d6bb3c39ec0d2280b177a77df72c4465a14e93669a9f79dca36031e",
+      "calls": [
+        {
+          "code_unit": 166,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 31
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/ui/player/p2;->d(Lmoe/rukamori/archivetune/models/MediaMetadata;IZZZZLjava/lang/Long;JJLmoe/rukamori/archivetune/playback/y1;Lr8/f48;Lmoe/rukamori/archivetune/ui/component/i;JJJLr8/si4;Lr8/si4;Lr8/si4;Lr8/vi4;Lr8/si4;Lr8/si4;ZJLr8/si4;Lr8/si4;Lr8/ct7;ZLr8/o72;III)V",
+      "flags": 25,
+      "registers": 157,
+      "code_sha256": "a5fe720ed6af2d6a27af3940c2724093a76c103b35bbda8a67bd1bbcb753a520",
+      "calls": [
+        {
+          "code_unit": 483,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 0
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/ui/player/t1;->b(Lmoe/rukamori/archivetune/ui/component/i;Lr8/f48;Lr8/ct7;ZLr8/si4;Lr8/vi4;Lr8/dqb;FZLr8/r19;Lr8/jf9;Lmoe/rukamori/archivetune/viewmodels/a2;Lr8/o72;I)V",
+      "flags": 25,
+      "registers": 140,
+      "code_sha256": "54b201a08e24115f116e3d8285d4027f5a29358363ac2986b838989d8e3f4744",
+      "calls": [
+        {
+          "code_unit": 1940,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 71
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/ui/player/z;->h(Lmoe/rukamori/archivetune/models/MediaMetadata;IZZZZLjava/lang/Long;Lr8/si4;JLmoe/rukamori/archivetune/playback/y1;Lr8/f48;Lmoe/rukamori/archivetune/ui/component/i;Lr8/o21;ZFLr8/vi4;Ljava/lang/String;Ljava/lang/String;Lr8/cg4;FLr8/si4;Lr8/si4;Lr8/vi4;Lr8/si4;ILr8/vi4;Lr8/vi4;Lr8/ct7;ZLr8/o72;III)V",
+      "flags": 25,
+      "registers": 103,
+      "code_sha256": "bf024a214eaac6eaf911c8e3e06b7da6d5843ffd34f19087c2ac8f0f36e1b8a8",
+      "calls": [
+        {
+          "code_unit": 1195,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 8
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/viewmodels/AlbumViewModel$fetchAlbumCanvas$1;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 14,
+      "code_sha256": "998768ef0746dc1554b8f1480e969824241d49e9b821358b3705f8dae4bcfbdb",
+      "calls": [
+        {
+          "code_unit": 78,
+          "target": "Lr8/hg6;->p(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 13
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lr8/py7;->v()Lr8/dm2;",
+      "flags": 1,
+      "registers": 4,
+      "code_sha256": "39fbdea78081068c6f004c7651e57b1eab7ee6777639f1f2716116dd3f931377",
+      "calls": [
+        {
+          "code_unit": 4,
+          "target": "Lr8/hg6;->p(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 0
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lr8/wr7;->a(Lmoe/rukamori/archivetune/models/MediaMetadata;Lr8/si4;ZLr8/xr7;ZLr8/ct7;Lr8/o72;I)V",
+      "flags": 25,
+      "registers": 35,
+      "code_sha256": "bf0bbdd1d76707e8e336ae1f16cc914dfba78a070a72df5cab386e1ca278e40f",
+      "calls": [
+        {
+          "code_unit": 446,
+          "target": "Lr8/hg6;->v(Lr8/o72;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 5
+        }
+      ]
+    }
+  ],
+  "scope": "Public pinned release bytecode references only; no app-private data or execution",
+  "encrypted_observation": "record-13408-1793271298861176248.age"
+}

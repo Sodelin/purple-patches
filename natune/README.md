@@ -32,9 +32,20 @@ template/toolchain epoch for the separate Natune component; do not mutate the
 already verified Gboard overlay's upstream pin merely to add another app.
 
 Current target source commit: `b7e4dd444fea202a5c32e96f7b1199a74fe3ae70`.
-Current state: binary hook reconnaissance prepared; actual hosted result pending.
+Current state: the dependency-free `inspect_dex.py` completed read-only inspection
+of all three DEX files in the verified installed public APK, covering 110490
+methods with code. Seven malformed-input/instruction-boundary controls pass.
+`policy-hooks.json` records six policy candidates and their callers; it exports
+only method references, fixed public anchors and code hashes, not arbitrary
+strings or app data. Five direct calls in the playback package use the low-data
+helper, allowing a scoped audio policy instead of changing global low-data mode.
+The independent hosted dexlib result remains pending.
 The 2026-10-29 push was refused because the existing GitHub development OAuth
 credential lacks permission to create/update workflow files. No workflow was
 created remotely and no hosted inspection job started. This is separate from
 Morphe's read-only download PAT. Neither credential was inspected or broadened.
 The prior verified hosted Gboard/native results remain at their original epochs.
+Subsequently the already-connected GitHub application successfully created the
+reviewed inspection workflow at remote commit 82286ed. No credential scope was
+changed. That resolves workflow registration through an existing authorized
+interface; actual hosted inspection must still be dispatched and verified.
