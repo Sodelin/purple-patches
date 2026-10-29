@@ -66,6 +66,17 @@ public final class VerifyGboardReadiness {
                 && hasString(verify, "whisper_family"), "Expected health fields missing from bridge verification");
         require(position(calls(verify), POLICY, "whisperPreflightSupported") >= 0,
                 "Bridge does not call the voice-preflight policy");
+        String version = System.getenv("BUNDLE_VERSION");
+        var alpha = java.util.regex.Pattern.compile("0\\.1\\.0-alpha\\.([0-9]+)")
+                .matcher(version == null ? "" : version);
+        require(alpha.matches(), "Unsupported candidate version for readiness verification");
+        if (Integer.parseInt(alpha.group(1)) >= 11) {
+            require(hasString(verify, "ok") && hasString(verify, "protocol")
+                            && position(calls(verify), POLICY, "bridgeHealth") >= 0,
+                    "Bridge lacks successful-protocol health policy references");
+            Method health = method(classes, POLICY, "bridgeHealth");
+            require(hasString(health, "memory-only-v1"), "Expected keyboard data-path marker missing");
+        }
         Method policy = method(classes, POLICY, "whisperPreflightSupported");
         require(hasString(policy, "full-v3-pin-engine-sha-v1"), "Expected voice-preflight capability missing");
         boolean orderedReferences = false;

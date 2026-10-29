@@ -32,6 +32,12 @@ and [gboard-alpha3-apk-verification.json](gboard-alpha3-apk-verification.json).
 Actual editor behavior and rollback remain to be verified before release or
 activation.
 
+Alpha.11 source also catches `RuntimeException` around the complete anchor
+comparison and refuses it, so an unavailable or throwing editor accessor does
+not escape that check. Its build and Android behavior remain unverified; the
+catch does not make the multi-call observation atomic or identify an active
+composing region.
+
 ## Active composition and insertion result: open release gate
 
 Android documents that [`InputConnection.commitText`](https://developer.android.com/reference/android/view/inputmethod/InputConnection#commitText(java.lang.CharSequence,%20int))

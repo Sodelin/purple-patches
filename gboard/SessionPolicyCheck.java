@@ -1,6 +1,113 @@
 import dev.purple.patches.gboard.SessionPolicy;
 public class SessionPolicyCheck {
     private static void check(boolean value) { if (!value) throw new AssertionError(); }
+    private static SessionPolicy.TranslationCatalogReader catalog(String[] ids, String[][] efforts) {
+        return new SessionPolicy.TranslationCatalogReader() {
+            public int size() { return ids.length; }
+            public String modelId(int index) { return ids[index]; }
+            public String[] efforts(int index) { return efforts[index]; }
+        };
+    }
+    private static void rejectsCatalog(SessionPolicy.TranslationCatalogReader reader) throws Exception {
+        try { SessionPolicy.translationCatalog(reader); throw new AssertionError("Accepted invalid catalogue"); }
+        catch (IllegalStateException expected) { }
+    }
+    private static void rejectsBridgeCatalog(java.lang.reflect.Method parse, Object input) throws Exception {
+        try { parse.invoke(null,input); throw new AssertionError("Accepted invalid bridge catalogue"); }
+        catch (java.lang.reflect.InvocationTargetException failure) {
+            check(failure.getCause() instanceof IllegalStateException);
+        }
+    }
+    /** Run the actual bridge catalogue adapter against controlled JVM-only JSON stubs. */
+    private static void checkBridgeCatalog() throws Exception {
+        java.nio.file.Path temp=java.nio.file.Files.createTempDirectory("purple-catalog-control-");
+        try {
+            java.nio.file.Path object=temp.resolve("org/json/JSONObject.java");
+            java.nio.file.Path array=temp.resolve("org/json/JSONArray.java");
+            java.nio.file.Path clock=temp.resolve("android/os/SystemClock.java");
+            for (java.nio.file.Path path:new java.nio.file.Path[]{object,array,clock})
+                java.nio.file.Files.createDirectories(path.getParent());
+            java.nio.file.Files.writeString(clock,
+                    "package android.os; public class SystemClock { public static long elapsedRealtime() { return 0; } }\n");
+            java.nio.file.Files.writeString(array, """
+                    package org.json;
+                    public class JSONArray {
+                        private final java.util.List<Object> values=new java.util.ArrayList<>();
+                        public JSONArray put(Object value) { values.add(value); return this; }
+                        public int length() { return values.size(); }
+                        public Object get(int index) { return values.get(index); }
+                        public JSONObject optJSONObject(int index) {
+                            Object value=values.get(index); return value instanceof JSONObject ? (JSONObject)value : null;
+                        }
+                        public JSONObject getJSONObject(int index) {
+                            JSONObject value=optJSONObject(index);
+                            if (value==null) throw new IllegalStateException("fixture JSON object");
+                            return value;
+                        }
+                    }
+                    """);
+            java.nio.file.Files.writeString(object, """
+                    package org.json;
+                    public class JSONObject {
+                        private final java.util.Map<String,Object> values=new java.util.HashMap<>();
+                        public JSONObject() {}
+                        public JSONObject(String ignored) {}
+                        public JSONObject put(String key,Object value) { values.put(key,value); return this; }
+                        public Object opt(String key) { return values.get(key); }
+                        public String optString(String key) {
+                            Object value=values.get(key); return value instanceof String ? (String)value : "";
+                        }
+                        public JSONArray getJSONArray(String key) {
+                            Object value=values.get(key);
+                            if (!(value instanceof JSONArray)) throw new IllegalStateException("fixture JSON array");
+                            return (JSONArray)value;
+                        }
+                        public String getString(String key) { return (String)values.get(key); }
+                        public boolean getBoolean(String key) { return (Boolean)values.get(key); }
+                        public int getInt(String key) { return ((Number)values.get(key)).intValue(); }
+                    }
+                    """);
+            javax.tools.JavaCompiler compiler=javax.tools.ToolProvider.getSystemJavaCompiler();
+            check(compiler!=null);
+            int status=compiler.run(null,null,null,"-classpath",System.getProperty("java.class.path"),
+                    "-d",temp.toString(),object.toString(),array.toString(),clock.toString(),
+                    "gboard/src/dev/purple/patches/gboard/BridgeClient.java");
+            check(status==0);
+            try (java.net.URLClassLoader loader=new java.net.URLClassLoader(
+                    new java.net.URL[]{temp.toUri().toURL()}, SessionPolicyCheck.class.getClassLoader())) {
+                Class<?> obj=loader.loadClass("org.json.JSONObject"), arr=loader.loadClass("org.json.JSONArray");
+                Class<?> bridge=loader.loadClass("dev.purple.patches.gboard.BridgeClient");
+                var parse=bridge.getDeclaredMethod("translationCatalog",obj); parse.setAccessible(true);
+                var put=obj.getMethod("put",String.class,Object.class); var append=arr.getMethod("put",Object.class);
+                Object other=obj.getConstructor().newInstance(); put.invoke(other,"id","other");
+                put.invoke(other,"efforts","ignored malformed unrelated model");
+                Object sol=obj.getConstructor().newInstance(); put.invoke(sol,"id","gpt-6.1-sol");
+                Object efforts=arr.getConstructor().newInstance();
+                for (String level:new String[]{"max","low","medium","max"}) append.invoke(efforts,level);
+                put.invoke(sol,"efforts",efforts);
+                Object models=arr.getConstructor().newInstance(); append.invoke(models,other); append.invoke(models,sol);
+                Object response=obj.getConstructor().newInstance(); put.invoke(response,"models",models);
+                check(java.util.Arrays.equals((String[])parse.invoke(null,response),new String[]{"medium","max"}));
+
+                Object one=arr.getConstructor().newInstance(); append.invoke(one,"max"); put.invoke(sol,"efforts",one);
+                check(java.util.Arrays.equals((String[])parse.invoke(null,response),new String[]{"max"}));
+                Object duplicate=obj.getConstructor().newInstance(); put.invoke(duplicate,"id","gpt-6.1-sol");
+                Object duplicateModels=arr.getConstructor().newInstance(); append.invoke(duplicateModels,sol); append.invoke(duplicateModels,duplicate);
+                Object duplicateResponse=obj.getConstructor().newInstance(); put.invoke(duplicateResponse,"models",duplicateModels);
+                rejectsBridgeCatalog(parse,duplicateResponse);
+                Object missing=obj.getConstructor().newInstance(); put.invoke(missing,"models",arr.getConstructor().newInstance());
+                rejectsBridgeCatalog(parse,missing);
+                Object wrong=arr.getConstructor().newInstance(); append.invoke(wrong,7); put.invoke(sol,"efforts",wrong);
+                rejectsBridgeCatalog(parse,response);
+                rejectsBridgeCatalog(parse,obj.getConstructor().newInstance());
+            }
+        } finally {
+            try (java.util.stream.Stream<java.nio.file.Path> paths=java.nio.file.Files.walk(temp)) {
+                for (java.nio.file.Path path:paths.sorted(java.util.Comparator.reverseOrder()).toList())
+                    java.nio.file.Files.delete(path);
+            }
+        }
+    }
     /** Run the actual permission activity against small JVM-only Android stubs. */
     private static void checkPermissionActivity() throws Exception {
         java.nio.file.Path temp=java.nio.file.Files.createTempDirectory("purple-permission-control-");
@@ -149,6 +256,12 @@ public class SessionPolicyCheck {
         Reader multibyte=new Reader(); multibyte.first=multibyte.last=new SessionPolicy.EditorPosition(0,3000,0);
         multibyte.selected="界".repeat(3000); check(SessionPolicy.captureEditor(multibyte)==null);
         check(SessionPolicy.bootstrapSuccess(0,-1));
+        check(SessionPolicy.bridgeHealth(true,1,"memory-only-v1"));
+        check(!SessionPolicy.bridgeHealth(false,1,"memory-only-v1"));
+        check(!SessionPolicy.bridgeHealth(true,2,"memory-only-v1"));
+        check(!SessionPolicy.bridgeHealth(true,"1","memory-only-v1"));
+        check(!SessionPolicy.bridgeHealth(null,1,"memory-only-v1"));
+        check(!SessionPolicy.bridgeHealth(true,1,"other"));
         Object owner=new Object();
         check(SessionPolicy.bootstrapOfferCurrent(1,1,owner,owner));
         check(!SessionPolicy.bootstrapOfferCurrent(1,2,owner,owner));
@@ -179,6 +292,21 @@ public class SessionPolicyCheck {
         check(SessionPolicy.translationEffortAllowed("max"));
         for (String value : new String[]{null,"","low","high","MAX","ultra"})
             check(!SessionPolicy.translationEffortAllowed(value));
+        check(java.util.Arrays.equals(SessionPolicy.translationEffortChoices(null), new String[]{}));
+        check(java.util.Arrays.equals(SessionPolicy.translationEffortChoices(new String[]{"low",null,"MAX"}), new String[]{}));
+        check(java.util.Arrays.equals(SessionPolicy.translationEffortChoices(new String[]{"medium"}), new String[]{"medium"}));
+        check(java.util.Arrays.equals(SessionPolicy.translationEffortChoices(new String[]{"max","max"}), new String[]{"max"}));
+        check(java.util.Arrays.equals(SessionPolicy.translationEffortChoices(new String[]{"max","low","medium","max"}), new String[]{"medium","max"}));
+        check(java.util.Arrays.equals(SessionPolicy.translationCatalog(catalog(
+                new String[]{"other","gpt-6.1-sol"},new String[][]{{"max"},{"max","medium"}})),
+                new String[]{"medium","max"}));
+        check(java.util.Arrays.equals(SessionPolicy.translationCatalog(catalog(
+                new String[]{"gpt-6.1-sol"},new String[][]{{"max"}})),new String[]{"max"}));
+        rejectsCatalog(null);
+        rejectsCatalog(catalog(new String[]{"other"},new String[][]{{"medium"}}));
+        rejectsCatalog(catalog(new String[]{"gpt-6.1-sol"},new String[][]{{"high"}}));
+        rejectsCatalog(catalog(new String[]{"gpt-6.1-sol","gpt-6.1-sol"},
+                new String[][]{{"medium"},{"max"}}));
         String[] tools = SessionPolicy.permissionsFor(SessionPolicy.PERMISSION_LOCAL_TOOLS);
         check(tools.length == 1 && tools[0].equals("com.termux.permission.RUN_COMMAND"));
         String[] microphone = SessionPolicy.permissionsFor(SessionPolicy.PERMISSION_MICROPHONE);
@@ -217,9 +345,11 @@ public class SessionPolicyCheck {
         check(sent[0]==4);
         check(SessionPolicy.bounded("hello"));check(!SessionPolicy.bounded(" "));check(!SessionPolicy.bounded("界".repeat(3000)));
         checkPermissionActivity();
+        checkBridgeCatalog();
         System.out.println("Editor privacy, localhost, stale selection and UTF-8 limits passed");
         System.out.println("One-shot insertion request and uncertain-result controls passed");
         System.out.println("Bootstrap session, deadline, replacement and one-shot controls passed");
         System.out.println("Scoped permission activity JVM fixture passed");
+        System.out.println("Actual bridge catalogue adapter with controlled JSON stubs passed");
     }
 }

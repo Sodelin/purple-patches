@@ -1,6 +1,7 @@
 package dev.purple.patches.gboard;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -46,12 +47,35 @@ final class BridgeClient {
     }
     void verify(boolean voice) throws Exception {
         JSONObject health = request("GET", "/health", null, null);
-        if (!"memory-only-v1".equals(health.optString("keyboard_data_path")))
+        if (!SessionPolicy.bridgeHealth(health.opt("ok"), health.opt("protocol"), health.optString("keyboard_data_path")))
             throw new IllegalStateException("Update the local bridge before using keyboard text or audio");
         if (voice && !SessionPolicy.whisperPreflightSupported(health.optString("whisper_preflight")))
             throw new IllegalStateException("Update the local bridge before using Whisper 3");
         if (voice && !"whisper-large-v3".equals(health.optString("whisper_family")))
             throw new IllegalStateException("Whisper 3 is not configured; another model will not be substituted");
+    }
+    String[] translationEfforts() throws Exception {
+        return translationCatalog(request("GET", "/models", null, null));
+    }
+    static String[] translationCatalog(JSONObject response) throws Exception {
+        JSONArray models = response.getJSONArray("models");
+        return SessionPolicy.translationCatalog(new SessionPolicy.TranslationCatalogReader() {
+            public int size() { return models.length(); }
+            public String modelId(int index) {
+                JSONObject model = models.optJSONObject(index);
+                return model == null ? null : model.optString("id");
+            }
+            public String[] efforts(int index) throws Exception {
+                JSONArray advertised = models.getJSONObject(index).getJSONArray("efforts");
+                String[] values = new String[advertised.length()];
+                for (int i = 0; i < values.length; i++) {
+                    Object value = advertised.get(i);
+                    if (!(value instanceof String)) throw new IllegalStateException("Invalid local reasoning catalogue");
+                    values[i] = (String)value;
+                }
+                return values;
+            }
+        });
     }
     String execute(String text, String language, String effort, byte[] wav, AtomicBoolean cancelled) throws Exception {
         if (wav == null && !SessionPolicy.translationEffortAllowed(effort))

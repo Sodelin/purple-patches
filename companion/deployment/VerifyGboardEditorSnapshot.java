@@ -54,6 +54,13 @@ public final class VerifyGboardEditorSnapshot {
         return result;
     }
 
+    private static boolean catches(Method method, String exceptionType) {
+        for (var block : method.getImplementation().getTryBlocks())
+            for (var handler : block.getExceptionHandlers())
+                if (exceptionType.equals(handler.getExceptionType())) return true;
+        return false;
+    }
+
     /** Linkage only: presence of references is not control-flow or Android execution proof. */
     private static void verifyBootstrap(Map<String, ClassDef> classes) {
         for (String name : new String[]{"begin", "invalidate", "consume", "pending"})
@@ -90,7 +97,8 @@ public final class VerifyGboardEditorSnapshot {
         require(!positions(capture, POLICY, "captureEditor").isEmpty(), "Snapshot does not call editor capture policy");
         var editorPolicy = calls(method(classes, POLICY, "captureEditor"));
         require(!positions(editorPolicy, POLICY, "validEditorRead").isEmpty(), "Editor capture lacks read validation");
-        var matches = calls(method(classes, SNAPSHOT, "matches"));
+        Method matchesMethod = method(classes, SNAPSHOT, "matches");
+        var matches = calls(matchesMethod);
         var captures = positions(matches, SNAPSHOT, "capture");
         var connections = positions(matches, "Landroid/inputmethodservice/InputMethodService;", "getCurrentInputConnection");
         var sensitive = positions(matches, POLICY, "sensitive");
@@ -133,6 +141,12 @@ public final class VerifyGboardEditorSnapshot {
             try { verifyBootstrap(missing); } catch (IllegalStateException expected) { refused = true; }
             require(refused, "Bootstrap checker accepted an absent policy class");
             System.out.println("Verified bootstrap session/linkage references and missing-class negative control; no Android execution is proved.");
+        }
+        if (revision >= 11) {
+            require(catches(matchesMethod, "Ljava/lang/RuntimeException;"), "Editor anchor lacks RuntimeException handler");
+            require(!catches(matchesMethod, "Ldev/purple/patches/gboard/NoSuchSyntheticException;"),
+                    "Editor exception-handler checker accepted a missing type");
+            System.out.println("Verified editor-anchor exception-handler presence and negative control; runtime behavior is not proved.");
         }
     }
 }

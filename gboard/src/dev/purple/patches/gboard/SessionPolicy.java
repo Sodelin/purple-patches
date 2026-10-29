@@ -63,8 +63,47 @@ public final class SessionPolicy {
     public static boolean whisperPreflightSupported(String advertised) {
         return WHISPER_PREFLIGHT.equals(advertised);
     }
+    /** A health marker is not meaningful unless the expected protocol succeeded. */
+    public static boolean bridgeHealth(Object ok, Object protocol, String dataPath) {
+        return Boolean.TRUE.equals(ok) && protocol instanceof Integer && ((Integer)protocol) == 1
+                && "memory-only-v1".equals(dataPath);
+    }
     public static boolean translationEffortAllowed(String effort) {
         return "medium".equals(effort) || "max".equals(effort);
+    }
+    /** Only show explicitly permitted levels that the selected CLI advertises. */
+    public static String[] translationEffortChoices(String[] advertised) {
+        boolean medium = false, max = false;
+        if (advertised != null) for (String effort : advertised) {
+            if ("medium".equals(effort)) medium = true;
+            if ("max".equals(effort)) max = true;
+        }
+        if (medium && max) return new String[]{"medium", "max"};
+        if (medium) return new String[]{"medium"};
+        if (max) return new String[]{"max"};
+        return new String[0];
+    }
+    public interface TranslationCatalogReader {
+        int size();
+        String modelId(int index) throws Exception;
+        String[] efforts(int index) throws Exception;
+    }
+    /** Require one exact Sol entry and never substitute an unadvertised level. */
+    public static String[] translationCatalog(TranslationCatalogReader catalog) throws Exception {
+        if (catalog == null) throw new IllegalStateException("Invalid local model catalogue");
+        int count = catalog.size();
+        if (count < 0) throw new IllegalStateException("Invalid local model catalogue");
+        boolean found = false;
+        String[] selected = null;
+        for (int i = 0; i < count; i++) {
+            if (!"gpt-6.1-sol".equals(catalog.modelId(i))) continue;
+            if (found) throw new IllegalStateException("The local Sol catalogue is ambiguous");
+            found = true;
+            selected = translationEffortChoices(catalog.efforts(i));
+        }
+        if (!found) throw new IllegalStateException("Sol 6.1 is unavailable in the local catalogue");
+        if (selected.length == 0) throw new IllegalStateException("No permitted Sol 6.1 reasoning level is advertised");
+        return selected;
     }
     /** Each explicit action requests only its own Android permission. */
     public static String[] permissionsFor(String scope) {

@@ -136,12 +136,66 @@ public final class PurpleAiRuntime {
     private static void chooseTranslationEffort(Snapshot anchor, String language) {
         InputMethodService ime = service.get();
         if (ime == null || !anchor.matches(ime, generation)) return;
-        String[] labels = {"Medium", "Max"};
-        String[] efforts = {"medium", "max"};
+        if (!busy.compareAndSet(false, true)) { notifyUser("The previous action is still finishing"); return; }
+        BridgeClient currentBridge = bridge;
+        if (currentBridge == null) { busy.set(false); notifyUser("Connect local tools first"); return; }
+        final long request = ++operation;
+        AtomicBoolean stopped = new AtomicBoolean(); cancellation = stopped;
+        AlertDialog progress = new AlertDialog.Builder(ime).setTitle("Sol 6.1 reasoning")
+                .setMessage("Checking available reasoning levels…")
+                .setNegativeButton("Cancel", (d, w) -> { if (request == operation && dialog == d) cancel(); }).create();
+        progress.setOnCancelListener(d -> { if (request == operation && dialog == d) cancel(); });
+        if (!show(progress)) { cancel(); busy.set(false); return; }
+        Runnable lookup = () -> {
+            String[] choices = null;
+            try {
+                currentBridge.verify(false);
+                if (stopped.get()) throw new InterruptedException();
+                choices = currentBridge.translationEfforts();
+                if (stopped.get()) throw new InterruptedException();
+            } catch (Exception unavailable) {
+                choices = null;
+            } finally {
+                final String[] available = choices;
+                MAIN.post(() -> {
+                    busy.set(false);
+                    boolean current = request == operation && !stopped.get() && dialog == progress;
+                    boolean anchorCurrent = current && anchor.matches(service.get(), generation);
+                    if (dialog == progress) dismiss();
+                    if (!current) return;
+                    if (!anchorCurrent) { notifyUser("The selection changed; select text again"); return; }
+                    if (available == null) {
+                        notifyUser("Sol 6.1 reasoning levels could not be confirmed. Check your local tools and model availability.");
+                        return;
+                    }
+                    showTranslationEfforts(anchor, language, available, request);
+                });
+            }
+        };
+        try { new Thread(lookup, "purple-gboard-catalog").start(); }
+        catch (RuntimeException unavailable) {
+            if (request == operation) {
+                cancel();
+                if (dialog == progress) dismiss();
+                notifyUser("Local reasoning choices are unavailable");
+            }
+            busy.set(false);
+        }
+    }
+    private static void showTranslationEfforts(Snapshot anchor, String language, String[] efforts, long request) {
+        InputMethodService ime = service.get();
+        if (ime == null || request != operation || !anchor.matches(ime, generation)) return;
+        String[] labels = new String[efforts.length];
+        for (int i = 0; i < efforts.length; i++) {
+            if ("medium".equals(efforts[i])) labels[i] = "Medium";
+            else if ("max".equals(efforts[i])) labels[i] = "Max";
+            else return;
+        }
         show(new AlertDialog.Builder(ime).setTitle("Sol 6.1 reasoning")
                 .setItems(labels, (d, which) -> {
                     if (which < 0 || which >= efforts.length) return;
-                    if (anchor.matches(service.get(), generation)) submit(anchor, language, efforts[which]);
+                    if (dialog == d && request == operation && anchor.matches(service.get(), generation))
+                        submit(anchor, language, efforts[which]);
                     else notifyUser("The selection changed; select text again");
                 }).setNegativeButton("Cancel", null).create());
     }
@@ -323,15 +377,17 @@ public final class PurpleAiRuntime {
             } catch (RuntimeException ignored) { return null; }
         }
         boolean matches(InputMethodService ime, long current) {
-            if (ime == null || session != current || ime.getCurrentInputConnection()!=connection) return false;
-            EditorInfo info=ime.getCurrentInputEditorInfo();
-            if (info==null || SessionPolicy.sensitive(info.inputType,info.imeOptions)) return false;
-            Snapshot now=capture(ime,current);
-            EditorInfo finalInfo=ime.getCurrentInputEditorInfo();
-            return now!=null && now.connection==connection && ime.getCurrentInputConnection()==connection
-                    && finalInfo!=null && !SessionPolicy.sensitive(finalInfo.inputType,finalInfo.imeOptions)
-                    && now.start==start && now.end==end && now.offset==offset
-                    && SessionPolicy.sameAnchor(session,current,before,after,selected,now.before,now.after,now.selected);
+            try {
+                if (ime == null || session != current || ime.getCurrentInputConnection()!=connection) return false;
+                EditorInfo info=ime.getCurrentInputEditorInfo();
+                if (info==null || SessionPolicy.sensitive(info.inputType,info.imeOptions)) return false;
+                Snapshot now=capture(ime,current);
+                EditorInfo finalInfo=ime.getCurrentInputEditorInfo();
+                return now!=null && now.connection==connection && ime.getCurrentInputConnection()==connection
+                        && finalInfo!=null && !SessionPolicy.sensitive(finalInfo.inputType,finalInfo.imeOptions)
+                        && now.start==start && now.end==end && now.offset==offset
+                        && SessionPolicy.sameAnchor(session,current,before,after,selected,now.before,now.after,now.selected);
+            } catch (RuntimeException unavailable) { return false; }
         }
     }
 }

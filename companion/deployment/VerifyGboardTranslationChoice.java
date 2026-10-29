@@ -64,18 +64,40 @@ public final class VerifyGboardTranslationChoice {
         require(calls(bridge, POLICY, "translationEffortAllowed") && hasString(bridge, "effort")
                 && hasString(bridge, "gpt-6.1-sol") && calls(bridge, "Lorg/json/JSONObject;", "put"),
                 "Translation request lacks effort-policy or Sol JSON references");
-        Method chooser = method(classes, RUNTIME, "chooseTranslationEffort");
+        String version = System.getenv("BUNDLE_VERSION");
+        var alpha = java.util.regex.Pattern.compile("0\\.1\\.0-alpha\\.([0-9]+)")
+                .matcher(version == null ? "" : version);
+        require(alpha.matches(), "Unsupported candidate version for translation verification");
+        int revision = Integer.parseInt(alpha.group(1));
+        Method chooser = method(classes, RUNTIME,
+                revision >= 11 ? "showTranslationEfforts" : "chooseTranslationEffort");
         require(hasString(chooser, "Medium") && hasString(chooser, "Max")
                 && hasString(chooser, "medium") && hasString(chooser, "max"),
                 "Translation effort chooser values are missing");
+        if (revision >= 11) {
+            Method choices = method(classes, BRIDGE, "translationEfforts");
+            Method parser = method(classes, BRIDGE, "translationCatalog");
+            Method catalogue = method(classes, POLICY, "translationCatalog");
+            require(hasString(choices, "/models") && calls(choices, BRIDGE, "translationCatalog")
+                    && calls(parser, POLICY, "translationCatalog")
+                    && hasString(catalogue, "gpt-6.1-sol")
+                    && calls(catalogue, POLICY, "translationEffortChoices"),
+                    "Translation catalogue lacks the selected model, source or choice policy reference");
+            boolean loads = false, displays = false;
+            for (ClassDef type : classes.values()) if (type.getType().startsWith("Ldev/purple/patches/gboard/PurpleAiRuntime"))
+                for (Method candidate : type.getMethods()) {
+                    loads |= calls(candidate, BRIDGE, "translationEfforts");
+                    displays |= calls(candidate, RUNTIME, "showTranslationEfforts");
+                }
+            require(loads && displays, "Translation catalogue is not linked to the chooser");
+            System.out.println("Verified local Sol catalogue and filtered-effort chooser references; no Android UI or account availability is proved.");
+        }
         boolean guardedSubmit = false;
         for (ClassDef type : classes.values()) if (type.getType().startsWith("Ldev/purple/patches/gboard/PurpleAiRuntime"))
             for (Method candidate : type.getMethods())
                 if (calls(candidate, SNAPSHOT, "matches") && calls(candidate, RUNTIME, "submit")) guardedSubmit = true;
         require(guardedSubmit, "No guarded translation submit reference found");
         System.out.println("Verified translation effort chooser, policy, guarded submit and Sol request references in APK DEX.");
-        String version = System.getenv("BUNDLE_VERSION");
-        require(version != null && !version.isEmpty(), "Missing selected bundle version");
         if (!version.equals("0.1.0-alpha.6")) {
             Method scope = method(classes, POLICY, "permissionsFor");
             require(hasString(scope, "local-tools") && hasString(scope, "microphone")
