@@ -66,6 +66,12 @@ concurrent admission, retained charges after copy/provider/stop failure,
 consumed IDs, reentrant cleanup and a complete actual copy/readback. They do
 not prove real Android allocation or restart recovery.
 
+Successor run40907229999 at2b73f584d76499cab85d22669cfc2294b38278b4
+passed57 budget controls, including synthetic recovery of pending and terminal
+IDs, and the other copy/cache/stop controls. Full artifact and source hashes
+are in ../budget-recovery-verification.json. The host still must bind a genuine
+complete journal snapshot before admitting work; no device restart was tested.
+
 NatuneCoroutineStop binds the retained original public continuation/context/job
 check ABI. It preserves the original cancellation exception and combines it
 with a required caller-supplied owner/headroom check. No original Job/context is

@@ -1,0 +1,40 @@
+{
+  "schema": "purple.natune.journal-recovery-verification.v1",
+  "source_commit": "2b73f584d76499cab85d22669cfc2294b38278b4",
+  "run_id": 40907405554,
+  "run_url": "https://github.com/Sodelin/purple-patches/actions/runs/40907405554",
+  "conclusion": "success",
+  "artifact_id": 12911502803,
+  "artifact_zip_sha256": "e37f782be87341513f9eac0d4715eb37020cf2caf69b9b91c73b4ac3961c94ad",
+  "member_sha256": {
+    "SHA256SUMS": "4bc7018252f2d60ffdeeedc1b917e2049ae9b6388bee09a79589d5108c588f9f",
+    "native-controls.txt": "2fec5a6bec7b46611aeadc820f4b7219d26790a862f092ffc461f761734ce966",
+    "natune-journal-check": "237e8d3ba4bc76ed3d9ff6e21a19e7d1838ffce573c40ec7de63ad278f8df752",
+    "purple-gboard-service": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91",
+    "purple-keyboard-bridge": "012728a807914932b6c95c9d9bd2d1777a88dd8ab5a313bd17063437db774ffa",
+    "response-schema.json": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
+    "source-SHA256SUMS": "c1f7a33be74834c8a6077a3a394ceb3f4d7b92e84606aa137a4bda1a35616582"
+  },
+  "source_hashes_verified_against_run_commit": {
+    "companion/Cargo.toml": "e6cab69c08a51d51b936d6739b33b03e3cc05b4acd0f152adcdf9aa6b687d5e0",
+    "companion/Cargo.lock": "bb0b1fc7d4611d120a39afbf107238ea22034ef9bd65995e336519ec693a32e3",
+    "companion/src/cli.rs": "504ca36c12a8627b00a7e2f33d8ed9f829ad1e499da2d363b72f72e9ea4d7546",
+    "companion/src/http.rs": "2933781ca9e8e785c598ee3ccec4266bf628dedca19ceed43c338f55a6eacfea",
+    "companion/src/jobs.rs": "2be689495355610f9075e05eb4de1e6e09cd01d4da573c01c7baf18560fd4abd",
+    "companion/src/lib.rs": "01c94b9939ec65148683a221ea0fa0bd55b7f9d4a03483a0a4fafb3ce9bad068",
+    "companion/src/main.rs": "16147887864ab191726a910759f90abf2ef365ee11960b534928f03e87d25667",
+    "companion/src/memory.rs": "caf71a444975569fac7e97d677eeffca3caa53e2ae242ac7a2d6932592131419",
+    "companion/src/natune_journal.rs": "f0d5a6a1554588256396356c37516114a8b15e190b59782e80027aaf269bbeb9",
+    "companion/src/private.rs": "8262df14c2cfe673b7d927f8e3119c50986b193afee2db3feeb3ef926b4e36c1",
+    "companion/src/vault.rs": "c30cb1e4556dc809003a18965dbbcf70f10facc917899b3bcde5b96af9990683",
+    "companion/src/whisper.rs": "c350f8023c3f47840a8dbc4d330d4a12beccd5468c98191ece70cc45a641bfc3",
+    "companion/src/bin/natune-journal-check.rs": "cdfa7643409adfff62b50c465a6c1f171933bab4045d7bd7dc864dab14d58456"
+  },
+  "native_test_summary": "test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s",
+  "recovery_control": "test natune_journal::tests::admission_recovery_includes_pending_and_consumed_terminal_ids ... ok",
+  "cross_build": "AArch64 Android; not executed on phone",
+  "limits": [
+    "Rust journal recovery uses a RAM-only public fixture store; actual backend and authenticated app binding have not been exercised.",
+    "No Android app, music, model, installed binary, identity, permission or device service was changed."
+  ]
+}

@@ -75,6 +75,14 @@ binding; the objects and matching totals do not themselves provide that
 binding or prove completeness. Values outside Java's positive long range must
 refuse rather than truncate. This API does not yet connect the two processes.
 
+Hosted Rust run40907405554 and Java run40907229999 both used source commit
+2b73f584d76499cab85d22669cfc2294b38278b4. The Rust controls exercise pending
+and terminal IDs after reopening a RAM fixture; the Java controls exercise
+restoration above a lowered limit, consumed IDs and inconsistent snapshots.
+Complete artifact/source readback is recorded in journal-recovery-verification.json
+and budget-recovery-verification.json. These are separate controls, not an
+end-to-end process-bound or device-restart test.
+
 The paired Android admission and app-scoped receipt remain to integrate.
 The journal does not measure free blocks, provider allocation, current grants,
 current document contents or external writers. Actual headroom/cleanup checks
