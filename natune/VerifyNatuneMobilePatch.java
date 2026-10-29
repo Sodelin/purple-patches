@@ -3,6 +3,8 @@ import com.android.tools.smali.dexlib2.Opcodes;
 import com.android.tools.smali.dexlib2.Opcode;
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21s;
 import com.android.tools.smali.dexlib2.iface.Method;
+import com.android.tools.smali.dexlib2.iface.value.*;
+import com.android.tools.smali.dexlib2.immutable.value.*;
 import com.android.tools.smali.dexlib2.iface.instruction.*;
 import com.android.tools.smali.dexlib2.iface.instruction.formats.ArrayPayload;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
@@ -22,13 +24,35 @@ public final class VerifyNatuneMobilePatch {
         new Site("Lmoe/rukamori/archivetune/playback/g;->g(Ljava/lang/String;Lr8/cf2;)Ljava/lang/Object;", 290, 2)
     );
     record Body(int registers, List<String> instructions, List<String> handlers) {}
-    record MethodState(int flags, Object annotations, Body body) {}
+    record MethodState(int flags, Object annotations, Object parameterAnnotations, Body body) {}
     record FieldState(int flags, Object initialValue, Object annotations) {}
     record ClassState(int flags, String superclass, Object interfaces, Object annotations, Map<String, FieldState> fields) {}
     record Snapshot(Map<String, MethodState> methods, Map<String, ClassState> classes) {}
 
     static void need(boolean value, String reason) {
         if (!value) throw new IllegalStateException(reason);
+    }
+    // DEX class_def_item permits omitted trailing static values. Normalize only
+    // type-correct false/null defaults observed in this pinned rewrite. Every
+    // other initializer retains exact EncodedValue equality (including true).
+    static Object initialValue(int flags, String type, EncodedValue value) {
+        if ((flags & 8) == 0 || value == null) return value;
+        if (type.equals("Z") && value instanceof BooleanEncodedValue b && !b.getValue()) return null;
+        if ((type.startsWith("L") || type.startsWith("[")) && value instanceof NullEncodedValue) return null;
+        return value;
+    }
+    static void initializerControls() {
+        need(initialValue(8, "Z", ImmutableBooleanEncodedValue.FALSE_VALUE) == null, "false default control");
+        need(initialValue(8, "Ljava/lang/String;", ImmutableNullEncodedValue.INSTANCE) == null, "null default control");
+        need(initialValue(8, "[I", ImmutableNullEncodedValue.INSTANCE) == null, "array null control");
+        need(initialValue(8, "Z", ImmutableBooleanEncodedValue.TRUE_VALUE) != null, "true must not equal absent");
+        need(initialValue(0, "Z", ImmutableBooleanEncodedValue.FALSE_VALUE) != null, "instance value must stay exact");
+        need(initialValue(8, "I", ImmutableBooleanEncodedValue.FALSE_VALUE) != null, "wrong type must stay distinct");
+        need(initialValue(8, "Z", ImmutableNullEncodedValue.INSTANCE) != null, "primitive null must stay distinct");
+        need(initialValue(8, "I", new ImmutableIntEncodedValue(7)) != null, "nonzero must stay exact");
+        need(initialValue(8, "Ljava/lang/String;", new ImmutableStringEncodedValue("")) != null, "empty string is not null");
+        need(!new FieldState(8, null, Set.of()).equals(new FieldState(9, null, Set.of())), "field access change control");
+        System.out.println("Initializer preservation controls passed: 10");
     }
     static String signature(MethodReference method) {
         return method.getDefiningClass() + "->" + method.getName() + "(" +
@@ -143,13 +167,13 @@ public final class VerifyNatuneMobilePatch {
             for (var clazz : entry.getDexFile().getClasses()) {
                 var fields = new TreeMap<String, FieldState>();
                 for (var field : clazz.getFields()) fields.put(field.getName() + ':' + field.getType(),
-                    new FieldState(field.getAccessFlags(), field.getInitialValue(), field.getAnnotations()));
+                    new FieldState(field.getAccessFlags(), initialValue(field.getAccessFlags(), field.getType(), field.getInitialValue()), field.getAnnotations()));
                 need(classes.put(clazz.getType(), new ClassState(clazz.getAccessFlags(), clazz.getSuperclass(),
                      clazz.getInterfaces(), clazz.getAnnotations(), fields)) == null, "Duplicate class");
                 for (var method : clazz.getMethods()) {
                     String key = signature(method);
                     Site site = expectedChanges ? SITES.stream().filter(x -> x.method().equals(key)).findFirst().orElse(null) : null;
-                    need(methods.put(key, new MethodState(method.getAccessFlags(), method.getAnnotations(), body(method, site))) == null,
+                    need(methods.put(key, new MethodState(method.getAccessFlags(), method.getAnnotations(), method.getParameters().stream().map(p -> p.getAnnotations()).toList(), body(method, site))) == null,
                          "Duplicate method");
                 }
             }
@@ -157,6 +181,7 @@ public final class VerifyNatuneMobilePatch {
         return new Snapshot(methods, classes);
     }
     public static void main(String[] args) throws Exception {
+        initializerControls();
         var expected = snapshot(new File(args[0]), true);
         var actual = snapshot(new File(args[1]), false);
         need(expected.classes().keySet().equals(actual.classes().keySet()), "Class set changed");
