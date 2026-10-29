@@ -1,5 +1,9 @@
 # Translation reasoning choice
 
+Alpha.18 source also preserves language script and region in the target picker;
+see [translation language choices](TRANSLATION-LANGUAGE-CHOICE.md). This does
+not change the selected Sol model or the explicit Medium/Max effort boundary.
+
 The alpha.6 source asks the user to choose **Medium** or **Max** after choosing
 the target language. It sends that exact selection with `gpt-6.1-sol` through
 the existing local Codex companion; it does not substitute another effort or

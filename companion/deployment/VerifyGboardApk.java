@@ -69,7 +69,16 @@ public final class VerifyGboardApk {
     }
     static void expectFailure(Runnable action) {
         try { action.run(); } catch (IllegalStateException expected) { return; }
-        throw new IllegalStateException("Verifier accepted a missing original member or parent");
+        throw new IllegalStateException("Verifier accepted an invalid fixture");
+    }
+    static int requireLocaleApi(String badging) {
+        var sdk = java.util.regex.Pattern.compile("(?m)^sdkVersion:'([0-9]+)'\\r?$").matcher(badging);
+        if (!sdk.find()) throw new IllegalStateException("Missing numeric minimum Android API");
+        int minimum;
+        try { minimum = Integer.parseInt(sdk.group(1)); }
+        catch (NumberFormatException invalid) { throw new IllegalStateException("Invalid minimum Android API"); }
+        if (minimum < 21 || sdk.find()) throw new IllegalStateException("Locale language tags require API 21 or later");
+        return minimum;
     }
     static void selfTest() {
         var concrete = new MethodKey("run", List.of("I"), "V");
@@ -83,6 +92,10 @@ public final class VerifyGboardApk {
         expectFailure(() -> requireMembers("fixture", original, new Members(original.methods(), Set.of())));
         expectFailure(() -> requireMembers("fixture", original, new Members(Map.of(abstractMethod, false), original.fields())));
         expectFailure(() -> requireMembers("fixture", original, new Members(Map.of(concrete, false, abstractMethod, false), original.fields())));
+        if (requireLocaleApi("sdkVersion:'21'\n") != 21) throw new IllegalStateException("Minimum API fixture failed");
+        expectFailure(() -> requireLocaleApi("sdkVersion:'20'\n"));
+        expectFailure(() -> requireLocaleApi("no sdk version\n"));
+        expectFailure(() -> requireLocaleApi("sdkVersion:'21'\nsdkVersion:'26'\n"));
         System.out.println("Stock API verifier controls passed: retained members and parents; missing fields, methods, bodies and parents rejected.");
     }
     static byte[] digest(InputStream input) throws Exception {
@@ -102,6 +115,11 @@ public final class VerifyGboardApk {
         if (!identity.find() || identity.group(1).equals("com.google.android.inputmethod.latin")
                 || !identity.group(3).equals("18.5.4.993608717-release-arm64-v8a"))
             throw new IllegalStateException("Output clone package/version not verified");
+        var alpha = java.util.regex.Pattern.compile("0\\.1\\.0-alpha\\.([0-9]+)")
+                .matcher(System.getenv().getOrDefault("BUNDLE_VERSION", ""));
+        if (alpha.matches() && Integer.parseInt(alpha.group(1)) >= 18)
+            System.out.println("Verified output minimum Android API=" + requireLocaleApi(badging)
+                    + "; locale language tags require API 21.");
         var manifest = java.nio.file.Files.readString(java.nio.file.Path.of(args[3]));
         for (String required : new String[]{"dev.purple.patches.gboard.enabled", "dev.purple.patches.gboard.PurpleBootstrapReceiver",
                 "dev.purple.patches.gboard.PurplePermissionActivity", "com.termux.permission.RUN_COMMAND", "android.permission.RECORD_AUDIO"})

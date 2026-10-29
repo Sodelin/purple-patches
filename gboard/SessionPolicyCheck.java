@@ -32,6 +32,31 @@ public class SessionPolicyCheck {
         try { SessionPolicy.translationCatalog(reader); throw new AssertionError("Accepted invalid catalogue"); }
         catch (IllegalStateException expected) { }
     }
+    private static void checkTranslationLanguages() {
+        java.util.Locale[] locales = {
+                java.util.Locale.forLanguageTag("zh-Hans-CN"), java.util.Locale.forLanguageTag("zh-Hant-TW"),
+                java.util.Locale.forLanguageTag("pt-BR"), java.util.Locale.forLanguageTag("pt-PT"),
+                java.util.Locale.forLanguageTag("en-US"), java.util.Locale.forLanguageTag("en-GB"),
+                java.util.Locale.forLanguageTag("en"), java.util.Locale.forLanguageTag("EN-us"),
+                java.util.Locale.ROOT, new java.util.Locale("a"), null
+        };
+        var choices = SessionPolicy.translationLanguages(locales, java.util.Locale.ENGLISH);
+        var expected = new java.util.HashSet<>(java.util.Arrays.asList(
+                "zh-Hans-CN", "zh-Hant-TW", "pt-BR", "pt-PT", "en-US", "en-GB", "en"));
+        var tags = new java.util.HashSet<String>(); var labels = new java.util.HashSet<String>();
+        for (var choice : choices) {
+            check(choice.label.endsWith("(" + choice.tag + ")"));
+            check(tags.add(choice.tag) && labels.add(choice.label));
+        }
+        check(tags.equals(expected));
+        java.util.Collections.reverse(java.util.Arrays.asList(locales));
+        var reversed = SessionPolicy.translationLanguages(locales, java.util.Locale.ENGLISH);
+        check(reversed.length == choices.length);
+        for (int i=0; i<choices.length; i++)
+            check(choices[i].tag.equals(reversed[i].tag) && choices[i].label.equals(reversed[i].label));
+        check(SessionPolicy.translationLanguages(null, java.util.Locale.ENGLISH).length == 0);
+        check(SessionPolicy.translationLanguages(locales, null).length == 0);
+    }
     private static void rejectsBridgeCatalog(java.lang.reflect.Method parse, Object input) throws Exception {
         try { parse.invoke(null,input); throw new AssertionError("Accepted invalid bridge catalogue"); }
         catch (java.lang.reflect.InvocationTargetException failure) {
@@ -412,6 +437,7 @@ public class SessionPolicyCheck {
                 .contains("pub const RESULT_CAP: usize = 64 * 1024;"));
         checkPermissionActivity();
         checkBridgeCatalog();
+        checkTranslationLanguages();
         System.out.println("Editor privacy, localhost, stale selection and UTF-8 limits passed");
         System.out.println("One-shot insertion request and uncertain-result controls passed");
         System.out.println("Same-session changed-anchor copy-only preview controls passed");
@@ -420,5 +446,6 @@ public class SessionPolicyCheck {
         System.out.println("Scoped permission activity JVM fixture passed");
         System.out.println("Actual bridge catalogue adapter with controlled JSON stubs passed");
         System.out.println("Companion-sized result and bounded HTTP response controls passed");
+        System.out.println("Distinct language, region and script choices passed");
     }
 }

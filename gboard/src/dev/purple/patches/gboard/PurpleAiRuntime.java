@@ -120,16 +120,16 @@ public final class PurpleAiRuntime {
             submit(anchor, null, null);
         } else {
             if (!SessionPolicy.bounded(anchor.selected)) { notifyUser("Select up to 8 KiB of text to translate"); return; }
-            java.util.SortedMap<String,String> languages = new java.util.TreeMap<>();
-            for (java.util.Locale locale : java.util.Locale.getAvailableLocales()) {
-                String code = locale.getLanguage();
-                if (!code.isEmpty()) languages.put(locale.getDisplayLanguage(), code);
-            }
-            String[] labels = languages.keySet().toArray(new String[0]);
-            String[] codes = languages.values().toArray(new String[0]);
+            SessionPolicy.TranslationLanguage[] languages = SessionPolicy.translationLanguages(
+                    java.util.Locale.getAvailableLocales(), java.util.Locale.getDefault());
+            if (languages.length == 0) { notifyUser("No translation languages are available on this device"); return; }
+            String[] labels = new String[languages.length];
+            for (int i = 0; i < languages.length; i++) labels[i] = languages[i].label;
             show(new AlertDialog.Builder(ime).setTitle("Translate to…")
                     .setItems(labels, (d, which) -> {
-                        if (anchor.matches(service.get(), generation)) chooseTranslationEffort(anchor, codes[which]);
+                        if (which < 0 || which >= languages.length) return;
+                        if (anchor.matches(service.get(), generation)) chooseTranslationEffort(anchor, languages[which].tag);
+                        else notifyUser("The selection changed; select text again");
                     }).setNegativeButton("Cancel", null).create());
         }
     }

@@ -3,6 +3,7 @@ import com.android.tools.smali.dexlib2.Opcodes;
 import com.android.tools.smali.dexlib2.iface.ClassDef;
 import com.android.tools.smali.dexlib2.iface.Method;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
 import com.android.tools.smali.dexlib2.iface.reference.StringReference;
 import java.io.File;
@@ -16,6 +17,7 @@ public final class VerifyGboardTranslationChoice {
     private static final String BRIDGE = "Ldev/purple/patches/gboard/BridgeClient;";
     private static final String POLICY = "Ldev/purple/patches/gboard/SessionPolicy;";
     private static final String PERMISSION = "Ldev/purple/patches/gboard/PurplePermissionActivity;";
+    private static final String LANGUAGE = "Ldev/purple/patches/gboard/SessionPolicy$TranslationLanguage;";
     private static void require(boolean ok, String message) {
         if (!ok) throw new IllegalStateException(message);
     }
@@ -49,6 +51,28 @@ public final class VerifyGboardTranslationChoice {
                     && call.getName().equals(name)) return true;
         return false;
     }
+    /** References only; they do not prove Android UI behavior or translation quality. */
+    private static void verifyLanguageChoices(Map<String, ClassDef> classes) {
+        require(classes.containsKey(LANGUAGE), "Missing translation-language value");
+        Method choices = method(classes, POLICY, "translationLanguages");
+        require(calls(choices, "Ljava/util/Locale;", "getLanguage")
+                        && calls(choices, "Ljava/util/Locale;", "toLanguageTag")
+                        && calls(choices, "Ljava/util/Locale;", "getDisplayName"),
+                "Language policy lacks locale, tag or display-name references");
+        require(calls(method(classes, RUNTIME, "click"), POLICY, "translationLanguages"),
+                "Translation picker lacks language-policy reference");
+        boolean label = false, tag = false;
+        for (ClassDef type : classes.values()) if (type.getType().startsWith("Ldev/purple/patches/gboard/PurpleAiRuntime"))
+            for (Method candidate : type.getMethods()) if (candidate.getImplementation() != null)
+                for (var instruction : candidate.getImplementation().getInstructions())
+                    if (instruction instanceof ReferenceInstruction ref && ref.getReference() instanceof FieldReference field
+                            && field.getDefiningClass().equals(LANGUAGE)) {
+                        label |= field.getName().equals("label");
+                        tag |= field.getName().equals("tag");
+                    }
+        require(label && tag && hasString(method(classes, BRIDGE, "execute"), "target_language"),
+                "Picker labels, selected tags or translation request field are absent");
+    }
     public static void main(String[] args) throws Exception {
         require(args.length == 1, "Expected one patched APK");
         var dex = DexFileFactory.loadDexContainer(new File(args[0]), Opcodes.getDefault());
@@ -69,6 +93,14 @@ public final class VerifyGboardTranslationChoice {
                 .matcher(version == null ? "" : version);
         require(alpha.matches(), "Unsupported candidate version for translation verification");
         int revision = Integer.parseInt(alpha.group(1));
+        if (revision >= 18) {
+            verifyLanguageChoices(classes);
+            var missing = new HashMap<>(classes); missing.remove(LANGUAGE);
+            boolean refused = false;
+            try { verifyLanguageChoices(missing); } catch (IllegalStateException expected) { refused = true; }
+            require(refused, "Language checker accepted a missing choice class");
+            System.out.println("Verified locale tag and translation picker references; no Android UI or model behavior is proved.");
+        }
         Method chooser = method(classes, RUNTIME,
                 revision >= 11 ? "showTranslationEfforts" : "chooseTranslationEffort");
         require(hasString(chooser, "Medium") && hasString(chooser, "Max")

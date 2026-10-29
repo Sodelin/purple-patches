@@ -89,6 +89,30 @@ public final class SessionPolicy {
     public static boolean translationEffortAllowed(String effort) {
         return "medium".equals(effort) || "max".equals(effort);
     }
+    public static final class TranslationLanguage {
+        public final String label, tag;
+        private TranslationLanguage(String label, String tag) { this.label=label; this.tag=tag; }
+    }
+    /** Preserve each installed language, script and region instead of collapsing by language name. */
+    public static TranslationLanguage[] translationLanguages(java.util.Locale[] locales, java.util.Locale display) {
+        if (locales == null || display == null) return new TranslationLanguage[0];
+        java.util.SortedMap<String, TranslationLanguage> byTag = new java.util.TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        for (java.util.Locale locale : locales) {
+            if (locale == null || locale.getLanguage().isEmpty()) continue;
+            String tag = locale.toLanguageTag();
+            if (tag.equalsIgnoreCase("und") || tag.regionMatches(true, 0, "und-", 0, 4) || tag.length() > 128)
+                continue;
+            String label = locale.getDisplayName(display);
+            if (label == null || label.trim().isEmpty()) label = tag;
+            if (!byTag.containsKey(tag)) byTag.put(tag, new TranslationLanguage(label + " (" + tag + ")", tag));
+        }
+        TranslationLanguage[] result = byTag.values().toArray(new TranslationLanguage[0]);
+        java.util.Arrays.sort(result, (left, right) -> {
+            int order = String.CASE_INSENSITIVE_ORDER.compare(left.label, right.label);
+            return order != 0 ? order : left.tag.compareTo(right.tag);
+        });
+        return result;
+    }
     /** Only show explicitly permitted levels that the selected CLI advertises. */
     public static String[] translationEffortChoices(String[] advertised) {
         boolean medium = false, max = false;
