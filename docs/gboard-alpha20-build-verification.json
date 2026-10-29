@@ -1,0 +1,22 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "source_commit": "ef5bc3d634fabfbf76ef8edc9de404b97a312343",
+  "local_source_commit": "83047f840a3a526928061ef29e5ffd763c6d23b2",
+  "shared_source_tree": "63e3fea218ee6b572853f0e28e1f801908f9cd44",
+  "version": "0.1.0-alpha.20",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "workflow_runs": [40968928898, 40969327600],
+  "artifact_ids": [12940385087, 12939178480],
+  "artifact_zip_bytes": [15582131, 15582131],
+  "artifact_zip_sha256": ["dba9570b4365dd1f0b7421411f3ecfb2850662c108ce4b88c3a35b40631a09e8", "87f0fb08766a7269ae58102a883d01f7a7fcf3d653f898b47435f4da75349631"],
+  "main_mpp_sha256": "903551e7ceb6c1dead2b6d7fa3679e595e2da31b364927a3ff8ef57c31b6214d",
+  "all_seven_artifact_members_identical": true,
+  "outer_zip_bytes_identical": false,
+  "overlay_files_verified": 28,
+  "build_inputs_verified": 5,
+  "android_36_jar_sha256_both_runs": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a",
+  "checks": "Both hosted builds passed the access-point control against the actual materialized upstream hook and the authored adapter, using synthetic Android/host classes. All seven members, checksums, source-input hashes, timestamp, version and provenance were compared in memory. A preceding synthetic failure was reproduced in run 40968777447.",
+  "limitations": "The fixture does not prove actual Android class loading, atomic action registration or stock Gboard behavior. SDK archive provenance, device behavior, privacy, model acceptance and release remain separate. Exact APK verification is separately recorded if completed.",
+  "release_published": false,
+  "device_accepted": false
+}

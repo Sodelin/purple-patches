@@ -72,9 +72,10 @@ Alpha.19 improves preservation of existing network-security resources. Two
 patch and compiled loopback-policy checks. General resource-alias handling,
 private bootstrap, companion recovery and real device acceptance remain open;
 alpha.19 has not been published to the candidate feed.
-Alpha.20 source contains an access-point fallback for a missing or incompatible
-optional dependency. Its hosted integration and bundle verification are in
-progress; it has not passed Android acceptance or replaced the public feed.
+Alpha.20 adds an access-point fallback for a missing or incompatible optional
+dependency. Its [hosted controls and two-build comparison](docs/gboard-alpha20-build-verification.json)
+and [exact-APK static checks](docs/gboard-alpha20-apk-verification.json) passed;
+it has not passed Android acceptance or replaced the public feed.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
@@ -116,7 +117,7 @@ Gboard bundle and actual phone behavior. The candidate has its own version;
 its selected update feed points only at the exact own versioned MPP, never an upstream binary.
 
 The published candidate prerelease and the verified local copy in
-`Download/Purple-Patches/` are the older alpha.1, not alpha.19. The public feed
+`Download/Purple-Patches/` are the older alpha.1, not alpha.20. The public feed
 warns against installing alpha.1. See [candidate delivery](docs/MORPHE-SOURCE.md)
 and the [local readback record](docs/local-patch-delivery.json).
 
