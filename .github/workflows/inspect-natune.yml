@@ -1,4 +1,4 @@
-name: Inspect exact Natune APK hooks off phone
+name: Inspect exact Natune settings entry off phone
 on:
   workflow_dispatch:
 permissions:
@@ -31,19 +31,15 @@ jobs:
         run: |
           curl -fL https://github.com/MorpheApp/morphe-desktop/releases/download/v1.19.1/morphe-desktop-1.19.1-all.jar -o "$RUNNER_TEMP/morphe.jar"
           echo "a51472252cd63b2eac635dbb5a154ff918bfc15268da89679feb3d760230c573  $RUNNER_TEMP/morphe.jar" | sha256sum -c -
-      - name: Inspect release bytecode without loading app classes
+      - name: Inspect settings-list bytecode without loading app classes
         run: |
           mkdir -p "$RUNNER_TEMP/natune-inspector"
-          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-inspector" natune/*.java natune/test-fixtures/android/net/Uri.java natune/test-fixtures/r8/km2.java
-          java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" OfflineSelectionPlanControls > dist/offline-selection-controls.txt
-          java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" FlacPrefixProbeControls > dist/flac-prefix-controls.txt
-          java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" FlacProbeStreamControls > dist/flac-stream-controls.txt
-          java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" NatuneDataSpecBindingControls > dist/data-spec-controls.txt
-          java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" InspectNatune "$RUNNER_TEMP/natune-original.apk" > dist/policy-hooks.txt
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-inspector" natune/InspectNatuneSettings.java
+          java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" InspectNatuneSettings "$RUNNER_TEMP/natune-original.apk" > dist/settings-hooks.txt
           cd dist
-          sha256sum target-proof.json policy-hooks.txt flac-prefix-controls.txt flac-stream-controls.txt data-spec-controls.txt offline-selection-controls.txt > SHA256SUMS
+          sha256sum target-proof.json settings-hooks.txt > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: natune-public-hook-inspection
+          name: natune-settings-hook-inspection
           path: dist/
           retention-days: 14
