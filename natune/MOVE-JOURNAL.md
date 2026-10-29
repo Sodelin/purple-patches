@@ -142,6 +142,14 @@ The journal does not measure free blocks, provider allocation, current grants,
 current document contents or external writers. Actual headroom/cleanup checks
 are still required and the general20GiB engineering build reserve is separate.
 
+For remote staging, the real owner must verify the selected receiver's saved
+bytes, confirm this operation's disposable local staging is gone, and commit or
+reconcile the matching `StageCleaned` event before releasing the Java mirror's
+reservation. A lost/uncertain journal append cannot be treated as success;
+freeze further admission until the original operation is reopened and
+reconciled. On restart, the owner must bind the complete journal projection to
+the actual app/receiver and current filesystem state before trusting it.
+
 `document(song,rendition)` returns an indexed reference with URI/extent/digest;
 it is not a fresh media verification or an authorization token. The native
 request conversion and pre-router hook must retain original song identity and

@@ -140,8 +140,12 @@ public final class TemporarySpaceBudget {
          * Actual owner verifies no charged temporary duplicates/staging remain.
          * This is a required host implementation, NOT a boolean cleanup permit.
          * It must not perform/remake a destructive operation as a side effect.
-         * A retained document qualifies only after exact cache release/indexing,
-         * or after verified removal of a failed/abandoned destination instead.
+         * A retained document qualifies only after exact cache release/indexing.
+         * For remote staging, the owner must verify the corresponding receiver
+         * copy, confirm this operation's disposable local staging is gone while
+         * preserving the source, and durably record/reconcile StageCleaned
+         * BEFORE returning. Failed/abandoned output also requires confirmed
+         * cleanup. A callback or an uncertain journal append is not enough.
          */
         void verifySettled() throws IOException;
     }
