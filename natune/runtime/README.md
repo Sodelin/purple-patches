@@ -47,8 +47,10 @@ release requires the owner's explicit cleanup-verification callback and is
 refused during copy or another settlement. No automatic timeout/close release.
 
 This is an in-memory counter and copy binding, not an Android scheduler,
-allocation quota, encrypted journal or cache-removal implementation. The host
-must restore unsettled claims before accepting another batch after restart,
+allocation quota, encrypted journal or cache-removal implementation. Its
+`fromRecovery` source can restore all pending charges and consumed IDs from a
+complete owner-supplied snapshot, even above a reduced limit. The host must
+actually read and bind the durable snapshot before accepting another batch,
 provide real ongoing headroom/cancellation checks, verify/index the retained
 URI and settle exact cache removal. Cleanup callbacks in controls are stand-ins.
 No UI calls this yet. Original monitor serialization still limits cache read

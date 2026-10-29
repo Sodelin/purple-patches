@@ -61,6 +61,22 @@ pub struct Snapshot {
     last_hash: String,
 }
 
+/// Minimal in-memory projection for restoring the app-side budget mirror.
+/// This does not authenticate a host, grant removal, or serialize itself.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RecoveryAttempt {
+    pub operation_id: String,
+    pub source_bytes: u64,
+    pub peak_bytes: u64,
+    pub unsettled: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AdmissionRecovery {
+    pub attempts: Vec<RecoveryAttempt>,
+    pub reserved_bytes: u64,
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Record {
@@ -154,6 +170,21 @@ impl<S: Store> Journal<S> {
         self.certain()?;
         self.rows.values().filter(|r| !matches!(r.stage, Stage::Moved | Stage::Abandoned))
             .try_fold(0u64, |total,r| total.checked_add(r.claim.peak_bytes).ok_or_else(|| "Move holds overflow".into()))
+    }
+    /// Includes settled IDs so a restarted mirror cannot readmit them. The
+    /// actual owner must freeze admissions while transferring this complete
+    /// snapshot into its paired Java counter. A snapshot is not a permit, an
+    /// Android binding, or evidence of current disk headroom.
+    pub fn admission_recovery(&self) -> Result<AdmissionRecovery, String> {
+        self.certain()?;
+        let reserved_bytes = self.reserved_bytes()?;
+        let attempts = self.rows.values().map(|row| RecoveryAttempt {
+            operation_id: row.claim.operation_id.clone(),
+            source_bytes: row.claim.source_bytes,
+            peak_bytes: row.claim.peak_bytes,
+            unsettled: !matches!(row.stage, Stage::Moved | Stage::Abandoned),
+        }).collect();
+        Ok(AdmissionRecovery { attempts, reserved_bytes })
     }
     /// Reference only: caller must check current grant/document/hash/owner state.
     /// No URI/length descriptor is promoted into a native write or removal permit.
@@ -336,6 +367,24 @@ mod tests {
         assert_eq!(memory.events.lock().unwrap().len(),5); // Loading wrote NOTHING.
     }
     #[test]
+    fn admission_recovery_includes_pending_and_consumed_terminal_ids() {
+        let memory=Memory::default(); let mut j=Journal::open(memory.clone(),1000).unwrap();
+        let pending=claim('1'); let moved=claim('2'); let abandoned=claim('3');
+        begin(&mut j,&pending); begin(&mut j,&moved); begin(&mut j,&abandoned);
+        verify(&mut j,&moved); step(&mut j,&moved,Event::Indexed);
+        step(&mut j,&moved,Event::RemovalPending); step(&mut j,&moved,Event::Moved);
+        step(&mut j,&abandoned,Event::Abandoned);
+        let restored=Journal::open(memory.clone(),50).unwrap();
+        let snapshot=restored.admission_recovery().unwrap();
+        assert_eq!(snapshot.reserved_bytes,100);
+        assert_eq!(snapshot.attempts,vec![
+            RecoveryAttempt{operation_id:pending.operation_id,source_bytes:90,peak_bytes:100,unsettled:true},
+            RecoveryAttempt{operation_id:moved.operation_id,source_bytes:90,peak_bytes:100,unsettled:false},
+            RecoveryAttempt{operation_id:abandoned.operation_id,source_bytes:90,peak_bytes:100,unsettled:false},
+        ]);
+        assert_eq!(memory.events.lock().unwrap().len(),9); // Read-only recovery.
+    }
+    #[test]
     fn accepted_but_uncertain_persistence_poisoned_until_explicit_recovery() {
         let memory=Memory::default(); let c=claim('3'); let mut j=Journal::open(memory.clone(),1000).unwrap();
         memory.fail_after_write.store(true,Ordering::SeqCst);
@@ -343,6 +392,7 @@ mod tests {
         assert!(j.reserved_bytes().is_err());
         assert!(j.snapshot(&c.operation_id).is_err());
         assert!(j.document(&c.song_id,&c.rendition_key).is_err());
+        assert!(j.admission_recovery().is_err());
         assert!(j.record(&c.operation_id,None,Event::Begin{claim:c.clone()}).is_err());
         assert_eq!(memory.events.lock().unwrap().len(),1);
         let mut restored=Journal::open(memory,1000).unwrap();

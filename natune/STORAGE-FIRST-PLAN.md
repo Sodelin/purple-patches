@@ -99,7 +99,7 @@ all Android writers.
 | --- | --- | --- |
 |1. Installation and existing data | A supported deployment/data-handoff route preserves the installed library. | Original target identity is pinned. No compatible same-signer patched update or verified old-cache handoff has been established. Resolve this before assuming a newly signed patch can use old app data. |
 |2. User entry and destination | Distinct Move to folder action, copy-export preserved, user-selected local content URI and scoped grants; clear progress/cancel/failure. | Android SAF stream adapter is compiled. Actual UI entry and destination lifecycle remain unbound. |
-|3. Whole-job admission | Adaptive track count under a1GB reserved temporary pool; actual size/headroom, durable unsettled reservations, owned pause/restore of competing download requests. | TemporarySpaceBudget binds peak admissions to the real stream copy;41 hosted controls pass (temporary-budget-verification.json). Rust durable admission/replay is implemented separately; actual headroom, paired Android recovery, cleanup ownership and scheduling remain unbound. |
+|3. Whole-job admission | Adaptive track count under a1GB reserved temporary pool; actual size/headroom, durable unsettled reservations, owned pause/restore of competing download requests. | The Java mirror and Rust journal have source interfaces to reconstruct pending charges and consumed IDs. Actual authenticated snapshot transfer, headroom, cleanup ownership and scheduling remain unbound; hosted controls do not establish on-device recovery. |
 |4. Exact complete source | Real original cache locks, original coroutine/job stops, exact rendition and complete spans; no network fallback or active-track removal. | Cache ABI/source reader implemented;46 controlled cache checks and49 copy checks passed. Original-coroutine cancellation bridge source is implemented; actual app/UI hook and phone behavior remain unverified. |
 |5. Verified output | Bounded streaming, complete count/hash readback, real format/extension and usable URI; no full tagging temp. | Actual copy core and SAF adapter implemented/host-checked; real provider and low-space behavior remain untested. |
 |6. Transaction and recovery | Original operation identity with required encrypted-before-persistence claim/result/recovery; restart/UNKNOWN reconciliation. | Rust journal and production encrypted-file backend reuse the existing vault;8 RAM lifecycle/recovery tests and Android cross-build pass. Actual app-scoped writer/delegation and real journal acceptance remain unbound; no new identity is authorized. |
@@ -131,6 +131,13 @@ own backup ZIP includes selected settings/account/library databases and fonts,
 not downloaded audio. Do not treat a library/database backup as a verified media
 handoff. Exact public source pins/hashes and selected rule lines are retained in
 existing-data-handoff-source-review.json; no backup operation was performed.
+
+An original-app single-song export to a remote document provider is a possible
+data-handoff route without replacing the original app. It retains the cache and
+does not prove source completeness or remote durability. Reviewed provider
+sources include write-error, overwrite and local-cache hazards; none is yet an
+accepted automatic-deletion route. See REMOTE-HANDOFF-REVIEW.md and
+remote-handoff-source-review.json before selecting a provider or receiver.
 
 Primary Android rule: https://developer.android.com/studio/publish/app-signing
 Pinned build source:

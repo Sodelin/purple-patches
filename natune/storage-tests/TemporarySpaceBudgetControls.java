@@ -119,7 +119,45 @@ public final class TemporarySpaceBudgetControls {
         refuses(() -> held.releaseAfterCleanup(() -> held.releaseAfterCleanup(() -> {})), "Reentrant settlement refused");
         need(reentrant.reservedBytes() == 10, "Failed settlement leaves entire reservation");
         held.releaseAfterCleanup(() -> {});
+
+        // Rebuild the app-side mirror from one synthetic complete durable
+        // snapshot. Real host authentication and journal binding remain open.
+        var pending = new TemporarySpaceBudget.RecoveredAttempt("original-pending", 9, 10, true);
+        var terminal = new TemporarySpaceBudget.RecoveredAttempt("original-terminal", 7, 8, false);
+        var restored = TemporarySpaceBudget.fromRecovery(5, Arrays.asList(pending, terminal), 2, 10);
+        need(restored.reservedBytes() == 10 && restored.limitBytes() == 5,
+                "A lowered budget preserves the complete older hold");
+        refuses(() -> restored.reserve("new", 3, 0, 1), "No admission while recovered hold exceeds limit");
+        var recoveredHold = restored.recoveredReservation("original-pending");
+        refuses(() -> recoveredHold.copy(source, () -> new Destination(), () -> {}),
+                "Recovered original cannot automatically copy again");
+        refuses(() -> recoveredHold.releaseAfterCleanup(() -> { throw new IOException("Still unknown"); }),
+                "Unknown recovered cleanup stays charged");
+        need(restored.reservedBytes() == 10, "Recovery failure cannot discard held allocation");
+        refuses(() -> restored.recoveredReservation("original-terminal"), "Terminal attempt has no live hold");
+        recoveredHold.releaseAfterCleanup(() -> {});
+        need(restored.reservedBytes() == 0, "Only verified recovered cleanup releases the hold");
+        refuses(() -> restored.recoveredReservation("original-pending"), "Settled recovery handle removed");
+        refuses(() -> restored.reserve("original-pending", 1, 0, 1), "Recovered pending ID remains consumed");
+        refuses(() -> restored.reserve("original-terminal", 1, 0, 1), "Recovered terminal ID remains consumed");
+        var afterRecovery = restored.reserve("new", 3, 0, 1);
+        need(restored.reservedBytes() == 4, "New attempt fits after actual recovered settlement");
+        afterRecovery.releaseAfterCleanup(() -> {});
+        refuses(() -> TemporarySpaceBudget.fromRecovery(20, Arrays.asList(pending, terminal), 1, 10),
+                "Partial entry count rejected");
+        refuses(() -> TemporarySpaceBudget.fromRecovery(20, Arrays.asList(pending, terminal), 2, 9),
+                "Incorrect held total rejected");
+        refuses(() -> TemporarySpaceBudget.fromRecovery(20, Arrays.asList(pending, pending), 2, 20),
+                "Duplicate original ID rejected");
+        refuses(() -> TemporarySpaceBudget.fromRecovery(20, Arrays.asList(
+                new TemporarySpaceBudget.RecoveredAttempt("bad", 0, 1, true)), 1, 1),
+                "Unknown recovered source length rejected");
+        refuses(() -> TemporarySpaceBudget.fromRecovery(Long.MAX_VALUE, Arrays.asList(
+                new TemporarySpaceBudget.RecoveredAttempt("huge", 1, Long.MAX_VALUE, true),
+                new TemporarySpaceBudget.RecoveredAttempt("overflow", 1, 2, true)), 2, Long.MAX_VALUE),
+                "Recovered byte sum overflow rejected");
         System.out.println("TEMPORARY_SPACE_BUDGET_CONTROLS passed=" + checks +
-                " android_headroom=false cleanup_owner_binding=false durable_recovery=false apk_hook=false");
+                " java_recovery_mirror=true android_headroom=false cleanup_owner_binding=false" +
+                " durable_recovery_bound=false apk_hook=false");
     }
 }

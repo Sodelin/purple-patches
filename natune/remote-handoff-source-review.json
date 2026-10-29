@@ -1,0 +1,109 @@
+{
+  "schema": "purple.natune.remote-handoff-source-review.v1",
+  "source_only": true,
+  "target": "N202610191717/code6900",
+  "files": [
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/ui/menu/SongMenu.kt",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/menu/SongMenu.kt",
+      "bytes": 72136,
+      "sha256": "0037ac16e5cac8cf96913ffa6b745f2a33c31ec5c6c05004fc07fc27726a3167",
+      "purpose": "single-song export source"
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/settings/ExportDownloadedSongsScreen.kt",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/settings/ExportDownloadedSongsScreen.kt",
+      "bytes": 42780,
+      "sha256": "36cf0734b3ba5fb9f79571ad12e4ecb7fae497eae8424e5009f004a88d78761d",
+      "purpose": "bulk export source"
+    },
+    {
+      "repository": "AlainKnaff/Android-SFTP-Documents-Provider",
+      "revision": "2aafdad03e0bf377dc28f9c4a83c079f886b719e",
+      "path": "app/src/main/java/com/island/androidsftpdocumentsprovider/provider/Proxy.kt",
+      "url": "https://github.com/AlainKnaff/Android-SFTP-Documents-Provider/blob/2aafdad03e0bf377dc28f9c4a83c079f886b719e/app/src/main/java/com/island/androidsftpdocumentsprovider/provider/Proxy.kt",
+      "bytes": 5819,
+      "sha256": "c8d2cb961ca04cc82901d1d99f0e9485cfc3483a4dcb42f0127484b11a0c23bf",
+      "purpose": "SFTP writes and error handling"
+    },
+    {
+      "repository": "AlainKnaff/Android-SFTP-Documents-Provider",
+      "revision": "2aafdad03e0bf377dc28f9c4a83c079f886b719e",
+      "path": "app/src/main/java/com/island/androidsftpdocumentsprovider/provider/SFTPProvider.java",
+      "url": "https://github.com/AlainKnaff/Android-SFTP-Documents-Provider/blob/2aafdad03e0bf377dc28f9c4a83c079f886b719e/app/src/main/java/com/island/androidsftpdocumentsprovider/provider/SFTPProvider.java",
+      "bytes": 21531,
+      "sha256": "937df668a1c67b6e88f7f587bb6b5b2148838cfd49378c99a49d45b687434ee8",
+      "purpose": "SFTP document creation and open"
+    },
+    {
+      "repository": "guidov/artmux",
+      "revision": "22957cdf8f209a5796230770526fead9594295d6",
+      "path": "app/src/main/java/app/artmux/android/data/fileprovider/ArtmuxDocumentsProvider.kt",
+      "url": "https://github.com/guidov/artmux/blob/22957cdf8f209a5796230770526fead9594295d6/app/src/main/java/app/artmux/android/data/fileprovider/ArtmuxDocumentsProvider.kt",
+      "bytes": 12693,
+      "sha256": "1adf03318b4346080945dc28b12459d99a5bf2484bbba455b0c33fcd37648b52",
+      "purpose": "Artmux SAF create and pipe writes"
+    },
+    {
+      "repository": "guidov/artmux",
+      "revision": "22957cdf8f209a5796230770526fead9594295d6",
+      "path": "app/build.gradle.kts",
+      "url": "https://github.com/guidov/artmux/blob/22957cdf8f209a5796230770526fead9594295d6/app/build.gradle.kts",
+      "bytes": 3088,
+      "sha256": "ec5d39b25c86f43ad77545e0f9b33ad7ac73dbf3a50efbcc9cb0de126507c786",
+      "purpose": "Artmux JSch version"
+    },
+    {
+      "repository": "mwiede/jsch",
+      "revision": "161569897ce40b035a7e6242da90a187ef9b6dda",
+      "path": "src/main/java/com/jcraft/jsch/ChannelSftp.java",
+      "url": "https://github.com/mwiede/jsch/blob/161569897ce40b035a7e6242da90a187ef9b6dda/src/main/java/com/jcraft/jsch/ChannelSftp.java",
+      "bytes": 88369,
+      "sha256": "c9d4a41b74209c80af4b08455f075df15bc66f40bdacae54ff50a3e59b115b15",
+      "purpose": "exact JSch default put mode"
+    },
+    {
+      "repository": "chenxiaolong/RSAF",
+      "revision": "c5a0a3461b0206bb97da7c14df6d331065f3be7a",
+      "path": "README.md",
+      "url": "https://github.com/chenxiaolong/RSAF/blob/c5a0a3461b0206bb97da7c14df6d331065f3be7a/README.md",
+      "bytes": 9114,
+      "sha256": "72ea3bf971d866fc0b4d3afd4908aad622126ccd63fa56d096cb8ca0b11f1c3d",
+      "purpose": "RSAF cache and completion limitations"
+    },
+    {
+      "repository": "chenxiaolong/RSAF",
+      "revision": "c5a0a3461b0206bb97da7c14df6d331065f3be7a",
+      "path": "app/src/main/java/com/chiller3/rsaf/rclone/RcloneProvider.kt",
+      "url": "https://github.com/chenxiaolong/RSAF/blob/c5a0a3461b0206bb97da7c14df6d331065f3be7a/app/src/main/java/com/chiller3/rsaf/rclone/RcloneProvider.kt",
+      "bytes": 53286,
+      "sha256": "6a3924ca96e55554004581cfa28df310f192c3967a77c1aca9d7418b7f75dd7d",
+      "purpose": "rclone proxy and write cache"
+    },
+    {
+      "repository": "chenxiaolong/RSAF",
+      "revision": "c5a0a3461b0206bb97da7c14df6d331065f3be7a",
+      "path": "app/src/main/java/com/chiller3/rsaf/rclone/VfsCache.kt",
+      "url": "https://github.com/chenxiaolong/RSAF/blob/c5a0a3461b0206bb97da7c14df6d331065f3be7a/app/src/main/java/com/chiller3/rsaf/rclone/VfsCache.kt",
+      "bytes": 6059,
+      "sha256": "0fe9a971054ac8f0f08c269a00df0f4166e69a11e8d03486e9966a54ce47b6cd",
+      "purpose": "cache directory and pending uploads"
+    }
+  ],
+  "findings": [
+    "Original single-song export writes cached span files to an ACTION_CREATE_DOCUMENT output stream, without the full bulk tagging temporary file; it still retains original cache and does not establish full-span coverage or destination durability.",
+    "Original bulk export prepares a full temporary tagged file and keeps the original cache; do not equate serialization with zero duplicate storage.",
+    "SFTP-SAF Proxy.onWrite catches IOException but advances offset and returns the requested size; flush and close errors are also caught. A caller success is not proof of a complete remote file.",
+    "Artmux at the selected source uses a pipe with an asynchronous SFTP writer. Its createDocument sends an empty file to the unguarded requested child path; the pinned JSch version defaults put(InputStream,String) to OVERWRITE, so an existing matching file can be overwritten.",
+    "RSAF defaults to VFS write caching; its provider says a file may be buffered to disk, and upload can continue asynchronously after the client closes. Neither low phone-storage use nor completed remote upload is established by client close."
+  ],
+  "limitations": [
+    "Static public source review; no provider, export, transfer, installation, credential, grant or device mutation was performed.",
+    "Independent exact remote readback, source completeness, collision-safe creation and per-track identity/settlement remain required before any removal of an original.",
+    "An unmodified installed NaTune app retains its original private downloads; a differently signed patched app has no demonstrated access to that private cache."
+  ]
+}

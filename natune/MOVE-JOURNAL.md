@@ -63,8 +63,19 @@ bytes or allow a fresh ID retry. Reopen and inspect the retained state instead.
 
 Use this durable admission as the real host authority, with the Java byte budget
 as an in-process guard, never as a replacement for durable recovery. They are
-not two independent pools granting twice the capacity. The paired Android
-admission, mirror/recovery protocol and app-scoped receipt remain to integrate.
+not two independent pools granting twice the capacity. `admission_recovery`
+provides an in-memory snapshot of every original operation ID, source/peak
+sizes, pending state and total charge, without song names or document URIs.
+`TemporarySpaceBudget.fromRecovery` can rebuild the Java mirror, retain
+terminal IDs, reject inconsistent totals and retain holds larger than a new
+limit. A restored hold cannot copy again automatically and only settles after
+the original owner verifies cleanup. The host must freeze admissions and
+transfer the complete snapshot through its actual authenticated app-scoped
+binding; the objects and matching totals do not themselves provide that
+binding or prove completeness. Values outside Java's positive long range must
+refuse rather than truncate. This API does not yet connect the two processes.
+
+The paired Android admission and app-scoped receipt remain to integrate.
 The journal does not measure free blocks, provider allocation, current grants,
 current document contents or external writers. Actual headroom/cleanup checks
 are still required and the general20GiB engineering build reserve is separate.

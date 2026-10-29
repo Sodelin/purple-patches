@@ -1,7 +1,9 @@
 package dev.purple.patches.natune;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -18,7 +20,9 @@ public final class TemporarySpaceBudget {
     private final long limit;
     private long reserved;
     private final Set<String> attemptedIds = new HashSet<>();
+    private final Map<String, Reservation> recoveredReservations = new HashMap<>();
 
+    /** Use only when the actual owner has proven the durable journal empty. */
     public TemporarySpaceBudget(long limit) {
         if (limit <= 0) throw new IllegalArgumentException("Positive budget required");
         this.limit = limit;
@@ -26,6 +30,77 @@ public final class TemporarySpaceBudget {
 
     public synchronized long reservedBytes() { return reserved; }
     public long limitBytes() { return limit; }
+
+    /**
+     * An in-memory projection of one original durable journal attempt. This is
+     * not a serializable permit or proof that the journal was read correctly.
+     * The actual owner must supply ALL attempts from one locked, authenticated
+     * journal snapshot before admitting any work, with no concurrent writer.
+     */
+    public static final class RecoveredAttempt {
+        public final String requestId;
+        public final long sourceBytes, peakBytes;
+        public final boolean unsettled;
+
+        public RecoveredAttempt(String requestId, long sourceBytes, long peakBytes,
+                boolean unsettled) {
+            this.requestId = requestId;
+            this.sourceBytes = sourceBytes;
+            this.peakBytes = peakBytes;
+            this.unsettled = unsettled;
+        }
+    }
+
+    /**
+     * Rebuilds the Java mirror from a complete journal snapshot. The expected
+     * count and held-byte total detect accidental partial or inconsistent
+     * transfer; they do not authenticate the sender or prove source custody.
+     * Settled IDs remain consumed. An unsettled original is charged even if a
+     * later limit is smaller, and cannot copy again without a future explicit
+     * original-operation reconciliation. Overflow or disagreement fails closed.
+     */
+    public static TemporarySpaceBudget fromRecovery(long limit,
+            Iterable<RecoveredAttempt> attempts, int expectedCount, long expectedHeldBytes)
+            throws IOException {
+        if (limit <= 0 || attempts == null || expectedCount < 0 || expectedHeldBytes < 0)
+            throw new IOException("Complete recovery snapshot required");
+        TemporarySpaceBudget result = new TemporarySpaceBudget(limit);
+        int count = 0;
+        for (RecoveredAttempt attempt : attempts) {
+            if (count >= expectedCount) throw new IOException("Too many recovered attempts");
+            if (attempt == null || !validId(attempt.requestId) || attempt.sourceBytes <= 0 ||
+                    attempt.peakBytes <= attempt.sourceBytes ||
+                    !result.attemptedIds.add(attempt.requestId)) {
+                throw new IOException("Invalid or duplicate recovered attempt");
+            }
+            count++;
+            if (attempt.unsettled) {
+                if (attempt.peakBytes > Long.MAX_VALUE - result.reserved)
+                    throw new IOException("Recovered holds overflow");
+                result.reserved += attempt.peakBytes;
+                result.recoveredReservations.put(attempt.requestId,
+                        result.new Reservation(attempt.requestId, attempt.sourceBytes,
+                                attempt.peakBytes, true));
+            }
+        }
+        if (count != expectedCount || result.reserved != expectedHeldBytes)
+            throw new IOException("Incomplete or inconsistent recovery snapshot");
+        return result;
+    }
+
+    /** Only an unresolved restored attempt has a reconciliation handle. */
+    public synchronized Reservation recoveredReservation(String requestId) throws IOException {
+        Reservation reservation = recoveredReservations.get(requestId);
+        if (reservation == null) throw new IOException("Recovered hold unavailable or settled");
+        return reservation;
+    }
+
+    private static boolean validId(String requestId) {
+        if (requestId == null || requestId.isEmpty() || requestId.length() > 128) return false;
+        for (int i = 0; i < requestId.length(); i++)
+            if (Character.isISOControl(requestId.charAt(i))) return false;
+        return true;
+    }
 
     /**
      * sourceBytes is the exact complete byte length. Staging and overhead must
@@ -37,7 +112,7 @@ public final class TemporarySpaceBudget {
      */
     public synchronized Reservation reserve(String requestId, long sourceBytes,
             long stagingBytes, long overheadBytes) throws IOException {
-        if (requestId == null || requestId.isEmpty() || sourceBytes <= 0 ||
+        if (!validId(requestId) || sourceBytes <= 0 ||
                 stagingBytes < 0 || overheadBytes <= 0) {
             throw new IOException("Known positive length and overhead required");
         }
@@ -48,8 +123,8 @@ public final class TemporarySpaceBudget {
             throw new IOException("Track peak exceeds budget");
         }
         long peak = sourceBytes + stagingBytes + overheadBytes;
-        if (peak > limit - reserved) throw new IOException("Temporary budget busy");
-        Reservation result = new Reservation(sourceBytes, peak);
+        if (reserved > limit || peak > limit - reserved) throw new IOException("Temporary budget busy");
+        Reservation result = new Reservation(requestId, sourceBytes, peak, false);
         attemptedIds.add(requestId);
         reserved += peak;
         return result;
@@ -72,13 +147,16 @@ public final class TemporarySpaceBudget {
     }
 
     public final class Reservation {
+        private final String requestId;
         public final long sourceBytes;
         public final long peakBytes;
         private boolean attempted, copying, settling, released;
 
-        private Reservation(long sourceBytes, long peakBytes) {
+        private Reservation(String requestId, long sourceBytes, long peakBytes, boolean attempted) {
+            this.requestId = requestId;
             this.sourceBytes = sourceBytes;
             this.peakBytes = peakBytes;
+            this.attempted = attempted;
         }
 
         /**
@@ -126,6 +204,7 @@ public final class TemporarySpaceBudget {
                     if (verified) {
                         reserved -= peakBytes;
                         released = true;
+                        recoveredReservations.remove(requestId);
                     }
                     settling = false;
                 }
