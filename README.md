@@ -6,9 +6,20 @@ releases. The Natune mobile-data patch has a verified off-phone build alongside 
 Gboard candidate; strict FLAC/provider integration remains in development. This project is independent of the Morphe maintainers.
 
 The published Gboard alpha.1 candidate can mistake an unavailable editor response
-for empty context. Alpha.3 corrects this in source and passed hosted bundle and
-APK checks, but has not passed device acceptance or replaced the public feed.
+for empty context. Alpha.3 corrects this in source; alpha.4 also adds bounded
+microphone capture. Both passed hosted bundle and APK checks. Alpha.5 also passed
+its [hosted bundle](docs/gboard-alpha5-build-verification.json) and
+[exact-APK static checks](docs/gboard-alpha5-apk-verification.json), and requires
+the newer companion's explicit voice-preflight capability. These
+candidates have not passed device acceptance or replaced the public feed.
 See [editor snapshot safety](docs/EDITOR-SNAPSHOT.md) before using the candidate.
+The alpha.6 source adds a per-translation Medium/Max reasoning choice. Its
+[hosted bundle](docs/gboard-alpha6-build-verification.json) passed; phone
+acceptance remains open.
+Alpha.7 adds a source-level mitigation for a Termux bootstrap logging risk and
+separates the microphone request from the local-tools request. The mitigation
+and a replacement capability handoff remain unverified. See [bootstrap privacy](docs/BOOTSTRAP-PRIVACY.md)
+and [permission flow](docs/PERMISSION-FLOW.md). Do not activate the candidate.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
@@ -28,8 +39,11 @@ The user selected full large-v3 for accuracy. Turbo, base and other generations
 are refused; no model substitution is permitted.
 
 The two actions require the authenticated local companion bootstrap at the
-stable Termux path ~/.local/bin/purple-gboard-service. Credentials remain only
-in keyboard-process memory, through a one-shot explicit nonexported callback.
+stable Termux path ~/.local/bin/purple-gboard-service. The keyboard does not
+persist the bearer in its preferences, but the current bootstrap sends it
+through Termux stdout and a one-shot explicit nonexported callback.
+Termux may log that stdout. The bearer handoff is a release blocker; see
+[bootstrap privacy](docs/BOOTSTRAP-PRIVACY.md).
 The keyboard refuses text/audio submission unless the companion advertises
 keyboard_data_path=memory-only-v1, and refuses dictation unless the declared
 model family is whisper-large-v3. The older retained bridge does not satisfy

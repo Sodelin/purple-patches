@@ -6,19 +6,21 @@ must continue working. A successful hosted build is not device acceptance.
 
 | Gate | Evidence or remaining work |
 | --- | --- |
-| Native deterministic controls | Historical0.2.0 run40527691599 passed27 controls/cross-build but actual Android OS probe later exposed anonymous-path denial. Source0.2.1 uses pipe audio plus fixed authored schema; run40540825059 passed28 public controls and Android ARM64 cross-build. ZIP/member/SHA/ELF verified independently; see[native-0.2.1-artifact.json](native-0.2.1-artifact.json). No model invoked. |
-| Gboard bundle | Run40528625015, source6719a21: complete build/test/metadata generation passed. Main MPP, all artifact hashes,44-patch catalog and overlay provenance independently verified in RAM; see[gboard-artifact.json](gboard-artifact.json). |
+| Native deterministic controls | Historical0.2.0 run40527691599 passed27 controls/cross-build but actual Android OS probe later exposed anonymous-path denial. Source0.2.1 uses pipe audio plus fixed authored schema; run40540825059 passed28 public controls and Android ARM64 cross-build. Development source0.2.2-dev.4 passed 44 library controls and an ARM64 cross-build, including synthetic hash cancellation; see [companion-022-dev4-verification.json](companion-022-dev4-verification.json). No model invoked and no phone acceptance inferred. |
+| Gboard bundle | Alpha.6 hosted build and policy controls passed; the MPP, artifact hashes and exact overlay provenance were independently checked in RAM. See [gboard-alpha6-build-verification.json](gboard-alpha6-build-verification.json). Alpha.7 adds an unbuilt bootstrap logging mitigation; it does not close the privacy gate. |
 | Java editor policy | The published alpha.1 candidate has hosted privacy and anchor controls. Alpha.2 rejects unavailable/inconsistent editor reads and observed selection movement; its hosted bundle evidence is [here](gboard-alpha2-build-verification.json). Alpha.3 adds an input-connection and sensitive-field recheck after capture; its hosted bundle evidence is [here](gboard-alpha3-build-verification.json). Device evidence remains open. See [EDITOR-SNAPSHOT.md](EDITOR-SNAPSHOT.md). |
 | Version admission | The new action participates in upstream generated editing-access-point admission and published catalog. Unsupported versions must remain rejected. |
 | Target APK | Pinned upstream targets18.5.4.993608717-release-arm64-v8a. Installed beta18.5.4.993608717, four original parts and Google signatures now verified read-only; User selected the supported release APKMirror input; beta compatibility is unnecessary. See[INSTALLED-TARGET.md](INSTALLED-TARGET.md). |
-| Morphe patching | PASS: the exact APKMirror release hash and Google signature were verified and three selected patches applied with full bytecode and validation for alpha.1 ([release-apk-artifact.json](release-apk-artifact.json)) and alpha.3 ([gboard-alpha3-apk-verification.json](gboard-alpha3-apk-verification.json)). Alpha.3 retained the original 22,860 classes, 15 native libraries and 140 assets and its new editor-check references were present. This is static acceptance only. |
-| Termux connection | Actual one-shot callback, nonexported receiver, denied permission, expired callback and app-process restart acceptance pending. No persisted capability preferences. |
+| Morphe patching | The exact APKMirror release hash and Google signature were verified and three selected patches applied for alpha.6 ([gboard-alpha6-apk-verification.json](gboard-alpha6-apk-verification.json)). Original classes, native libraries and assets were retained and translation chooser references were present. This is static evidence only. Alpha.7 has not been built or patched. |
+| Termux connection | A source review found that bootstrap sends the bearer over stdout, which reviewed Termux source can log. Alpha.7 requests custom background log level off as defense in depth; this has not been verified on the installed version and is not a safe-handoff proof. Activation is blocked until the handoff and actual logging paths are resolved. See [BOOTSTRAP-PRIVACY.md](BOOTSTRAP-PRIVACY.md). Actual callback, receiver, permission, expiry and app-process restart acceptance also remain pending. |
+| Permission flow | Alpha.7 source requests Termux's command permission for local-tools connection and microphone permission separately for dictation; translation does not request the microphone. The selected Termux permission permits this app to run commands as Termux. Device permission/denial/revocation and rationale behavior remain open; see [PERMISSION-FLOW.md](PERMISSION-FLOW.md). |
+| Job cancellation | A lost job-start response can leave the keyboard without the server-generated ID needed for cancellation. A versioned client/companion reconciliation and recovery path remains open; see [JOB-CANCELLATION.md](JOB-CANCELLATION.md). Dev.4 separately checks cancellation during the full model hash; [hosted controls passed and limitations remain](WHISPER-HASH-CANCELLATION.md). |
 | Privacy | New companion keeps prompt/audio/events/output in anonymous memory/pipes, seals its capability and recovery intents using the existing identity. Actual phone sink integration and internal Codex writer coverage remain separate open checks. Dated offline catalog still reports native writer integration uninstalled; see[privacy-status-readback.json](privacy-status-readback.json), not a fresh deployment acceptance. |
 | Android memory transport | Actual public cat fixture: inherited anonymous /proc/self/fd path denied, inherited stdin and pipe stdin succeed. Source0.2.1 corrects both audio and schema routes; see[android-transport-control.json](android-transport-control.json). Rust/app/decoder acceptance remains separate. |
-| Whisper | Existing base multilingual assets do not qualify. User-selected full large-v3 weights, matching architecture, pinned bytes and engine are required. No weights downloaded or live speech tested. |
+| Whisper | Existing base multilingual assets do not qualify. The `0.2.2-dev.3` source checks selected full-v3 declaration/size/header and the executable engine hash at health preflight; Gboard alpha.5 requires its explicit capability marker. The complete model hash is still checked once later, before transcription. Preflight alone is not a full-model integrity check. The [hosted companion controls](companion-022-dev3-verification.json) and [alpha.5 bundle build](gboard-alpha5-build-verification.json) passed. User-selected full large-v3 weights, matching architecture, pinned bytes and engine are required. No weights downloaded or live speech tested. |
 | Editor integrity | Device tests must cover selection replacement, cursor movement, editor switch, app switch, cancellation, delayed result and starting another operation before an earlier preview is inserted. Original text must survive every refusal. |
-| Microphone | Alpha.4 source adds an elapsed-time limit, nonblocking reads, worker-owned release and PCM staging cleanup; see [MICROPHONE-CAPTURE.md](MICROPHONE-CAPTURE.md). Its hosted checks and device behavior are separate gates. Device tests must verify stop, cancel, the 60-second ceiling, permissions, interruptions and release. Health/family validation must precede microphone opening. |
-| Translation | One explicit selected-text request, exact gpt-6.1-sol, no context inheritance/fallback, preview and explicit insertion. Live testing remains held. |
+| Microphone | Alpha.4 source adds an elapsed-time limit, nonblocking reads, worker-owned release and PCM staging cleanup; synthetic hosted checks passed in [gboard-alpha4-build-verification.json](gboard-alpha4-build-verification.json). Alpha.5's [hosted APK inspection](gboard-alpha5-apk-verification.json) also found the voice-readiness and capture references. This is static linkage evidence, not a control-flow or device proof. See [MICROPHONE-CAPTURE.md](MICROPHONE-CAPTURE.md). Device tests must verify stop, cancel, the 60-second ceiling, permissions, interruptions and release. Health/family validation must precede microphone opening. |
+| Translation | Alpha.6 adds an explicit Medium/Max choice for each selected-text Sol request; no context inheritance or effort/model fallback. See [TRANSLATION-EFFORT.md](TRANSLATION-EFFORT.md). Its hosted bundle and companion controls passed. Preview and insertion are explicit; actual UI/translation acceptance remains open and live model testing is held. |
 | Regression/rollback | Alongside-stock package option and independent keyboard recovery must work before changing the user's default. No installation/default switch has occurred. |
 | Update feed | The public candidate feed, published Gboard prerelease and complete pinned MPP were rechecked anonymously on 29 October 2026; the separate companion0.2.1 prerelease also resolved anonymously. See [public-feed-check-20261029.json](public-feed-check-20261029.json). Actual phone Manager import/update acceptance remains pending. |
 
@@ -53,6 +55,8 @@ fixture checks and packaging work moving while that action is held.
 
 The current public feed and historical local deliverable point to alpha.1, which
 has the editor-snapshot issue documented in [EDITOR-SNAPSHOT.md](EDITOR-SNAPSHOT.md).
+The feed description now warns against installing it; anonymous readback is
+recorded in [feed-warning-readback-20261029.json](feed-warning-readback-20261029.json).
 Do not treat it as the current activation candidate. The hosted archives also
 contain auxiliary `-sources.mpp` and `-javadoc.mpp` outputs; those are not the
 Manager patch input. Actual Manager import/update remains unperformed.
@@ -70,13 +74,18 @@ creation and refuses a differing existing file.
 
 ## Companion revision selection
 
-The verified0.2.1 companion is the retained candidate for future authorized
-deployment; the newer Gboard bundle still needs its own complete selection and
-acceptance. Its executable, wrapper, fixed schema and exact
-corresponding source are retained in public prerelease425713896; all six assets
-passed full remote byte readback. See[private-companion-0.2.1.json](private-companion-0.2.1.json).
-The previous0.2.0 artifact/draft is retained history, with a read-back
-supersession notice; it is not a supported future runtime selection.
+Gboard alpha.5 requires the voice-readiness capability introduced in
+`0.2.2-dev.3`; the `0.2.2-dev.4` source retains that capability and adds
+cooperative model-hash cancellation. Its hosted artifact and source are
+verified in [companion-022-dev4-verification.json](companion-022-dev4-verification.json).
+The exact main Gboard bundle and dev.3/dev.4 companion archives have private
+Drive copies with full readback and actual restoration; see
+[candidate custody](GBOARD-ALPHA5-DRAFT.md).
+Public deployment and update custody still need to be established. The previously published0.2.1
+companion remains historical evidence for earlier candidates; it does not
+satisfy alpha.5's voice-preflight contract. Its earlier readback is retained in
+[private-companion-0.2.1.json](private-companion-0.2.1.json). The previous0.2.0
+artifact/draft is retained history, with a read-back supersession notice.
 
 The retained Whisper1.8.3 engine hash was reverified without executing it.
 Pinned source supports large-v3 and `-f -` stdin audio; rebuilding the engine is

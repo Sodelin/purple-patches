@@ -1,0 +1,66 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40922221480,
+  "workflow_source_commit": "8f354708df96ab07b0a6d3ef5c90b3314dff55c1",
+  "bundle_build_run": 40921539615,
+  "bundle_source_commit": "58e1d65be69409adff0d3f3e695463920f09ef30",
+  "bundle_version": "0.1.0-alpha.5",
+  "bundle_sha256": "091ea2715818dd261b3017662761a494e41e2c644243d263a9e9e9ffc91f33e4",
+  "artifact_id": 12919785138,
+  "artifact_zip_bytes": 49114100,
+  "artifact_zip_sha256": "dd189941e31a20bafaf3990d6602a4f1edba6bf21802dad37636b7ef3d5e055c",
+  "members": {
+    "build-run.json": {
+      "bytes": 152,
+      "sha256": "6a86532639054876a73ffd9a37d6cc83ba4e0ea45b576a4fa0ced7a859f035e1"
+    },
+    "gboard-patch-result.json": {
+      "bytes": 401,
+      "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"
+    },
+    "SHA256SUMS": {
+      "bytes": 354,
+      "sha256": "f12c790746c6df387b4d806481d19391c189d5a66e3fc30333712d99517a3156"
+    },
+    "gboard-purple-unsigned.apk": {
+      "bytes": 84549992,
+      "sha256": "4c54e425a2ccac431ac8177fbf8b823502b28c4a507c70f3a88d8c4c5e3e0c7d"
+    },
+    "purple-provenance.json": {
+      "bytes": 1992,
+      "sha256": "3ade05b0b165a88d6988bc700dd5c2f2d6708f367691e86d64e7727185212af5"
+    }
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified_by_workflow": true
+  },
+  "hosted_static_verification": {
+    "output_package": "dev.jason.com.google.android.inputmethod.latin",
+    "original_classes_retained": 22860,
+    "output_classes": 26013,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "dexopt_assets_excluded": true,
+    "editor_capture_and_voice_readiness_references_present": true,
+    "limitations": "DEX reference order is static linkage evidence, not Android execution or control-flow proof."
+  },
+  "independent_artifact_verification": "ZIP and all member bytes/hash read in memory; selected build and provenance matched.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7,
+  "patch_result": {
+    "success": true,
+    "applied_patches": [
+      "Add Gboard Signature Bypass",
+      "Package Rename",
+      "Whisper 3 dictation and AI Translate"
+    ],
+    "failed_patches": [],
+    "patching_and_rebuilding_passed": true
+  }
+}

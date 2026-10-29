@@ -145,7 +145,9 @@ pub fn main_command(args: Vec<String>) -> Result<(), String> {
         "stop" => stop(&state)?,
         _ => return Err("Unknown bridge command".into()),
     };
-    // Only bootstrap emits the capability, directly to its private app callback.
+    // Bootstrap emits the capability to stdout for Termux to deliver in a callback.
+    // That stdout may be logged by Termux; activation remains blocked until the
+    // handoff is replaced and the selected Termux/runtime path is verified.
     let mut stdout = std::io::stdout().lock();
     serde_json::to_writer(&mut stdout, &value).map_err(|e| e.to_string())?;
     stdout.write_all(b"\n").map_err(|e| e.to_string())

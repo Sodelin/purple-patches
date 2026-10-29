@@ -35,6 +35,31 @@ authorized; full weights must be acquired once at their selected final location.
 No shared external model path or second full weights copy is admitted by this
 source.
 
+The `0.2.2-dev.3` source changes the health preflight: it requires a valid
+private config, the selected official full-large-v3 SHA declaration and size,
+the full-v3 header, and a present nonempty executable engine with matching SHA
+inside the owned Whisper directory. This preflight deliberately does not hash
+the entire model on every health request. The owned worker checks the complete
+model hash once and rechecks the engine before inference, after audio capture. Removing the
+duplicate full-model hash from request admission avoids reading the same 3.1 GB
+model twice for each transcription. Metadata preflight alone cannot detect a
+same-size corrupt model or establish phone readiness. The development companion
+is not installed or accepted. The earlier0.2.1 candidate remains the published
+historical artifact and is not silently replaced.
+Hosted synthetic controls and the Android ARM64 cross-build passed for dev.2;
+see [verification](../docs/companion-022-dev2-verification.json). Dev.3 adds an
+explicit health capability marker, which Gboard alpha.5 requires before opening
+the microphone. Its [hosted controls and Android cross-build](../docs/companion-022-dev3-verification.json)
+also passed; old companions cannot silently satisfy the new keyboard's
+voice-preflight contract. No phone installation or model test is established.
+
+The `0.2.2-dev.4` source also checks the job's cancellation flag while reading
+the model for its full SHA-256 verification. This is cooperative, and does not
+resolve the separate lost-start-response race. See
+[hash cancellation](../docs/WHISPER-HASH-CANCELLATION.md). Its
+[hosted controls and Android cross-build](../docs/companion-022-dev4-verification.json)
+passed; phone acceptance remains open.
+
 
 Companion0.2.1 corrects an actual Android transport failure: `/proc/self/fd/N`
 reopening is denied for the tested inherited anonymous file. Audio is now sent

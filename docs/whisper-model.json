@@ -10,6 +10,14 @@
   "download_url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-large-v3.bin",
   "expected_bytes": 3095033483,
   "expected_sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+  "independent_primary_metadata_check": {
+    "checked_utc": "2026-10-29",
+    "repository_revision": "c521a4b02f422512d734391fdf08bb08c0862f68",
+    "metadata_url": "https://huggingface.co/api/models/ggerganov/whisper.cpp/revision/c521a4b02f422512d734391fdf08bb08c0862f68?blobs=true",
+    "file_bytes": 3095033483,
+    "file_sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+    "scope": "Public repository metadata only; no model bytes downloaded or executed."
+  },
   "metadata_evidence": "Repository revision and LFS size/SHA obtained from primary hosting API; actual full model bytes have not been acquired or independently verified.",
   "admission": "Full large-v3 architecture only; reject turbo decoder, base and older generations. Verify complete bytes before activation; no model fallback.",
   "storage": "Keep20GiB free after peak allocation. Do not download below reserve; stream one verified retained model without archive/source duplication. Existing base model/engine/config remain held.",

@@ -143,7 +143,7 @@ pub fn handle(
         Err((code, error)) => return respond(stream, code, &json!({"error":error})),
     };
     let result = match (request.method.as_str(), request.path.as_str()) {
-        ("GET", "/health") => Ok(json!({"ok":true,"protocol":PROTOCOL,"version":VERSION,"keyboard_data_path":"memory-only-v1","whisper_family":service.whisper_family()})),
+        ("GET", "/health") => Ok(json!({"ok":true,"protocol":PROTOCOL,"version":VERSION,"keyboard_data_path":"memory-only-v1","whisper_preflight":whisper::PREFLIGHT_CAPABILITY,"whisper_family":service.whisper_family()})),
         ("GET", "/models") => service.models(),
         ("POST", "/query") => {
             if !request
@@ -285,6 +285,10 @@ mod tests {
         let (response, _) = exchange(&auth, "/health", "GET", b"");
         assert!(response.starts_with("HTTP/1.1 200 "));
         assert!(response.contains("\"protocol\":1"));
+        let body = response.split_once("\r\n\r\n").unwrap().1;
+        let health: Value = serde_json::from_str(body).unwrap();
+        assert_eq!(health["whisper_preflight"], whisper::PREFLIGHT_CAPABILITY);
+        assert!(health["whisper_family"].is_null()); // No synthetic model is installed.
         let (response, stopping) = exchange(&auth, "/shutdown", "POST", b"");
         assert!(response.starts_with("HTTP/1.1 200 "));
         assert!(stopping);

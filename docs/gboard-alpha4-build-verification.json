@@ -1,0 +1,24 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40918313910,
+  "artifact_id": 12916019805,
+  "source_commit": "977733f186f39632818fea124da6d31a73ba2fe7",
+  "version": "0.1.0-alpha.4",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15462524,
+  "artifact_zip_sha256": "7d59a4f969f11ab24aedb328e8eef67cc5adcce71d8f6291ae763fd7f8c9605a",
+  "members_sha256": {
+    "SHA256SUMS": "b635df0c75732134b836c6d8bebaccb92a68d5c8e7097fbae803d7ffa58281d3",
+    "patches-0.1.0-alpha.4-javadoc.mpp": "f8df4f69368aa650cc6a2613840e26f9a35acce460643c0b85ea7dc247837a2b",
+    "patches-0.1.0-alpha.4-sources.mpp": "ddf656e83e2d0dbd86fc0613a37dc9d1a5c00fd6473ef086d4e77fe8a9aede70",
+    "patches-0.1.0-alpha.4.mpp": "0679214153ac97dfc7abb02255fc26313057112b773db25da0907d7271eb3b8f",
+    "patches-bundle.json": "2c6108bf631702abd533318911d5b2d5a66b2a8fcc7784117d0c83a092c6e5ca",
+    "patches-list.json": "ffebd310fab525733dc7eb88b4216c211d7f69aa997c95825db44d12ca5466ec",
+    "purple-provenance.json": "c7d524580c223e3a1a0097d5d8351172346dfe00fc90c07d73985f214dde7b2e"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "capture_controls": "Synthetic capture/clock/stop/cancellation/WAV/cleanup controls passed in hosted run; no microphone opened",
+  "actual_apk_patch_or_device_acceptance": false,
+  "notes": "Hosted build only; source snapshot hashes checked from Git, APK installation and live keyboard not tested."
+}

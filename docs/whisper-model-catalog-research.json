@@ -1,0 +1,62 @@
+{
+  "schema": "purple.whisper-model-research.v1",
+  "checked_utc": "2026-10-29",
+  "status": "Primary repository metadata only. No weights downloaded, model executed, or alternative model integrated.",
+  "nolan_selection": "large-v3-f16",
+  "alternatives_require_explicit_selection_and_engine_verification": true,
+  "sources": [
+    "https://huggingface.co/api/models/ggerganov/whisper.cpp/revision/5359861c739e955e79d9a303bcbc70fb988958b1?blobs=true",
+    "https://huggingface.co/api/models/distil-whisper/distil-large-v3.5-ggml/revision/960ecb5c2ecfba3ebb9ebe485c1032ec266cf436?blobs=true",
+    "https://huggingface.co/distil-whisper/distil-large-v3.5",
+    "https://github.com/openai/whisper"
+  ],
+  "candidates": [
+    {
+      "id": "large-v3-f16",
+      "repository": "ggerganov/whisper.cpp",
+      "revision": "5359861c739e955e79d9a303bcbc70fb988958b1",
+      "file": "ggml-large-v3.bin",
+      "bytes": 3095033483,
+      "sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+      "language": "multilingual"
+    },
+    {
+      "id": "large-v3-q5-0",
+      "repository": "ggerganov/whisper.cpp",
+      "revision": "5359861c739e955e79d9a303bcbc70fb988958b1",
+      "file": "ggml-large-v3-q5_0.bin",
+      "bytes": 1081140203,
+      "sha256": "d75795ecff3f83b5faa89d1900604ad8c780abd5739fae406de19f23ecd98ad1",
+      "language": "multilingual"
+    },
+    {
+      "id": "large-v3-turbo-f16",
+      "repository": "ggerganov/whisper.cpp",
+      "revision": "5359861c739e955e79d9a303bcbc70fb988958b1",
+      "file": "ggml-large-v3-turbo.bin",
+      "bytes": 1624555275,
+      "sha256": "1fc70f774d38eb169993ac391eea357ef47c88757ef72ee5943879b7e8e2bc69",
+      "language": "multilingual transcription; not Whisper speech translation"
+    },
+    {
+      "id": "large-v3-turbo-q5-0",
+      "repository": "ggerganov/whisper.cpp",
+      "revision": "5359861c739e955e79d9a303bcbc70fb988958b1",
+      "file": "ggml-large-v3-turbo-q5_0.bin",
+      "bytes": 574041195,
+      "sha256": "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2",
+      "language": "multilingual transcription; not Whisper speech translation"
+    },
+    {
+      "id": "distil-large-v3-5-ggml",
+      "repository": "distil-whisper/distil-large-v3.5-ggml",
+      "revision": "960ecb5c2ecfba3ebb9ebe485c1032ec266cf436",
+      "file": "ggml-model.bin",
+      "bytes": 1519521155,
+      "sha256": "ec2498919b498c5f6b00041adb45650124b3cd9f26f545fffa8f5d11c28dcf26",
+      "language": "English"
+    }
+  ],
+  "source_revision_note": "An earlier repository revision c521a4b02f422512d734391fdf08bb08c0862f68 contains large-v3 but not the Turbo files. Main resolved to 5359861c739e955e79d9a303bcbc70fb988958b1 when these records were obtained; it is pinned above rather than assumed interchangeable.",
+  "remaining": "Verify downloaded bytes, engine format/runtime compatibility, language handling, privacy and real device performance before exposing any new selectable option."
+}

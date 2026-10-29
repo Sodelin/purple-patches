@@ -1,0 +1,64 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40926643415,
+  "workflow_source_commit": "6352943eec078705458d7e5c0e39dd50d70ed5cd",
+  "bundle_build_run": 40925825758,
+  "bundle_source_commit": "3b16c6982d133263c28c0ecbf065e5a0da19037d",
+  "bundle_version": "0.1.0-alpha.6",
+  "bundle_sha256": "22f3bfaea6b7e4134111a6b116aef4cc234d53fe9ce8655aacaa61b8be7dfa23",
+  "artifact_id": 12920298658,
+  "artifact_zip_bytes": 49115528,
+  "artifact_zip_sha256": "40328fc8ef35fc76210676f2dc18e8797c9813f1a3308cc9df9b9389811c13cf",
+  "members": {
+    "SHA256SUMS": {
+      "bytes": 354,
+      "sha256": "ab016a75afbe0b29cab028473e695dddf8c76f985961f62f972b8a5de0346c89"
+    },
+    "build-run.json": {
+      "bytes": 152,
+      "sha256": "b8f33c3ee35988a068d46974a302922966690213f3c91d2a734d2f6c11e8064c"
+    },
+    "gboard-patch-result.json": {
+      "bytes": 401,
+      "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"
+    },
+    "gboard-purple-unsigned.apk": {
+      "bytes": 84550891,
+      "sha256": "7b66fa89995e93cb9abbb63f6c05fe766d1c4f4b38f73703a8697b5edd7f2f00"
+    },
+    "purple-provenance.json": {
+      "bytes": 1992,
+      "sha256": "2e2019eac1dad6840935ad23314cd22eba9ec3e23df666cc3ac7cb6a65d34381"
+    }
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified_by_workflow": true
+  },
+  "hosted_static_verification": {
+    "original_classes_retained": 22860,
+    "output_classes": 26014,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "translation_effort_chooser_policy_guarded_submit_and_sol_references_present": true,
+    "limitations": "DEX references are static linkage evidence, not Android execution, security, or control-flow proof. Alpha.6 still sends its bootstrap bearer through Termux stdout."
+  },
+  "independent_artifact_verification": "ZIP and every member read and hashed in memory; all four published member checksums, source commit, version and upstream provenance matched.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7,
+  "patch_result": {
+    "success": true,
+    "applied_patches": [
+      "Add Gboard Signature Bypass",
+      "Whisper 3 dictation and AI Translate",
+      "Package Rename"
+    ],
+    "failed_patches": [],
+    "patching_and_rebuilding_passed": true
+  }
+}

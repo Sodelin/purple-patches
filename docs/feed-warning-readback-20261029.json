@@ -1,0 +1,11 @@
+{
+  "schema": "purple.feed-warning-readback.v1",
+  "source_commit": "55d5799",
+  "sha256": "86886c58e9ae24cf84fd3b0d8e10e030239d4edcf32af7545d8d922b3f5366c4",
+  "anonymous_pinned_and_main_bytes_match": true,
+  "selected_version": "0.1.0-alpha.1",
+  "description": "Experimental alpha.1: known editor snapshot issue; do not install. Newer candidate is awaiting phone acceptance.",
+  "version_or_download_changed": false,
+  "newer_candidate_published": false,
+  "phone_manager_checked": false
+}

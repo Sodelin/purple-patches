@@ -1,0 +1,64 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40919375217,
+  "workflow_source_commit": "33698ec9bc716e05c7f1d525cabc9d5eaaf1c218",
+  "bundle_build_run": 40918313910,
+  "bundle_source_commit": "977733f186f39632818fea124da6d31a73ba2fe7",
+  "bundle_version": "0.1.0-alpha.4",
+  "bundle_sha256": "0679214153ac97dfc7abb02255fc26313057112b773db25da0907d7271eb3b8f",
+  "artifact_id": 12917666712,
+  "artifact_zip_bytes": 49114132,
+  "artifact_zip_sha256": "2acaa112e65cdef328264d3d721edbbb50a2ba00fabca916c7292e80524df854",
+  "members": {
+    "SHA256SUMS": {
+      "bytes": 354,
+      "sha256": "0f94eb2bd360d067cc19c5aeac3f9a402520aaefeed197591defc5fe9c1855ac"
+    },
+    "build-run.json": {
+      "bytes": 152,
+      "sha256": "5b83663de9ef5c7679d04e3fec49a0ccb125b3a19086c888b1a3add4ee1abcab"
+    },
+    "gboard-patch-result.json": {
+      "bytes": 401,
+      "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"
+    },
+    "gboard-purple-unsigned.apk": {
+      "bytes": 84549925,
+      "sha256": "2e47467164d9a0baaa88a651c2b2e4dd1521a4a20801dc5aebbfc7f31015c551"
+    },
+    "purple-provenance.json": {
+      "bytes": 1992,
+      "sha256": "c7d524580c223e3a1a0097d5d8351172346dfe00fc90c07d73985f214dde7b2e"
+    }
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified": true
+  },
+  "patch_result": {
+    "success": true,
+    "applied_patches": [
+      "Add Gboard Signature Bypass",
+      "Whisper 3 dictation and AI Translate",
+      "Package Rename"
+    ],
+    "failed_patches": []
+  },
+  "hosted_static_verification": {
+    "output_package": "dev.jason.com.google.android.inputmethod.latin",
+    "original_classes_retained": 22860,
+    "output_classes": 26013,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "dexopt_assets_excluded": true,
+    "editor_and_finite_capture_linkage_present": true
+  },
+  "independent_artifact_verification": "ZIP and all member bytes/hash read in memory; selected build, provenance and patch result matched. This is static hosted evidence.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7
+}

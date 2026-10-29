@@ -104,9 +104,9 @@ public final class PurpleAiRuntime {
         if (anchor == null) { notifyUser("This editor does not expose a stable text selection"); return; }
         if (whisper) {
             if (ime.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                permissions(ime); return;
+                permissions(ime, SessionPolicy.PERMISSION_MICROPHONE); return;
             }
-            submit(anchor, null);
+            submit(anchor, null, null);
         } else {
             if (!SessionPolicy.bounded(anchor.selected)) { notifyUser("Select up to 8 KiB of text to translate"); return; }
             java.util.SortedMap<String,String> languages = new java.util.TreeMap<>();
@@ -118,22 +118,40 @@ public final class PurpleAiRuntime {
             String[] codes = languages.values().toArray(new String[0]);
             show(new AlertDialog.Builder(ime).setTitle("Translate to…")
                     .setItems(labels, (d, which) -> {
-                        if (anchor.matches(service.get(), generation)) submit(anchor, codes[which]);
+                        if (anchor.matches(service.get(), generation)) chooseTranslationEffort(anchor, codes[which]);
                     }).setNegativeButton("Cancel", null).create());
         }
     }
-    private static void permissions(Context context) {
+    private static void chooseTranslationEffort(Snapshot anchor, String language) {
+        InputMethodService ime = service.get();
+        if (ime == null || !anchor.matches(ime, generation)) return;
+        String[] labels = {"Medium", "Max"};
+        String[] efforts = {"medium", "max"};
+        show(new AlertDialog.Builder(ime).setTitle("Sol 6.1 reasoning")
+                .setItems(labels, (d, which) -> {
+                    if (which < 0 || which >= efforts.length) return;
+                    if (anchor.matches(service.get(), generation)) submit(anchor, language, efforts[which]);
+                    else notifyUser("The selection changed; select text again");
+                }).setNegativeButton("Cancel", null).create());
+    }
+    private static void permissions(Context context, String scope) {
+        if (SessionPolicy.permissionsFor(scope).length != 1) return;
         try { context.startActivity(new Intent().setClassName(context.getPackageName(),
-                PurplePermissionActivity.class.getName()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
-        catch (RuntimeException ignored) { notifyUser("Grant microphone and local-tools access in app permissions"); }
+                PurplePermissionActivity.class.getName()).putExtra(PurplePermissionActivity.EXTRA_SCOPE, scope)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
+        catch (RuntimeException ignored) {
+            notifyUser(SessionPolicy.PERMISSION_MICROPHONE.equals(scope)
+                    ? "Allow microphone access for dictation in app permissions"
+                    : "Allow local-tools access in app permissions");
+        }
     }
     private static void offerConnection(InputMethodService ime) {
         show(new AlertDialog.Builder(ime).setTitle("Connect local tools")
-                .setMessage("Connect to your existing local Whisper and Codex tools. Normal Gboard continues working without them.")
+                .setMessage("Termux gives this keyboard permission to run commands as Termux. These actions use your existing local Whisper and Codex tools. Dictation asks for microphone access separately.")
                 .setNegativeButton("Cancel", null).setPositiveButton("Connect", (d, w) -> connect(ime)).create());
     }
     private static void connect(InputMethodService ime) {
-        if (ime.checkSelfPermission("com.termux.permission.RUN_COMMAND") != PackageManager.PERMISSION_GRANTED) { permissions(ime); return; }
+        if (ime.checkSelfPermission("com.termux.permission.RUN_COMMAND") != PackageManager.PERMISSION_GRANTED) { permissions(ime, SessionPolicy.PERMISSION_LOCAL_TOOLS); return; }
         if (callback != null) callback.cancel();
         nonce = UUID.randomUUID().toString(); connectDeadline = SystemClock.elapsedRealtime() + 30000;
         Intent result = new Intent().setClassName(ime.getPackageName(), PurpleBootstrapReceiver.class.getName())
@@ -145,6 +163,9 @@ public final class PurpleAiRuntime {
                 .putExtra("com.termux.RUN_COMMAND_ARGUMENTS", new String[]{"bootstrap"})
                 .putExtra("com.termux.RUN_COMMAND_WORKDIR", "/data/data/com.termux/files/home")
                 .putExtra("com.termux.RUN_COMMAND_BACKGROUND", true)
+                // Best effort on reviewed Termux source only; the stdout capability handoff
+                // remains a release blocker until a non-loggable channel is established.
+                .putExtra("com.termux.RUN_COMMAND_BACKGROUND_CUSTOM_LOG_LEVEL", "0")
                 .putExtra("com.termux.RUN_COMMAND_PENDING_INTENT", callback);
         try { if (ime.startService(command) == null) throw new IllegalStateException(); }
         catch (RuntimeException ignored) { callback.cancel(); callback = null; nonce = null; notifyUser("Local tools are not available"); }
@@ -168,8 +189,9 @@ public final class PurpleAiRuntime {
             notifyUser("Local tools connected. Choose Whisper or Translate.");
         } catch (Exception ignored) { bridge = null; notifyUser("Local tools could not connect"); }
     }
-    private static void submit(Snapshot anchor, String language) {
+    private static void submit(Snapshot anchor, String language, String effort) {
         InputMethodService ime = service.get();
+        if (language == null ? effort != null : !SessionPolicy.translationEffortAllowed(effort)) return;
         if (ime == null || !anchor.matches(ime, generation) || !busy.compareAndSet(false, true)) return;
         final long request = ++operation;
         AtomicBoolean stopped = new AtomicBoolean(); cancellation = stopped;
@@ -198,7 +220,7 @@ public final class PurpleAiRuntime {
                     MAIN.post(() -> { if (!stopped.get()) progress.setMessage("Recording — tap Stop when finished"); });
                     audio = recorder.record(stopped);
                 }
-                String text = currentBridge.execute(voice ? "transcribe" : "translate", anchor.selected, language, audio, stopped);
+                String text = currentBridge.execute(anchor.selected, language, effort, audio, stopped);
                 MAIN.post(() -> {
                     if (request != operation || stopped.get() || !anchor.matches(service.get(), generation)) return;
                     dismiss();

@@ -68,15 +68,12 @@ fn models_at(path: &Path) -> Result<Vec<Model>, String> {
     let advertised = entry["supported_reasoning_levels"]
         .as_array()
         .ok_or("Sol 6.1 reasoning choices are unavailable")?;
-    if !ALLOWED_EFFORTS.iter().all(|required| {
-        advertised
-            .iter()
-            .any(|value| value["effort"].as_str() == Some(*required))
-    }) {
-        return Err(
-            "Sol 6.1 medium and max must both be advertised; no effort or model was substituted"
-                .into(),
-        );
+    let efforts: Vec<String> = ALLOWED_EFFORTS.iter()
+        .filter(|required| advertised.iter().any(|value| value["effort"].as_str() == Some(**required)))
+        .map(|value| (*value).into())
+        .collect();
+    if efforts.is_empty() {
+        return Err("Sol 6.1 has no advertised Medium or Max choice; no effort or model was substituted".into());
     }
     let mut tiers = vec![Tier {
         id: "standard".into(),
@@ -96,11 +93,8 @@ fn models_at(path: &Path) -> Result<Vec<Model>, String> {
     Ok(vec![Model {
         id: ALLOWED_MODEL.into(),
         label: "Sol 6.1".into(),
-        default_effort: "medium".into(),
-        efforts: ALLOWED_EFFORTS
-            .iter()
-            .map(|value| (*value).into())
-            .collect(),
+        default_effort: efforts[0].clone(),
+        efforts,
         tiers,
     }])
 }
@@ -481,19 +475,20 @@ pub fn run(
     }
 }
 
-pub fn sha256_file(path: &Path) -> Result<String, String> {
+fn sha256_reader(reader: &mut impl Read, cancelled: Option<&AtomicBool>) -> Result<String, String> {
     use sha2::{Digest, Sha256};
-    let mut file = OpenOptions::new()
-        .read(true)
-        .custom_flags(libc::O_NOFOLLOW)
-        .open(path)
-        .map_err(|_| "Pinned engine file unavailable")?;
     let mut digest = Sha256::new();
     let mut buffer = [0u8; 65536];
     loop {
-        let n = file
+        if cancelled.is_some_and(|stop| stop.load(Ordering::Relaxed)) {
+            return Err("cancelled".into());
+        }
+        let n = reader
             .read(&mut buffer)
             .map_err(|_| "Pinned engine read failed")?;
+        if cancelled.is_some_and(|stop| stop.load(Ordering::Relaxed)) {
+            return Err("cancelled".into());
+        }
         if n == 0 {
             break;
         }
@@ -502,10 +497,49 @@ pub fn sha256_file(path: &Path) -> Result<String, String> {
     Ok(format!("{:x}", digest.finalize()))
 }
 
+fn open_hash_file(path: &Path) -> Result<File, String> {
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_NOFOLLOW)
+        .open(path)
+        .map_err(|_| "Pinned engine file unavailable".into())
+}
+
+pub fn sha256_file(path: &Path) -> Result<String, String> {
+    sha256_reader(&mut open_hash_file(path)?, None)
+}
+
+pub fn sha256_file_cancellable(path: &Path, cancelled: &AtomicBool) -> Result<String, String> {
+    if cancelled.load(Ordering::Relaxed) { return Err("cancelled".into()); }
+    sha256_reader(&mut open_hash_file(path)?, Some(cancelled))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::private::Scratch;
+    #[test]
+    fn hashing_stops_between_reads_and_preserves_exact_digest() {
+        struct StopAfterRead<'a> { stop: &'a AtomicBool, reads: usize }
+        impl Read for StopAfterRead<'_> {
+            fn read(&mut self, bytes: &mut [u8]) -> std::io::Result<usize> {
+                self.reads += 1;
+                bytes[0] = b'x';
+                self.stop.store(true, Ordering::Relaxed);
+                Ok(1)
+            }
+        }
+        let stop = AtomicBool::new(true);
+        let mut reader = StopAfterRead { stop: &stop, reads: 0 };
+        assert_eq!(sha256_reader(&mut reader, Some(&stop)).unwrap_err(), "cancelled");
+        assert_eq!(reader.reads, 0);
+        stop.store(false, Ordering::Relaxed);
+        assert_eq!(sha256_reader(&mut reader, Some(&stop)).unwrap_err(), "cancelled");
+        assert_eq!(reader.reads, 1);
+        stop.store(false, Ordering::Relaxed);
+        assert_eq!(sha256_reader(&mut &b"abc"[..], Some(&stop)).unwrap(),
+                   "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    }
     fn catalogue() -> Vec<Model> {
         vec![Model {
             id: ALLOWED_MODEL.into(),
@@ -781,7 +815,7 @@ mod tests {
     }
 
     #[test]
-    fn catalogue_requires_visible_sol_and_both_approved_efforts_without_fallback() {
+    fn catalogue_keeps_advertised_approved_efforts_without_fallback() {
         let scratch = Scratch::new();
         let base = json!({"slug":ALLOWED_MODEL,"display_name":"Sol 6.1","visibility":"list",
             "default_reasoning_level":"low", "supported_reasoning_levels":[{"effort":"medium"},{"effort":"max"}],
@@ -790,15 +824,12 @@ mod tests {
         others["slug"] = json!("gpt-6-astra");
         let mut hidden = base.clone();
         hidden["visibility"] = json!("hide");
-        let mut missing_max = base.clone();
-        missing_max["supported_reasoning_levels"] = json!([{"effort":"medium"}]);
-        let mut missing_medium = base.clone();
-        missing_medium["supported_reasoning_levels"] = json!([{"effort":"max"}]);
+        let mut no_approved = base.clone();
+        no_approved["supported_reasoning_levels"] = json!([{"effort":"low"}]);
         for (i, entries) in [
             json!([others]),
             json!([hidden]),
-            json!([missing_max]),
-            json!([missing_medium]),
+            json!([no_approved]),
             json!([base.clone(), base.clone()]),
         ]
         .iter()
@@ -815,7 +846,7 @@ mod tests {
         let path = scratch.0.join("approved.json");
         private::create(
             &path,
-            &serde_json::to_vec(&json!({"models":[base]})).unwrap(),
+            &serde_json::to_vec(&json!({"models":[base.clone()]})).unwrap(),
         )
         .unwrap();
         let allowed = models_at(&path).unwrap();
@@ -825,6 +856,20 @@ mod tests {
         let mut request = query();
         request.tier = Some("priority".into());
         assert!(request.validate(&allowed).is_err());
+
+        for (i, present, absent) in [(0, "medium", "max"), (1, "max", "medium")] {
+            let mut single = base.clone();
+            single["supported_reasoning_levels"] = json!([{"effort":present},{"effort":"low"}]);
+            let path = scratch.0.join(format!("single-{i}.json"));
+            private::create(&path, &serde_json::to_vec(&json!({"models":[single]})).unwrap()).unwrap();
+            let models = models_at(&path).unwrap();
+            assert_eq!(models[0].efforts, vec![present]);
+            assert_eq!(models[0].default_effort, present);
+            let mut request = query(); request.effort = present.into();
+            assert!(request.validate(&models).is_ok());
+            request.effort = absent.into();
+            assert!(request.validate(&models).is_err());
+        }
     }
 
     fn suggestion() -> Query {

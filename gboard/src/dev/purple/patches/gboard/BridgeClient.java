@@ -48,17 +48,22 @@ final class BridgeClient {
         JSONObject health = request("GET", "/health", null, null);
         if (!"memory-only-v1".equals(health.optString("keyboard_data_path")))
             throw new IllegalStateException("Update the local bridge before using keyboard text or audio");
+        if (voice && !SessionPolicy.whisperPreflightSupported(health.optString("whisper_preflight")))
+            throw new IllegalStateException("Update the local bridge before using Whisper 3");
         if (voice && !"whisper-large-v3".equals(health.optString("whisper_family")))
             throw new IllegalStateException("Whisper 3 is not configured; another model will not be substituted");
     }
-    String execute(String mode, String text, String language, byte[] wav, AtomicBoolean cancelled) throws Exception {
+    String execute(String text, String language, String effort, byte[] wav, AtomicBoolean cancelled) throws Exception {
+        if (wav == null && !SessionPolicy.translationEffortAllowed(effort))
+            throw new IllegalArgumentException("Choose Medium or Max reasoning");
+        if (wav != null && effort != null) throw new IllegalArgumentException("Unexpected dictation reasoning");
         verify(wav != null);
         if (cancelled.get()) throw new InterruptedException();
         JSONObject started;
         if (wav == null) {
             JSONObject data = new JSONObject().put("mode", "translate").put("prompt", text)
                     .put("context", "").put("target_language", language)
-                    .put("model", "gpt-6.1-sol").put("effort", "medium").put("tier", "standard");
+                    .put("model", "gpt-6.1-sol").put("effort", effort).put("tier", "standard");
             started = request("POST", "/query", data.toString().getBytes(StandardCharsets.UTF_8), "application/json");
         } else started = request("POST", "/transcribe", wav, "audio/wav");
         job = started.getString("id");
