@@ -71,6 +71,10 @@ public final class InspectNatune {
                 System.out.println("CODEC_OUTPUT_FORMAT\t"+signature(method));
             }
         }
+        for(String owner:List.of("Lmoe/rukamori/archivetune/App;", "Lmoe/rukamori/archivetune/MainActivity;")) {
+            var clazz=classes.get(owner);
+            if(clazz!=null)for(var method:clazz.getMethods())if(method.getName().equals("onCreate"))codecBody(method,40);
+        }
         var predicates=new TreeSet<String>();
         for(String owner:owners) {
             var clazz=classes.get(owner);

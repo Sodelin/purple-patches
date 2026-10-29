@@ -1,0 +1,25 @@
+{
+  "schema": "purple.natune-navigation-video-source-review.v1",
+  "upstream_commit": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+  "files": [
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/MainActivity.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/MainActivity.kt",
+      "bytes": 266975,
+      "sha256": "9d82fc21f9b78ab8d52dc47858dc98cadb69df65fccedebc5a53fe6db1d3752f"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/ui/player/VideoArtworkPlayer.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/player/VideoArtworkPlayer.kt",
+      "bytes": 78435,
+      "sha256": "aafb449d699c7f9351dec87a7e8bfc10b5ff7499cac89941498dd4e348a1711d"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/sponsorblock/SponsorBlockPlaybackController.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/sponsorblock/SponsorBlockPlaybackController.kt",
+      "bytes": 4842,
+      "sha256": "c1f1842cd3566a99690b3e69d7e8586c89236d2cb00b3bb927f06ff6d38d4c71"
+    }
+  ],
+  "runtime_observed": false
+}
