@@ -205,7 +205,7 @@ public final class InspectNatune {
         // Inspect the observed receiver and its original owner, not an assumed
         // public Media3 ABI. No field values or app objects are accessed.
         var receiverTypes = new TreeSet<>(List.of("Lr8/td1;", "Lr8/d7b;", "Lr8/vu2;",
-            "Lr8/ye2;", "Lmoe/rukamori/archivetune/playback/g;"));
+            "Lr8/ae3;", "Lmoe/rukamori/archivetune/playback/g;"));
         for (var clazz : classes.values())
             if (clazz.getInterfaces().contains("Lr8/td1;")) receiverTypes.add(clazz.getType());
         for (String type : receiverTypes) {
@@ -219,8 +219,11 @@ public final class InspectNatune {
             for (var method : clazz.getMethods()) {
                 System.out.println("STORAGE_RECEIVER_METHOD\t" + signature(method) + "\tflags=" + method.getAccessFlags());
                 if (clazz.getInterfaces().contains("Lr8/td1;") &&
-                    (Set.of("p", "l", "b", "o", "c", "j", "d").contains(method.getName()) ||
+                    (Set.of("p", "l", "b", "o", "c", "j", "d", "q").contains(method.getName()) ||
                      method.getReturnType().equals("Lr8/td1;"))) codecBody(method, 60);
+                if ((type.equals("Lr8/d7b;") && Set.of("<init>", "compareTo").contains(method.getName())) ||
+                    (type.equals("Lr8/vu2;") && method.getName().equals("b")) ||
+                    (type.equals("Lr8/ae3;") && method.getName().equals("c"))) codecBody(method, 100);
             }
         }
         for (var clazz : classes.values())
