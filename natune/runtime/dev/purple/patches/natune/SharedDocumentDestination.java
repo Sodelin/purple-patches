@@ -36,8 +36,10 @@ public final class SharedDocumentDestination implements VerifiedStreamCopy.Desti
                 displayName.indexOf('/') >= 0 || displayName.indexOf('\\') >= 0) {
             throw new IOException("Audio type and document name required");
         }
-        // The provider creates a new document, choosing a unique name when
-        // necessary. Never look up and truncate a user file by display name.
+        // Android's provider contract calls for a newly created document. A
+        // particular provider may violate that contract: its actual create and
+        // write behavior must be established by the owner before selecting it.
+        // This adapter cannot itself prove that an existing file is untouched.
         Uri parent = DocumentsContract.buildDocumentUriUsingTree(tree,
                 DocumentsContract.getTreeDocumentId(tree));
         Uri created = DocumentsContract.createDocument(resolver, parent, mimeType, displayName);

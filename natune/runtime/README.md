@@ -9,10 +9,12 @@ actual supplied stock result, rather than reconstructing network status.
 Patch-presence marker methods intentionally return false until actual selected
 Morphe hooks bind them. The runtime-settings source checkpoint now contains an
 experimental application bootstrap, original-result wrapper, marker rewriting
-and switchable local decoder guards. It has not yet passed a hosted patch build
-or an independent original/patched APK comparison. The original application
+and switchable local decoder guards. Hosted run 40920698630 built the profile,
+applied it to the exact pinned APK, and independently compared the original
+program and resources after checking those additions. It did not execute the
+Android settings or player. See `../runtime-settings-verification.json`. The original application
 entry was inspected at 22 registers, 813 code units and four try blocks; the
-new verifier must check handler boundaries as well as the added prefix. The
+new verifier checks handler boundaries as well as the added prefix. The
 settings Activity is not yet declared in the target manifest or reachable from
 the original app. No settings UI has been installed or accepted on a phone.
 

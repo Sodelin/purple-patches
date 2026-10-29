@@ -38,13 +38,27 @@ jobs:
           java -cp "$RUNNER_TEMP/copy-core" NatuneCachedSourceControls > dist/cache-source-controls.txt
           java -cp "$RUNNER_TEMP/copy-core" TemporarySpaceBudgetControls > dist/temporary-budget-controls.txt
           java -cp "$RUNNER_TEMP/copy-core" NatuneCoroutineStopControls > dist/coroutine-stop-controls.txt
+      - name: Exercise pending MediaStore destination with synthetic owner/provider
+        run: |
+          mkdir -p "$RUNNER_TEMP/media-controls"
+          javac -Xlint:all -Werror -d "$RUNNER_TEMP/media-controls" \
+            natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
+            natune/runtime/dev/purple/patches/natune/MediaStoreAudioDestination.java \
+            natune/test-fixtures/android/net/Uri.java \
+            natune/storage-tests/media-fixtures/android/content/*.java \
+            natune/storage-tests/media-fixtures/android/database/*.java \
+            natune/storage-tests/media-fixtures/android/os/*.java \
+            natune/storage-tests/media-fixtures/android/provider/*.java \
+            natune/storage-tests/MediaStoreAudioDestinationControls.java
+          java -cp "$RUNNER_TEMP/media-controls" MediaStoreAudioDestinationControls > dist/media-store-controls.txt
       - name: Compile SAF adapter against real Android SDK
         run: |
           ANDROID_JAR="$(find "$ANDROID_HOME/platforms" -name android.jar -type f | sort -V | tail -1)"
           test -f "$ANDROID_JAR"
           javac -Xlint:all -Werror -cp "$ANDROID_JAR:$RUNNER_TEMP/copy-core" \
             -d "$RUNNER_TEMP/copy-core" \
-            natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java
+            natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java \
+            natune/runtime/dev/purple/patches/natune/MediaStoreAudioDestination.java
           printf '%s\n' 'ANDROID_SAF_COMPILE passed=true device_provider_test=false apk_binding=false' > dist/android-saf-compile.txt
       - name: Retain compact public verification
         run: |
@@ -54,6 +68,7 @@ jobs:
             natune/test-fixtures/android/net/Uri.java \
             natune/test-fixtures/r8/km2.java \
             natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java \
+            natune/runtime/dev/purple/patches/natune/MediaStoreAudioDestination.java \
             natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
             natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java \
             natune/runtime/dev/purple/patches/natune/NatuneCoroutineStop.java \
@@ -61,9 +76,14 @@ jobs:
             natune/storage-tests/NatuneCachedSourceControls.java \
             natune/storage-tests/TemporarySpaceBudgetControls.java \
             natune/storage-tests/NatuneCoroutineStopControls.java \
-            natune/storage-tests/fixtures/r8/*.java > dist/source-SHA256SUMS
+            natune/storage-tests/fixtures/r8/*.java \
+            natune/storage-tests/media-fixtures/android/content/*.java \
+            natune/storage-tests/media-fixtures/android/database/*.java \
+            natune/storage-tests/media-fixtures/android/os/*.java \
+            natune/storage-tests/media-fixtures/android/provider/*.java \
+            natune/storage-tests/MediaStoreAudioDestinationControls.java > dist/source-SHA256SUMS
           cd dist
-          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt coroutine-stop-controls.txt shared-document-request-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
+          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt coroutine-stop-controls.txt media-store-controls.txt shared-document-request-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: natune-shared-storage-controls

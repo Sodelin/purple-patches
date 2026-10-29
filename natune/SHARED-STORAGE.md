@@ -120,8 +120,25 @@ DocumentsContract stream boundary for a newly created document under an
 already-authorized SAF tree. It obtains no grant. It reserves output opening
 before attempting it, so an uncertain open does not automatically retry, and
 reopens that exact content URI for verification. Incomplete created documents
-remain for the owning job's explicit recovery/cleanup; no old user file or
-source can be deleted by this adapter.
+remain for the owning job's explicit recovery/cleanup; it does not delete a
+source. Android specifies that document creation allocates a new ID, but the
+client cannot enforce that a particular third-party provider obeys the rule.
+Some reviewed providers can overwrite or return before remote durability. An
+actual provider's creation, write and settlement behavior must be established
+before this adapter is selected; a successful create call alone does not prove
+an existing file was protected.
+
+`MediaStoreAudioDestination.java` is a separate source candidate for a local
+Android 10+ MediaStore audio folder. It creates a pending audio row on a selected
+real volume, checks its owner, volume, folder and pending state, and implements
+the existing verified-copy destination. It publishes only the original copy
+result for the same live source and destination after another full readback;
+an uncertain publication is not automatically retried. It never removes a
+source or claims a computer copy. The actual app still must select a folder,
+admit peak space, bind a durable encrypted operation and reconcile uncertain
+rows before this can serve as a Move or future-download route. It does not make
+an arbitrary SAF folder or Fuji receiver equivalent to MediaStore. Synthetic
+controls and real SDK compilation, if passed, are not device/provider proof.
 
 The copy result is in-memory byte evidence, not a deletion permit or completed
 move. The source lease/coverage reader is now implemented against the exact

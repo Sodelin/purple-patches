@@ -1,0 +1,31 @@
+{
+  "schema": "purple.natune-runtime-settings-verification.v1",
+  "hosted_run": 40920698630,
+  "hosted_source_commit": "0632a068de1d70ec916df91f0cf8aed84da86dd4",
+  "local_source_commit_with_identical_tree": "cc9d64e3b8e295b440b76247471de6de4b1c42a0",
+  "source_tree": "acd6c7933d8fe5b5df812f25cfb4dbece3678c81",
+  "inherited_checkpoint": "36685c359e43d0d0a02c323484bd3712c2fbb2e7",
+  "artifact_id": 12917643903,
+  "artifact_zip_bytes": 85007,
+  "artifact_zip_sha256": "35ed8a14364754e267e780193854e2ec5e40381571e0807ed2591047eaf6759a",
+  "mpp_name": "patches-0.3.0-dev.1.mpp",
+  "mpp_bytes": 67902,
+  "mpp_sha256": "098b0a83d28f2336aed9516881d37badb2965ed951df6d90d4b0f9914c37092d",
+  "artifact_member_hashes_checked": 8,
+  "settings_extension_source_hashes_checked": 2,
+  "original_classes_compared": 27129,
+  "original_methods_compared": 114583,
+  "original_non_dex_entries_compared": 1884,
+  "first_attempt": {
+    "run": 40920293320,
+    "result": "Built and patched, but verification refused the generated extension R class; the successor explicitly permits that generated namespace."
+  },
+  "scope": "Exact bootstrap, original-result wrapper, feature markers and four optional decoder guard prefixes checked; remaining original code, handlers, resources, native files and assets compared. Debug items and signing were outside comparison.",
+  "limits": [
+    "No Android settings or decoder execution, phone installation, playback or device acceptance",
+    "Settings Activity has no manifest declaration or in-app navigation",
+    "No complete FLAC download/provider acceptance, whole-file codec proof or Move implementation",
+    "No same-signer update or verified handoff of the installed app's private downloads",
+    "Hosted prototype only; existing public release/feed was not changed"
+  ]
+}

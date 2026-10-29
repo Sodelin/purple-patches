@@ -7,4 +7,9 @@ public final class Uri {
     public static Uri parse(String literal){return new Uri(literal);}
     public String getScheme(){return java.net.URI.create(literal).getScheme();}
     public String getAuthority(){return java.net.URI.create(literal).getAuthority();}
+    public java.util.List<String> getPathSegments(){
+        String path=java.net.URI.create(literal).getPath();
+        if(path==null||path.equals("/"))return java.util.List.of();
+        return java.util.Arrays.asList(path.substring(1).split("/"));
+    }
 }
