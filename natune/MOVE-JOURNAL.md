@@ -72,6 +72,15 @@ does not know those events must refuse rather than silently discard them. No
 history is rewritten. No serializer or receipt descriptor authenticates a
 caller or rechecks computer bytes on restart.
 
+Hosted [run 40911881847](https://github.com/Sodelin/purple-patches/actions/runs/40911881847)
+at `ef58831a2e18bb966f173ac6ca394c4b2537fba4` passed 42 Rust library
+controls and cross-built the checker. The fixtures cover matching remote
+receipts, staged cleanup and restart, uncertainty, receipt reuse, schema
+downgrade, and live destination conflicts including reordered recovery. Full
+artifact and source hashes are recorded in `remote-stage-verification.json`.
+All receiver and cleanup observations were synthetic; the checker was not
+executed on the phone and no original media or app data was accessed.
+
 The journal records observations; none of these enums authenticates a caller,
 recreates a native permit or executes a copy/removal. Android may not submit
 serialized `Moved` as a cleanup grant. The future captured owner must actually

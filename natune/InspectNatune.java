@@ -39,7 +39,7 @@ public final class InspectNatune {
             if (inheritedMethod(parent, parameters, result, classes, seen)) return true;
         return clazz.getSuperclass() != null && inheritedMethod(clazz.getSuperclass(), parameters, result, classes, seen);
     }
-    static final Set<String> CODEC_ANCHORS = Set.of("audio", "video", "audio/raw", "audio/flac", "audio/ac4");
+    static final Set<String> CODEC_ANCHORS = Set.of("audio", "video", "audio/raw", "audio/flac", "audio/ac4", "qobuz:", "tidal:");
     static void codecBody(Method method, int maximum) {
         var body=method.getImplementation();
         if(body==null)return;
@@ -303,6 +303,21 @@ public final class InspectNatune {
         "export_tmp", "Could not open destination stream", "Download cache is empty for this song"
     );
     static void inspectStorageHooks(Map<String,ClassDef> classes) {
+        // The installed export coroutine calls this exact optimized resolver.
+        // Inspect its public DEX body without reading any user cache keys.
+        var exportResolver = classes.get("Lmoe/rukamori/archivetune/ui/menu/q0;");
+        if (exportResolver == null) throw new IllegalStateException("Export resolver unavailable");
+        int exactResolvers = 0;
+        for (var method : exportResolver.getMethods()) {
+            if (method.getName().equals("c") &&
+                String.join("",method.getParameterTypes()).equals("Lr8/td1;Ljava/lang/String;") &&
+                method.getReturnType().equals("Ljava/util/NavigableSet;")) {
+                System.out.println("STORAGE_RENDITION_RESOLVER\t" + signature(method));
+                codecBody(method, 400);
+                exactResolvers++;
+            }
+        }
+        if (exactResolvers != 1) throw new IllegalStateException("Export resolver layout changed");
         int matches = 0;
         var owners = new TreeSet<String>();
         for (var clazz : classes.values()) for (var method : clazz.getMethods()) {
