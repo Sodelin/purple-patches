@@ -80,19 +80,24 @@ MIME. Its existing `requested_name` remains the user-requested filename. For
 this schema only, `destination_tree_uri` contains the actual Android MediaStore
 audio **collection** URI for that volume; it is not a SAF tree grant. The
 returned `Destination` URI must be an audio row in that same volume with a
-positive row ID. The Android owner must still query the provider for the real
-row, owner, folder, MIME and contents; a serialized URI or successful journal
-transition cannot prove any of those facts.
+positive row ID. A schema 3 `Verified` document also retains the actual
+provider-selected display name, which can differ from the requested name when
+there is a collision. The Android adapter latches that name and refuses a
+change during its readback/publication checks. The Android owner must still
+query the provider for the real row, owner, folder, MIME and contents; a
+serialized URI, name or successful journal transition cannot prove those facts.
 
 The new field is absent from serialized v1/v2 claims when not selected. New
 MediaStore claims start at schema 3 and stay there through verified remote and
 cleanup events; a schema downgrade refuses. Older readers reject the new
 field/schema instead of silently dropping it. Existing claims/history are not
 rewritten. This is an explicit source ABI change to `Claim`: Rust constructors
-must set the field, using `None` for historical SAF claims. No existing
-installed journal or caller has been changed. Hosted successor controls are
-pending; actual Android selection, app-authenticated encrypted writer and
-restart/UNKNOWN recovery remain unbound.
+must set the field, using `None` for historical SAF claims. `Document` also
+has an optional actual display name; the uninstalled schema 3 candidate
+requires it for MediaStore while legacy v1/v2 documents omit it. No existing
+installed journal or caller has been changed. The name-observation successor
+still requires its own hosted verification; actual Android selection,
+app-authenticated encrypted writer and restart/UNKNOWN recovery remain unbound.
 
 Hosted [run 40911881847](https://github.com/Sodelin/purple-patches/actions/runs/40911881847)
 at `ef58831a2e18bb966f173ac6ca394c4b2537fba4` passed 42 Rust library

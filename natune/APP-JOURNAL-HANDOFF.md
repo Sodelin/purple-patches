@@ -47,6 +47,12 @@ folder, MIME and actual collection URI. See `MOVE-JOURNAL.md` and the separate
 hosted Java/Rust source verification records. These use simulated owners and
 still need a real authenticated owner binding.
 
+The subsequent uninstalled source extends the verified observation with the
+actual provider-selected display name. The adapter retains it across row checks,
+and the schema 3 journal requires it alongside the selected folder/MIME; a
+provider-renamed result is not confused with the originally requested name.
+This successor awaits hosted verification and does not authenticate an owner.
+
 Primary source: [Termux RUN_COMMAND documentation](https://github.com/termux/termux-app/wiki/RUN_COMMAND-Intent)
 
 ## Next integration boundary

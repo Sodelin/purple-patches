@@ -29,11 +29,13 @@ public final class MediaStoreAudioDestinationControls {
         String owner="example.natune",folder,name,mime,returned="content://media/external_primary/audio/media/42";
         int pending=1,inserts,opens,reads,updates;
         boolean missing,duplicate,nullOutput,nullInput,corruptRead,updateZeroAfterChange,throwAfterUpdate,mutateOnUpdate;
+        boolean renameOnInsert,renameOnUpdate;
         byte[] body=new byte[0];
         ContentValues inserted;
         public Uri insert(Uri collection,ContentValues values){
             inserts++;inserted=values;folder=(String)values.get(MediaStore.MediaColumns.RELATIVE_PATH);
             name=(String)values.get(MediaStore.MediaColumns.DISPLAY_NAME);
+            if(renameOnInsert)name=name.replace(".flac"," (1).flac");
             mime=(String)values.get(MediaStore.MediaColumns.MIME_TYPE);
             return returned==null?null:Uri.parse(returned);
         }
@@ -61,6 +63,7 @@ public final class MediaStoreAudioDestinationControls {
         public int update(Uri ignored,ContentValues values,String selection,String[] args){
             updates++;pending=(Integer)values.get(MediaStore.MediaColumns.IS_PENDING);
             if(mutateOnUpdate&&body.length>0)body[0]^=1;
+            if(renameOnUpdate)name="unexpected-change.flac";
             if(throwAfterUpdate)throw new IllegalStateException("Uncertain provider outcome");
             return updateZeroAfterChange?0:1;
         }
@@ -88,21 +91,25 @@ public final class MediaStoreAudioDestinationControls {
         need(Arrays.equals(bytes,app.store.body)&&app.store.pending==1&&app.store.updates==0,"Copy and independent pending readback");
         output.publish(proof,source,()->{});
         need(app.store.pending==0&&app.store.updates==1&&Arrays.equals(source.bytes,bytes),"Publish only verified original; source retained");
+        need(output.observedDisplayName().equals("song.flac"),"Retain observed provider name");
         refuses(()->output.publish(proof,source,()->{}),"Do not repeat publication");
         refuses(output::openNewOutput,"Do not reopen output");
 
         App invalid=new App();
-        for(String path:new String[]{"", "/Music", "Music/../Else", "Music//Bad", "Music\\Bad", "."})
+        for(String path:new String[]{"", "/Music", "Music/../Else", "Music//Bad", "Music\\Bad", ".", "Music/" + "é".repeat(2049), "Music/\ud800"})
             refuses(()->MediaStoreAudioDestination.create(invalid,"external_primary",path,"song.flac","audio/flac"),"Invalid folder");
         refuses(()->MediaStoreAudioDestination.create(invalid,"missing","Music","song.flac","audio/flac"),"Unselected volume");
         refuses(()->MediaStoreAudioDestination.create(invalid,"external_primary","Music","../song.flac","audio/flac"),"Invalid filename");
+        for(String name:new String[]{"é".repeat(257),"\ud800","\u00a0"})
+            refuses(()->MediaStoreAudioDestination.create(invalid,"external_primary","Music",name,"audio/flac"),"Name cannot be retained by journal");
         need(invalid.store.inserts==0,"Invalid inputs cause no insertion");
         int version=Build.VERSION.SDK_INT;Build.VERSION.SDK_INT=28;
         refuses(()->create(invalid),"Unsupported Android release");Build.VERSION.SDK_INT=version;
 
         for(String bad:new String[]{"content://other/external_primary/audio/media/42",
                 "content://media/removable/audio/media/42","content://media/external_primary/audio/media",
-                "content://media/external_primary/audio/media/nope"}){
+                "content://media/external_primary/audio/media/nope","content://media/external_primary/audio/media/+42",
+                "content://media/external_primary/audio/media/42?other=1","content://media/external_primary/audio/media/%34%32"}){
             App wrong=new App();wrong.store.returned=bad;
             var wrongRow=create(wrong);
             need(wrongRow.documentUri()!=null,"Returned row remains available for reconciliation");
@@ -115,6 +122,19 @@ public final class MediaStoreAudioDestinationControls {
         refuses(mistyped::openNewOutput,"Wrong returned row MIME");need(wrongMime.store.opens==0,"No output to wrong MIME");
         App wrongName=new App();var badName=create(wrongName);wrongName.store.name="../other";
         refuses(badName::openNewOutput,"Invalid returned row name");need(wrongName.store.opens==0,"No output to invalid name");
+        App renamed=new App();renamed.store.renameOnInsert=true;Source rs=new Source(bytes);var rd=create(renamed);
+        refuses(rd::observedDisplayName,"Provider name is unknown before ownership query");
+        var rp=VerifiedStreamCopy.copy(rs,rd,()->{});rd.publish(rp,rs,()->{});
+        need(rd.observedDisplayName().equals("song (1).flac"),"Preserve provider collision-safe name");
+        App changedName=new App();Source cs=new Source(bytes);var cd=create(changedName);
+        var cp=VerifiedStreamCopy.copy(cs,cd,()->{});changedName.store.name="renamed.flac";
+        refuses(()->cd.publish(cp,cs,()->{}),"Renamed pending row refuses publication");
+        need(changedName.store.updates==0,"A changed name does not publish");
+        App lateName=new App();Source ls=new Source(bytes);var ld=create(lateName);
+        var lp=VerifiedStreamCopy.copy(ls,ld,()->{});lateName.store.renameOnUpdate=true;
+        refuses(()->ld.publish(lp,ls,()->{}),"Renamed during publication remains uncertain");
+        refuses(()->ld.publish(lp,ls,()->{}),"Uncertain renamed publication does not replay");
+        need(lateName.store.updates==1 && ld.observedDisplayName().equals("song.flac"),"Keep first observed name for recovery");
         App duplicate=new App();duplicate.store.duplicate=true;
         var duplicated=create(duplicate);refuses(duplicated::openNewOutput,"Duplicate query rows");
 

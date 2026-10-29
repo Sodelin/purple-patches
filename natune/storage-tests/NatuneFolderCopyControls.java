@@ -63,6 +63,7 @@ public final class NatuneFolderCopyControls {
         final Fixture fixture;
         final List<String> calls = new ArrayList<>();
         String failAt;
+        String actualName;
         boolean stopped;
         Owner(Fixture fixture) { this.fixture = fixture; }
         public void begin(String id, String key, VerifiedStreamCopy.SourceLease source,
@@ -88,11 +89,13 @@ public final class NatuneFolderCopyControls {
                 fixture.app.store.opens == 0, "Actual returned URI reaches owner before output");
             if ("destination".equals(failAt)) throw new IOException("Synthetic uncertain destination");
         }
-        public void verified(String id, Uri uri, VerifiedStreamCopy.VerifiedCopy proof) throws IOException {
+        public void verified(String id, Uri uri, String name, VerifiedStreamCopy.VerifiedCopy proof) throws IOException {
             calls.add("verified");
             need(id.equals(OPERATION) && uri.equals(fixture.attempt.returnedUri()) &&
-                proof.bytes == BYTES.length && fixture.app.store.pending == 0 && fixture.app.store.updates == 1,
+                name.equals(fixture.app.store.name) && proof.bytes == BYTES.length &&
+                fixture.app.store.pending == 0 && fixture.app.store.updates == 1,
                 "Owner receives matching proof after publication and readback");
+            actualName = name;
             if ("verified".equals(failAt)) throw new IOException("Synthetic uncertain verification");
             if ("stop-after-verified".equals(failAt)) stopped = true;
         }
@@ -112,7 +115,9 @@ public final class NatuneFolderCopyControls {
                 {"bad/volume", "Music", "song.flac", "audio/flac"},
                 {"external_primary", "Music/../Other", "song.flac", "audio/flac"},
                 {"external_primary", "Music", "../song.flac", "audio/flac"},
-                {"external_primary", "Music", "song.flac", "audio/*"}}) {
+                {"external_primary", "Music", "song.flac", "audio/*"},
+                {"external_primary", "Music", "é".repeat(257), "audio/flac"},
+                {"external_primary", "Music", "\ud800", "audio/flac"}}) {
             try {
                 new NatuneFolderCopy.Target(fields[0], fields[1], fields[2], fields[3]);
                 throw new IllegalStateException("Invalid target accepted");
@@ -130,6 +135,12 @@ public final class NatuneFolderCopyControls {
         ok.originalRetained();
         refuses(() -> ok.run(() -> {}), "A successful original invocation cannot repeat");
         need(ok.app.store.inserts == 1 && ok.app.store.updates == 1, "No duplicate output or publication");
+
+        Fixture collision = new Fixture(); collision.app.store.renameOnInsert = true;
+        collision.run(() -> {});
+        need("fixture (1).flac".equals(collision.owner.actualName),
+            "Owner receives actual collision-safe name, not only requested name");
+        collision.originalRetained();
 
         Fixture stale = new Fixture();
         d7b old = stale.cache.c.spans.pollLast();

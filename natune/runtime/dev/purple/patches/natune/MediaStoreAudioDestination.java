@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -29,6 +30,7 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
     private final String selectedVolume;
     private final String selectedMime;
     private final Uri row;
+    private String observedName;
     private boolean outputAttempted;
     private boolean publishAttempted;
 
@@ -52,7 +54,7 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
             throw new IOException("Application owner unavailable");
         if (!validVolume(volume) || !MediaStore.getExternalVolumeNames(app).contains(volume))
             throw new IOException("Selected writable volume unavailable");
-        if (normalizedFolder(relativeFolder) == null || !fileName(displayName) || !audioMime(actualMime))
+        if (normalizedFolder(relativeFolder) == null || !journalName(displayName) || !audioMime(actualMime))
             throw new IOException("Selected folder, audio filename and actual MIME required");
         if (app.getContentResolver() == null) throw new IOException("Media provider unavailable");
     }
@@ -86,6 +88,14 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
         for (int i = 0; i < name.length(); i++) if (Character.isISOControl(name.charAt(i))) return false;
         return true;
     }
+    // The existing journal accepts at most 512 UTF-8 bytes and rejects blank,
+    // control-containing or non-filename values. Reject malformed UTF-16 too;
+    // Java's replacement encoding must not change the retained identity.
+    static boolean journalName(String name) {
+        if (!fileName(name) || !StandardCharsets.UTF_8.newEncoder().canEncode(name) ||
+                name.getBytes(StandardCharsets.UTF_8).length > 512) return false;
+        return name.codePoints().anyMatch(c -> !Character.isWhitespace(c) && !Character.isSpaceChar(c));
+    }
     static boolean validVolume(String volume) {
         if (volume == null || volume.isEmpty()) return false;
         for (int i = 0; i < volume.length(); i++) {
@@ -106,10 +116,12 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
     }
     static String normalizedFolder(String path) {
         if (path == null || path.isEmpty() || path.startsWith("/") || path.indexOf('\\') >= 0 ||
-                path.indexOf('\0') >= 0) return null;
+                path.indexOf('\0') >= 0 || !StandardCharsets.UTF_8.newEncoder().canEncode(path)) return null;
         String normalized = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
         if (normalized.isEmpty()) return null;
-        for (String part : normalized.split("/", -1)) if (!fileName(part)) return null;
+        // The durable journal bounds each UTF-8 path component at 4096 bytes.
+        for (String part : normalized.split("/", -1))
+            if (!fileName(part) || part.getBytes(StandardCharsets.UTF_8).length > 4096) return null;
         return normalized + "/";
     }
     private static boolean selectedRow(Uri row, String volume) {
@@ -117,21 +129,34 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
         List<String> parts = row.getPathSegments();
         if (parts.size() != 4 || !volume.equals(parts.get(0)) || !"audio".equals(parts.get(1)) ||
                 !"media".equals(parts.get(2))) return false;
-        try { return Long.parseLong(parts.get(3)) > 0; }
+        String id = parts.get(3);
+        if (id.isEmpty() || !row.toString().equals("content://media/" + volume + "/audio/media/" + id))
+            return false;
+        for (int i = 0; i < id.length(); i++) if (id.charAt(i) < '0' || id.charAt(i) > '9') return false;
+        try { return Long.parseLong(id) > 0; }
         catch (NumberFormatException invalid) { return false; }
     }
     public Uri documentUri() { return row; }
+    /** The provider may choose a collision-safe name different from the request. */
+    public synchronized String observedDisplayName() throws IOException {
+        if (observedName == null) throw new IOException("Media row name not yet observed");
+        return observedName;
+    }
 
     private void requireOwnedState(boolean pending) throws IOException {
         if (!selectedRow(row, selectedVolume)) throw new IOException("Unexpected media row identity");
         String[] columns = {MediaStore.MediaColumns.OWNER_PACKAGE_NAME, MediaStore.MediaColumns.IS_PENDING,
             MediaStore.MediaColumns.RELATIVE_PATH, MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.MIME_TYPE};
         try (Cursor cursor = resolver.query(row, columns, null, null, null)) {
-            if (cursor == null || !cursor.moveToFirst() ||
-                    !ownerPackage.equals(cursor.getString(0)) || cursor.getInt(1) != (pending ? 1 : 0) ||
-                    !selectedFolder.equals(cursor.getString(2)) ||
-                    !fileName(cursor.getString(3)) || !selectedMime.equals(cursor.getString(4)) ||
-                    cursor.moveToNext()) throw new IOException("Media row owner/state unavailable or changed");
+            if (cursor == null || !cursor.moveToFirst())
+                throw new IOException("Media row owner/state unavailable or changed");
+            String name = cursor.getString(3);
+            if (!ownerPackage.equals(cursor.getString(0)) || cursor.getInt(1) != (pending ? 1 : 0) ||
+                    !selectedFolder.equals(cursor.getString(2)) || !journalName(name) ||
+                    (observedName != null && !observedName.equals(name)) ||
+                    !selectedMime.equals(cursor.getString(4)) || cursor.moveToNext())
+                throw new IOException("Media row owner/state unavailable or changed");
+            if (observedName == null) observedName = name;
         }
     }
 

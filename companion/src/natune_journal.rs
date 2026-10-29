@@ -47,6 +47,9 @@ pub struct Document {
     pub uri: String,
     pub bytes: u64,
     pub sha256: String,
+    /// Schema 3 records the actual provider-selected name after readback.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actual_display_name: Option<String>,
 }
 
 /// An observation supplied by the selected receiver's real owner, never a
@@ -344,7 +347,8 @@ impl<S: Store> Journal<S> {
                 next.destination = Some(uri.clone()); Stage::Destination
             }
             (Stage::Destination, Event::Verified { document }) if
-                next.destination.as_ref() == Some(&document.uri) && document.bytes == next.claim.source_bytes && hex64(&document.sha256) => {
+                next.destination.as_ref() == Some(&document.uri) && document.bytes == next.claim.source_bytes &&
+                hex64(&document.sha256) && document_name_matches(&next.claim, document) => {
                 next.document = Some(document.clone()); Stage::Verified
             }
             (Stage::Verified, Event::RemoteVerified { receipt }) if
@@ -388,9 +392,18 @@ fn media_store_selection(claim: &Claim, selected: &MediaStoreAudioSelection) -> 
         !subtype.is_empty() && subtype != "*" && subtype.bytes().all(|b| b.is_ascii_alphanumeric() ||
             matches!(b, b'!' | b'#' | b'$' | b'%' | b'&' | b'\'' | b'*' | b'+' | b'-' |
                 b'.' | b'^' | b'_' | b'`' | b'|' | b'~')));
-    volume_ok && folder_ok && mime_ok && !claim.requested_name.trim().is_empty() &&
-        claim.requested_name != "." && claim.requested_name != ".." && content_uri(&claim.destination_tree_uri) &&
+    volume_ok && folder_ok && mime_ok && media_display_name(&claim.requested_name) && content_uri(&claim.destination_tree_uri) &&
         claim.destination_tree_uri == format!("content://media/{}/audio/media", selected.volume)
+}
+fn media_display_name(name: &str) -> bool {
+    text(name,512) && !name.trim().is_empty() && name != "." && name != ".." && !name.contains(['/', '\\'])
+}
+fn document_name_matches(claim: &Claim, document: &Document) -> bool {
+    match (&claim.media_store_audio, &document.actual_display_name) {
+        (Some(_), Some(name)) => media_display_name(name),
+        (None, None) => true,
+        _ => false,
+    }
 }
 fn destination_matches(claim: &Claim, uri: &str) -> bool {
     match &claim.media_store_audio {
@@ -446,7 +459,7 @@ mod tests {
             source_bytes: 90, peak_bytes: 100, media_store_audio: None }
     }
     fn document() -> Document {
-        Document { uri: "content://fixture.documents/document/song".into(), bytes:90, sha256:"b".repeat(64) }
+        Document { uri: "content://fixture.documents/document/song".into(), bytes:90, sha256:"b".repeat(64), actual_display_name:None }
     }
     fn media_claim(digit: char) -> Claim {
         let mut c = claim(digit);
@@ -458,7 +471,8 @@ mod tests {
         c
     }
     fn media_document() -> Document {
-        Document { uri: "content://media/external_primary/audio/media/42".into(), ..document() }
+        Document { uri: "content://media/external_primary/audio/media/42".into(),
+            actual_display_name:Some("song (1).flac".into()), ..document() }
     }
     fn receipt() -> RemoteReceipt {
         RemoteReceipt { receiver_id:"public-fixture-receiver".into(), transfer_id:"public-fixture-transfer".into(),
@@ -500,6 +514,7 @@ mod tests {
         let mut restored=Journal::open(memory.clone(),1000).unwrap();
         let row=restored.snapshot(&c.operation_id).unwrap().unwrap();
         assert_eq!(row.claim,c); assert_eq!(row.schema,3);
+        assert_eq!(row.document.as_ref().unwrap().actual_display_name.as_deref(),Some("song (1).flac"));
         assert_eq!(row.stage,Stage::RemoteVerified); assert_eq!(restored.reserved_bytes().unwrap(),100);
         step(&mut restored,&c,Event::StageCleaned);
         drop(restored);
@@ -507,6 +522,26 @@ mod tests {
         assert_eq!(again.snapshot(&c.operation_id).unwrap().unwrap().stage,Stage::StagedRemotely);
         assert_eq!(again.snapshot(&c.operation_id).unwrap().unwrap().claim,c);
         assert_eq!(again.reserved_bytes().unwrap(),0);
+    }
+    #[test]
+    fn media_store_verified_name_is_required_and_legacy_documents_stay_unchanged() {
+        let legacy=document();
+        let legacy_json=serde_json::to_string(&legacy).unwrap();
+        assert!(!legacy_json.contains("actual_display_name"));
+        assert_eq!(serde_json::from_str::<Document>(&legacy_json).unwrap(),legacy);
+        let memory=Memory::default(); let c=media_claim('e'); let mut j=Journal::open(memory.clone(),1000).unwrap();
+        begin(&mut j,&c); step(&mut j,&c,Event::Destination{uri:media_document().uri});
+        for name in [None,Some("".into()),Some("../other".into()),Some("\u{00a0}".into()),Some("a".repeat(513))] {
+            let mut doc=media_document(); doc.actual_display_name=name;
+            assert!(j.record(&c.operation_id,Some(1),Event::Verified{document:doc}).is_err());
+        }
+        assert_eq!(memory.events.lock().unwrap().len(),2);
+        step(&mut j,&c,Event::Verified{document:media_document()});
+        let legacy_claim=claim('f'); begin(&mut j,&legacy_claim);
+        step(&mut j,&legacy_claim,Event::Destination{uri:document().uri});
+        let mut wrong=document(); wrong.actual_display_name=Some("song.flac".into());
+        assert!(j.record(&legacy_claim.operation_id,Some(1),Event::Verified{document:wrong}).is_err());
+        step(&mut j,&legacy_claim,Event::Verified{document:document()});
     }
     #[test]
     fn media_store_claim_rejects_mismatched_selection_before_persistence() {

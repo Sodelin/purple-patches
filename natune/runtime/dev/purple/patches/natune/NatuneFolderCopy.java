@@ -40,7 +40,7 @@ public final class NatuneFolderCopy {
                 VerifiedStreamCopy.SourceLease source,
                 TemporarySpaceBudget.Reservation reservation, Target target) throws IOException;
         void destination(String operationId, Uri actualReturnedUri) throws IOException;
-        void verified(String operationId, Uri actualReturnedUri,
+        void verified(String operationId, Uri actualReturnedUri, String actualDisplayName,
                 VerifiedStreamCopy.VerifiedCopy copy) throws IOException;
     }
 
@@ -50,7 +50,7 @@ public final class NatuneFolderCopy {
         public Target(String volume, String folder, String displayName, String audioMime) {
             String normalized = MediaStoreAudioDestination.normalizedFolder(folder);
             if (!MediaStoreAudioDestination.validVolume(volume) || normalized == null ||
-                    !MediaStoreAudioDestination.fileName(displayName) || !MediaStoreAudioDestination.audioMime(audioMime))
+                    !MediaStoreAudioDestination.journalName(displayName) || !MediaStoreAudioDestination.audioMime(audioMime))
                 throw new IllegalArgumentException("Invalid selected MediaStore target");
             this.volume = volume;
             this.folder = normalized;
@@ -151,7 +151,7 @@ public final class NatuneFolderCopy {
                         phase = Phase.PUBLISHED;
                         stop.check();
                         phase = Phase.VERIFIED_ENTERED;
-                        owner.verified(operationId, destination.documentUri(), copy);
+                        owner.verified(operationId, destination.documentUri(), destination.observedDisplayName(), copy);
                         phase = Phase.VERIFIED_RETAINED;
                         stop.check();
                         source.assertUnchanged();
