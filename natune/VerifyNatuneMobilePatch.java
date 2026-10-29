@@ -295,7 +295,7 @@ public final class VerifyNatuneMobilePatch {
                 byte[] a, b;
                 try (var input = source.getInputStream(entry)) { a = MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()); }
                 try (var input = patched.getInputStream(retained)) { b = MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()); }
-                need(MessageDigest.isEqual(a, b), "Original asset bytes changed");
+                need(MessageDigest.isEqual(a, b), "Original asset bytes changed: " + name);
                 preservedEntries++;
                 if (name.startsWith("lib/")) nativeFiles++;
                 if (name.startsWith("assets/")) assets++;

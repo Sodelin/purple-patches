@@ -45,6 +45,10 @@ The next verifier compares every added class and method to the actual compiled
 extension DEX, including compiler-generated classes, and still requires all
 original program and non-DEX resources to match. That run did not establish a
 complete static-preservation result or any Android execution.
+Run 40934581669 matched the compiled extension but stopped when an original
+non-DEX APK entry differed after resource patching. The next run records all
+changed public APK entry names/hashes and compares the Android manifest's
+compiled XML tree; the byte-preservation check has not been weakened.
 
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
 provide bounded streaming, full destination readback and the real Android SAF

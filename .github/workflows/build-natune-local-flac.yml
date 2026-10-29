@@ -123,6 +123,16 @@ jobs:
             --bytecode-mode FULL --validate --unsigned \
             --result-file dist/patch-result.json \
             --out "$RUNNER_TEMP/natune-patched.apk" "$RUNNER_TEMP/natune-original.apk"
+          python natune/compare_apk_resources.py "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-patched.apk" | tee dist/resource-differences.txt
+          AAPT2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -1)"
+          "$AAPT2" dump xmltree "$RUNNER_TEMP/natune-original.apk" --file AndroidManifest.xml > "$RUNNER_TEMP/original-manifest.txt"
+          "$AAPT2" dump xmltree "$RUNNER_TEMP/natune-patched.apk" --file AndroidManifest.xml > "$RUNNER_TEMP/patched-manifest.txt"
+          if cmp -s "$RUNNER_TEMP/original-manifest.txt" "$RUNNER_TEMP/patched-manifest.txt"; then
+            printf '%s\n' 'MANIFEST_XMLTREE identical=true' | tee dist/manifest-comparison.txt
+          else
+            printf '%s\n' 'MANIFEST_XMLTREE identical=false' | tee dist/manifest-comparison.txt
+            diff -u "$RUNNER_TEMP/original-manifest.txt" "$RUNNER_TEMP/patched-manifest.txt" | head -80 || true
+          fi
           mkdir -p "$RUNNER_TEMP/natune-verifier"
           javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-verifier" \
             natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneFlacCarrier.java
@@ -135,7 +145,7 @@ jobs:
           printf '%s\n' 'FLAC_JNI_SYMBOL present=true device_execution=false' > dist/native-jni-symbol.txt
           sha256sum .github/workflows/build-natune-local-flac.yml natune/materialize.py \
             natune/NatuneMobileDataPatch.kt natune/NatuneFlacFolderCarrierPatch.kt \
-            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneFlacCarrier.java \
+            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneFlacCarrier.java natune/compare_apk_resources.py \
             natune/target.json natune/fetch_target.py natune/verify_apk_metadata.py \
             natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
             natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
