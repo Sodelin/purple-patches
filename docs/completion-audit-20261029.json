@@ -1,17 +1,17 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: alpha.14 committed-input guard and source-time manifest; two hosted builds matched MPP bytes, exact-APK static inspection passed and artifacts were privately archived",
+  "current_turn_classification": "progress: alpha.16 selects a hosted Android 36 SDK view; two exact-source builds matched artifact member bytes, pinned-APK static inspection passed and both build ZIPs were privately archived",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",
     "subagents": "None used."
   },
   "gboard_evidence": {
-    "source_commit": "81f042630155be28730f6c0f08c9912d6b8c6b33",
-    "bundle": "gboard-alpha14-build-verification.json and gboard-alpha14-reproducibility.json: two hosted builds matched all member bytes; exact source/input hashes verified, outer ZIP wrappers differed.",
-    "apk": "gboard-alpha14-apk-verification.json: pinned public Gboard release signature checked and three patches applied; original API/native/asset inventory and preview/warning references checked statically.",
-    "custody": "GBOARD-ALPHA14-CUSTODY.md: private Drive ZIP full readback and MPP hash matched in memory; no disk restore or installation.",
+    "source_commit": "907a886adb8b2ff7bc8c3d8df86aef92c7134baa",
+    "bundle": "gboard-alpha16-reproducibility.json: two hosted builds matched every member byte and the observed Android 36 jar hash; committed overlay/input hashes and source-time manifest were checked. Outer ZIP wrappers differed; official SDK archive correspondence and future images/dependencies remain open.",
+    "apk": "gboard-alpha16-apk-verification.json: pinned public Gboard release signature checked and three patches applied; original API/native/asset inventory and preview/warning references checked statically.",
+    "custody": "GBOARD-ALPHA16-CUSTODY.md: both private Drive ZIPs passed full readback and extracted MPP hash checks in memory; no disk restore or installation.",
     "companion": "companion-022-dev6-verification.json: 45 public controls and Android ARM64 cross-build; the separate Drive upload outcome is uncertain.",
     "not_proven": "No actual keyboard/UI, microphone, full-v3 inference, Sol account request, installed behavior, stock-feature regression or rollback has been accepted."
   },
@@ -30,12 +30,12 @@
     "Full large-v3 acquisition and exact engine/model acceptance when the model hold is released, including meaningful latency, memory and cancellation checks.",
     "Editor composition, result retention across session ends, long dictation and actual user-directed preview/insertion behavior; alpha.12 copy-only behavior remains untested on Android.",
     "A finite authorized install/alongside-stock regression and rollback window with adequate measured storage headroom.",
-    "A verified maintained Morphe feed for the accepted version and actual Manager import/update; the currently published alpha.1 feed has a warning and is not alpha.14."
+    "A verified maintained Morphe feed for the accepted version and actual Manager import/update; the currently published alpha.1 feed has a warning and is not alpha.16."
   ],
   "storage_observation": {
-    "free_bytes": 5953245184,
-    "observed_utc": "2026-10-29T19:45Z",
+    "free_bytes": 5875113984,
+    "observed_utc": "2026-10-29T20:58:05Z",
     "qualification": "Concurrent user activity may change this snapshot. It is below the 20 GiB engineering reserve; no phone build or personal-media deletion follows."
   },
-  "next_action": "Continue independent Gboard source/recovery work, reconcile the existing expert route and preserve the exact owner boundaries; only perform model, installation or device actions if their named holds are released."
+  "next_action": "Advance caller-bound bootstrap and durable job recovery source design; obtain the already-prepared expert review through a verified existing route, and perform model, installation or device actions only after their named holds are released."
 }

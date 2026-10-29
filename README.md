@@ -51,6 +51,11 @@ time and refuses uncommitted or extra overlay inputs. Two [hosted builds](docs/g
 produced identical patch bytes on the observed runner image; a separate
 [static APK inspection](docs/gboard-alpha14-apk-verification.json) passed.
 The wider privacy, recovery, phone and release gates remain open.
+Alpha.16 restricts the hosted build's SDK view to Android 36 and pins its JDK
+and action references. Two [hosted builds](docs/gboard-alpha16-reproducibility.json)
+matched all artifact member bytes, and an [exact-APK static inspection](docs/gboard-alpha16-apk-verification.json)
+passed. SDK provenance and the same privacy, recovery, device and release gates
+remain open; this is not an installation recommendation.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining

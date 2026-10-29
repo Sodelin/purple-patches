@@ -69,11 +69,25 @@ SHA-256 was `9633f101e45ac3fc5888d8fb666e6d78226a58d74546729a2bf7626910495922`;
 main MPP SHA-256 was `068e3a27cdc9cddd6b487a1abfe224e1c28be07bdcceba12351756f24d68e1f5`.
 The inspected prediction did not instrument the plugin's actual selection.
 
-The proposed alpha.16 workflow at `tools/proposals/build-gboard-pinned.yml`
-uses a temporary hosted SDK view containing only the already-installed stable
-Android 36 platform, records its `android.jar` hash and checks that the view
-and bytes remain unchanged after the build. It also adds the source-integrity
-test to automatic push triggers. The runner image behind the label and the SDK
-and transitive dependency bytes are not independently pinned by this proposal.
-This is reviewable source until the actual workflow is updated and tested; it
-does not publish a release or change the phone.
+The alpha.16 workflow uses a temporary hosted SDK view containing only the
+already-installed Android 36 platform, records its `android.jar` hash and
+checks that the view and bytes remain unchanged after the build. It also adds
+the source-integrity test to automatic push triggers. The two
+[alpha.16 builds](gboard-alpha16-reproducibility.json) of source
+`907a886adb8b2ff7bc8c3d8df86aef92c7134baa` produced identical bytes for all
+seven artifact members, including the main, source and documentation MPPs.
+Their outer GitHub ZIP wrappers differed. Both runs reported the same SDK jar
+hash and Temurin `21.0.13+9`; plugin selection is inferred from its reviewed
+source and the one-platform view rather than measured inside the plugin. The
+separate [exact-APK inspection](gboard-alpha16-apk-verification.json) passed.
+
+Android's [SDK platform release notes](https://developer.android.com/tools/releases/platforms)
+identify API 36 as stable. Google's
+[repository metadata](https://dl.google.com/android/repository/repository2-1.xml),
+read 2026-10-29, lists multiple `platforms;android-36` packages, including
+`platform-36_r02.zip` and extension variants. The observed hosted jar has not
+been independently matched to any official archive. The moving runner image,
+SDK bytes and transitive dependencies are not all pinned; these two runs are
+not a promise of reproducibility on a future image. The private copies are
+documented in [GBOARD-ALPHA16-CUSTODY.md](GBOARD-ALPHA16-CUSTODY.md). The
+workflow does not publish a release or change the phone.

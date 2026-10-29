@@ -1,0 +1,42 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40953008751,
+  "workflow_source_commit": "907a886adb8b2ff7bc8c3d8df86aef92c7134baa",
+  "bundle_build_run": 40951874920,
+  "bundle_source_commit": "907a886adb8b2ff7bc8c3d8df86aef92c7134baa",
+  "bundle_version": "0.1.0-alpha.16",
+  "bundle_sha256": "6531359ac46889641bbb484853b8c1b7a84116844d9f68f7360154af6453973c",
+  "artifact_id": 12931604117,
+  "artifact_zip_bytes": 49122347,
+  "artifact_zip_sha256": "05327b76531b8ebbe7fc2628eac46b16d295e6d2d684a9fe9086c42b20f9a102",
+  "members": {
+    "SHA256SUMS": {"bytes": 354, "sha256": "2994797b4854240208ef1aa5aa9f0736217488fb3e20809c1001a0d7f8dda9a8"},
+    "build-run.json": {"bytes": 152, "sha256": "3e65e4d8ee00ab5ea331b916a89b310630b1cc69117cf01d2a05163e25c0aba3"},
+    "gboard-patch-result.json": {"bytes": 401, "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"},
+    "gboard-purple-unsigned.apk": {"bytes": 84557618, "sha256": "63f9607730df8ef042058cfd5169d5789ae11a66bbb37bec3bc88031f5ecba25"},
+    "purple-provenance.json": {"bytes": 2795, "sha256": "f998fbfe811ac2fe8148d2398707d9179c92b1e962d3ac8c32f70bab6729c0e1"}
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified_by_workflow": true
+  },
+  "applied_patches": ["Add Gboard Signature Bypass", "Whisper 3 dictation and AI Translate", "Package Rename"],
+  "hosted_static_verification": {
+    "original_classes_retained": 22860,
+    "output_classes": 26029,
+    "original_method_signatures_retained": 118230,
+    "original_field_signatures_retained": 85104,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "synthetic_negative_controls": "passed for selected editor, policy and linkage checks",
+    "limitations": "Static DEX references, signatures and byte inventories do not prove Android behavior, privacy, cancellation, recovery or real account availability. The candidate still sends its bootstrap bearer through Termux stdout."
+  },
+  "independent_artifact_verification": "ZIP held in memory and each member streamed and hashed; checksum list, successful build source, version and upstream provenance matched.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7
+}

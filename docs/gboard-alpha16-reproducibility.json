@@ -1,0 +1,39 @@
+{
+  "schema": "purple.hosted-reproducibility.v1",
+  "source_commit": "907a886adb8b2ff7bc8c3d8df86aef92c7134baa",
+  "version": "0.1.0-alpha.16",
+  "manifest_timestamp_ms": 1793306718000,
+  "workflow_runs": [40951874920, 40952582514],
+  "artifact_ids": [12931467851, 12931224342],
+  "outer_zip_sha256": [
+    "f81d657f142d5d2b31c7989bf02dc1bfca0d2673d84633e256baeb0ba38ca281",
+    "92b6cb89851c12ca93f761bbe2944df665625b012c17ab24c1d62707b3017424"
+  ],
+  "outer_zip_bytes": [15478674, 15478674],
+  "outer_zip_bytes_identical": false,
+  "members_sha256": {
+    "SHA256SUMS": "da3cf4054fe0d7622bad834fc22aa92c6875985093c23b7d0456792d767d2c7c",
+    "patches-0.1.0-alpha.16-javadoc.mpp": "e1aee9c081bef49618a35e6fe10d7add5e14298b10934e68c9c85c782bd6f43b",
+    "patches-0.1.0-alpha.16-sources.mpp": "078377453ea5abedba0b67696bf5bc0de7da6d36b2708b1bbac0d11539a21fc2",
+    "patches-0.1.0-alpha.16.mpp": "6531359ac46889641bbb484853b8c1b7a84116844d9f68f7360154af6453973c",
+    "patches-bundle.json": "473acf57bcb8a3060f3d5d50b57a506325b23d2d0d51585ed0cce208b1d17f40",
+    "patches-list.json": "7b3c2e831e038124a4bb493474620f9a88f7fdb03a109d77521be3f88843aadc",
+    "purple-provenance.json": "f998fbfe811ac2fe8148d2398707d9179c92b1e962d3ac8c32f70bab6729c0e1"
+  },
+  "different_members": [],
+  "all_members_identical": true,
+  "overlay_files_verified": 11,
+  "build_inputs_verified": 5,
+  "runner": "ubuntu-24.04 label; runner image may change",
+  "jdk": "Temurin 21.0.13+9",
+  "sdk": {
+    "view": "Only existing runner platforms/android-36 was exposed to the reviewed plugin selection path.",
+    "observed_android_jar_sha256_in_both_runs": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a",
+    "post_build_path_and_hash_check": "passed in both runs",
+    "selection_evidence": "Plugin source and the one-platform view; selection was not instrumented in the plugin.",
+    "official_archive_correspondence": "not verified"
+  },
+  "limits": "Two hosted builds only. Future runner image, SDK bytes and transitive dependencies, Android behavior and release acceptance remain separate.",
+  "phone_or_model_action": false,
+  "release_published": false
+}
