@@ -63,3 +63,16 @@ The41 controls cover mixed-size boundary admission, unknown/overflow sizes,
 concurrent admission, retained charges after copy/provider/stop failure,
 consumed IDs, reentrant cleanup and a complete actual copy/readback. They do
 not prove real Android allocation or restart recovery.
+
+NatuneCoroutineStop binds the retained original public continuation/context/job
+check ABI. It preserves the original cancellation exception and combines it
+with a required caller-supplied owner/headroom check. No original Job/context is
+reconstructed, and no private reflection or default non-stopped owner is used.
+Run40897610592 at96f368cb53dd4e7034513adb42ad76f9ed24c901 passed10 new
+coroutine bridge controls,49 copy,46 cache and41 budget controls plus Android
+SAF SDK compilation. ../coroutine-stop-verification.json records complete artifact
+and immutable-source hash readback. The cancellation tests use public ABI
+stand-ins, including a late cancellation in the actual copy implementation;
+no original Android coroutine or installed APK callsite has executed this code.
+The source-level manager/transport settlement audit is separately retained in
+../removal-lifecycle-source-review.json and ../CACHE-SOURCE-BINDING.md.

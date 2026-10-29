@@ -173,3 +173,9 @@ PRDownloader's DownloadRequestLifetime.cancel immediately releases its latch;
 cleanup may happen on a later completion callback. Pausing competing downloads
 must therefore verify final staging disposition, not equate latch release with
 returned disk space. Reservation cleanup stays charged through uncertainty.
+
+Hosted cancellation bridge verification: run40897610592 at
+96f368cb53dd4e7034513adb42ad76f9ed24c901 passed10 new context/stop/copy controls,
+with the existing49 copy/46 cache/41 budget controls and Android SDK compile.
+coroutine-stop-verification.json pins the fully read-back artifact and sources.
+These controls do not bind the actual UI, original Android Job or remover.
