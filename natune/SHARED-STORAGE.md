@@ -199,3 +199,10 @@ re-resolve a moved file through a network source on a local-access failure.
 shared-document-playback-source-review.json retains the exact source bodies'
 hashes and selected lines. This is source and request-conversion evidence,
 not phone playback acceptance or an installed Move action.
+
+Hosted run40900141658 at7e10a53f1433737cb4b333e159da732609ab81e3 passed43 native
+request controls, including the20 new shared-document cases, plus49 copy,
+46 cache,41 budget and10 coroutine controls and real Android SAF compilation.
+shared-document-request-verification.json retains full artifact/source hash
+readback. The native request/URI classes in those controls are ABI stand-ins;
+no actual grant, document, installed native router or phone playback was tested.

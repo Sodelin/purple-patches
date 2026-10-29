@@ -1,0 +1,46 @@
+{
+  "schema": "purple.natune.shared-document-request-verification.v1",
+  "source_commit": "7e10a53f1433737cb4b333e159da732609ab81e3",
+  "run_id": 40900141658,
+  "run_url": "https://github.com/Sodelin/purple-patches/actions/runs/40900141658",
+  "conclusion": "success",
+  "artifact_id": 12908851557,
+  "artifact_zip_sha256": "071e046976900f7f567bb814fdf53ca27feb68c5b329e9baa60a34b372cce8e8",
+  "member_hashes_verified": true,
+  "source_hashes_verified_against_run_commit": {
+    "natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java": "6442f778d2183388b14423f2c1a543a8ef39f4ee20f7684985416f539cde8e26",
+    "natune/NatuneDataSpecBinding.java": "5f32a8087bdc64f519179ccc2f50bad8854a06a92cefa6029bc2057743e35a67",
+    "natune/NatuneDataSpecBindingControls.java": "cb836b3a47b0a240142daf064060ce44e66ddc290059c6394d1b46711b903c7b",
+    "natune/test-fixtures/android/net/Uri.java": "00a3223e73beaffaa8076369ccf403db3972ce83c4457a7ca1347ff6f89a5515",
+    "natune/test-fixtures/r8/km2.java": "3934591a234c6a84ddd2cf00de1f21cd6edb538192ad5daf7f5e7dc539ca35a4",
+    "natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java": "4541f50631426c0fb696958101db723c77f5ee7ff61c2ea45672e4f600847c1f",
+    "natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java": "726a4cdb7f7d29772fadd1c436cdcbcdfbc52af35a5cbbedf091d521b6afee7a",
+    "natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java": "e00050a8ef42ed845c74325343ce53a45a52aa4e2832a9552bb4f4d51c51445d",
+    "natune/runtime/dev/purple/patches/natune/NatuneCoroutineStop.java": "01063defc6a12b288dcffd732e411e9bdf1ae0cb3157373dcfe2ba92cfc030cd",
+    "natune/storage-tests/VerifiedStreamCopyControls.java": "0a5de774e3d7f311c4719cf2d045621a86b04830b3c5ccbadd4af29c58001f46",
+    "natune/storage-tests/NatuneCachedSourceControls.java": "4dd0c641d5846d64c1085ea8cc6dff30c6d892ed72bda8c0e70ecba9478f0e47",
+    "natune/storage-tests/TemporarySpaceBudgetControls.java": "04c293e2cf75a3722d586fbcfc50e598f91448af23385409d899e601f3e0b148",
+    "natune/storage-tests/NatuneCoroutineStopControls.java": "d8ffea000b6f664519a289b0208c77c43f5e307bbc779e9f5bb6a49b3344ea04",
+    "natune/storage-tests/fixtures/r8/c7b.java": "7d59cf63033d4daa6ed425414464a993593a1bf73f4ad093c62445f9f7b0f8b3",
+    "natune/storage-tests/fixtures/r8/cf2.java": "5da33bbdf325d2a58f99f76da186192930d66fcc39f70aa06d0f794af110bc91",
+    "natune/storage-tests/fixtures/r8/d7b.java": "6d46427b161399a8f9bb61cf7a79b2d03754700cbf7844202b61704d8396412f",
+    "natune/storage-tests/fixtures/r8/dd6.java": "f59ca1da0b2bc710e532364f72d357bdd363a0f16162cb9aef029532b2b403c7",
+    "natune/storage-tests/fixtures/r8/vu2.java": "69f37a8775629904d65429e5bdead309a961ea7e2e165868023435ef0c16dc4c",
+    "natune/storage-tests/fixtures/r8/w21.java": "f86c80e2f9c375736c2d00eda8edc768968a6e362c72ece747d8d1d93079fdd1",
+    "natune/storage-tests/fixtures/r8/yg2.java": "fdc5633aa63eb2be72fd4918a88348de7a28434de7b0bc94b46fa498b23ce89b"
+  },
+  "reports": {
+    "cache-source-controls.txt": "NATUNE_CACHE_SOURCE_CONTROLS passed=46 owners=public_fixture_stand_ins apk_hook=false device_cache_test=false source_removal=false",
+    "coroutine-stop-controls.txt": "NATUNE_COROUTINE_STOP_CONTROLS passed=10 original_android_job=false apk_hook=false deletion=false",
+    "android-saf-compile.txt": "ANDROID_SAF_COMPILE passed=true device_provider_test=false apk_binding=false",
+    "shared-document-request-controls.txt": "NATUNE_DATASPEC_CONTROLS\tpassed=43\tandroid_fixture_only=true\tapp_authority=false",
+    "stream-copy-controls.txt": "VERIFIED_STREAM_COPY_CONTROLS passed=49 android_owner_binding=false source_removal=false installed_ui=false",
+    "temporary-budget-controls.txt": "TEMPORARY_SPACE_BUDGET_CONTROLS passed=41 android_headroom=false cleanup_owner_binding=false durable_recovery=false apk_hook=false"
+  },
+  "limits": [
+    "Native DataSpec request conversion exercised against explicit public r8/Android ABI stand-ins, not an installed Android source or actual SAF document.",
+    "No durable original-ID/rendition map, URI grant, pre-router APK hook or map-aware prefetch/error recovery has been bound.",
+    "Android SAF SDK compile only. No actual playback, cache removal, app/private-data access, install, model or device action.",
+    "Existing full Move, direct-download, Gboard and broader patch acceptance remains incomplete; these controls do not establish a storage release."
+  ]
+}
