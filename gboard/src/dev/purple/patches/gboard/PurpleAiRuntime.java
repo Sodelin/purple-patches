@@ -106,7 +106,7 @@ public final class PurpleAiRuntime {
             if (ime.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 permissions(ime); return;
             }
-            submit(anchor, null);
+            submit(anchor, null, null);
         } else {
             if (!SessionPolicy.bounded(anchor.selected)) { notifyUser("Select up to 8 KiB of text to translate"); return; }
             java.util.SortedMap<String,String> languages = new java.util.TreeMap<>();
@@ -118,9 +118,21 @@ public final class PurpleAiRuntime {
             String[] codes = languages.values().toArray(new String[0]);
             show(new AlertDialog.Builder(ime).setTitle("Translate to…")
                     .setItems(labels, (d, which) -> {
-                        if (anchor.matches(service.get(), generation)) submit(anchor, codes[which]);
+                        if (anchor.matches(service.get(), generation)) chooseTranslationEffort(anchor, codes[which]);
                     }).setNegativeButton("Cancel", null).create());
         }
+    }
+    private static void chooseTranslationEffort(Snapshot anchor, String language) {
+        InputMethodService ime = service.get();
+        if (ime == null || !anchor.matches(ime, generation)) return;
+        String[] labels = {"Medium", "Max"};
+        String[] efforts = {"medium", "max"};
+        show(new AlertDialog.Builder(ime).setTitle("Sol 6.1 reasoning")
+                .setItems(labels, (d, which) -> {
+                    if (which < 0 || which >= efforts.length) return;
+                    if (anchor.matches(service.get(), generation)) submit(anchor, language, efforts[which]);
+                    else notifyUser("The selection changed; select text again");
+                }).setNegativeButton("Cancel", null).create());
     }
     private static void permissions(Context context) {
         try { context.startActivity(new Intent().setClassName(context.getPackageName(),
@@ -168,8 +180,9 @@ public final class PurpleAiRuntime {
             notifyUser("Local tools connected. Choose Whisper or Translate.");
         } catch (Exception ignored) { bridge = null; notifyUser("Local tools could not connect"); }
     }
-    private static void submit(Snapshot anchor, String language) {
+    private static void submit(Snapshot anchor, String language, String effort) {
         InputMethodService ime = service.get();
+        if (language == null ? effort != null : !SessionPolicy.translationEffortAllowed(effort)) return;
         if (ime == null || !anchor.matches(ime, generation) || !busy.compareAndSet(false, true)) return;
         final long request = ++operation;
         AtomicBoolean stopped = new AtomicBoolean(); cancellation = stopped;
@@ -198,7 +211,7 @@ public final class PurpleAiRuntime {
                     MAIN.post(() -> { if (!stopped.get()) progress.setMessage("Recording — tap Stop when finished"); });
                     audio = recorder.record(stopped);
                 }
-                String text = currentBridge.execute(voice ? "transcribe" : "translate", anchor.selected, language, audio, stopped);
+                String text = currentBridge.execute(anchor.selected, language, effort, audio, stopped);
                 MAIN.post(() -> {
                     if (request != operation || stopped.get() || !anchor.matches(service.get(), generation)) return;
                     dismiss();

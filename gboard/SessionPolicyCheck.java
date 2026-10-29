@@ -56,6 +56,10 @@ public class SessionPolicyCheck {
         check(SessionPolicy.whisperPreflightSupported("full-v3-pin-engine-sha-v1"));
         for (String value : new String[]{null,"","full-v3-pin-engine-sha-v0","memory-only-v1"})
             check(!SessionPolicy.whisperPreflightSupported(value));
+        check(SessionPolicy.translationEffortAllowed("medium"));
+        check(SessionPolicy.translationEffortAllowed("max"));
+        for (String value : new String[]{null,"","low","high","MAX","ultra"})
+            check(!SessionPolicy.translationEffortAllowed(value));
         String companion = java.nio.file.Files.readString(java.nio.file.Path.of("companion/src/whisper.rs"));
         check(companion.contains("pub const PREFLIGHT_CAPABILITY: &str = \"" + SessionPolicy.WHISPER_PREFLIGHT + "\";"));
         for (Object err:new Object[]{null,0,1,"-1"}) check(!SessionPolicy.bootstrapSuccess(0,err));

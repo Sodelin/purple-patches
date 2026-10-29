@@ -13,6 +13,8 @@ its [hosted bundle](docs/gboard-alpha5-build-verification.json) and
 the newer companion's explicit voice-preflight capability. These
 candidates have not passed device acceptance or replaced the public feed.
 See [editor snapshot safety](docs/EDITOR-SNAPSHOT.md) before using the candidate.
+The alpha.6 source adds a per-translation Medium/Max reasoning choice; it has
+not yet passed its own hosted build or phone acceptance.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining

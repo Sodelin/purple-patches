@@ -20,6 +20,9 @@ public final class SessionPolicy {
     public static boolean whisperPreflightSupported(String advertised) {
         return WHISPER_PREFLIGHT.equals(advertised);
     }
+    public static boolean translationEffortAllowed(String effort) {
+        return "medium".equals(effort) || "max".equals(effort);
+    }
     public static boolean bounded(String value) {
         return value != null && !value.trim().isEmpty()
                 && value.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= TEXT_BYTES;
