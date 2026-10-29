@@ -1,0 +1,23 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "source_commit": "5390b3bc26ec943697886714ff8c0b3b117f89ac",
+  "local_source_commit": "6a9378b338106e762f68348b29ef58a3fa04e231",
+  "shared_source_tree": "df40750319b6c965fc17d884506ba33203c5f63d",
+  "version": "0.1.0-alpha.21",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "workflow_runs": [40971506354, 40971917468],
+  "artifact_ids": [12939853573, 12941111496],
+  "artifact_zip_bytes": [15581189, 15581189],
+  "artifact_zip_sha256": ["69032403dcbde3295def24cb6da705d555e6a00874c3435c5d1d7ba44a021b6e", "91e99d2026eabe839915771245fb12d9bd3adfb57e262f618dc7ea7d0433c1b9"],
+  "main_mpp_sha256": "97bf0b56b2a3e982bd1707711e4174eac24e5989834ff7c30e51ea79960dc778",
+  "all_seven_artifact_members_identical": true,
+  "outer_zip_bytes_identical": false,
+  "overlay_files_verified": 28,
+  "build_inputs_verified": 5,
+  "android_36_jar_sha256_both_runs": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a",
+  "checks": "The actual BridgeClient used Proxy.NO_PROXY for synthetic GET and POST requests intercepted by a fake URL handler; no socket was opened. The materialized upstream access-point control also passed. All seven members, checksums, source-input hashes, timestamp, version and provenance were compared in memory.",
+  "earlier_failure": "Run 40971360001 failed the direct-proxy assertion against the prior no-argument openConnection source. This was a synthetic handler control, not an observed Android proxy or leak.",
+  "limitations": "Two hosted builds and synthetic controls do not establish Android routing, private bootstrap, stock keyboard behavior, actual model use or release acceptance.",
+  "release_published": false,
+  "device_accepted": false
+}

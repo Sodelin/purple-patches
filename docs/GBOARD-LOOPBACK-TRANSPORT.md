@@ -15,7 +15,11 @@ fixture invokes the actual `BridgeClient.request` for synthetic GET and POST
 requests using a fake URL handler and synthetic token; it opens no socket or
 listener. The previous source failed the direct-proxy assertion in
 [run 40971360001](https://github.com/Sodelin/purple-patches/actions/runs/40971360001).
-Verification of the corrected bundle and APK is recorded separately when complete.
+Two corrected builds passed the control and produced identical artifact members;
+see [build verification](gboard-alpha21-build-verification.json). The
+[APK inspection](gboard-alpha21-apk-verification.json) found the direct-proxy
+references and rejected the earlier alpha.20 output as a negative control.
+That static check is not a data-flow or Android routing proof.
 
 This bypasses the Java proxy selector for these loopback requests. It does not
 prove Android runtime routing, protect against all local processes or network

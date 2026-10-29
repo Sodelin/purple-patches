@@ -76,8 +76,10 @@ Alpha.20 adds an access-point fallback for a missing or incompatible optional
 dependency. Its [hosted controls and two-build comparison](docs/gboard-alpha20-build-verification.json)
 and [exact-APK static checks](docs/gboard-alpha20-apk-verification.json) passed;
 it has not passed Android acceptance or replaced the public feed.
-Alpha.21 source explicitly bypasses the Java proxy selector for local bridge
-requests; its hosted verification is in progress. See [loopback transport](docs/GBOARD-LOOPBACK-TRANSPORT.md).
+Alpha.21 explicitly bypasses the Java proxy selector for local bridge requests;
+its [hosted controls and two-build comparison](docs/gboard-alpha21-build-verification.json)
+and [exact-APK static checks](docs/gboard-alpha21-apk-verification.json) passed.
+See [loopback transport](docs/GBOARD-LOOPBACK-TRANSPORT.md).
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
@@ -119,7 +121,7 @@ Gboard bundle and actual phone behavior. The candidate has its own version;
 its selected update feed points only at the exact own versioned MPP, never an upstream binary.
 
 The published candidate prerelease and the verified local copy in
-`Download/Purple-Patches/` are the older alpha.1, not alpha.20. The public feed
+`Download/Purple-Patches/` are the older alpha.1, not alpha.21. The public feed
 warns against installing alpha.1. See [candidate delivery](docs/MORPHE-SOURCE.md)
 and the [local readback record](docs/local-patch-delivery.json).
 

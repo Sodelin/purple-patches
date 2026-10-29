@@ -1,0 +1,42 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40972359801,
+  "workflow_source_commit": "1be2420ec363ba6513c2d25db1f35e861e5bcc5f",
+  "bundle_build_run": 40971506354,
+  "bundle_source_commit": "5390b3bc26ec943697886714ff8c0b3b117f89ac",
+  "bundle_version": "0.1.0-alpha.21",
+  "bundle_sha256": "97bf0b56b2a3e982bd1707711e4174eac24e5989834ff7c30e51ea79960dc778",
+  "artifact_id": 12940368682,
+  "artifact_zip_bytes": 49127256,
+  "artifact_zip_sha256": "981f12b069b01178559d6f37a81391af787983a95a5148c53a125c12a7b92ed8",
+  "unsigned_apk_bytes": 84559102,
+  "unsigned_apk_sha256": "1ff758517fa449e4ff63a4b3bc56711956001640072d570c17c430e94e5ddb42",
+  "input": {
+    "origin": "APKMirror supported release; expected Google signer certificate matched the apksigner output",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402"
+  },
+  "applied_patches": ["Add Gboard Signature Bypass", "Whisper 3 dictation and AI Translate", "Package Rename"],
+  "output_clone_package": "dev.jason.com.google.android.inputmethod.latin",
+  "static_preservation": {
+    "minimum_android_api": 26,
+    "original_classes_retained": 22860,
+    "output_classes": 26031,
+    "original_method_signatures_retained": 118230,
+    "original_field_signatures_retained": 85104,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140
+  },
+  "direct_loopback": "The BridgeClient request DEX contains Proxy.NO_PROXY and exactly one URL.openConnection(Proxy) reference, with no other openConnection overload in that method; its constructor references the local-endpoint policy. The independently hash-checked alpha.20 output was rejected by this verifier. These are references, not DEX data-flow or Android routing proof.",
+  "access_point_fallback": "The selected LinkageError guards remain present; the independently hash-checked alpha.19 output was rejected by that verifier.",
+  "historical_controls": "The historical APK checks were explicitly requested for this run. They are optional for future runs because GitHub artifact retention is finite.",
+  "dispatch_note": "An initial gh CLI attempt rejected a JSON boolean before dispatch; the accepted dispatch used the CLI's required string value for the boolean input.",
+  "network_observation_sha256": "5d85741f46f658d16d14ee234fd0601e4aee0b0c947ae25b8bc637ab9bb4fd3d",
+  "network_observation": "Original generated name absent; explicit false base and only IPv4 loopback allowed in compiled XML. This is a static exact-target observation, not Android effective policy.",
+  "independent_readback": "The complete artifact ZIP and all five checksum-listed members were streamed and hashed in memory; member set, selected build identity, version, provenance and patch-result fields were inspected.",
+  "limitations": "The APK is unsigned and was not installed. This inspection does not compare every original resource or method body, establish runtime routing/action registration, exercise microphone/model/CLI, or close privacy and recovery holds.",
+  "installed": false,
+  "signed": false,
+  "device_accepted": false
+}
