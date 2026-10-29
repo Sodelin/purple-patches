@@ -7,6 +7,7 @@ on:
       - 'gboard/**'
       - 'tools/materialize.py'
       - 'tools/bundle_feed.py'
+      - 'tools/check_materialization.py'
       - 'tools/version.txt'
       - '.github/workflows/build.yml'
 permissions:
@@ -28,21 +29,31 @@ jobs:
         with:
           distribution: temurin
           java-version: '21.0.13+9'
-      - name: Record selected toolchain inputs
+      - name: Select existing stable Android 36 platform
         run: |
           java -version
           python - <<'PY'
           import hashlib, json, os
           from pathlib import Path
-          platforms=Path(os.environ['ANDROID_HOME'])/'platforms'
-          candidates=[p for p in platforms.iterdir() if p.is_dir() and (p/'android.jar').exists()]
-          if not candidates: raise SystemExit('Android platform jar unavailable')
-          selected=max(candidates,key=lambda p:p.name)
-          if not (selected/'android.jar').is_file(): raise SystemExit('Selected Android platform jar is not a file')
-          with (selected/'android.jar').open('rb') as stream:
+          sdk=Path(os.environ['ANDROID_HOME']).resolve(strict=True)
+          platform=sdk/'platforms'/'android-36'
+          jar=platform/'android.jar'
+          if not jar.is_file(): raise SystemExit('Existing stable Android 36 platform unavailable')
+          with jar.open('rb') as stream:
               digest=hashlib.file_digest(stream,'sha256').hexdigest()
-          print(json.dumps({'android_home_candidate_platform':selected.name,'android_jar_sha256':digest,
-                            'limits':'Prediction from ANDROID_HOME before build; local.properties or environment changes may select another SDK'}))
+          shim=Path(os.environ['RUNNER_TEMP'])/'purple-sdk-36'
+          shim.mkdir()
+          for child in sdk.iterdir():
+              if child.name!='platforms':(shim/child.name).symlink_to(child,target_is_directory=child.is_dir())
+          (shim/'platforms').mkdir()
+          (shim/'platforms'/'android-36').symlink_to(platform,target_is_directory=True)
+          values={'ANDROID_HOME':str(shim),'ANDROID_SDK_ROOT':str(shim),
+                  'PURPLE_ANDROID36_SHA256':digest,'PURPLE_ANDROID36_REAL':str(platform.resolve())}
+          if any('\n' in value or '\r' in value for value in values.values()):raise SystemExit('Invalid SDK path')
+          with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as env:
+              for key,value in values.items():env.write(key+'='+value+'\n')
+          print(json.dumps({'platform':'android-36','android_jar_sha256':digest,
+                            'scope':'Existing runner SDK; no SDK download or phone installation'}))
           PY
       - name: Feed metadata controls
         run: python tools/bundle_feed.py --check
@@ -67,6 +78,19 @@ jobs:
           cd "$RUNNER_TEMP/gboard-upstream"
           chmod +x gradlew
           ./gradlew --no-daemon :patches:buildAndroid :patches:generatePatchesList
+          python - <<'PY'
+          import hashlib, os
+          from pathlib import Path
+          if Path('local.properties').exists():raise SystemExit('Unexpected local.properties SDK override')
+          sdk=Path(os.environ['ANDROID_HOME']);platforms=sdk/'platforms'
+          candidates=[p for p in platforms.iterdir() if p.is_dir() and (p/'android.jar').exists()]
+          if len(candidates)!=1 or candidates[0].name!='android-36':raise SystemExit('Android platform selection changed')
+          if str(candidates[0].resolve())!=os.environ['PURPLE_ANDROID36_REAL']:raise SystemExit('Android platform target changed')
+          with (candidates[0]/'android.jar').open('rb') as stream:
+              if hashlib.file_digest(stream,'sha256').hexdigest()!=os.environ['PURPLE_ANDROID36_SHA256']:
+                  raise SystemExit('Android platform bytes changed during build')
+          print('Stable Android 36 SDK path and jar remained unchanged; plugin selection is source-derived.')
+          PY
           mkdir -p "$GITHUB_WORKSPACE/dist"
           cp patches/build/libs/*.mpp "$GITHUB_WORKSPACE/dist/"
           cp patches-list.json patches-bundle.json purple-provenance.json "$GITHUB_WORKSPACE/dist/"

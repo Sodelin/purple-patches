@@ -60,12 +60,20 @@ than `+00:00`. Its source-integrity refusal fixture passed; no bundle was
 built. The corrected test compares parsed instants and keeps this failure as
 history rather than counting it as a successful build.
 
-The proposed alpha.15 workflow at `tools/proposals/build-gboard-pinned.yml`
-selects the observed `ubuntu-24.04` label, exact Temurin `21.0.13+9`, and the
-three action commit hashes observed in both alpha.14 builds. It records the
-`ANDROID_HOME` platform `android.jar` the reviewed Morphe plugin would select,
-and its SHA-256; it does not instrument the actual later plugin selection.
-The runner image behind the label, the SDK bytes and transitive dependencies
-still require verification; recording the SDK hash is not an SDK pin. This is
-reviewable source only until the actual workflow is updated and tested. It
+The alpha.15 workflow selected the observed `ubuntu-24.04` label, exact Temurin
+`21.0.13+9`, and the three action commit hashes observed in both alpha.14 builds.
+Its hosted build `40951142999` succeeded, but its `ANDROID_HOME` platform
+inspection predicted `android-37.2-beta3` because the pinned Morphe plugin picks
+the lexicographically greatest available platform. The resulting artifact ZIP
+SHA-256 was `9633f101e45ac3fc5888d8fb666e6d78226a58d74546729a2bf7626910495922`;
+main MPP SHA-256 was `068e3a27cdc9cddd6b487a1abfe224e1c28be07bdcceba12351756f24d68e1f5`.
+The inspected prediction did not instrument the plugin's actual selection.
+
+The proposed alpha.16 workflow at `tools/proposals/build-gboard-pinned.yml`
+uses a temporary hosted SDK view containing only the already-installed stable
+Android 36 platform, records its `android.jar` hash and checks that the view
+and bytes remain unchanged after the build. It also adds the source-integrity
+test to automatic push triggers. The runner image behind the label and the SDK
+and transitive dependency bytes are not independently pinned by this proposal.
+This is reviewable source until the actual workflow is updated and tested; it
 does not publish a release or change the phone.
