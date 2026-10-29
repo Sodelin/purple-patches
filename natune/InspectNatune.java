@@ -6,6 +6,8 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction;
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
@@ -50,6 +52,12 @@ public final class InspectNatune {
             var row=new StringBuilder("CODEC_NODE\t"+offset+"\t"+instruction.getOpcode().name());
             if(instruction instanceof OneRegisterInstruction r)row.append("\tA=").append(r.getRegisterA());
             if(instruction instanceof TwoRegisterInstruction r)row.append("\tB=").append(r.getRegisterB());
+            if(instruction instanceof FiveRegisterInstruction r)row.append("\targc=").append(r.getRegisterCount())
+                .append("\tC=").append(r.getRegisterC()).append("\tD=").append(r.getRegisterD())
+                .append("\tE=").append(r.getRegisterE()).append("\tF=").append(r.getRegisterF())
+                .append("\tG=").append(r.getRegisterG());
+            if(instruction instanceof RegisterRangeInstruction r)row.append("\targc=").append(r.getRegisterCount())
+                .append("\tstart=").append(r.getStartRegister());
             if(instruction instanceof WideLiteralInstruction r)row.append("\tliteral=").append(r.getWideLiteral());
             if(instruction instanceof OffsetInstruction r)row.append("\ttarget=").append(offset+r.getCodeOffset());
             if(instruction instanceof ReferenceInstruction r) {
@@ -169,6 +177,84 @@ public final class InspectNatune {
         System.out.println("STREAM_TOTAL\tsources=" + sources.size() + "\tinterfaces=" + interfaces + "\tfactories=" + factories);
         inspectCodecHooks(classes);
         inspectStorageHooks(classes);
+        inspectRemovalGraph(classes);
+    }
+
+    /**
+     * Locate the actual exact-release Cache.removeResource callsites and their
+     * program callers. This emits public descriptors and selected code only;
+     * it does not read user cache keys, APK private state or arbitrary strings.
+     */
+    static void inspectRemovalGraph(Map<String,ClassDef> classes) {
+        var removers = new TreeMap<String,Method>();
+        for (var clazz : classes.values()) for (var method : clazz.getMethods()) {
+            var body = method.getImplementation();
+            if (body == null) continue;
+            for (var instruction : body.getInstructions()) {
+                if (!(instruction instanceof ReferenceInstruction r) ||
+                    !(r.getReference() instanceof MethodReference ref)) continue;
+                if (ref.getDefiningClass().equals("Lr8/td1;") && ref.getName().equals("l") &&
+                    String.join("",ref.getParameterTypes()).equals("Ljava/lang/String;") &&
+                    ref.getReturnType().equals("V")) {
+                    removers.put(signature(method),method);
+                }
+            }
+        }
+        if (removers.isEmpty() || removers.size() > 64)
+            throw new IllegalStateException("Exact cache-removal graph unavailable or unexpectedly broad");
+        var dispatched = new TreeSet<String>(removers.keySet());
+        var owners = new TreeSet<String>();
+        for (var entry : removers.entrySet()) {
+            var method = entry.getValue();
+            var owner = classes.get(method.getDefiningClass());
+            if (owner == null) throw new IllegalStateException("Removal owner unavailable");
+            owners.add(owner.getType());
+            System.out.println("CACHE_REMOVE_SITE\t" + entry.getKey());
+            codecBody(method, 300);
+            // Calls through the exact direct interfaces are separate references
+            // after R8; include matching interface declarations for caller scan.
+            for (String type : owner.getInterfaces()) {
+                var iface = classes.get(type);
+                if (iface == null) continue;
+                for (var candidate : iface.getMethods()) {
+                    if (candidate.getName().equals(method.getName()) &&
+                        String.join("",candidate.getParameterTypes()).equals(String.join("",method.getParameterTypes())) &&
+                        candidate.getReturnType().equals(method.getReturnType())) {
+                        dispatched.add(signature(candidate));
+                        System.out.println("CACHE_REMOVE_DISPATCH\t" + signature(candidate) + "\timplementation=" + entry.getKey());
+                    }
+                }
+            }
+        }
+        for (String type : owners) {
+            var owner = classes.get(type);
+            System.out.println("CACHE_REMOVE_OWNER\t" + type + "\tsuper=" + owner.getSuperclass() +
+                "\tinterfaces=" + owner.getInterfaces());
+            for (var field : owner.getFields())
+                System.out.println("CACHE_REMOVE_FIELD\t" + type + "->" + field.getName() + ":" + field.getType() +
+                    "\tflags=" + field.getAccessFlags());
+            for (var method : owner.getMethods())
+                System.out.println("CACHE_REMOVE_METHOD\t" + signature(method) + "\tflags=" + method.getAccessFlags());
+        }
+        int callers = 0;
+        for (var clazz : classes.values()) for (var method : clazz.getMethods()) {
+            var body = method.getImplementation();
+            if (body == null) continue;
+            var targets = new TreeSet<String>();
+            for (var instruction : body.getInstructions())
+                if (instruction instanceof ReferenceInstruction r && r.getReference() instanceof MethodReference ref &&
+                    dispatched.contains(signature(ref))) targets.add(signature(ref));
+            for (String target : targets) {
+                System.out.println("CACHE_REMOVE_CALLER\t" + signature(method) + "\t" + target);
+                callers++;
+            }
+        }
+        var handler = classes.get("Lr8/xd3;");
+        if (handler == null) throw new IllegalStateException("Download manager handler unavailable");
+        System.out.println("DOWNLOAD_HANDLER\t" + handler.getType() + "\tsuper=" + handler.getSuperclass());
+        for (var method : handler.getMethods())
+            if (method.getName().equals("handleMessage")) codecBody(method, 350);
+        System.out.println("CACHE_REMOVE_TOTAL\tsites=" + removers.size() + "\towners=" + owners.size() + "\tcallers=" + callers);
     }
     static final Set<String> STORAGE_ANCHORS = Set.of(
         "export_tmp", "Could not open destination stream", "Download cache is empty for this song"
