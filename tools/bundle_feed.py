@@ -1,7 +1,10 @@
 """Morphe Manager 2.2.0 JSON-source metadata; no publication side effects."""
 from datetime import datetime, timezone
 import json
+from pathlib import Path
 import re
+import subprocess
+import sys
 from urllib.parse import urlsplit
 
 
@@ -59,6 +62,7 @@ def check():
         raise AssertionError('Wrong component tag prefix accepted')
     assert not bundle_feed(version, '2026-10-27T15:00:00Z')['download_url']
     print('Feed UTC conversion, rollover, source identity/version and unreleased refusal controls passed')
+    subprocess.run([sys.executable,str(Path(__file__).with_name('check_materialization.py'))],check=True)
 
 
 if __name__ == '__main__':

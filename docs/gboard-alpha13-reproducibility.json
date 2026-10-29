@@ -1,0 +1,27 @@
+{
+  "schema": "purple.gboard.reproducibility-observation.v1",
+  "source_commit": "bc81100e7851c7cc0ca345e8189d16916a6bb3b0",
+  "version": "0.1.0-alpha.13",
+  "workflow_runs": [40945630370, 40947061110],
+  "artifact_ids": [12927859419, 12930370668],
+  "main_mpp_sha256": [
+    "5dc7ac8e7fd9584beea76ead2dbb35036a5b52de67ac073ec4f440a2b77cc7d8",
+    "ac82d89d34da535c1e92d40534be4dff8ce130bbcff7cd686ddb9c3874aae698"
+  ],
+  "outer_zip_sha256": [
+    "70dd836ed135b11492f3c5127b6801ce16d4d620feb087c53a0840319197c384",
+    "536c22f68902c7915c16e503de7af8d04228b8d6ee6f918f51546da486aaf424"
+  ],
+  "exact_main_mpp_reproduced": false,
+  "same_main_member_names_order_and_zip_metadata": true,
+  "main_members_compared": 661,
+  "main_member_content_changes": ["META-INF/MANIFEST.MF"],
+  "non_manifest_compressed_entries_compared": 660,
+  "non_manifest_compressed_entries_different": 0,
+  "manifest_timestamp_values_ms": [1793304291515, 1793304881840],
+  "source_provenance_and_all_artifact_checksums_verified": true,
+  "observed_runner": "Both runs reported ubuntu-24.04 image 20261025.353.1, Temurin 21 and Gradle 9.6.1; this is not cross-platform or time-independent evidence.",
+  "primary_source": "https://github.com/MorpheApp/morphe-patches-gradle-plugin/blob/52be641ed3b965a20c33bd43e0cbe9efd308bc64/src/main/kotlin/app/morphe/patches/gradle/PatchesPlugin.kt",
+  "source_observation": "The public v1.3.3 plugin source sets the bundle manifest Timestamp from System.currentTimeMillis(). The actual plugin artifact was not separately matched byte-for-byte to that source.",
+  "limits": "The two builds do not prove reproducibility. Moving runner/action versions, SDK and unlocked dependency resolution remain inputs. No installation, phone operation or model request occurred."
+}
