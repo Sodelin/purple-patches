@@ -168,6 +168,53 @@ public final class InspectNatune {
             throw new IllegalStateException("Pinned stream interface hierarchy changed");
         System.out.println("STREAM_TOTAL\tsources=" + sources.size() + "\tinterfaces=" + interfaces + "\tfactories=" + factories);
         inspectCodecHooks(classes);
+        inspectStorageHooks(classes);
+    }
+    static final Set<String> STORAGE_ANCHORS = Set.of(
+        "export_tmp", "Could not open destination stream", "Download cache is empty for this song"
+    );
+    static void inspectStorageHooks(Map<String,ClassDef> classes) {
+        int matches = 0;
+        var owners = new TreeSet<String>();
+        for (var clazz : classes.values()) for (var method : clazz.getMethods()) {
+            var body = method.getImplementation();
+            if (body == null) continue;
+            var anchors = new TreeSet<String>();
+            for (var instruction : body.getInstructions())
+                if (instruction instanceof ReferenceInstruction r &&
+                    r.getReference() instanceof StringReference s && STORAGE_ANCHORS.contains(s.getString()))
+                    anchors.add(s.getString());
+            if (anchors.isEmpty()) continue;
+            matches++; owners.add(clazz.getType());
+            System.out.println("STORAGE_ANCHORED\t" + signature(method) + "\tanchors=" + anchors);
+            // Read public code only. codecBody omits non-whitelisted strings;
+            // the original tag is retained for compatibility with old readers.
+            codecBody(method, 180);
+            for (var instruction : body.getInstructions())
+                if (instruction instanceof ReferenceInstruction r && r.getReference() instanceof MethodReference m)
+                    System.out.println("STORAGE_CALL\t" + signature(method) + "\t" + signature(m));
+        }
+        for (String owner : owners) {
+            var clazz = classes.get(owner);
+            for (var field : clazz.getFields())
+                System.out.println("STORAGE_OWNER_FIELD\t" + owner + "->" + field.getName() + ":" + field.getType() +
+                    "\tflags=" + field.getAccessFlags());
+        }
+        // Resolve the actual optimized Cache-like interface, rather than
+        // compiling an assumed upstream Media3 class name into an extension.
+        for (var clazz : classes.values()) {
+            if ((clazz.getAccessFlags() & 0x200) == 0) continue;
+            boolean cacheShape = false;
+            for (var method : clazz.getMethods())
+                if (String.join("", method.getParameterTypes()).equals("Ljava/lang/String;") &&
+                    method.getReturnType().equals("Ljava/util/NavigableSet;")) cacheShape = true;
+            if (!cacheShape) continue;
+            System.out.println("STORAGE_CACHE_INTERFACE\t" + clazz.getType());
+            for (var method : clazz.getMethods())
+                System.out.println("STORAGE_CACHE_METHOD\t" + signature(method) + "\tflags=" + method.getAccessFlags());
+        }
+        if (matches == 0) throw new IllegalStateException("Pinned export source anchors missing");
+        System.out.println("STORAGE_TOTAL\tanchored_methods=" + matches + "\towner_classes=" + owners.size());
     }
     static final Set<String> ANCHORS = Set.of(
         "Low-data mode active; skipping Tidal/Qobuz for %s",
