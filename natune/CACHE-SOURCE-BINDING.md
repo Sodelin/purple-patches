@@ -123,3 +123,24 @@ Primary source:
 - https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/di/AppModule.kt
 - https://github.com/androidx/media/blob/1.10.1/libraries/datasource/src/main/java/androidx/media3/datasource/cache/ContentMetadata.java
 - https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt
+
+## Exact original cancellation and broad purge inspection
+
+Terminal public-APK inspection run40890946791 at b6321c8f4a0832f02ad1e33741bd2d548bf2ec93
+passed. Full artifact member hashes were read back; storage-lifecycle-inspection.json
+v5 retains exact original method bodies/identities. This is static evidence,
+not a new device/cache execution or a removal authorization.
+
+The export continuation superclass cf2 exposes getContext():yg2. The one bounded
+static context/void candidate w21.J(yg2) looks up fxd.O through context.p0,
+checks ss5.e(), and throws ss5.G():CancellationException when inactive. This
+provides an exact original-job cancellation candidate for the future hook;
+verify its context-key semantics and binding before replacing StopCheck.
+Thread interruption alone is not the original coroutine's cancellation.
+
+DownloadUtil's optimized static g.a(g,String) iterates ne3.a(songId), calling
+Cache.l(key) on BOTH g.b and g.c for every generated key. It is a broad cache
+purge, not an exact verified-rendition remover. The existing selected-delete
+coroutine also directly removes source keys and sends asynchronous ae3.c(id).
+Neither returning void nor enqueueing removal settles our proposed move.
+Do not wire the Move button to this deletion path after merely copying one key.

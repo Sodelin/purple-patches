@@ -8,7 +8,7 @@ installation holds remain intact. Execute one project production job at a time.
 ## Acceptance target
 
 The user selects existing downloaded songs and a local shared folder. One Move
-job at a time streams the exact complete track, verifies the completed document,
+batch uses size-budgeted track admissions to stream each exact complete track, verifies the completed document,
 indexes its location, and removes only its verified cached source through the
 settled original app lifecycle. Failure, cancellation and interruption retain
 the original or an explicitly recoverable verified copy; uncertain destructive
@@ -27,29 +27,71 @@ The current bulk export adds a complete tagging temp file as well. A loop that
 serializes export but starts many other download/export/upload jobs does not
 bound the complete pipeline's allocation.
 
-The new queue must hold a single end-to-end admission until the current track's
-chosen workflow is settled. The next track is not admitted merely because the
-previous file was handed to an external uploader. Use bounded pending metadata,
-not a batch of materialized pending files. Temporarily pausing competing NaTune
-downloads must preserve their original user stop states and resume only jobs
-that this operation actually paused, unless the user changed their state.
-Do not stop unrelated apps/services. Other user writers can still consume free
-space, so check actual headroom before each track and stop cleanly if it changes.
+The queue uses a **1 GB (1,000,000,000 byte) temporary-space pool** by default,
+per Nolan's adaptive concurrency request. This media-operation budget is separate
+from the20GiB engineering build reserve and migration admission rules. It limits
+reserved additional allocation, not library size, existing music or song count.
+Admit as many tracks as fit their complete peak reservations. Do not wait until
+a running copy reaches the limit to stop accepting work.
 
-For the local streaming path, reserve the measured complete destination length
-plus bounded metadata/IO overhead while the cached source still exists. Avoid
-the full tagging temp file. A100MiB track therefore needs roughly another
-100MiB, not zero extra bytes. This is an estimate until the exact local document
-provider is verified. Cloud SAF providers may spool additional copies; do not
-apply the local-folder allocation claim to them. Reading back a hash uses the
-existing destination bytes, not another complete file.
+For every track, reserve the full verified source length needed by the new
+local destination, any tagging/provider/upload staging, and bounded metadata/IO
+allocation overhead BEFORE creating output. Existing cached originals already
+consume free space; do not charge their old allocation twice. Their destination
+copies are charged while both exist. Round conservatively for actual allocation;
+logical length alone does not prove allocated blocks. Avoid the complete tagging
+temp file. Readback hashes reuse destination bytes and bounded buffers.
+Unknown lengths or unknown provider spooling cannot be treated as zero. A single
+track whose required peak exceeds the pool waits for an explicit budget change
+or a separately supported streaming route; never truncate it or secretly raise
+the pool. Use local, measured providers for the initial release, not cloud SAF
+providers with unknown staging.
 
-The existing selected remote pull route should stream the shared file without
-another phone-sized upload staging file. Verify the receiver's complete bytes,
-then perform the separately authorized phone cleanup. Export→verify→local cache
-release→transfer→remote verify→phone cleanup can run one track at a time. The
-user can alternatively keep the shared phone file; that mode cannot claim its
-space was reclaimed remotely.
+Keep each reservation until the corresponding temporary duplicate/staging is
+confirmed gone. Completed copy, uploader handoff, timeout, cancellation or a
+failure toast does not release it. An uncertain cleanup stays charged and stops
+new admissions if necessary. Required operation identities and reconciliation
+must survive restart through the existing encrypted recovery contract; restart
+does not reset uncertain reservations to zero. No new identity or plaintext
+catalog journal is authorized.
+
+After a verified local document is indexed AND the exact cached original is
+confirmed removed, that document is the retained music copy rather than temporary
+duplication. Its duplicate reservation can settle. A remote receiver streaming
+that existing document without extra phone staging can overlap the next move;
+remote receipt alone cannot release a separate uploader's staging reservation.
+Remote copy verification and separately authorized phone cleanup remain necessary
+to reclaim the music's actual phone space. Keeping the shared file is valid but
+does not claim remote space recovery.
+
+Check fresh headroom before each admission and during output, with a nonzero
+failure/cleanup allowance. Account for outstanding promises without double-counting
+bytes already materialized: a free-space snapshot includes their physical writes,
+so subtract still-unwritten reserved peaks rather than all reservations again.
+Retained output, failed partial files and new music consume actual headroom even
+when no longer charged to the duplicate pool. If other writers consume space,
+stop new admissions and preserve recoverable originals; this queue cannot promise
+that unrelated apps will never fill the phone.
+
+Bound pending work to track metadata, not pre-created pending audio files.
+Coordinate competing NaTune writers through their actual owners, preserving
+manual pause/stop changes; resume only requests this job paused. Do not stop
+unrelated services. One project job may contain multiple admitted tracks; that
+is not permission for another chat or production job.
+
+Current implementation limitation: NatuneCachedSource holds the original wrapper
+and delegate monitors throughout copy/readback. Several workers therefore cannot
+read the same cache concurrently. The queue may overlap independent settled
+stages, but true parallel reads require a separately verified descriptor/span
+lifecycle and fresh unchanged-source guards. Do not claim adaptive admission
+alone makes the current reader parallel, or remove cache locks for throughput.
+
+Release controls must cover mixed sizes fitting exactly at the boundary, one
+byte over, changing headroom, unknown/oversized tracks, failed partial cleanup,
+restart with unsettled reservations, concurrent admission and actual source-lock
+behavior. Provider/device proof must measure peak allocation and verify exact
+cache release; a synthetic accounting pass alone cannot prove the1GB limit on
+all Android writers.
 
 ## Ordered critical path and release gates
 
@@ -57,13 +99,13 @@ space was reclaimed remotely.
 | --- | --- | --- |
 |1. Installation and existing data | A supported deployment/data-handoff route preserves the installed library. | Original target identity is pinned. No compatible same-signer patched update or verified old-cache handoff has been established. Resolve this before assuming a newly signed patch can use old app data. |
 |2. User entry and destination | Distinct Move to folder action, copy-export preserved, user-selected local content URI and scoped grants; clear progress/cancel/failure. | Android SAF stream adapter is compiled. Actual UI entry and destination lifecycle remain unbound. |
-|3. Whole-job admission | One track across the selected export/transfer/cleanup pipeline, actual size/headroom, owned pause/restore of competing download requests. | Full queue/owner admission and background scheduling remain to implement. |
+|3. Whole-job admission | Adaptive track count under a1GB reserved temporary pool; actual size/headroom, durable unsettled reservations, owned pause/restore of competing download requests. | Full queue/owner admission and background scheduling remain to implement. |
 |4. Exact complete source | Real original cache locks, original coroutine/job stops, exact rendition and complete spans; no network fallback or active-track removal. | Cache ABI/source reader implemented;46 controlled cache checks and49 copy checks passed. Actual app/coroutine/UI hook and phone behavior remain unverified. |
 |5. Verified output | Bounded streaming, complete count/hash readback, real format/extension and usable URI; no full tagging temp. | Actual copy core and SAF adapter implemented/host-checked; real provider and low-space behavior remain untested. |
 |6. Transaction and recovery | Original operation identity with required encrypted-before-persistence claim/result/recovery; restart/UNKNOWN reconciliation. | Original encrypted phone identity exists. The app-scoped writer/admission and actual move journal remain unbound; no new identity is authorized. |
 |7. Exact cache release | Settle original request, preserve other source variants/readers/owners, release only eligible unchanged cached bytes and reconcile counters. | Original remover is asynchronous and its listener purges all recognized source variants from both caches. Scoped listener/removal and settlement binding remain to implement; no deletion path exists in the new reader. |
 |8. Library and playback | Stable original song/rendition→content URI mapping, coherent download indicators/playlists/favorites and offline playback after cache release. | Existing MediaStore scanner is not an arbitrary SAF/original-ID mapping. New index and playback selection remain unbound. |
-|9. Remote transfer and cleanup | Selected receiver gets complete verified bytes before authorized phone-file removal; every queued track settles before next admission. | Existing route/owners are retained. No media transfer/deletion is performed by this plan or the current source checks. |
+|9. Remote transfer and cleanup | Selected receiver gets complete verified bytes before authorized phone-file removal; each temporary reservation settles before reuse; no unaccounted upload staging. | Existing route/owners are retained. No media transfer/deletion is performed by this plan or the current source checks. |
 |10. Packaging and phone proof | Reproducible off-phone MPP/APK patching, declared compatibility, full unrelated-code/resource preservation, finite install/regression/rollback acceptance and verified update source. | Previous unrelated quality candidates are not a Move release. A storage MPP, complete patched APK verification, installation route and device acceptance remain open. |
 
 ## First gate: signer/data continuity

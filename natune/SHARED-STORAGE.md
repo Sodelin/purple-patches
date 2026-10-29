@@ -38,7 +38,10 @@ file stream nor Natune's private cached bytes. See EXTERNAL-DOWNLOADER.md.
 
 Add a distinct **Move to folder** action alongside the existing copy export;
 do not silently change the meaning of Export. The selected UI action should
-process one track at a time and stop cleanly without replaying uncertain work.
+use adaptive admissions under the1GB temporary-space contract in
+STORAGE-FIRST-PLAN.md, and stop cleanly without replaying uncertain work.
+The current reader still serializes reads under original cache monitors;
+admission concurrency alone is not parallel cache-copy implementation.
 
 1. Select the exact completed download/rendition and its cache keys. Check full
    expected length, contiguous spans, current playback/readers and active
