@@ -99,7 +99,7 @@ all Android writers.
 | --- | --- | --- |
 |1. Installation and existing data | A supported deployment/data-handoff route preserves the installed library. | Original target identity is pinned. No compatible same-signer patched update or verified old-cache handoff has been established. Resolve this before assuming a newly signed patch can use old app data. |
 |2. User entry and destination | Distinct Move to folder action, copy-export preserved, user-selected local content URI and scoped grants; clear progress/cancel/failure. | Android SAF stream adapter is compiled. Actual UI entry and destination lifecycle remain unbound. |
-|3. Whole-job admission | Adaptive track count under a1GB reserved temporary pool; actual size/headroom, durable unsettled reservations, owned pause/restore of competing download requests. | In-memory peak admission and real stream-copy binding implemented in TemporarySpaceBudget; actual headroom, encrypted restart recovery, cleanup ownership and Android scheduling remain unbound. |
+|3. Whole-job admission | Adaptive track count under a1GB reserved temporary pool; actual size/headroom, durable unsettled reservations, owned pause/restore of competing download requests. | TemporarySpaceBudget binds peak admissions to the real stream copy;41 hosted controls pass (temporary-budget-verification.json). Actual headroom, encrypted restart recovery, cleanup ownership and Android scheduling remain unbound. |
 |4. Exact complete source | Real original cache locks, original coroutine/job stops, exact rendition and complete spans; no network fallback or active-track removal. | Cache ABI/source reader implemented;46 controlled cache checks and49 copy checks passed. Actual app/coroutine/UI hook and phone behavior remain unverified. |
 |5. Verified output | Bounded streaming, complete count/hash readback, real format/extension and usable URI; no full tagging temp. | Actual copy core and SAF adapter implemented/host-checked; real provider and low-space behavior remain untested. |
 |6. Transaction and recovery | Original operation identity with required encrypted-before-persistence claim/result/recovery; restart/UNKNOWN reconciliation. | Original encrypted phone identity exists. The app-scoped writer/admission and actual move journal remain unbound; no new identity is authorized. |
@@ -124,6 +124,13 @@ route is available, evacuate the existing library through the installed app's
 supported export workflow before adopting a differently signed patched app.
 Prepare that sequential recovery workflow with its existing media owner; do
 not bypass private data access, uninstall or infer permission for device work.
+
+The reviewed Android backup rules explicitly exclude download/player-cache
+files and the ExoPlayer index in both cloud and device-transfer lanes. The app's
+own backup ZIP includes selected settings/account/library databases and fonts,
+not downloaded audio. Do not treat a library/database backup as a verified media
+handoff. Exact public source pins/hashes and selected rule lines are retained in
+existing-data-handoff-source-review.json; no backup operation was performed.
 
 Primary Android rule: https://developer.android.com/studio/publish/app-signing
 Pinned build source:

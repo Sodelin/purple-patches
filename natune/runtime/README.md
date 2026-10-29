@@ -53,3 +53,13 @@ provide real ongoing headroom/cancellation checks, verify/index the retained
 URI and settle exact cache removal. Cleanup callbacks in controls are stand-ins.
 No UI calls this yet. Original monitor serialization still limits cache read
 parallelism. See ../STORAGE-FIRST-PLAN.md for the full deployment/release gates.
+
+Hosted run40896283116 at8ba4582e9d9d6f780871bc41d7e675da13def1f9 passed41
+budget/copy integration controls,49 existing copy controls,46 cache-source
+controls and real Android SDK compilation of the SAF adapter. Full artifact
+member hashes and every recorded source hash were compared against the run's
+immutable Git commit; ../temporary-budget-verification.json retains the proof.
+The41 controls cover mixed-size boundary admission, unknown/overflow sizes,
+concurrent admission, retained charges after copy/provider/stop failure,
+consumed IDs, reentrant cleanup and a complete actual copy/readback. They do
+not prove real Android allocation or restart recovery.

@@ -1,0 +1,35 @@
+{
+  "schema": "purple.natune.temporary-budget-verification.v1",
+  "source_commit": "8ba4582e9d9d6f780871bc41d7e675da13def1f9",
+  "run_id": 40896283116,
+  "run_url": "https://github.com/Sodelin/purple-patches/actions/runs/40896283116",
+  "conclusion": "success",
+  "artifact_id": 12906219455,
+  "artifact_zip_sha256": "71027431679edd3ee71dd58340a03d35e821e8662f00d48f3068169226d9f286",
+  "member_hashes_verified": true,
+  "source_hashes_verified_against_run_commit": {
+    "natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java": "6442f778d2183388b14423f2c1a543a8ef39f4ee20f7684985416f539cde8e26",
+    "natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java": "4541f50631426c0fb696958101db723c77f5ee7ff61c2ea45672e4f600847c1f",
+    "natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java": "726a4cdb7f7d29772fadd1c436cdcbcdfbc52af35a5cbbedf091d521b6afee7a",
+    "natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java": "e00050a8ef42ed845c74325343ce53a45a52aa4e2832a9552bb4f4d51c51445d",
+    "natune/storage-tests/VerifiedStreamCopyControls.java": "0a5de774e3d7f311c4719cf2d045621a86b04830b3c5ccbadd4af29c58001f46",
+    "natune/storage-tests/NatuneCachedSourceControls.java": "4dd0c641d5846d64c1085ea8cc6dff30c6d892ed72bda8c0e70ecba9478f0e47",
+    "natune/storage-tests/TemporarySpaceBudgetControls.java": "04c293e2cf75a3722d586fbcfc50e598f91448af23385409d899e601f3e0b148",
+    "natune/storage-tests/fixtures/r8/c7b.java": "7d59cf63033d4daa6ed425414464a993593a1bf73f4ad093c62445f9f7b0f8b3",
+    "natune/storage-tests/fixtures/r8/d7b.java": "6d46427b161399a8f9bb61cf7a79b2d03754700cbf7844202b61704d8396412f",
+    "natune/storage-tests/fixtures/r8/dd6.java": "f59ca1da0b2bc710e532364f72d357bdd363a0f16162cb9aef029532b2b403c7",
+    "natune/storage-tests/fixtures/r8/vu2.java": "69f37a8775629904d65429e5bdead309a961ea7e2e165868023435ef0c16dc4c"
+  },
+  "reports": {
+    "stream-copy-controls.txt": "VERIFIED_STREAM_COPY_CONTROLS passed=49 android_owner_binding=false source_removal=false installed_ui=false",
+    "cache-source-controls.txt": "NATUNE_CACHE_SOURCE_CONTROLS passed=46 owners=public_fixture_stand_ins apk_hook=false device_cache_test=false source_removal=false",
+    "temporary-budget-controls.txt": "TEMPORARY_SPACE_BUDGET_CONTROLS passed=41 android_headroom=false cleanup_owner_binding=false durable_recovery=false apk_hook=false",
+    "android-saf-compile.txt": "ANDROID_SAF_COMPILE passed=true device_provider_test=false apk_binding=false"
+  },
+  "limits": [
+    "Synthetic streams/owner callbacks and explicit cache ABI stand-ins; no Android headroom, private media or cleanup authority exercised.",
+    "Actual Android SAF adapter compiled against SDK only; not a phone/provider test.",
+    "In-memory counter is not durable recovery, an Android scheduler, or a physical storage quota.",
+    "No APK/UI hook, signer-compatible deployment, installation or source removal."
+  ]
+}

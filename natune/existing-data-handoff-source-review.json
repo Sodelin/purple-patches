@@ -1,0 +1,180 @@
+{
+  "schema": "purple.natune.existing-data-handoff-review.v1",
+  "source_commit": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+  "public_source_only": true,
+  "files": [
+    {
+      "path": "app/src/main/res/xml/backup_rules.xml",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/res/xml/backup_rules.xml",
+      "bytes": 356,
+      "sha256": "73cf39666abd8c73238eb8f8047721011f885c8f449a46d1603d98f4bf4d1c38",
+      "selected_lines": [
+        {
+          "line": 3,
+          "text": "<exclude"
+        },
+        {
+          "line": 6,
+          "text": "<exclude"
+        },
+        {
+          "line": 9,
+          "text": "<exclude"
+        },
+        {
+          "line": 12,
+          "text": "<exclude"
+        }
+      ]
+    },
+    {
+      "path": "app/src/main/res/xml/data_extraction_rules.xml",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/res/xml/data_extraction_rules.xml",
+      "bytes": 994,
+      "sha256": "d74ab9b935e16c3b3bdc653f84651f5c1840a024f3c786b414bcd8c1752f9a16",
+      "selected_lines": [
+        {
+          "line": 8,
+          "text": "<exclude"
+        },
+        {
+          "line": 11,
+          "text": "<exclude"
+        },
+        {
+          "line": 14,
+          "text": "<exclude"
+        },
+        {
+          "line": 17,
+          "text": "<exclude"
+        },
+        {
+          "line": 22,
+          "text": "<exclude"
+        },
+        {
+          "line": 25,
+          "text": "<exclude"
+        },
+        {
+          "line": 28,
+          "text": "<exclude"
+        },
+        {
+          "line": 31,
+          "text": "<exclude"
+        }
+      ]
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/backup/BackupArchiveRepository.kt",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/backup/BackupArchiveRepository.kt",
+      "bytes": 13161,
+      "sha256": "0f651132c911dcb03aebe804e333c5c5c630377cb05c1283e6d3523a2bef2286",
+      "selected_lines": [
+        {
+          "line": 16,
+          "text": "import moe.rukamori.archivetune.db.InternalDatabase"
+        },
+        {
+          "line": 22,
+          "text": "import java.util.zip.ZipEntry"
+        },
+        {
+          "line": 28,
+          "text": "EXPORT_SETTINGS,"
+        },
+        {
+          "line": 50,
+          "text": "suspend fun createBackup("
+        },
+        {
+          "line": 57,
+          "text": "val includeSettings = BackupArchiveCategory.SETTINGS in categories"
+        },
+        {
+          "line": 58,
+          "text": "val includeAccount = BackupArchiveCategory.ACCOUNT in categories"
+        },
+        {
+          "line": 59,
+          "text": "val includeLibrary = BackupArchiveCategory.LIBRARY in categories"
+        },
+        {
+          "line": 60,
+          "text": "val settingsExcludedKeys = if (includeAccount) emptySet() else ACCOUNT_PREFERENCE_KEYS"
+        },
+        {
+          "line": 61,
+          "text": "val dbFile = context.getDatabasePath(InternalDatabase.DB_NAME)"
+        },
+        {
+          "line": 66,
+          "text": "dbFile.resolveSibling(\"${InternalDatabase.DB_NAME}-wal\"),"
+        },
+        {
+          "line": 67,
+          "text": "dbFile.resolveSibling(\"${InternalDatabase.DB_NAME}-shm\"),"
+        },
+        {
+          "line": 68,
+          "text": "dbFile.resolveSibling(\"${InternalDatabase.DB_NAME}-journal\"),"
+        },
+        {
+          "line": 106,
+          "text": "emit(BackupArchiveStep.EXPORT_SETTINGS, indeterminate = true)"
+        },
+        {
+          "line": 107,
+          "text": "zipStream.putNextEntry(ZipEntry(SETTINGS_XML_FILENAME))"
+        },
+        {
+          "line": 114,
+          "text": "// but the actual .ttf binary lives in filesDir/custom_fonts/ \u2014 without"
+        },
+        {
+          "line": 133,
+          "text": "zipStream.putNextEntry(ZipEntry(\"$FONTS_ZIP_PREFIX/${file.name}\"))"
+        },
+        {
+          "line": 163,
+          "text": "zipStream.putNextEntry(ZipEntry(file.name))"
+        },
+        {
+          "line": 242,
+          "text": "const val SETTINGS_XML_FILENAME = \"settings.xml\""
+        },
+        {
+          "line": 243,
+          "text": "const val CUSTOM_FONTS_DIR_NAME = \"custom_fonts\""
+        },
+        {
+          "line": 247,
+          "text": "val ACCOUNT_PREFERENCE_KEYS: Set<String> ="
+        },
+        {
+          "line": 312,
+          "text": "LIBRARY,"
+        },
+        {
+          "line": 313,
+          "text": "ACCOUNT,"
+        },
+        {
+          "line": 314,
+          "text": "SETTINGS,"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "Android backup rules explicitly exclude download/player caches and exoplayer internal index from both reviewed transfer lanes.",
+    "The app ZIP backup selects settings/account/library database and optional fonts, not downloaded audio; library metadata backup is not media recovery."
+  ],
+  "limits": [
+    "No backup/export/provider operation, account preferences, private data or key material inspected.",
+    "No supported same-signer update or automatic existing-cache handoff has been established.",
+    "Original app must remain installed with original data; do not uninstall based on this source review."
+  ]
+}
