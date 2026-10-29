@@ -1,0 +1,45 @@
+{
+  "schema": "purple.natune-upgrade-source-review.v1",
+  "upstream_commit": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+  "files": [
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/downloads/DownloadRepository.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/downloads/DownloadRepository.kt",
+      "bytes": 3299,
+      "sha256": "cb9ef4d6cc84c70b20df31962af91b0e51076a6e6f0f33a7343cfcd83c751864"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/downloads/ManageDownloadsUseCase.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/downloads/ManageDownloadsUseCase.kt",
+      "bytes": 16213,
+      "sha256": "ca454c6315e1ecfd3fe6c29f5a6bb047add53029ff08f53c6aeba48fa8411845"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/viewmodels/DownloadLibraryViewModel.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/viewmodels/DownloadLibraryViewModel.kt",
+      "bytes": 10417,
+      "sha256": "a16bf14ea994049b4c4ee8a9ca53f6b4999fb4ba8053cd4db11b1cb0e96a40a8"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/downloads/DownloadLibraryScreen.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/downloads/DownloadLibraryScreen.kt",
+      "bytes": 34584,
+      "sha256": "97fae2326d5a5d19f7b850e19e30e467ff0885222c39dba2b188907560267c81"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt",
+      "bytes": 65834,
+      "sha256": "a68822b3d885aff03097eb2df3c416ad77c7ccd03a591c031d2158d208189222"
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/playback/MusicService.kt",
+      "url": "https://raw.githubusercontent.com/NatuneGroup/ArchiveTune/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/MusicService.kt",
+      "bytes": 630107,
+      "sha256": "472266e7e3cf6bd503d2916dcb3b75a8d1e66b54fb03faf368ca9f0e005b912b"
+    }
+  ],
+  "user_library_read": false,
+  "app_runtime_called": false,
+  "upgrade_implemented": false
+}

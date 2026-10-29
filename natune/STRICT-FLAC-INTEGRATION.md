@@ -267,3 +267,13 @@ Primary error/lifecycle references:
 
 - https://github.com/androidx/media/blob/1.10.1/libraries/exoplayer/src/main/java/androidx/media3/exoplayer/BaseRenderer.java
 - https://github.com/androidx/media/blob/1.10.1/libraries/common/src/main/java/androidx/media3/common/PlaybackException.java
+
+Hosted lifecycle successor40877133662 at source606cab9 passed actual APK patching
+with all four guards and54emitted-instruction controls. Full original remaining
+program/resources passed the same27129class/114583method comparison. Exact
+artifact/member/source hashes and report are in
+local-flac-lifecycle-build-verification.json. This proves the source/build/static
+increment; actual Android next-track/error UI and decoder acceptance remain open.
+Nolan's additional Find FLAC upgrades, Road Trip buffering and unified patch
+settings requirements are tracked in FLAC-UPGRADES.md and
+ROAD-TRIP-AND-SETTINGS.md; they are not claimed by this bundle.

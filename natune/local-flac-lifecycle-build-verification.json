@@ -1,0 +1,38 @@
+{
+  "schema": "purple.natune-local-flac-lifecycle-build.v1",
+  "run_id": 40877133662,
+  "run_url": "https://github.com/Sodelin/purple-patches/actions/runs/40877133662",
+  "source_commit": "606cab923f0b046b66190728aee9844068fcc161",
+  "artifact_id": 12897978952,
+  "artifact_zip_sha256": "39d1db2e71f552b1ff8bbc033457d3e3b8ebbd4ff9a2f300b7c47afed1f83c3d",
+  "artifact_files_sha256": {
+    "SHA256SUMS": "5b5fe47aba4c397d68dd1da95afc59ceea225eec65dbb1d1b319602a863f7bae",
+    "patch-result.json": "3030e3dc964b63a29868934d232e6d26fa12caf06e1e3f8628159ca197f64279",
+    "patches-0.2.0-dev.2-javadoc.mpp": "9fc7c478e27c86d3879a63d5f3afac31b54998c503954ceb96004d397d40e391",
+    "patches-0.2.0-dev.2-sources.mpp": "b7544ac3fedb1bd8960c4b86babdf15db9dda35b3a8644e04e46f93da02346e6",
+    "patches-0.2.0-dev.2.mpp": "04c29d3662bdb4f274dabd86f912aca2bb529b5c1fb87f007e0d51581195b75f",
+    "patches-list.json": "c96d4a471158ecf575e98ab14327ae6705384f82549bb8f56130681aaee6798c",
+    "purple-natune-provenance.json": "4bc4596971bd4236198b44e354844552e93e05a92441b45899c5e5b456482d15",
+    "static-preservation.txt": "31781e9db4dbe119c28a32dcd8887d4489821376b2d3a4cbca77ce1384640234",
+    "target-proof.json": "4a589aeee716ad21018cf62d4339522434e8d680eb00c7ab5a450ca22917273a"
+  },
+  "main_mpp_bytes": 715650,
+  "static_verification": [
+    "Initializer preservation controls passed: 14",
+    "Verified five mobile-data overrides and four exact local FLAC guards; every original remaining method/body/resource preserved.",
+    "Classes=27129; methods=114583; retained native files=24; retained assets=12; all retained non-DEX/signature entries=1884",
+    "Compared instructions/references/registers/constants/branch targets/try handlers, class and field metadata; debug items and APK signing are outside this comparison.",
+    "LOCAL_FLAC_GUARD_CONTROLS passed=54 actual_patched_bytecode=true android_decoder_acceptance=false full_download_admission=false"
+  ],
+  "patch_result": {
+    "success": true,
+    "applied_patches": [
+      "Allow full-quality audio on mobile data",
+      "Require FLAC for local audio decoding"
+    ]
+  },
+  "phone_acceptance": false,
+  "full_download_admission": false,
+  "additional_providers_implemented": false,
+  "published_feed_changed": false
+}

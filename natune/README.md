@@ -114,3 +114,11 @@ See [full artifact evidence](local-flac-build-verification.json) and
 [scope and remaining integration](STRICT-FLAC-INTEGRATION.md).
 This is local decoder admission, not complete FLAC downloads, new providers or
 phone playback acceptance. No patched third-party APK is distributed.
+
+The successor `0.2.0-dev.2` also guards actual input-format changes through
+Natune's original renderer-error path. Hosted run40877133662 passed all54actual
+prefix/negative controls and complete remaining-program/resource preservation;
+[exact evidence](local-flac-lifecycle-build-verification.json) is retained.
+No phone acceptance or runtime settings toggle is implied. Current additional
+scope includes [upgrading existing non-FLAC downloads](FLAC-UPGRADES.md),
+[Road Trip buffering and patch settings](ROAD-TRIP-AND-SETTINGS.md).
