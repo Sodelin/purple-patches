@@ -89,6 +89,11 @@ public final class InspectNatuneSettings {
             System.out.println("SETTINGS_INTERFACE\t"+type+"\tflags="+clazz.getAccessFlags()+"\tsuper="+clazz.getSuperclass()+"\tinterfaces="+clazz.getInterfaces());
             for(var method:clazz.getMethods())System.out.println("SETTINGS_INTERFACE_METHOD\t"+sig(method)+"\tflags="+method.getAccessFlags());
         }
+        var callback=classes.get("Lr8/yza;");
+        if(callback!=null){
+            System.out.println("SETTINGS_CALLBACK\t"+callback.getType()+"\tinterfaces="+callback.getInterfaces());
+            for(var method:callback.getMethods())if(method.getName().equals("a")&&method.getParameterTypes().isEmpty())dump(method,0,120);
+        }
         for(var clazz:classes.values())for(var method:clazz.getMethods()){
             if(method.getImplementation()==null)continue;
             var code=new ArrayList<Instruction>();method.getImplementation().getInstructions().forEach(code::add);
