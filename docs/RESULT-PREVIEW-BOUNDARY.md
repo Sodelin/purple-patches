@@ -14,8 +14,9 @@ request. It leaves the possible-start warning armed if result parsing or
 validation fails. The job response reader has a separate cap derived from the
 maximum completed-result bytes, worst-case six-byte JSON escaping of one byte,
 and the fixed companion job envelope. Other response types retain their earlier
-bound. The source is a candidate until the hosted checks and APK inspection are
-recorded; it has not been executed on Android.
+bound. The [hosted bundle and controls](gboard-alpha17-build-verification.json)
+passed, as did the [static APK inspection](gboard-alpha17-apk-verification.json).
+The candidate has not been executed on Android.
 
 `SessionPolicyCheck.java` contains public synthetic controls for multibyte
 UTF-8 limits, a result larger than the input limit, a maximum-size escaped job

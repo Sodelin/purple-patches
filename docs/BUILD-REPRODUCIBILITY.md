@@ -91,3 +91,11 @@ SDK bytes and transitive dependencies are not all pinned; these two runs are
 not a promise of reproducibility on a future image. The private copies are
 documented in [GBOARD-ALPHA16-CUSTODY.md](GBOARD-ALPHA16-CUSTODY.md). The
 workflow does not publish a release or change the phone.
+
+Two alpha.17 builds of source `17f325c481f7f84550013924496ff088d99f2ad2`
+also matched all seven artifact member bytes under the same observed SDK jar
+and JDK; their outer ZIP wrappers differed. See the
+[alpha.17 comparison](gboard-alpha17-reproducibility.json) and
+[private custody](GBOARD-ALPHA17-CUSTODY.md). This repeats the scoped check for
+the result-preservation source change and does not close the same future-image,
+SDK-provenance or device-acceptance gaps.

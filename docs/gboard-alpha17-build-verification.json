@@ -1,0 +1,32 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40954855554,
+  "artifact_id": 12934125291,
+  "source_commit": "17f325c481f7f84550013924496ff088d99f2ad2",
+  "local_source_commit": "a02751389fad612f46d84aff41c12e1c97ed4cc6",
+  "shared_source_tree": "b7aeba8dfb42eaedbe6b520ba6f2c48232f5af2d",
+  "version": "0.1.0-alpha.17",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15479931,
+  "artifact_zip_sha256": "badb1719c6811d359385c7e1ddd79a45dca853a7a5c6b298fc99acd6755ba9da",
+  "members_sha256": {
+    "SHA256SUMS": "07af8b7f817ea9a85d7d10edf7580bb1bfe231bba699d240799a07f5e29c4c8a",
+    "patches-0.1.0-alpha.17-javadoc.mpp": "45b21edab2fab7129c783d75e70096362211fbba85a1f62284939ae91f2d7adf",
+    "patches-0.1.0-alpha.17-sources.mpp": "2602e4546c71bab7273e54fddea18b73032ffb57937959e9785bcbda42cfec29",
+    "patches-0.1.0-alpha.17.mpp": "859aaa9edd423e609c9c12f281c77bebb97ddd93d116f08b94cc52d353318c2c",
+    "patches-bundle.json": "358e3bb7166c497a786aa36dc16a2be39fd85dbf2c4d8ed6578763ea209e9344",
+    "patches-list.json": "70bd13769cea4a578ea827471b104d3c3fef54ecbbfb7bcb9d42680fe7497e8a",
+    "purple-provenance.json": "eade304aa9ace4045601aa2c6ab51000be8a3d0bf3fe1b49d7913b5b3cbe99b1"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "build_input_files_matched_git_commit": 5,
+  "manifest_timestamp_ms": 1793307963000,
+  "sdk_observed_android_jar_sha256": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a",
+  "checks": "Hosted existing policy controls and new companion-sized result, multibyte, escaped job-response and over-limit controls passed; the upstream bundle built.",
+  "checks_scope": "Public synthetic policy and controlled JSON-stub/memory-stream checks. No actual Android JSON parser, editor, callback, microphone, model, account or phone execution.",
+  "independent_readback": "All seven ZIP members, checksums, provenance, source input hashes and manifest timestamps checked in memory.",
+  "unreleased_feed_has_download_url": false,
+  "privacy_release_gate": "OPEN: Termux command still emits the bearer in stdout; actual caller, Codex writer and tool boundaries remain unverified.",
+  "device_accepted": false
+}

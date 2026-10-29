@@ -1,0 +1,42 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40955367975,
+  "workflow_source_commit": "17f325c481f7f84550013924496ff088d99f2ad2",
+  "bundle_build_run": 40954855554,
+  "bundle_source_commit": "17f325c481f7f84550013924496ff088d99f2ad2",
+  "bundle_version": "0.1.0-alpha.17",
+  "bundle_sha256": "859aaa9edd423e609c9c12f281c77bebb97ddd93d116f08b94cc52d353318c2c",
+  "artifact_id": 12932193907,
+  "artifact_zip_bytes": 49122868,
+  "artifact_zip_sha256": "60957d868552f013187cfa2f72f58adcc253ac07af5e63ae5e39339dd7e9babd",
+  "members": {
+    "SHA256SUMS": {"bytes": 354, "sha256": "1006ab2cc4a4bf58703919bbf2de31a1ad4e018d84a249d0073d0b6cc2c371dc"},
+    "build-run.json": {"bytes": 152, "sha256": "1c62e238196ad670de52e31b7dac217141c7aaa45d2438775cace9081196af17"},
+    "gboard-patch-result.json": {"bytes": 401, "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"},
+    "gboard-purple-unsigned.apk": {"bytes": 84558119, "sha256": "80d1856888d7b12f82b7fb7c38799786da283e352adfebe6eb86fed5a80d12d5"},
+    "purple-provenance.json": {"bytes": 2795, "sha256": "eade304aa9ace4045601aa2c6ab51000be8a3d0bf3fe1b49d7913b5b3cbe99b1"}
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified_by_workflow": true
+  },
+  "applied_patches": ["Add Gboard Signature Bypass", "Whisper 3 dictation and AI Translate", "Package Rename"],
+  "hosted_static_verification": {
+    "original_classes_retained": 22860,
+    "output_classes": 26029,
+    "original_method_signatures_retained": 118230,
+    "original_field_signatures_retained": 85104,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "result_bound_and_insertion_references": "present; missing-policy negative control passed",
+    "limitations": "Static DEX references, signatures and byte inventories do not prove Android behavior, privacy, cancellation, recovery or account availability. Bootstrap bearer output remains a release blocker."
+  },
+  "independent_artifact_verification": "ZIP held in memory and each member streamed and hashed; checksums, source, version, provenance and selected patches matched.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7
+}
