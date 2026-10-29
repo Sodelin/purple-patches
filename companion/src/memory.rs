@@ -28,6 +28,11 @@ impl Drop for Owned {
     fn drop(&mut self){if !self.1{return} unsafe {libc::kill(-(self.0.id() as i32),libc::SIGKILL);} let _=self.0.kill();let _=self.0.wait();}
 }
 pub fn run(command:&mut Command,input:&[u8],cancelled:&AtomicBool,cap:usize)->Result<Vec<u8>,String> {
+    run_with_progress(command,input,cancelled,cap,|_,_|{})
+}
+// The no-op production observer permits deterministic supervision fixtures
+// to wait for an owned child at a precise input-write boundary.
+fn run_with_progress<F: FnMut(usize,u32)>(command:&mut Command,input:&[u8],cancelled:&AtomicBool,cap:usize,mut progress:F)->Result<Vec<u8>,String> {
     if cancelled.load(Ordering::Relaxed){return Err("cancelled".into())}
     command.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped()).process_group(0);
     let parent=unsafe {libc::getpid()};
@@ -46,7 +51,7 @@ pub fn run(command:&mut Command,input:&[u8],cancelled:&AtomicBool,cap:usize)->Re
     loop {
         if let Some(ref mut writer)=stdin {
             match writer.write(&input[sent..]) {
-                Ok(n)=>sent+=n,
+                Ok(n)=>{sent+=n;if n>0{progress(sent,pid);}},
                 Err(e) if e.kind()==std::io::ErrorKind::WouldBlock=>{},
                 Err(e) if e.kind()==std::io::ErrorKind::Interrupted=>{},
                 Err(_)=>{return Err("Engine input was not accepted".into())}
@@ -79,4 +84,24 @@ pub fn run(command:&mut Command,input:&[u8],cancelled:&AtomicBool,cap:usize)->Re
  #[test]fn failed_child_is_not_success(){let mut c=Command::new("/bin/sh");c.args(["-c","printf partial; exit 1"]);assert!(run(&mut c,b"",&AtomicBool::new(false),64).is_err());}
  #[test]fn output_overflow_refuses(){let mut c=Command::new("/bin/sh");c.args(["-c","printf 12345678"]);assert!(run(&mut c,b"",&AtomicBool::new(false),3).is_err());}
  #[test]fn cancellation_prevents_spawn(){let mut c=Command::new("/no/such/file");assert_eq!(run(&mut c,b"",&AtomicBool::new(true),64).unwrap_err(),"cancelled");}
+ #[test]fn successful_child_exit_before_full_input_is_not_success(){
+  let mut c=Command::new("/bin/sh");c.args(["-c","IFS= read -r line; printf partial"]);
+  let input=vec![b'\n';4*1024*1024];let mut observed=false;
+  let result=run_with_progress(&mut c,&input,&AtomicBool::new(false),64,|sent,pid|{
+   if observed{return}
+   assert!(sent<input.len(),"fixture requires a partial first pipe write");
+   let deadline=Instant::now()+Duration::from_secs(5);
+   loop{
+    let mut info:libc::siginfo_t=unsafe{std::mem::zeroed()};
+    let status=unsafe{libc::waitid(libc::P_PID,pid,&mut info,libc::WEXITED|libc::WNOHANG|libc::WNOWAIT)};
+    assert_eq!(status,0,"owned child status unavailable");
+    if unsafe{info.si_pid()}!=0{break}
+    assert!(Instant::now()<deadline,"fixture child did not exit");
+    thread::sleep(Duration::from_millis(5));
+   }
+   observed=true;
+  });
+  assert!(observed);
+  assert!(result.is_err(),"successful child exit must not accept unsent input");
+ }
 }
