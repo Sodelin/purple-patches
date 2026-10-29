@@ -61,6 +61,11 @@ limit, so a valid larger completed result can reach preview. The [hosted
 controls](docs/gboard-alpha17-build-verification.json) and [exact-APK static
 inspection](docs/gboard-alpha17-apk-verification.json) passed; Android behavior,
 session recovery and the existing release gates remain open.
+Alpha.18 preserves an installed locale's script and region in the translation
+picker, so choices such as Simplified and Traditional Chinese need not collapse
+to the same language code. [Hosted controls](docs/gboard-alpha18-build-verification.json)
+and [static APK checks](docs/gboard-alpha18-apk-verification.json) passed;
+actual Android selection and translation quality remain unverified.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining

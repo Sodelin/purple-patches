@@ -99,3 +99,10 @@ and JDK; their outer ZIP wrappers differed. See the
 [private custody](GBOARD-ALPHA17-CUSTODY.md). This repeats the scoped check for
 the result-preservation source change and does not close the same future-image,
 SDK-provenance or device-acceptance gaps.
+
+Two alpha.18 builds of source `a5c0cb15edf7d1d18592c079c2c16e4d2d66daeb`
+also matched all seven artifact member bytes under the same observed SDK jar
+and JDK; their outer ZIP wrappers differed. See the
+[alpha.18 comparison](gboard-alpha18-reproducibility.json) and
+[private custody](GBOARD-ALPHA18-CUSTODY.md). This does not resolve future-runner,
+SDK-provenance or Android acceptance gaps.

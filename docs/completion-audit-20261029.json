@@ -1,17 +1,17 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: alpha.17 separates valid result and input bounds, checks escaped response limits, passed hosted controls and exact-APK inspection, and reproduced its bundle in two hosted builds",
+  "current_turn_classification": "progress: alpha.18 preserves selected translation language script and region, passed hosted locale controls and corrected exact-APK inspection, and reproduced its bundle in two hosted builds",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",
     "subagents": "None used."
   },
   "gboard_evidence": {
-    "source_commit": "17f325c481f7f84550013924496ff088d99f2ad2",
-    "bundle": "gboard-alpha17-build-verification.json and gboard-alpha17-reproducibility.json: companion-sized result controls passed; two hosted builds matched every artifact member and the observed Android 36 jar hash. Future runner/dependency states and SDK archive correspondence remain open.",
-    "apk": "gboard-alpha17-apk-verification.json: pinned public Gboard release signature checked and three patches applied; original API/native/asset inventory and result/preview references checked statically.",
-    "custody": "GBOARD-ALPHA17-CUSTODY.md: both private Drive ZIPs passed full readback and extracted MPP hash checks in memory; no disk restore or installation.",
+    "source_commit": "a5c0cb15edf7d1d18592c079c2c16e4d2d66daeb",
+    "bundle": "gboard-alpha18-build-verification.json and gboard-alpha18-reproducibility.json: locale mapping controls passed; two hosted builds matched every artifact member and the observed Android 36 jar hash. Future runner/dependency states and SDK archive correspondence remain open.",
+    "apk": "gboard-alpha18-apk-verification.json: pinned public Gboard release signature checked and three patches applied; corrected checker verified output minimum API 26 and original API/native/asset inventory plus locale/preview references statically.",
+    "custody": "GBOARD-ALPHA18-CUSTODY.md: both private Drive ZIPs passed full readback and extracted MPP hash checks in memory; no disk restore or installation.",
     "companion": "companion-022-dev6-verification.json: 45 public controls and Android ARM64 cross-build; the separate Drive upload outcome is uncertain.",
     "not_proven": "No actual keyboard/UI, microphone, full-v3 inference, Sol account request, installed behavior, stock-feature regression or rollback has been accepted."
   },
@@ -30,11 +30,11 @@
     "Full large-v3 acquisition and exact engine/model acceptance when the model hold is released, including meaningful latency, memory and cancellation checks.",
     "Editor composition, result retention across session ends, long dictation and actual user-directed preview/insertion behavior; alpha.12 copy-only behavior remains untested on Android.",
     "A finite authorized install/alongside-stock regression and rollback window with adequate measured storage headroom.",
-    "A verified maintained Morphe feed for the accepted version and actual Manager import/update; the currently published alpha.1 feed has a warning and is not alpha.17."
+    "A verified maintained Morphe feed for the accepted version and actual Manager import/update; the currently published alpha.1 feed has a warning and is not alpha.18."
   ],
   "storage_observation": {
-    "free_bytes": 5902659584,
-    "observed_utc": "2026-10-29T21:15:45Z",
+    "free_bytes": 5872930816,
+    "observed_utc": "2026-10-29T21:32:39Z",
     "qualification": "Concurrent user activity may change this snapshot. It is below the 20 GiB engineering reserve; no phone build or personal-media deletion follows."
   },
   "next_action": "Advance caller-bound bootstrap and durable job recovery source design; obtain the already-prepared expert review through a verified existing route, and perform model, installation or device actions only after their named holds are released."

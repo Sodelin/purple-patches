@@ -18,14 +18,17 @@ Public synthetic checks cover Simplified and Traditional Chinese, Brazilian
 and European Portuguese, English regions, duplicate tags, missing locales and
 deterministic ordering. The APK checker requires the selected clone's minimum
 Android API to support `Locale.toLanguageTag()` and checks source references;
-these are not Android UI or model-quality tests. Hosted verification is pending.
+these are not Android UI or model-quality tests. The [hosted build](gboard-alpha18-build-verification.json)
+and corrected [APK inspection](gboard-alpha18-apk-verification.json) passed.
 The set of installed locales is not a claim that Sol supports every locale or
 will preserve the requested dialect. Actual selection, output quality and
 editor behavior require the existing authorized device and model acceptance.
 
 Android documents [`Locale.getAvailableLocales()` and `toLanguageTag()`](https://developer.android.com/reference/java/util/Locale)
-and notes that a well-formed tag is not necessarily a registered one. No model
-or phone operation was performed for this change.
+and notes that a well-formed tag is not necessarily a registered one, and that
+converting a nonconforming locale can lose components. The picker represents
+the resulting eligible tags rather than every possible original locale state.
+No model or phone operation was performed for this change.
 
 The first static APK check, run `40957451264`, applied the patch but failed
 before its inventory checks because the new minimum-API verifier accepted only
@@ -33,4 +36,6 @@ before its inventory checks because the new minimum-API verifier accepted only
 recognizes both `minSdkVersion` and `sdkVersion`. The corrected verifier accepts
 either single numeric field, still refuses ambiguous, missing, nonnumeric or
 pre-21 values, and has fixtures for both spellings. The failed run did not
-publish an APK; the exact actual value and corrected inspection remain pending.
+publish an APK. Corrected run `40957800280` reported a minimum API of 26 and
+passed the language and preservation reference checks. The first failure did
+not record which spelling appeared; no phone acceptance is inferred.

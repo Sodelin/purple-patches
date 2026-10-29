@@ -1,0 +1,32 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40957051732,
+  "artifact_id": 12934371607,
+  "source_commit": "a5c0cb15edf7d1d18592c079c2c16e4d2d66daeb",
+  "local_source_commit": "19fc0db6ecd04a5e329ae48d8519225dfb75b727",
+  "shared_source_tree": "4cd97552aa77128325fafd43ccfbf21dfa59df04",
+  "version": "0.1.0-alpha.18",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15480985,
+  "artifact_zip_sha256": "50662609e0123c8f105b6cca7f83043682da8eb4bbc1f23dc449eab98b9d2a89",
+  "members_sha256": {
+    "SHA256SUMS": "e6fb84f05ce764d31b16001031460d522d6c6600a4caafe1bff90e8a3aac1f6b",
+    "patches-0.1.0-alpha.18-javadoc.mpp": "c99faa35541dae5395ffeec465d1d09abfeae3c0a810f653eb8ad4ac993fe3f8",
+    "patches-0.1.0-alpha.18-sources.mpp": "57d9f026700f88eb5e6e5df076a07db81cc4154f26064cb1e8b04379da3116ba",
+    "patches-0.1.0-alpha.18.mpp": "a082f17ae9d5feb14704fa91a284acd0e40fb791154cd7b38543283ff1c39596",
+    "patches-bundle.json": "51a32e758c24061c5bfcfd20e229a511c6a966f38d432415c3f509cc8bac57bf",
+    "patches-list.json": "99dde5a96ed9f5982f77c2eaa6746146d6aa54bfca0b51ee17122672158ceb8f",
+    "purple-provenance.json": "4049c16f70a6b8e5bda2ab449d8ede4622d9b28f3ba7a36ee35584923d3fab12"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "build_input_files_matched_git_commit": 5,
+  "manifest_timestamp_ms": 1793308860000,
+  "checks": "Hosted policy controls include language/script/region mapping, duplicate tags, invalid locales and deterministic ordering; the upstream bundle built.",
+  "checks_scope": "Public synthetic Java locale and policy checks; no Android UI, actual editor, account, translation, microphone or model execution.",
+  "independent_readback": "All seven ZIP members, checksums, provenance, source input hashes and manifest timestamps checked in memory.",
+  "unreleased_feed_has_download_url": false,
+  "runner_warning": "GitHub forced Node.js 24 for the pinned Node.js 20 actions and reported setup-java v4 deprecated; this run succeeded but future runner and dependency behavior remains open.",
+  "privacy_release_gate": "OPEN: Termux command still emits the bearer in stdout; actual caller, Codex writer and tool boundaries remain unverified.",
+  "device_accepted": false
+}

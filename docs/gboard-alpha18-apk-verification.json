@@ -1,0 +1,45 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40957800280,
+  "workflow_source_commit": "cd15fbe9bb89d1d2a9762351c9bcd3e136911f67",
+  "bundle_build_run": 40957051732,
+  "bundle_source_commit": "a5c0cb15edf7d1d18592c079c2c16e4d2d66daeb",
+  "bundle_version": "0.1.0-alpha.18",
+  "bundle_sha256": "a082f17ae9d5feb14704fa91a284acd0e40fb791154cd7b38543283ff1c39596",
+  "artifact_id": 12934451979,
+  "artifact_zip_bytes": 49124269,
+  "artifact_zip_sha256": "6a636538de6f18d07213b3a40a80dcbfdbd132dd635e4e457f0d11fe3703513d",
+  "members": {
+    "SHA256SUMS": {"bytes": 354, "sha256": "aba3c41957efc38b4399713535f9ba9b5d474014b1fa6f379853130f2ca5be81"},
+    "build-run.json": {"bytes": 152, "sha256": "eff7c9ca90281def14b7cb98a8882bdc9759f8f212613a698aa0ea66a8a6eab9"},
+    "gboard-patch-result.json": {"bytes": 401, "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"},
+    "gboard-purple-unsigned.apk": {"bytes": 84558463, "sha256": "202d8daaf2db090ee293484ce1d80602adefb489bbeea70eeca811432bea247b"},
+    "purple-provenance.json": {"bytes": 2795, "sha256": "4049c16f70a6b8e5bda2ab449d8ede4622d9b28f3ba7a36ee35584923d3fab12"}
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified_by_workflow": true
+  },
+  "applied_patches": ["Add Gboard Signature Bypass", "Whisper 3 dictation and AI Translate", "Package Rename"],
+  "hosted_static_verification": {
+    "output_minimum_android_api": 26,
+    "locale_api_minimum_android_api": 21,
+    "original_classes_retained": 22860,
+    "output_classes": 26031,
+    "original_method_signatures_retained": 118230,
+    "original_field_signatures_retained": 85104,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "language_choice_references": "present; missing-choice-class negative control passed",
+    "limitations": "Static DEX references and inventories do not prove Android UI, privacy, cancellation, recovery or translation quality. Bootstrap bearer output remains a release blocker."
+  },
+  "earlier_failure": "Run 40957451264 applied the same bundle but the initial verifier failed to find a numeric minimum SDK with its single-label parser; the corrected verifier accepts both documented AAPT2 labels and still fails closed.",
+  "independent_artifact_verification": "ZIP held in memory and each member streamed and hashed; checksums, source, version, provenance and selected patches matched.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7
+}

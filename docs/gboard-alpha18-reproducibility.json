@@ -1,0 +1,34 @@
+{
+  "schema": "purple.hosted-reproducibility.v1",
+  "source_commit": "a5c0cb15edf7d1d18592c079c2c16e4d2d66daeb",
+  "version": "0.1.0-alpha.18",
+  "manifest_timestamp_ms": 1793308860000,
+  "workflow_runs": [40957051732, 40958024273],
+  "artifact_ids": [12934371607, 12935255266],
+  "outer_zip_sha256": [
+    "50662609e0123c8f105b6cca7f83043682da8eb4bbc1f23dc449eab98b9d2a89",
+    "ff417b548cc8dc017a0331318101d3e7eda9f243042f272736545498175947f4"
+  ],
+  "outer_zip_bytes": [15480985, 15480985],
+  "outer_zip_bytes_identical": false,
+  "members_sha256": {
+    "SHA256SUMS": "e6fb84f05ce764d31b16001031460d522d6c6600a4caafe1bff90e8a3aac1f6b",
+    "patches-0.1.0-alpha.18-javadoc.mpp": "c99faa35541dae5395ffeec465d1d09abfeae3c0a810f653eb8ad4ac993fe3f8",
+    "patches-0.1.0-alpha.18-sources.mpp": "57d9f026700f88eb5e6e5df076a07db81cc4154f26064cb1e8b04379da3116ba",
+    "patches-0.1.0-alpha.18.mpp": "a082f17ae9d5feb14704fa91a284acd0e40fb791154cd7b38543283ff1c39596",
+    "patches-bundle.json": "51a32e758c24061c5bfcfd20e229a511c6a966f38d432415c3f509cc8bac57bf",
+    "patches-list.json": "99dde5a96ed9f5982f77c2eaa6746146d6aa54bfca0b51ee17122672158ceb8f",
+    "purple-provenance.json": "4049c16f70a6b8e5bda2ab449d8ede4622d9b28f3ba7a36ee35584923d3fab12"
+  },
+  "different_members": [],
+  "all_members_identical": true,
+  "overlay_files_verified": 11,
+  "build_inputs_verified": 5,
+  "runner": "ubuntu-24.04 label; runner image may change",
+  "jdk": "Temurin 21.0.13+9",
+  "observed_android_jar_sha256_in_both_runs": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a",
+  "sdk_limit": "One-platform SDK view and source-derived plugin selection checked; official archive correspondence remains unverified.",
+  "limits": "Two hosted builds only. Future runner image, SDK bytes and transitive dependencies, Android behavior and release acceptance remain separate.",
+  "phone_or_model_action": false,
+  "release_published": false
+}
