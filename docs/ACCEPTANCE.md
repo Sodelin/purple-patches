@@ -80,9 +80,11 @@ Gboard alpha.5 requires the voice-readiness capability introduced in
 `0.2.2-dev.3`; the `0.2.2-dev.4` source retains that capability and adds
 cooperative model-hash cancellation. Its hosted artifact and source are
 verified in [companion-022-dev4-verification.json](companion-022-dev4-verification.json).
-The exact main Gboard bundle and dev.3/dev.4 companion archives have private
+The alpha.5 main Gboard bundle and dev.3/dev.4 companion archives have private
 Drive copies with full readback and actual restoration; see
-[candidate custody](GBOARD-ALPHA5-DRAFT.md).
+[candidate custody](GBOARD-ALPHA5-DRAFT.md). The newer alpha.8 build archive
+has also passed full Drive byte/hash readback and in-memory MPP extraction, but
+has not had a physical disk restore; see [alpha.8 custody](GBOARD-ALPHA8-CUSTODY.md).
 Public deployment and update custody still need to be established. The previously published0.2.1
 companion remains historical evidence for earlier candidates; it does not
 satisfy alpha.5's voice-preflight contract. Its earlier readback is retained in
