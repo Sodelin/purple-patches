@@ -227,26 +227,31 @@ public final class PurpleAiRuntime {
             }
         }, "purple-gboard-action").start();
     }
-    private static String text(CharSequence value) { return value == null ? "" : value.toString(); }
     private static final class Snapshot {
         final InputConnection connection;
         final long session;
         final String before, after, selected;
         final int start, end, offset;
-        Snapshot(InputConnection connection, long session, String before, String after, String selected, ExtractedText position) {
-            this.connection=connection; this.session=session; this.before=before; this.after=after; this.selected=selected;
-            start=position.selectionStart; end=position.selectionEnd; offset=position.startOffset;
+        Snapshot(InputConnection connection, long session, SessionPolicy.EditorSnapshot snapshot) {
+            this.connection=connection; this.session=session; this.before=snapshot.before;
+            this.after=snapshot.after; this.selected=snapshot.selected;
+            start=snapshot.start; end=snapshot.end; offset=snapshot.offset;
         }
         static Snapshot capture(InputMethodService ime, long generation) {
             try {
                 InputConnection connection = ime.getCurrentInputConnection(); if (connection == null) return null;
                 ExtractedTextRequest request = new ExtractedTextRequest(); request.hintMaxChars=128; request.hintMaxLines=1;
-                ExtractedText position=connection.getExtractedText(request, 0);
-                if (position==null) return null;
-                String selected=text(connection.getSelectedText(0));
-                if (selected.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > SessionPolicy.TEXT_BYTES) return null;
-                return new Snapshot(connection, generation, text(connection.getTextBeforeCursor(64,0)),
-                        text(connection.getTextAfterCursor(64,0)), selected, position);
+                SessionPolicy.EditorSnapshot snapshot=SessionPolicy.captureEditor(new SessionPolicy.EditorReader() {
+                    public SessionPolicy.EditorPosition position() {
+                        ExtractedText value=connection.getExtractedText(request,0);
+                        return value==null ? null : new SessionPolicy.EditorPosition(
+                                value.selectionStart,value.selectionEnd,value.startOffset);
+                    }
+                    public CharSequence selected() { return connection.getSelectedText(0); }
+                    public CharSequence before() { return connection.getTextBeforeCursor(64,0); }
+                    public CharSequence after() { return connection.getTextAfterCursor(64,0); }
+                });
+                return snapshot==null ? null : new Snapshot(connection,generation,snapshot);
             } catch (RuntimeException ignored) { return null; }
         }
         boolean matches(InputMethodService ime, long current) {
