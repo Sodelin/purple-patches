@@ -21,8 +21,12 @@ jobs:
           mkdir -p "$RUNNER_TEMP/copy-core" dist
           javac -Xlint:all -Werror -d "$RUNNER_TEMP/copy-core" \
             natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
-            natune/storage-tests/VerifiedStreamCopyControls.java
+            natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
+            natune/storage-tests/VerifiedStreamCopyControls.java \
+            natune/storage-tests/NatuneCachedSourceControls.java \
+            natune/storage-tests/fixtures/r8/*.java
           java -cp "$RUNNER_TEMP/copy-core" VerifiedStreamCopyControls > dist/stream-copy-controls.txt
+          java -cp "$RUNNER_TEMP/copy-core" NatuneCachedSourceControls > dist/cache-source-controls.txt
       - name: Compile SAF adapter against real Android SDK
         run: |
           ANDROID_JAR="$(find "$ANDROID_HOME/platforms" -name android.jar -type f | sort -V | tail -1)"
@@ -35,9 +39,12 @@ jobs:
         run: |
           sha256sum natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
             natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java \
-            natune/storage-tests/VerifiedStreamCopyControls.java > dist/source-SHA256SUMS
+            natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
+            natune/storage-tests/VerifiedStreamCopyControls.java \
+            natune/storage-tests/NatuneCachedSourceControls.java \
+            natune/storage-tests/fixtures/r8/*.java > dist/source-SHA256SUMS
           cd dist
-          sha256sum stream-copy-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
+          sha256sum stream-copy-controls.txt cache-source-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: natune-shared-storage-controls
