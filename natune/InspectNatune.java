@@ -76,7 +76,7 @@ public final class InspectNatune {
             var clazz=classes.get(owner);
             System.out.println("CODEC_CLASS\t"+owner+"\tsuper="+clazz.getSuperclass());
             for(var method:clazz.getMethods()) {
-                if(!method.getReturnType().equals("I") || method.getParameterTypes().size()>3 ||
+                if(!Set.of("I","Z","Ljava/util/List;").contains(method.getReturnType()) || method.getParameterTypes().size()>3 ||
                     method.getParameterTypes().stream().noneMatch(p->formatTypes.contains(p.toString())))continue;
                 codecBody(method,40);
                 if(method.getImplementation()!=null)for(var instruction:method.getImplementation().getInstructions())
