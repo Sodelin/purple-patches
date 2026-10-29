@@ -35,7 +35,8 @@ cross-build without touching its index. `companion-source-join-verification.json
 records the exact join and its limits. The uninstalled folder/FLAC carrier
 passed an exact public APK static comparison; its original native library is
 4 KiB aligned. The replacement library now passes 16 KiB ELF layout and the
-existing synthetic checks, while its APK package layout remains to be verified.
+existing synthetic checks; Morphe's direct output compressed it, and a separate
+hosted finalization and full ZIP comparison are awaiting verification.
 `flac-carrier-verification.json` and `flac-16k-verification.json` record both.
 
 ## Remaining work packages

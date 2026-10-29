@@ -32,7 +32,7 @@ private val natuneFlacCarrierResources = rawResourcePatch {
 @Suppress("unused")
 val natuneFlacFolderCarrierPatch = bytecodePatch(
     name = "NaTune FLAC folder carrier (development)",
-    description = "Experimental native FLAC and folder-copy source carrier. No Move action or app-data handoff is included.",
+    description = "Experimental carrier; hosted native-library finalization required. No Move action or app-data handoff is included.",
     default = false,
 ) {
     compatibleWith(Compatibility(

@@ -67,7 +67,12 @@ the compiled extension and JNI names. The previously built native library has
 release. Hosted run 40936010048 built a 16 KiB-aligned replacement and passed
 the decoder and folder-copy fixture checks; `../flac-16k-verification.json`
 records its source, full artifact readback and ELF layout. The successor carrier
-still needs its APK ZIP compression/alignment check. No app hook, journal owner,
+run 40936437037 then found Morphe's raw-resource output compressed the new
+library (ZIP method 8), so it failed the stored-and-aligned check. A hosted
+finalization candidate re-adds only that matching library as stored and uses
+Android `zipalign -P 16` before comparing every ZIP entry and the exact original
+app. This separate post-processing step is not an integrated Morphe Manager
+route and has not yet passed its hosted verification. No app hook, journal owner,
 Android execution or installation is claimed by either carrier.
 
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
