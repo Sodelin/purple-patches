@@ -49,6 +49,16 @@ jobs:
             natune/test-fixtures/android/net/Uri.java \
             natune/settings-tests/NatuneSettingsNavigationControls.java
           java -cp "$RUNNER_TEMP/settings-controls" NatuneSettingsNavigationControls > dist/settings-navigation-controls.txt
+          python natune/settings-tests/materialize_enabled.py "$RUNNER_TEMP/enabled-src/RuntimeSettings.java"
+          mkdir -p "$RUNNER_TEMP/preferences-controls"
+          javac -Xlint:all -Werror -d "$RUNNER_TEMP/preferences-controls" \
+            "$RUNNER_TEMP/enabled-src/RuntimeSettings.java" \
+            natune/settings-tests/fixtures-page/dev/purple/patches/natune/PurpleSettingsPage.java \
+            natune/storage-tests/media-fixtures/android/content/*.java \
+            natune/storage-tests/media-fixtures/android/database/*.java \
+            natune/test-fixtures/android/net/Uri.java \
+            natune/settings-tests/RuntimeSettingsControls.java
+          java -cp "$RUNNER_TEMP/preferences-controls" RuntimeSettingsControls > dist/runtime-settings-controls.txt
       - name: Acquire exact verified public original and proven patching tool
         run: |
           python natune/fetch_target.py "$RUNNER_TEMP/natune-original.apk"

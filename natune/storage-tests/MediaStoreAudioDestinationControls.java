@@ -102,12 +102,15 @@ public final class MediaStoreAudioDestinationControls {
                 "content://media/removable/audio/media/42","content://media/external_primary/audio/media",
                 "content://media/external_primary/audio/media/nope"}){
             App wrong=new App();wrong.store.returned=bad;
-            refuses(()->create(wrong),"Wrong returned row");need(wrong.store.opens==0,"No output to wrong row");
+            var wrongRow=create(wrong);
+            need(wrongRow.documentUri()!=null,"Returned row remains available for reconciliation");
+            refuses(wrongRow::openNewOutput,"Wrong returned row");need(wrong.store.opens==0,"No output to wrong row");
         }
         App wrongOwner=new App();wrongOwner.store.owner="another.app";
-        refuses(()->create(wrongOwner),"Wrong row owner");need(wrongOwner.store.opens==0,"No output to other owner");
+        var other=create(wrongOwner);
+        refuses(other::openNewOutput,"Wrong row owner");need(wrongOwner.store.opens==0,"No output to other owner");
         App duplicate=new App();duplicate.store.duplicate=true;
-        refuses(()->create(duplicate),"Duplicate query rows");
+        var duplicated=create(duplicate);refuses(duplicated::openNewOutput,"Duplicate query rows");
 
         App tampered=new App();Source a=new Source(bytes);var d=create(tampered);
         var p=VerifiedStreamCopy.copy(a,d,()->{});tampered.store.body[0]^=1;

@@ -23,6 +23,15 @@ def materialize(destination, local_flac=False, runtime_settings=False):
         raise RuntimeError('Wrong template revision')
     if subprocess.check_output(['git', '-C', str(destination), 'status', '--porcelain']):
         raise RuntimeError('Do not overwrite dirty source')
+    # The pinned template's plugin repositories omit Maven Central. The plugin
+    # portal can mirror transitive libraries, but that route was unavailable in
+    # one hosted run. Add the canonical repository without changing any pins.
+    settings = destination / 'settings.gradle.kts'
+    settings_text = settings.read_text()
+    anchor = '        gradlePluginPortal()\n        google()\n'
+    if settings_text.count(anchor) != 1:
+        raise RuntimeError('Template plugin repository hook changed')
+    settings.write_text(settings_text.replace(anchor, anchor + '        mavenCentral()\n'))
     shutil.rmtree(destination / 'patches/src/main/kotlin/app/template')
     target = destination / 'patches/src/main/kotlin/dev/purple/patches/natune/NatuneMobileDataPatch.kt'
     target.parent.mkdir(parents=True, exist_ok=False)
@@ -83,6 +92,7 @@ configurations.configureEach {
              'runtime_settings_extension_included': runtime_settings,
              'runtime_settings_app_binding': runtime_settings,
              'runtime_settings_navigation_binding': runtime_settings,
+             'canonical_maven_central_plugin_resolution': True,
              'runtime_settings_patch_sha256': hashlib.sha256((ROOT / 'NatuneRuntimeSettingsPatch.kt').read_bytes()).hexdigest() if runtime_settings else None,
              'runtime_settings_sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in
                  (ROOT / 'runtime/dev/purple/patches/natune' / name for name in SETTINGS_SOURCES)} if runtime_settings else {},

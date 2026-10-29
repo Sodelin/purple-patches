@@ -26,14 +26,16 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
     private final ContentResolver resolver;
     private final String ownerPackage;
     private final String selectedFolder;
+    private final String selectedVolume;
     private final Uri row;
     private boolean outputAttempted;
     private boolean publishAttempted;
 
-    private MediaStoreAudioDestination(ContentResolver resolver, String ownerPackage, String selectedFolder, Uri row) {
+    private MediaStoreAudioDestination(ContentResolver resolver, String ownerPackage, String selectedFolder, String selectedVolume, Uri row) {
         this.resolver = resolver;
         this.ownerPackage = ownerPackage;
         this.selectedFolder = selectedFolder;
+        this.selectedVolume = selectedVolume;
         this.row = row;
     }
 
@@ -59,11 +61,11 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
         values.put(MediaStore.MediaColumns.RELATIVE_PATH, folder);
         values.put(MediaStore.MediaColumns.IS_PENDING, 1);
         Uri row = resolver.insert(MediaStore.Audio.Media.getContentUri(volume), values);
-        if (!selectedRow(row, volume))
-            throw new IOException("Pending media creation uncertain");
-        MediaStoreAudioDestination result = new MediaStoreAudioDestination(resolver, app.getPackageName(), folder, row);
-        result.requireOwnedState(true);
-        return result;
+        if (row == null) throw new IOException("Pending media creation uncertain");
+        // Return the exact provider result to the owner before a validation
+        // query can fail. The owner must durably retain it; a wrong URI is
+        // evidence to reconcile, not permission to open or delete a row.
+        return new MediaStoreAudioDestination(resolver, app.getPackageName(), folder, volume, row);
     }
 
     private static boolean fileName(String name) {
@@ -89,6 +91,7 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
     public Uri documentUri() { return row; }
 
     private void requireOwnedState(boolean pending) throws IOException {
+        if (!selectedRow(row, selectedVolume)) throw new IOException("Unexpected media row identity");
         String[] columns = {MediaStore.MediaColumns.OWNER_PACKAGE_NAME, MediaStore.MediaColumns.IS_PENDING,
             MediaStore.MediaColumns.RELATIVE_PATH};
         try (Cursor cursor = resolver.query(row, columns, null, null, null)) {

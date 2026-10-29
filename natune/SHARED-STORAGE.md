@@ -141,7 +141,10 @@ rows before this can serve as a Move or future-download route. It does not make
 an arbitrary SAF folder or Fuji receiver equivalent to MediaStore. Hosted run
 40921635909 passed 44 synthetic MediaStore/copy controls and compiled the
 adapter against the real Android SDK; `media-store-verification.json` pins the
-artifact and source. This is not a device/provider or Move acceptance test.
+artifact and source. A later source change returns even an unexpected provider
+URI to the owner for encrypted recovery before validation; that successor still
+needs its own controls. A null/throwing insertion remains an uncertain original
+operation. This is not a device/provider or Move acceptance test.
 
 The copy result is in-memory byte evidence, not a deletion permit or completed
 move. The source lease/coverage reader is now implemented against the exact
