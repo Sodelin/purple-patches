@@ -15,6 +15,9 @@ public final class VerifyGboardEditorSnapshot {
     private static final String POLICY = "Ldev/purple/patches/gboard/SessionPolicy;";
     private static final String SNAPSHOT = "Ldev/purple/patches/gboard/PurpleAiRuntime$Snapshot;";
     private static final String INSERTION = "Ldev/purple/patches/gboard/SessionPolicy$InsertionAttempt;";
+    private static final String RUNTIME = "Ldev/purple/patches/gboard/PurpleAiRuntime;";
+    private static final String BOOTSTRAP = "Ldev/purple/patches/gboard/SessionPolicy$BootstrapAttempt;";
+    private static final String RECEIVER = "Ldev/purple/patches/gboard/PurpleBootstrapReceiver;";
 
     private static void require(boolean condition, String detail) {
         if (!condition) throw new IllegalStateException(detail);
@@ -51,6 +54,28 @@ public final class VerifyGboardEditorSnapshot {
         return result;
     }
 
+    /** Linkage only: presence of references is not control-flow or Android execution proof. */
+    private static void verifyBootstrap(Map<String, ClassDef> classes) {
+        for (String name : new String[]{"begin", "invalidate", "consume", "pending"})
+            method(classes, BOOTSTRAP, name);
+        var end = calls(method(classes, RUNTIME, "end"));
+        var clear = calls(method(classes, RUNTIME, "clearPendingBootstrap"));
+        var connect = calls(method(classes, RUNTIME, "connect"));
+        var result = calls(method(classes, RUNTIME, "bootstrapResult"));
+        var receive = calls(method(classes, RECEIVER, "onReceive"));
+        require(!positions(end, RUNTIME, "clearPendingBootstrap").isEmpty(), "Session end lacks pending bootstrap cleanup reference");
+        require(!positions(clear, BOOTSTRAP, "invalidate").isEmpty()
+                        && !positions(clear, "Landroid/app/PendingIntent;", "cancel").isEmpty(),
+                "Cleanup lacks bootstrap invalidation or PendingIntent cancellation reference");
+        require(!positions(connect, POLICY, "bootstrapOfferCurrent").isEmpty()
+                        && !positions(connect, BOOTSTRAP, "begin").isEmpty(),
+                "Connection lacks offered-session or bootstrap begin reference");
+        require(!positions(result, BOOTSTRAP, "consume").isEmpty()
+                        && !positions(result, BOOTSTRAP, "pending").isEmpty(),
+                "Bootstrap result lacks session consumption or pending-state reference");
+        require(!positions(receive, RUNTIME, "bootstrapResult").isEmpty(), "Receiver does not reference bootstrap delivery");
+    }
+
     public static void main(String[] args) throws Exception {
         require(args.length == 1, "Expected one patched APK");
         var dex = DexFileFactory.loadDexContainer(new File(args[0]), Opcodes.getDefault());
@@ -77,7 +102,12 @@ public final class VerifyGboardEditorSnapshot {
                 "Expected checks on both sides of snapshot capture");
         require(!positions(matches, POLICY, "sameAnchor").isEmpty(), "Anchor comparison missing");
         System.out.println("Verified editor policy, capture, anchor and post-capture recheck references in APK DEX.");
-        if ("0.1.0-alpha.9".equals(System.getenv("BUNDLE_VERSION"))) {
+        String version = System.getenv("BUNDLE_VERSION");
+        var alpha = java.util.regex.Pattern.compile("0\\.1\\.0-alpha\\.([0-9]+)")
+                .matcher(version == null ? "" : version);
+        require(alpha.matches(), "Unsupported candidate version for editor verification");
+        int revision = Integer.parseInt(alpha.group(1));
+        if (revision >= 9) {
             method(classes, INSERTION, "attempt");
             boolean oneShot = false, commit = false, buttonDisabled = false, showListener = false;
             for (ClassDef type : classes.values())
@@ -93,7 +123,16 @@ public final class VerifyGboardEditorSnapshot {
                     }
             require(oneShot && commit && buttonDisabled && showListener,
                     "Missing one-shot insertion, editor commit or preview button references");
-            System.out.println("Verified alpha.9 preview and one-shot insertion references; no Android UI behavior is proved.");
+            System.out.println("Verified preview and one-shot insertion references; no Android UI behavior is proved.");
+        }
+        if (revision >= 10) {
+            verifyBootstrap(classes);
+            var missing = new HashMap<>(classes);
+            missing.remove(BOOTSTRAP);
+            boolean refused = false;
+            try { verifyBootstrap(missing); } catch (IllegalStateException expected) { refused = true; }
+            require(refused, "Bootstrap checker accepted an absent policy class");
+            System.out.println("Verified bootstrap session/linkage references and missing-class negative control; no Android execution is proved.");
         }
     }
 }
