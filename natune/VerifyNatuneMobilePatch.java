@@ -33,11 +33,12 @@ public final class VerifyNatuneMobilePatch {
         if (!value) throw new IllegalStateException(reason);
     }
     // DEX class_def_item permits omitted trailing static values. Normalize only
-    // type-correct false/null defaults observed in this pinned rewrite. Every
+    // type-correct false/null/positive-zero float defaults observed in this pinned rewrite. Every
     // other initializer retains exact EncodedValue equality (including true).
     static Object initialValue(int flags, String type, EncodedValue value) {
         if ((flags & 8) == 0 || value == null) return value;
         if (type.equals("Z") && value instanceof BooleanEncodedValue b && !b.getValue()) return null;
+        if (type.equals("F") && value instanceof FloatEncodedValue f && Float.floatToRawIntBits(f.getValue()) == 0) return null;
         if ((type.startsWith("L") || type.startsWith("[")) && value instanceof NullEncodedValue) return null;
         return value;
     }
@@ -52,7 +53,11 @@ public final class VerifyNatuneMobilePatch {
         need(initialValue(8, "I", new ImmutableIntEncodedValue(7)) != null, "nonzero must stay exact");
         need(initialValue(8, "Ljava/lang/String;", new ImmutableStringEncodedValue("")) != null, "empty string is not null");
         need(!new FieldState(8, null, Set.of()).equals(new FieldState(9, null, Set.of())), "field access change control");
-        System.out.println("Initializer preservation controls passed: 10");
+        need(initialValue(8, "F", new ImmutableFloatEncodedValue(0.0f)) == null, "positive float zero default");
+        need(initialValue(8, "F", new ImmutableFloatEncodedValue(-0.0f)) != null, "negative float zero must stay exact");
+        need(initialValue(8, "F", new ImmutableFloatEncodedValue(Float.NaN)) != null, "NaN must stay exact");
+        need(initialValue(8, "D", new ImmutableFloatEncodedValue(0.0f)) != null, "wrong float type must stay distinct");
+        System.out.println("Initializer preservation controls passed: 14");
     }
     static String signature(MethodReference method) {
         return method.getDefiningClass() + "->" + method.getName() + "(" +
