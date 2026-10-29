@@ -95,9 +95,10 @@ rewritten. This is an explicit source ABI change to `Claim`: Rust constructors
 must set the field, using `None` for historical SAF claims. `Document` also
 has an optional actual display name; the uninstalled schema 3 candidate
 requires it for MediaStore while legacy v1/v2 documents omit it. No existing
-installed journal or caller has been changed. The name-observation successor
-still requires its own hosted verification; actual Android selection,
-app-authenticated encrypted writer and restart/UNKNOWN recovery remain unbound.
+installed journal or caller has been changed. Hosted successor runs for the
+name observation are recorded in `media-store-name-verification.json`; actual
+Android selection, app-authenticated encrypted writer and restart/UNKNOWN
+recovery remain unbound.
 
 Hosted [run 40911881847](https://github.com/Sodelin/purple-patches/actions/runs/40911881847)
 at `ef58831a2e18bb966f173ac6ca394c4b2537fba4` passed 42 Rust library

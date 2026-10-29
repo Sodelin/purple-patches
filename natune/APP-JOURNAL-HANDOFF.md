@@ -51,7 +51,8 @@ The subsequent uninstalled source extends the verified observation with the
 actual provider-selected display name. The adapter retains it across row checks,
 and the schema 3 journal requires it alongside the selected folder/MIME; a
 provider-renamed result is not confused with the originally requested name.
-This successor awaits hosted verification and does not authenticate an owner.
+Hosted synthetic-provider and Rust state-machine verification is recorded in
+`media-store-name-verification.json`; it does not authenticate an owner.
 
 Primary source: [Termux RUN_COMMAND documentation](https://github.com/termux/termux-app/wiki/RUN_COMMAND-Intent)
 

@@ -162,7 +162,11 @@ controls and compiled the actual Android source against the SDK;
 `folder-copy-verification.json` records its exact source and full artifact
 readback. Hosted successor run 40926425767 passed 75 controls, including the original-stop
 check after the cache lease closes; `folder-copy-stop-verification.json` pins its
-source and artifact. This is not an app, device or real journal test.
+source and artifact. Newer run 40928837373 passed 106 synthetic folder-copy and
+74 synthetic MediaStore controls, including a provider-selected collision name
+and a name changing during publication, and compiled against the Android SDK.
+`media-store-name-verification.json` pins its source, artifact and the separate
+Rust journal controls. This is not an app, device or real journal test.
 
 The copy result is in-memory byte evidence, not a deletion permit or completed
 move. The source lease/coverage reader is now implemented against the exact

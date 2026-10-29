@@ -1,0 +1,38 @@
+{
+  "schema": "purple.natune-media-store-name-verification.v1",
+  "hosted_source_commit": "893270efa051efcb8301bfb84706089c6523159b",
+  "local_source_commit_with_identical_tree": "2b84075dcd5bc82d0292b93746d8262dac0f5823",
+  "source_tree": "266b5903e24d02265ed8a0517f11db76075eda37",
+  "android_adapter": {
+    "hosted_run": 40928837373,
+    "artifact_id": 12922515424,
+    "artifact_zip_bytes": 4259,
+    "artifact_zip_sha256": "019e6bebda6085d67ce941c3f5eec62739c3c2f3c6f04da3f50af2b9c688c086",
+    "artifact_members_checked": 9,
+    "source_hashes_checked": 31,
+    "synthetic_folder_copy_controls_passed": 106,
+    "synthetic_media_store_controls_passed": 74,
+    "real_android_sdk_compilation": true
+  },
+  "rust_journal": {
+    "hosted_run": 40928978822,
+    "artifact_id": 12922340938,
+    "artifact_zip_bytes": 735606,
+    "artifact_zip_sha256": "85f806fb08f10bb2cdb276f0eb6c245b528878bb547a241c6ce40b2d12a505ff",
+    "artifact_members_checked": 6,
+    "source_hashes_checked": 13,
+    "journal_source_sha256": "85db012725715f67ab1f4c77fac35ee8f84f18872204182c13941a6d6d3fef19",
+    "checker_source_sha256": "71f900dcb284bb822e873e82893a4795404c68840b2a3bbda8e9e87b258a8409",
+    "library_tests_passed": 47,
+    "journal_tests_passed": 19,
+    "android_aarch64_cross_build": true,
+    "checker_bytes": 688440,
+    "checker_sha256": "2134aa227f586a971aa1dbab8583159759611cc51f65a11035ae971a1b5f9e1e"
+  },
+  "phone_execution": false,
+  "real_journal_backend_tested": false,
+  "actual_app_bound": false,
+  "device_provider_test": false,
+  "original_media_accessed": false,
+  "limits": "Public synthetic owner, cache, provider and in-memory journal fixtures. The Android caller, authenticated encrypted journal, destination, source/rendition, receiver and user workflow remain unbound. The Rust build used this branch's older companion manifest, not the Gboard owner's newer source; no joint build or installed artifact is claimed."
+}
