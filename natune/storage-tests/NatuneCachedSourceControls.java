@@ -190,7 +190,8 @@ public final class NatuneCachedSourceControls {
         selectedCache.c.spans.add(new d7b(alternateKey, firstSelected.z, lastSelected.z, 1, lastSelected.B));
         TreeSet<d7b> actualSelection = selectedCache.p(alternateKey);
         Destination selectedDestination = new Destination();
-        NatuneCachedSource.withSelectedSpans(selectedCache, actualSelection, () -> {}, source -> {
+        NatuneCachedSource.withSelectedSpans(selectedCache, actualSelection, () -> {}, (key, source) -> {
+            need(key.equals(alternateKey), "Owner receives the selected key, not the bare song key");
             need(Thread.holdsLock(selectedCache.b) && Thread.holdsLock(selectedCache.c),
                     "Resolver selection is checked under the original locks");
             return VerifiedStreamCopy.copy(source, selectedDestination, () -> {});
@@ -203,27 +204,27 @@ public final class NatuneCachedSourceControls {
         stale.c.spans.add(new d7b(replaced.f, replaced.s, replaced.z, replaced.C, replaced.B));
         Destination staleOutput = new Destination();
         refuses(() -> NatuneCachedSource.withSelectedSpans(stale, staleSelection, () -> {},
-                source -> VerifiedStreamCopy.copy(source, staleOutput, () -> {})),
+                (key, source) -> VerifiedStreamCopy.copy(source, staleOutput, () -> {})),
                 "Same-key same-file replacement makes the old selection stale");
         need(!staleOutput.opened, "Stale selected spans open no output");
 
         dd6 partial = fixture(); TreeSet<d7b> partialSelection = partial.p(KEY);
         partialSelection.pollLast(); Destination partialOutput = new Destination();
         refuses(() -> NatuneCachedSource.withSelectedSpans(partial, partialSelection, () -> {},
-                source -> VerifiedStreamCopy.copy(source, partialOutput, () -> {})),
+                (key, source) -> VerifiedStreamCopy.copy(source, partialOutput, () -> {})),
                 "Partial resolver selection refuses even if the cache is complete");
         need(!partialOutput.opened, "Partial selection opens no output");
 
         TreeSet<d7b> mixed = selectedCache.p(alternateKey);
         mixed.add(selectedCache.p(KEY).first());
-        refuses(() -> NatuneCachedSource.withSelectedSpans(selectedCache, mixed, () -> {}, source -> null),
+        refuses(() -> NatuneCachedSource.withSelectedSpans(selectedCache, mixed, () -> {}, (key, source) -> null),
                 "Mixed rendition keys refuse");
         refuses(() -> NatuneCachedSource.withSelectedSpans(selectedCache, new TreeSet<d7b>(),
-                () -> {}, source -> null), "Empty resolver selection refuses");
+                () -> {}, (key, source) -> null), "Empty resolver selection refuses");
         refuses(() -> NatuneCachedSource.withSelectedSpans(fixture(), actualSelection,
-                () -> {}, source -> null), "Selection from another cache refuses");
+                () -> {}, (key, source) -> null), "Selection from another cache refuses");
         refuses(() -> NatuneCachedSource.withSelectedSpans(selectedCache, actualSelection,
-                () -> { throw new IOException("Original stopped"); }, source -> null),
+                () -> { throw new IOException("Original stopped"); }, (key, source) -> null),
                 "Stopped original cannot enter selected source");
 
         stopped.set(false);

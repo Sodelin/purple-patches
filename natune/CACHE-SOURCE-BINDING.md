@@ -79,7 +79,12 @@ the existing copy lease; it does not call or alter the stock export. The actual
 app hook, original cancellation, destination admission and recovery still need
 to be bound. The resolver can select a bare key before another rendition, so
 matching its exact selection is not proof that the user intended that rendition.
-The successor controls for this addition are pending their hosted run.
+Hosted run 40924852938 passed 56 source controls against public fixture
+stand-ins; `selected-spans-verification.json` records its exact source and
+artifact. These controls do not execute the app or establish a device cache.
+The later source also passes the selected key to its owning callback so the
+existing encrypted journal can bind the real rendition; that interface change
+requires its own successor verification and has no installed caller.
 
 ## Remaining move integration
 

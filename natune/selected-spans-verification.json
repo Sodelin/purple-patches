@@ -1,0 +1,25 @@
+{
+  "schema": "purple.natune-selected-cache-spans-verification.v1",
+  "hosted_run": 40924852938,
+  "hosted_source_commit": "b233c5021a42d64197a15408d7e58402e2822bfe",
+  "local_source_commit_with_identical_tree": "1c7581cefd78a330fc765238be3b47ec55b28e07",
+  "source_tree": "24f251b7e24b86caa082f077a94916bbbb9f9099",
+  "artifact_id": 12918739941,
+  "artifact_zip_bytes": 3871,
+  "artifact_zip_sha256": "fe392a9bfd9811fa3889465e51d0d8b1a4df7def4c808c6344c26e2d1212edd0",
+  "member_hashes_checked": 8,
+  "source_hashes_checked": 29,
+  "cache_source_controls_passed": 56,
+  "other_controls_passed": {
+    "copy": 49,
+    "media_store": 48,
+    "budget": 57,
+    "coroutine_stop": 10,
+    "data_spec": 43
+  },
+  "android_sdk_compilation": true,
+  "actual_app_bound": false,
+  "device_cache_test": false,
+  "music_copied_or_removed": false,
+  "limits": "Synthetic ABI and files. The original resolver output, app owner, rendition intent, durable recovery and actual destination remain to be bound."
+}

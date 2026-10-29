@@ -138,12 +138,26 @@ an uncertain publication is not automatically retried. It never removes a
 source or claims a computer copy. The actual app still must select a folder,
 admit peak space, bind a durable encrypted operation and reconcile uncertain
 rows before this can serve as a Move or future-download route. It does not make
-an arbitrary SAF folder or Fuji receiver equivalent to MediaStore. Hosted successor run 40923679222 passed 48 synthetic MediaStore/copy controls
+an arbitrary SAF folder or Fuji receiver equivalent to MediaStore. Hosted
+successor run 40923679222 passed 48 synthetic MediaStore/copy controls
 and compiled the adapter against the real Android SDK;
 `media-store-recovery-verification.json` pins the exact source and artifact.
 The successor returns even an unexpected provider URI to the owner before
-validation so the owner can retain it for encrypted recovery. A null/throwing insertion remains an uncertain original
-operation. This is not a device/provider or Move acceptance test.
+validation so the owner can retain it for encrypted recovery. A null/throwing
+insertion remains an uncertain original operation. This is not a device/provider
+or Move acceptance test.
+
+`NatuneFolderCopy.java` now joins the selected-span lease, the existing shared
+temporary-budget mirror and the local MediaStore destination into one attempt.
+It requires the real owner to retain the original encrypted Begin, returned
+destination and verified-copy observations in order. The reservation stays
+charged on success and failure. It preserves returned provider URIs and the
+last entered phase for original-operation reconciliation; it never retries,
+deletes a source, transfers to a computer or releases a reservation. Its owner
+callbacks are not an authentication mechanism or an implementation of the
+Termux-owned journal. App selection, original cancellation/headroom, journal
+IPC and recovery, actual codec/recording identity, UI and device acceptance
+remain unbound. Successor hosted controls are pending.
 
 The copy result is in-memory byte evidence, not a deletion permit or completed
 move. The source lease/coverage reader is now implemented against the exact

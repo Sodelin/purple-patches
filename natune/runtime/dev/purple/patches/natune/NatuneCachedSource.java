@@ -26,13 +26,18 @@ public final class NatuneCachedSource {
     public interface ReadAction<T> {
         T run(VerifiedStreamCopy.SourceLease source) throws IOException;
     }
+    public interface SelectedReadAction<T> {
+        /** The actual selected key stays in memory unless the real owner seals it. */
+        T run(String exactCacheKey, VerifiedStreamCopy.SourceLease source) throws IOException;
+    }
 
     public static <T> T withSource(Object cache, String exactCacheKey,
             VerifiedStreamCopy.StopCheck stop, ReadAction<T> action)
             throws IOException {
         if (exactCacheKey == null || exactCacheKey.isEmpty())
             throw new IOException("Exact cache key required");
-        return withSource(cache, exactCacheKey, null, stop, action);
+        Objects.requireNonNull(action, "action");
+        return withSource(cache, exactCacheKey, null, stop, (key, source) -> action.run(source));
     }
 
     /**
@@ -44,7 +49,7 @@ public final class NatuneCachedSource {
      * keep its own destination/admission/recovery and user-selection duties.
      */
     public static <T> T withSelectedSpans(Object cache, NavigableSet<?> selected,
-            VerifiedStreamCopy.StopCheck stop, ReadAction<T> action)
+            VerifiedStreamCopy.StopCheck stop, SelectedReadAction<T> action)
             throws IOException {
         // The inspected pinned resolver returns the TreeSet produced by the
         // original cache API (or an empty TreeSet). Do not execute an arbitrary
@@ -56,7 +61,7 @@ public final class NatuneCachedSource {
 
     private static <T> T withSource(Object cache, String exactCacheKey,
             NavigableSet<?> selected, VerifiedStreamCopy.StopCheck stop,
-            ReadAction<T> action) throws IOException {
+            SelectedReadAction<T> action) throws IOException {
         Objects.requireNonNull(action, "action");
         Objects.requireNonNull(stop, "stop");
         stop.check();
@@ -93,7 +98,7 @@ public final class NatuneCachedSource {
                                 throw new IOException("Original export selection changed");
                         source.assertUnchanged();
                     }
-                    return action.run(source);
+                    return action.run(key, source);
                 }
             }
         }
