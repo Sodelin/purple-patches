@@ -145,14 +145,15 @@ fn preflight_with_pin(state: &Path, pin: ModelPin<'_>) -> Result<Config, String>
     Ok(config)
 }
 
-fn config_with_pin(state: &Path, pin: ModelPin<'_>) -> Result<Config, String> {
+fn config_with_pin(state: &Path, pin: ModelPin<'_>, cancelled: &AtomicBool) -> Result<Config, String> {
+    if cancelled.load(std::sync::atomic::Ordering::Relaxed) { return Err("cancelled".into()); }
     let config = preflight_with_pin(state, pin)?;
     // Streaming hashes use bounded memory; no model/audio leaves this device.
-    if cli::sha256_file(&config.model)
-        .map_err(|_| "Whisper unavailable: pinned model cannot be read")?
+    if cli::sha256_file_cancellable(&config.model, cancelled)
+        .map_err(|e| if e == "cancelled" { e } else { "Whisper unavailable: pinned model cannot be read".into() })?
         != config.model_sha256
-        || cli::sha256_file(&config.binary)
-            .map_err(|_| "Whisper unavailable: pinned binary cannot be read")?
+        || cli::sha256_file_cancellable(&config.binary, cancelled)
+            .map_err(|e| if e == "cancelled" { e } else { "Whisper unavailable: pinned binary cannot be read".into() })?
             != config.binary_sha256
     {
         return Err("Whisper unavailable: installed engine/model bytes changed".into());
@@ -160,8 +161,8 @@ fn config_with_pin(state: &Path, pin: ModelPin<'_>) -> Result<Config, String> {
     Ok(config)
 }
 
-fn config(state: &Path) -> Result<Config, String> {
-    config_with_pin(state, selected_model())
+fn config(state: &Path, cancelled: &AtomicBool) -> Result<Config, String> {
+    config_with_pin(state, selected_model(), cancelled)
 }
 
 pub fn preflight(state: &Path) -> Result<(), String> {
@@ -185,7 +186,7 @@ fn classify_header(header:&[u8])->Result<&'static str,String>{
 }
 pub fn transcribe(state:&Path,_directory:&Path,cancelled:&AtomicBool,bytes:&[u8])->Result<String,String>{
     validate_wav(bytes)?;
-    let config=config(state)?;
+    let config=config(state,cancelled)?;
     let mut command=Command::new(config.binary);
     command.arg("-m").arg(config.model).arg("-f").arg("-")
         .args(["--language","auto","--no-timestamps","--threads","4","--no-prints"]);
@@ -254,7 +255,11 @@ mod tests {
         });
         private::create(&root.join("config.json"), &serde_json::to_vec(&record).unwrap()).unwrap();
         assert!(preflight_with_pin(&scratch.0, pin).is_ok());
-        assert!(config_with_pin(&scratch.0, pin).is_ok());
+        let cancelled = AtomicBool::new(false);
+        assert!(config_with_pin(&scratch.0, pin, &cancelled).is_ok());
+        cancelled.store(true, std::sync::atomic::Ordering::Relaxed);
+        assert!(matches!(config_with_pin(&scratch.0, pin, &cancelled), Err(e) if e == "cancelled"));
+        cancelled.store(false, std::sync::atomic::Ordering::Relaxed);
         assert!(preflight_with_pin(&scratch.0, ModelPin { sha256: &"f".repeat(64), bytes: pin.bytes }).is_err());
         fs::set_permissions(&binary, fs::Permissions::from_mode(0o600)).unwrap();
         assert!(preflight_with_pin(&scratch.0, pin).is_err());
@@ -267,7 +272,7 @@ mod tests {
         header[47] = 1; // Same-size/header change requires the full hash, not metadata alone.
         fs::write(&model, header).unwrap();
         assert!(preflight_with_pin(&scratch.0, pin).is_ok());
-        assert!(config_with_pin(&scratch.0, pin).is_err());
+        assert!(config_with_pin(&scratch.0, pin, &cancelled).is_err());
         fs::remove_file(&binary).unwrap();
         assert!(preflight_with_pin(&scratch.0, pin).is_err());
         assert_eq!(selected_model().bytes, 3_095_033_483);

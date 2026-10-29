@@ -481,19 +481,20 @@ pub fn run(
     }
 }
 
-pub fn sha256_file(path: &Path) -> Result<String, String> {
+fn sha256_reader(reader: &mut impl Read, cancelled: Option<&AtomicBool>) -> Result<String, String> {
     use sha2::{Digest, Sha256};
-    let mut file = OpenOptions::new()
-        .read(true)
-        .custom_flags(libc::O_NOFOLLOW)
-        .open(path)
-        .map_err(|_| "Pinned engine file unavailable")?;
     let mut digest = Sha256::new();
     let mut buffer = [0u8; 65536];
     loop {
-        let n = file
+        if cancelled.is_some_and(|stop| stop.load(Ordering::Relaxed)) {
+            return Err("cancelled".into());
+        }
+        let n = reader
             .read(&mut buffer)
             .map_err(|_| "Pinned engine read failed")?;
+        if cancelled.is_some_and(|stop| stop.load(Ordering::Relaxed)) {
+            return Err("cancelled".into());
+        }
         if n == 0 {
             break;
         }
@@ -502,10 +503,49 @@ pub fn sha256_file(path: &Path) -> Result<String, String> {
     Ok(format!("{:x}", digest.finalize()))
 }
 
+fn open_hash_file(path: &Path) -> Result<File, String> {
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_NOFOLLOW)
+        .open(path)
+        .map_err(|_| "Pinned engine file unavailable".into())
+}
+
+pub fn sha256_file(path: &Path) -> Result<String, String> {
+    sha256_reader(&mut open_hash_file(path)?, None)
+}
+
+pub fn sha256_file_cancellable(path: &Path, cancelled: &AtomicBool) -> Result<String, String> {
+    if cancelled.load(Ordering::Relaxed) { return Err("cancelled".into()); }
+    sha256_reader(&mut open_hash_file(path)?, Some(cancelled))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::private::Scratch;
+    #[test]
+    fn hashing_stops_between_reads_and_preserves_exact_digest() {
+        struct StopAfterRead<'a> { stop: &'a AtomicBool, reads: usize }
+        impl Read for StopAfterRead<'_> {
+            fn read(&mut self, bytes: &mut [u8]) -> std::io::Result<usize> {
+                self.reads += 1;
+                bytes[0] = b'x';
+                self.stop.store(true, Ordering::Relaxed);
+                Ok(1)
+            }
+        }
+        let stop = AtomicBool::new(true);
+        let mut reader = StopAfterRead { stop: &stop, reads: 0 };
+        assert_eq!(sha256_reader(&mut reader, Some(&stop)).unwrap_err(), "cancelled");
+        assert_eq!(reader.reads, 0);
+        stop.store(false, Ordering::Relaxed);
+        assert_eq!(sha256_reader(&mut reader, Some(&stop)).unwrap_err(), "cancelled");
+        assert_eq!(reader.reads, 1);
+        stop.store(false, Ordering::Relaxed);
+        assert_eq!(sha256_reader(&mut &b"abc"[..], Some(&stop)).unwrap(),
+                   "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    }
     fn catalogue() -> Vec<Model> {
         vec![Model {
             id: ALLOWED_MODEL.into(),
