@@ -239,6 +239,28 @@ public final class InspectNatune {
                                 r.getReference() instanceof MethodReference m)
                                 System.out.println("STORAGE_DELETE_CALL\t" + signature(m));
                 }
+        var utility = classes.get("Lmoe/rukamori/archivetune/playback/g;");
+        for (var method : utility.getMethods())
+            if (method.getName().equals("a") && method.getReturnType().equals("V")) codecBody(method, 160);
+        // Resolve native coroutine cancellation from the actual Continuation
+        // interface, without assuming upstream Kotlin names survived R8.
+        var continuation = classes.get("Lr8/cf2;");
+        if (continuation == null) throw new IllegalStateException("Original continuation missing");
+        var contextTypes = new TreeSet<String>();
+        for (var method : continuation.getMethods()) {
+            System.out.println("STORAGE_CONTINUATION_METHOD\t" + signature(method));
+            if (method.getParameterTypes().isEmpty() && method.getReturnType().startsWith("Lr8/"))
+                contextTypes.add(method.getReturnType());
+        }
+        int cancellationCandidates = 0;
+        for (var clazz : classes.values()) for (var method : clazz.getMethods()) {
+            if ((method.getAccessFlags() & 8) == 0 || method.getImplementation() == null ||
+                !method.getReturnType().equals("V") || method.getParameterTypes().size() != 1 ||
+                !contextTypes.contains(method.getParameterTypes().get(0).toString())) continue;
+            System.out.println("STORAGE_CONTEXT_VOID_CANDIDATE\t" + signature(method));
+            codecBody(method, 60); cancellationCandidates++;
+        }
+        System.out.println("STORAGE_CONTEXT_TOTAL\tcandidates=" + cancellationCandidates);
         // Resolve the actual optimized Cache-like interface, rather than
         // compiling an assumed upstream Media3 class name into an extension.
         for (var clazz : classes.values()) {
