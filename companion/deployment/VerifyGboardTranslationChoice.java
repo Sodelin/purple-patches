@@ -15,6 +15,7 @@ public final class VerifyGboardTranslationChoice {
     private static final String SNAPSHOT = "Ldev/purple/patches/gboard/PurpleAiRuntime$Snapshot;";
     private static final String BRIDGE = "Ldev/purple/patches/gboard/BridgeClient;";
     private static final String POLICY = "Ldev/purple/patches/gboard/SessionPolicy;";
+    private static final String PERMISSION = "Ldev/purple/patches/gboard/PurplePermissionActivity;";
     private static void require(boolean ok, String message) {
         if (!ok) throw new IllegalStateException(message);
     }
@@ -39,6 +40,13 @@ public final class VerifyGboardTranslationChoice {
         for (var instruction : method.getImplementation().getInstructions())
             if (instruction instanceof ReferenceInstruction ref && ref.getReference() instanceof MethodReference call
                     && call.getDefiningClass().equals(owner) && call.getName().equals(name)) return true;
+        return false;
+    }
+    private static boolean callsName(Method method, String name) {
+        if (method.getImplementation() == null) return false;
+        for (var instruction : method.getImplementation().getInstructions())
+            if (instruction instanceof ReferenceInstruction ref && ref.getReference() instanceof MethodReference call
+                    && call.getName().equals(name)) return true;
         return false;
     }
     public static void main(String[] args) throws Exception {
@@ -66,5 +74,27 @@ public final class VerifyGboardTranslationChoice {
                 if (calls(candidate, SNAPSHOT, "matches") && calls(candidate, RUNTIME, "submit")) guardedSubmit = true;
         require(guardedSubmit, "No guarded translation submit reference found");
         System.out.println("Verified translation effort chooser, policy, guarded submit and Sol request references in APK DEX.");
+        String version = System.getenv("BUNDLE_VERSION");
+        require(version != null && !version.isEmpty(), "Missing selected bundle version");
+        if (!version.equals("0.1.0-alpha.6")) {
+            Method scope = method(classes, POLICY, "permissionsFor");
+            require(hasString(scope, "local-tools") && hasString(scope, "microphone")
+                    && hasString(scope, "com.termux.permission.RUN_COMMAND")
+                    && hasString(scope, "android.permission.RECORD_AUDIO"),
+                    "Missing separate permission scopes or permissions");
+            Method activity = method(classes, PERMISSION, "onCreate");
+            require(calls(activity, POLICY, "permissionsFor") && callsName(activity, "requestPermissions")
+                    && callsName(activity, "checkSelfPermission")
+                    && hasString(activity, "dev.purple.patches.gboard.permission_scope"),
+                    "Permission activity does not reference the scoped request policy");
+            Method connect = method(classes, RUNTIME, "connect");
+            Method click = method(classes, RUNTIME, "click");
+            require(hasString(connect, "local-tools") && calls(connect, RUNTIME, "permissions")
+                    && hasString(click, "microphone") && calls(click, RUNTIME, "permissions"),
+                    "Local-tools and microphone actions do not reference separate scopes");
+            require(hasString(connect, "com.termux.RUN_COMMAND_BACKGROUND_CUSTOM_LOG_LEVEL")
+                    && hasString(connect, "0"), "Missing best-effort Termux logging extra");
+            System.out.println("Verified scoped permission and best-effort logging-extra references in APK DEX; runtime privacy is not established.");
+        }
     }
 }
