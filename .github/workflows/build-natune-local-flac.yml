@@ -36,7 +36,7 @@ jobs:
         run: |
           (cd "$RUNNER_TEMP/natune-flac-input" && sha256sum -c SHA256SUMS)
           sha256sum -c "$RUNNER_TEMP/natune-flac-input/source-SHA256SUMS"
-          echo "72ee124f75f3be57c18df3a542076f126a3e5c3f6e477bf368ef4fcc6e2e9b8244  $RUNNER_TEMP/natune-flac-input/libpurple_natune_flac.so" | sha256sum -c -
+          echo "72ee124f75f3be57c18df3a542076f126a3e5c3e477bf368ef4fcc6e2e9b8244  $RUNNER_TEMP/natune-flac-input/libpurple_natune_flac.so" | sha256sum -c -
           echo "7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c  $RUNNER_TEMP/natune-flac-input/FLAC-LICENSE.txt" | sha256sum -c -
       - name: DEX input-boundary controls
         run: python -m unittest discover -s natune -p 'test_*.py' -v

@@ -33,6 +33,13 @@ Their actual app host still needs to be selected. The settings profile excludes 
 Kotlin standard library. Current selected feeds and installed behavior are
 unchanged. No phone install/UI/permission/model action accompanies this source.
 
+Hosted packaging run 40933871582 stopped at input verification: the recorded
+library SHA-256 had accidentally acquired two extra characters and was not a
+valid checksum. A fresh memory-only download of the original public artifact
+matched all 15 member checksums and all 37 source hashes; the library fingerprint
+and packaging pins have been corrected in the successor source. That failure did
+not reach compilation or app patching and did not affect the earlier decoder tests.
+
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
 provide bounded streaming, full destination readback and the real Android SAF
 stream boundary for future Move to folder integration. Hosted run40886068466

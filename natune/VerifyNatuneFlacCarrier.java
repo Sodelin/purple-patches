@@ -49,7 +49,7 @@ public final class VerifyNatuneFlacCarrier {
             "Strict folder-copy entry missing");
 
         Map<String,String> additions = Map.of(
-            "lib/arm64-v8a/libpurple_natune_flac.so", "72ee124f75f3be57c18df3a542076f126a3e5c3f6e477bf368ef4fcc6e2e9b8244",
+            "lib/arm64-v8a/libpurple_natune_flac.so", "72ee124f75f3be57c18df3a542076f126a3e5c3e477bf368ef4fcc6e2e9b8244",
             "assets/purple/natune/FLAC-LICENSE.txt", "7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c");
         VerifyNatuneMobilePatch.compare(original, new VerifyNatuneMobilePatch.Snapshot(bodies, classes), args,
             "Verified carrier entries and JNI names; original program semantics and non-DEX resource bytes preserved within the stated comparison.", additions);

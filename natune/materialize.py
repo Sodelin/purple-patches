@@ -13,7 +13,7 @@ SETTINGS_SOURCES = ('RuntimeSettings.java', 'PurpleSettingsPage.java', 'NatuneSe
 FOLDER_SOURCES = ('VerifiedStreamCopy.java', 'NatuneCachedSource.java', 'TemporarySpaceBudget.java',
                   'NatuneCoroutineStop.java', 'SharedDocumentDestination.java', 'MediaStoreAudioDestination.java',
                   'NatuneFolderCopy.java', 'FlacIntegrity.java')
-FLAC_LIBRARY_SHA256 = '72ee124f75f3be57c18df3a542076f126a3e5c3f6e477bf368ef4fcc6e2e9b8244'
+FLAC_LIBRARY_SHA256 = '72ee124f75f3be57c18df3a542076f126a3e5c3e477bf368ef4fcc6e2e9b8244'
 FLAC_LICENSE_SHA256 = '7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c'
 
 

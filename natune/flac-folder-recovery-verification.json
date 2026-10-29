@@ -16,10 +16,19 @@
     "native_decoder_controls_passed": 42,
     "strict_folder_copy_controls_passed": 17,
     "missing_decoder_preflight_controls_passed": 2,
-    "tested_sample_bit_depths": [4, 8, 12, 16, 20, 24, 31, 32],
+    "tested_sample_bit_depths": [
+      4,
+      8,
+      12,
+      16,
+      20,
+      24,
+      31,
+      32
+    ],
     "independent_pcm_digest_checked_for_each_depth": true,
     "android_aarch64_library_bytes": 378256,
-    "android_aarch64_library_sha256": "72ee124f75f3be57c18df3a542076f126a3e5c3f6e477bf368ef4fcc6e2e9b8244"
+    "android_aarch64_library_sha256": "72ee124f75f3be57c18df3a542076f126a3e5c3e477bf368ef4fcc6e2e9b8244"
   },
   "shared_companion": {
     "hosted_run": 40932569868,
@@ -39,5 +48,11 @@
   "real_encrypted_journal_bound": false,
   "phone_execution": false,
   "original_media_accessed": false,
-  "limits": "Public synthetic owner/cache/provider and in-memory journal controls. Fixture encoding and decoding use the same pinned reference project; independent Python-computed source PCM digests were checked, not an independent decoder conformance suite. The actual app, JNI packaging, encrypted owner, complete source/rendition, Fuji receiver, source removal and phone/user acceptance remain unbound. Native FLAC only; no claim about other containers or audio provenance."
+  "limits": "Public synthetic owner/cache/provider and in-memory journal controls. Fixture encoding and decoding use the same pinned reference project; independent Python-computed source PCM digests were checked, not an independent decoder conformance suite. The actual app, JNI packaging, encrypted owner, complete source/rendition, Fuji receiver, source removal and phone/user acceptance remain unbound. Native FLAC only; no claim about other containers or audio provenance.",
+  "fingerprint_correction": {
+    "reason": "The initially recorded native-library SHA-256 contained two extra characters; hosted packaging run 40933871582 refused it before compilation.",
+    "method": "Re-read the original public artifact in memory, checked its full ZIP hash, all 15 member checksums and all 37 source hashes against the pinned local source; the library field above is the actual 64-character SHA-256.",
+    "earlier_decoder_test_results_changed": false,
+    "device_execution": false
+  }
 }
