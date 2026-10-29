@@ -50,9 +50,17 @@ updated. Android documents false for an invalid connection. A thrown or delayed
 call may leave a different outcome uncertain; automatic insertion retry is not
 safe without an actual outcome and anchor check.
 
+There is an earlier result-loss path as well: when an operation completes, its
+queued UI callback returns without showing the result if the captured editor
+anchor no longer matches. Ending the input session also cancels the operation
+and dismisses its dialog. These checks avoid inserting into a changed editor,
+but the current implementation does not provide a way to recover a generated
+result in those cases. This is source behavior, not an observed device incident.
+
 Before activation, select and verify an insertion protocol that handles active
 composition deliberately, keeps a recoverable preview when insertion fails or
-is uncertain, and does not claim cross-process atomic compare-and-replace.
+is uncertain or the editor changes, and does not claim cross-process atomic
+compare-and-replace.
 Calling `finishComposingText` itself changes editor state and needs its own
 explicit UX and regression analysis; it is not assumed to be a free fix.
 Authorized tests must cover active composition, selection changes, input
