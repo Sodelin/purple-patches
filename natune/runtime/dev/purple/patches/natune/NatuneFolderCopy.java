@@ -2,6 +2,7 @@ package dev.purple.patches.natune;
 
 import android.content.Context;
 import android.net.Uri;
+import android.provider.MediaStore;
 import java.io.IOException;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -15,6 +16,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class NatuneFolderCopy {
     private NatuneFolderCopy() {}
+
+    // The existing Move journal uses this exact operation identity format.
+    // Validate the original ID; never derive a replacement for an old attempt.
+    private static boolean journalOperationId(String id) {
+        if (id == null || id.length() != 64) return false;
+        for (int i = 0; i < id.length(); i++) {
+            char c = id.charAt(i);
+            if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) return false;
+        }
+        return true;
+    }
 
     /**
      * Real owner callbacks must return only after the corresponding existing
@@ -36,11 +48,17 @@ public final class NatuneFolderCopy {
     public static final class Target {
         public final String volume, folder, displayName, audioMime;
         public Target(String volume, String folder, String displayName, String audioMime) {
-            this.volume = Objects.requireNonNull(volume, "volume");
-            this.folder = Objects.requireNonNull(folder, "folder");
-            this.displayName = Objects.requireNonNull(displayName, "displayName");
-            this.audioMime = Objects.requireNonNull(audioMime, "audioMime");
+            String normalized = MediaStoreAudioDestination.normalizedFolder(folder);
+            if (!MediaStoreAudioDestination.validVolume(volume) || normalized == null ||
+                    !MediaStoreAudioDestination.fileName(displayName) || !MediaStoreAudioDestination.audioMime(audioMime))
+                throw new IllegalArgumentException("Invalid selected MediaStore target");
+            this.volume = volume;
+            this.folder = normalized;
+            this.displayName = displayName;
+            this.audioMime = audioMime;
         }
+        /** Real Android audio collection URI, not an asserted SAF tree grant. */
+        public Uri collectionUri() { return MediaStore.Audio.Media.getContentUri(volume); }
     }
 
     /** Ordered original stages, including calls whose outcome may be unknown. */
@@ -89,9 +107,14 @@ public final class NatuneFolderCopy {
             Objects.requireNonNull(budget, "budget");
             Objects.requireNonNull(stop, "stop");
             Objects.requireNonNull(owner, "owner");
+            if (!journalOperationId(operationId)) throw new IOException("Original journal operation ID invalid");
             if (!started.compareAndSet(false, true)) throw new IOException("Original copy already attempted");
             phase = Phase.ENTERED;
             try {
+                stop.check();
+                MediaStoreAudioDestination.validateTarget(context, target.volume, target.folder,
+                    target.displayName, target.audioMime);
+                stop.check();
                 VerifiedStreamCopy.VerifiedCopy result = NatuneCachedSource.withSelectedSpans(
                     cache, selected, stop, (key, source) -> {
                         source.assertUnchanged();

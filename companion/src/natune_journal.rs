@@ -24,6 +24,21 @@ pub struct Claim {
     pub requested_name: String,
     pub source_bytes: u64,
     pub peak_bytes: u64,
+    /// Schema 3 only. The legacy URI field holds the actual MediaStore audio
+    /// collection URI for this volume, not a claimed SAF tree grant.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub media_store_audio: Option<MediaStoreAudioSelection>,
+}
+
+/// Frozen selected destination context, not a provider grant or evidence that
+/// the returned row belongs to this operation. The Android owner must check
+/// the actual volume, row, owner, folder, MIME, source and current grant.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct MediaStoreAudioSelection {
+    pub volume: String,
+    pub relative_folder: String,
+    pub mime_type: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -272,7 +287,12 @@ impl<S: Store> Journal<S> {
                 return Err("Temporary pool busy or track oversized".into());
             }
         }
-        let schema = if prior.is_some_and(|p| p.schema == 2) || matches!(&event, Event::RemoteVerified { .. }) { 2 } else { 1 };
+        let schema = if prior.is_some_and(|p| p.schema == 3) ||
+            matches!(&event, Event::Begin { claim } if claim.media_store_audio.is_some()) {
+            3
+        } else if prior.is_some_and(|p| p.schema == 2) || matches!(&event, Event::RemoteVerified { .. }) {
+            2
+        } else { 1 };
         let record = Record { schema, operation_id: operation_id.to_owned(), generation,
             previous_sha256: prior.map(|r| r.last_hash.clone()), event };
         let bytes = serde_json::to_vec(&record).map_err(|_| "Move event encoding failed")?;
@@ -290,7 +310,12 @@ impl<S: Store> Journal<S> {
     }
     fn project(&self, record: &Record, bytes: &[u8]) -> Result<Snapshot, String> {
         if let Event::Begin { claim } = &record.event {
-            if record.schema != 1 || record.generation != 0 || record.previous_sha256.is_some() ||
+            let selected_destination_ok = match (record.schema, &claim.media_store_audio) {
+                (1, None) => true,
+                (3, Some(selection)) => media_store_selection(claim, selection),
+                _ => false,
+            };
+            if !selected_destination_ok || record.generation != 0 || record.previous_sha256.is_some() ||
                 self.rows.contains_key(&record.operation_id) || claim.operation_id != record.operation_id ||
                 !hex64(&claim.operation_id) || !hex64(&claim.source_fingerprint) ||
                 !text(&claim.song_id,512) || !text(&claim.rendition_key,1024) ||
@@ -300,13 +325,14 @@ impl<S: Store> Journal<S> {
                 return Err("Move claim invalid, repeated or requires explicit replacement custody".into());
             }
             return Ok(Snapshot { claim: claim.clone(), generation: 0, stage: Stage::Reserved,
-                destination: None, document: None, remote: None, schema: 1, local_cleaned: false, last_hash: hash(bytes) });
+                destination: None, document: None, remote: None, schema: record.schema, local_cleaned: false, last_hash: hash(bytes) });
         }
         let mut next = self.rows.get(&record.operation_id).ok_or("Move claim missing")?.clone();
         let schema_ok = match (next.schema, record.schema) {
             (1, 1) => !matches!(&record.event, Event::RemoteVerified { .. } | Event::StageCleaned),
             (1, 2) => matches!(&record.event, Event::RemoteVerified { .. }),
             (2, 2) => true,
+            (3, 3) => true,
             _ => false,
         };
         if !schema_ok || next.generation.checked_add(1) != Some(record.generation) ||
@@ -314,7 +340,7 @@ impl<S: Store> Journal<S> {
             return Err("Move event chain differs".into());
         }
         next.stage = match (&next.stage, &record.event) {
-            (Stage::Reserved, Event::Destination { uri }) if content_uri(uri) => {
+            (Stage::Reserved, Event::Destination { uri }) if destination_matches(&next.claim, uri) => {
                 next.destination = Some(uri.clone()); Stage::Destination
             }
             (Stage::Destination, Event::Verified { document }) if
@@ -348,6 +374,34 @@ fn text(s: &str, cap: usize) -> bool { !s.is_empty() && s.len()<=cap && !s.chars
 fn content_uri(s: &str) -> bool {
     text(s,4096) && s.strip_prefix("content://").and_then(|tail| tail.split_once('/'))
         .is_some_and(|(authority,path)| !authority.is_empty() && !path.is_empty())
+}
+fn media_store_selection(claim: &Claim, selected: &MediaStoreAudioSelection) -> bool {
+    // Android's returned mounted-volume name is still checked by the real
+    // owner. These characters preserve its exact, unescaped URI segment.
+    let volume_ok = !selected.volume.is_empty() && selected.volume.bytes().all(|b|
+        b.is_ascii_alphanumeric() || b == b'_' || b == b'-');
+    let folder = selected.relative_folder.strip_suffix('/');
+    let folder_ok = folder.is_some_and(|path| !path.is_empty() &&
+        path.split('/').all(|part| text(part,4096) && part != "." && part != ".." &&
+            !part.contains('\\')));
+    let mime_ok = selected.mime_type.strip_prefix("audio/").is_some_and(|subtype|
+        !subtype.is_empty() && subtype != "*" && subtype.bytes().all(|b| b.is_ascii_alphanumeric() ||
+            matches!(b, b'!' | b'#' | b'$' | b'%' | b'&' | b'\'' | b'*' | b'+' | b'-' |
+                b'.' | b'^' | b'_' | b'`' | b'|' | b'~')));
+    volume_ok && folder_ok && mime_ok && !claim.requested_name.trim().is_empty() &&
+        claim.requested_name != "." && claim.requested_name != ".." && content_uri(&claim.destination_tree_uri) &&
+        claim.destination_tree_uri == format!("content://media/{}/audio/media", selected.volume)
+}
+fn destination_matches(claim: &Claim, uri: &str) -> bool {
+    match &claim.media_store_audio {
+        None => content_uri(uri),
+        Some(selected) => {
+            let prefix = format!("content://media/{}/audio/media/", selected.volume);
+            uri.strip_prefix(&prefix).is_some_and(|id|
+                !id.is_empty() && id.bytes().all(|b| b.is_ascii_digit()) &&
+                id.parse::<i64>().is_ok_and(|n| n > 0))
+        }
+    }
 }
 fn valid_name(name: &str) -> bool {
     name.len()==85 && name.is_ascii() && hex64(&name[..64]) && &name[64..65]=="-" && &name[81..]==".age" &&
@@ -389,10 +443,22 @@ mod tests {
         Claim { operation_id: digit.to_string().repeat(64), song_id: format!("fixture-song-{digit}"),
             rendition_key: format!("fixture-source:fixture-song-{digit}"), source_fingerprint: "a".repeat(64),
             destination_tree_uri: "content://fixture.documents/tree/music".into(), requested_name: "song.flac".into(),
-            source_bytes: 90, peak_bytes: 100 }
+            source_bytes: 90, peak_bytes: 100, media_store_audio: None }
     }
     fn document() -> Document {
         Document { uri: "content://fixture.documents/document/song".into(), bytes:90, sha256:"b".repeat(64) }
+    }
+    fn media_claim(digit: char) -> Claim {
+        let mut c = claim(digit);
+        c.destination_tree_uri = "content://media/external_primary/audio/media".into();
+        c.media_store_audio = Some(MediaStoreAudioSelection {
+            volume: "external_primary".into(), relative_folder: "Music/Selected/".into(),
+            mime_type: "audio/flac".into(),
+        });
+        c
+    }
+    fn media_document() -> Document {
+        Document { uri: "content://media/external_primary/audio/media/42".into(), ..document() }
     }
     fn receipt() -> RemoteReceipt {
         RemoteReceipt { receiver_id:"public-fixture-receiver".into(), transfer_id:"public-fixture-transfer".into(),
@@ -420,6 +486,75 @@ mod tests {
         let projected=j.project(&record,&bytes).unwrap();
         j.store.append(&format!("{}-{:016x}.age",c.operation_id,record.generation),&bytes).unwrap();
         j.rows.insert(c.operation_id.clone(),projected);
+    }
+    #[test]
+    fn media_store_claim_retains_exact_target_across_remote_cleanup_and_restart() {
+        let memory=Memory::default(); let c=media_claim('a'); let mut j=Journal::open(memory.clone(),1000).unwrap();
+        begin(&mut j,&c);
+        assert_eq!(j.snapshot(&c.operation_id).unwrap().unwrap().schema,3);
+        step(&mut j,&c,Event::Destination{uri:media_document().uri});
+        step(&mut j,&c,Event::Verified{document:media_document()});
+        step(&mut j,&c,Event::RemoteVerified{receipt:receipt()});
+        assert!(j.record(&c.operation_id,Some(3),Event::RemovalPending).is_err());
+        drop(j);
+        let mut restored=Journal::open(memory.clone(),1000).unwrap();
+        let row=restored.snapshot(&c.operation_id).unwrap().unwrap();
+        assert_eq!(row.claim,c); assert_eq!(row.schema,3);
+        assert_eq!(row.stage,Stage::RemoteVerified); assert_eq!(restored.reserved_bytes().unwrap(),100);
+        step(&mut restored,&c,Event::StageCleaned);
+        drop(restored);
+        let again=Journal::open(memory,1000).unwrap();
+        assert_eq!(again.snapshot(&c.operation_id).unwrap().unwrap().stage,Stage::StagedRemotely);
+        assert_eq!(again.snapshot(&c.operation_id).unwrap().unwrap().claim,c);
+        assert_eq!(again.reserved_bytes().unwrap(),0);
+    }
+    #[test]
+    fn media_store_claim_rejects_mismatched_selection_before_persistence() {
+        for defect in ["collection","volume","folder","path_traversal","mime","wildcard","name"] {
+            let memory=Memory::default(); let mut j=Journal::open(memory.clone(),1000).unwrap(); let mut c=media_claim('a');
+            match defect {
+                "collection" => c.destination_tree_uri="content://media/other/audio/media".into(),
+                "volume" => c.media_store_audio.as_mut().unwrap().volume="other/volume".into(),
+                "folder" => c.media_store_audio.as_mut().unwrap().relative_folder="Music/Selected".into(),
+                "path_traversal" => c.media_store_audio.as_mut().unwrap().relative_folder="Music/../Other/".into(),
+                "mime" => c.media_store_audio.as_mut().unwrap().mime_type="video/mp4".into(),
+                "wildcard" => c.media_store_audio.as_mut().unwrap().mime_type="audio/*".into(),
+                _ => c.requested_name="..".into(),
+            }
+            assert!(j.record(&c.operation_id,None,Event::Begin{claim:c.clone()}).is_err(),"{defect}");
+            assert!(memory.events.lock().unwrap().is_empty(),"{defect}");
+        }
+    }
+    #[test]
+    fn media_store_row_must_match_selected_collection_and_positive_id() {
+        let memory=Memory::default(); let c=media_claim('b'); let mut j=Journal::open(memory.clone(),1000).unwrap();
+        begin(&mut j,&c);
+        for uri in ["content://media/other/audio/media/42", "content://other/external_primary/audio/media/42",
+            "content://media/external_primary/audio/media/0", "content://media/external_primary/audio/media/-1",
+            "content://media/external_primary/audio/media/42?other=1", "content://media/external_primary/audio/media/1/2"] {
+            assert!(j.record(&c.operation_id,Some(0),Event::Destination{uri:uri.into()}).is_err(),"{uri}");
+        }
+        assert_eq!(memory.events.lock().unwrap().len(),1);
+        step(&mut j,&c,Event::Destination{uri:media_document().uri});
+        assert_eq!(j.snapshot(&c.operation_id).unwrap().unwrap().stage,Stage::Destination);
+    }
+    #[test]
+    fn media_store_schema_cannot_downgrade_and_legacy_claim_bytes_stay_unchanged() {
+        let legacy=claim('c');
+        let legacy_json=serde_json::to_string(&legacy).unwrap();
+        assert!(!legacy_json.contains("media_store_audio"));
+        assert_eq!(serde_json::from_str::<Claim>(&legacy_json).unwrap(),legacy);
+        for bad_schema in [1,2] {
+            let memory=Memory::default(); let c=media_claim('d'); let mut j=Journal::open(memory.clone(),1000).unwrap();
+            begin(&mut j,&c); step(&mut j,&c,Event::Destination{uri:media_document().uri});
+            drop(j);
+            let name=format!("{}-{:016x}.age",c.operation_id,1);
+            let mut events=memory.events.lock().unwrap();
+            let mut value:serde_json::Value=serde_json::from_slice(&events[&name]).unwrap();
+            value["schema"]=bad_schema.into(); events.insert(name,serde_json::to_vec(&value).unwrap());
+            drop(events);
+            assert!(Journal::open(memory,1000).is_err());
+        }
     }
     #[test]
     fn new_original_removal_is_refused_and_keeps_identity_and_charge() {

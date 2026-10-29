@@ -17,6 +17,7 @@ import r8.dd6;
 /** Integrated public-fixture controls; no actual journal, app or media. */
 public final class NatuneFolderCopyControls {
     private static final String KEY = "qobuz:fixture-song";
+    private static final String OPERATION = "a".repeat(64);
     private static final byte[] BYTES = new byte[4099];
     private static final NatuneFolderCopy.Target TARGET = new NatuneFolderCopy.Target(
         "external_primary", "Music/Selected", "fixture.flac", "audio/flac");
@@ -50,7 +51,7 @@ public final class NatuneFolderCopyControls {
             owner = new Owner(this);
         }
         VerifiedStreamCopy.VerifiedCopy run(VerifiedStreamCopy.StopCheck stop) throws IOException {
-            return attempt.run(app, cache, selected, "fixture-operation", TARGET, budget,
+            return attempt.run(app, cache, selected, OPERATION, TARGET, budget,
                 0, 128, stop, owner);
         }
         void originalRetained() {
@@ -68,8 +69,12 @@ public final class NatuneFolderCopyControls {
                 TemporarySpaceBudget.Reservation reservation, NatuneFolderCopy.Target target)
                 throws IOException {
             calls.add("begin");
-            need(id.equals("fixture-operation") && key.equals(KEY) && target == TARGET,
+            need(id.equals(OPERATION) && key.equals(KEY) && target == TARGET,
                 "Original intent and selected key reach owner");
+            need(target.collectionUri().toString().equals("content://media/external_primary/audio/media") &&
+                target.volume.equals("external_primary") && target.folder.equals("Music/Selected/") &&
+                target.displayName.equals("fixture.flac") && target.audioMime.equals("audio/flac"),
+                "Owner receives the actual collection and normalized selected destination");
             need(Thread.holdsLock(fixture.cache.b) && Thread.holdsLock(fixture.cache.c),
                 "Original cache locks held during owner binding");
             need(fixture.app.store.inserts == 0 && reservation.sourceBytes == BYTES.length &&
@@ -79,13 +84,13 @@ public final class NatuneFolderCopyControls {
         }
         public void destination(String id, Uri uri) throws IOException {
             calls.add("destination");
-            need(id.equals("fixture-operation") && uri.equals(fixture.attempt.returnedUri()) &&
+            need(id.equals(OPERATION) && uri.equals(fixture.attempt.returnedUri()) &&
                 fixture.app.store.opens == 0, "Actual returned URI reaches owner before output");
             if ("destination".equals(failAt)) throw new IOException("Synthetic uncertain destination");
         }
         public void verified(String id, Uri uri, VerifiedStreamCopy.VerifiedCopy proof) throws IOException {
             calls.add("verified");
-            need(id.equals("fixture-operation") && uri.equals(fixture.attempt.returnedUri()) &&
+            need(id.equals(OPERATION) && uri.equals(fixture.attempt.returnedUri()) &&
                 proof.bytes == BYTES.length && fixture.app.store.pending == 0 && fixture.app.store.updates == 1,
                 "Owner receives matching proof after publication and readback");
             if ("verified".equals(failAt)) throw new IOException("Synthetic uncertain verification");
@@ -93,6 +98,27 @@ public final class NatuneFolderCopyControls {
         }
     }
     private static void check() throws Exception {
+        Fixture badId = new Fixture();
+        for (String id : new String[]{null, "a".repeat(63), "a".repeat(65),
+                "A".repeat(64), "g".repeat(64), "a".repeat(63) + "\n"}) {
+            refuses(() -> badId.attempt.run(badId.app, badId.cache, badId.selected, id,
+                TARGET, badId.budget, 0, 128, () -> {}, badId.owner),
+                "Original operation ID must match the journal format");
+        }
+        need(badId.attempt.phase() == NatuneFolderCopy.Phase.NEW && badId.budget.reservedBytes() == 0 &&
+            badId.owner.calls.isEmpty() && badId.app.store.inserts == 0,
+            "Invalid ID never reaches reservation, journal or provider");
+        for (String[] fields : new String[][] {
+                {"bad/volume", "Music", "song.flac", "audio/flac"},
+                {"external_primary", "Music/../Other", "song.flac", "audio/flac"},
+                {"external_primary", "Music", "../song.flac", "audio/flac"},
+                {"external_primary", "Music", "song.flac", "audio/*"}}) {
+            try {
+                new NatuneFolderCopy.Target(fields[0], fields[1], fields[2], fields[3]);
+                throw new IllegalStateException("Invalid target accepted");
+            } catch (IllegalArgumentException expected) { need(true, "Invalid target refused before admission"); }
+        }
+
         Fixture ok = new Fixture();
         var proof = ok.run(() -> {});
         need(ok.attempt.phase() == NatuneFolderCopy.Phase.LOCAL_VERIFIED && !ok.attempt.failed(),
@@ -116,7 +142,7 @@ public final class NatuneFolderCopyControls {
         Fixture tooLarge = new Fixture();
         TemporarySpaceBudget small = new TemporarySpaceBudget(BYTES.length);
         refuses(() -> tooLarge.attempt.run(tooLarge.app, tooLarge.cache, tooLarge.selected,
-            "fixture-operation", TARGET, small, 0, 128, () -> {}, tooLarge.owner),
+            OPERATION, TARGET, small, 0, 128, () -> {}, tooLarge.owner),
             "An entire peak that exceeds the selected pool refuses");
         need(tooLarge.app.store.inserts == 0 && tooLarge.owner.calls.isEmpty() && small.reservedBytes() == 0,
             "Budget refusal creates no destination or journal claim");

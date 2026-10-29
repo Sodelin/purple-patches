@@ -37,6 +37,15 @@ installed transport are not inferred from public source. An existing approved
 bridge may satisfy these requirements if its actual owner and interface support
 it; this review does not create or select one.
 
+Android Bridge's existing-owner source response
+`0341aaf20dfcab7cb4f0ae0f3be6bf4aefe15023:coordination/NATUNE-APP-JOURNAL-ROUTE-RETURN-20261029.md`
+reports no qualifying selected receiver in the sources it checked. It also
+identified the original-ID and MediaStore-destination representation gaps.
+The successor source validates the journal's 64-lowercase-hex original ID before
+reservation, and adds a schema 3 MediaStore selection with volume, normalized
+folder, MIME and actual collection URI. See `MOVE-JOURNAL.md`; these source
+changes still need hosted verification and a real authenticated owner binding.
+
 Primary source: [Termux RUN_COMMAND documentation](https://github.com/termux/termux-app/wiki/RUN_COMMAND-Intent)
 
 ## Next integration boundary

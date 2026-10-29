@@ -48,6 +48,7 @@ fn check() -> Result<(), String> {
         requested_name:"PUBLIC-FIXTURE-NOT-CREATED.flac".into(),
         source_bytes:9,
         peak_bytes:1_048_576,
+        media_store_audio:None,
     };
     let document=Document {
         uri:"content://fixture.invalid/document/PUBLIC-FIXTURE-NOT-CREATED".into(),

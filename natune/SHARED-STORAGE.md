@@ -160,9 +160,9 @@ IPC and recovery, actual codec/recording identity, UI and device acceptance
 remain unbound. Hosted run 40925574995 passed 68 integrated synthetic-owner
 controls and compiled the actual Android source against the SDK;
 `folder-copy-verification.json` records its exact source and full artifact
-readback. A later source change adds an original-stop check after the cache
-lease closes; its successor controls are pending. This is not an app, device
-or real journal test.
+readback. Hosted successor run 40926425767 passed 75 controls, including the original-stop
+check after the cache lease closes; `folder-copy-stop-verification.json` pins its
+source and artifact. This is not an app, device or real journal test.
 
 The copy result is in-memory byte evidence, not a deletion permit or completed
 move. The source lease/coverage reader is now implemented against the exact

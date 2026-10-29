@@ -72,6 +72,28 @@ does not know those events must refuse rather than silently discard them. No
 history is rewritten. No serializer or receipt descriptor authenticates a
 caller or rechecks computer bytes on restart.
 
+## Source successor: explicit MediaStore destination
+
+The new schema 3 source adds an optional `media_store_audio` field to `Claim`
+with the selected Android volume, normalized relative folder and actual audio
+MIME. Its existing `requested_name` remains the user-requested filename. For
+this schema only, `destination_tree_uri` contains the actual Android MediaStore
+audio **collection** URI for that volume; it is not a SAF tree grant. The
+returned `Destination` URI must be an audio row in that same volume with a
+positive row ID. The Android owner must still query the provider for the real
+row, owner, folder, MIME and contents; a serialized URI or successful journal
+transition cannot prove any of those facts.
+
+The new field is absent from serialized v1/v2 claims when not selected. New
+MediaStore claims start at schema 3 and stay there through verified remote and
+cleanup events; a schema downgrade refuses. Older readers reject the new
+field/schema instead of silently dropping it. Existing claims/history are not
+rewritten. This is an explicit source ABI change to `Claim`: Rust constructors
+must set the field, using `None` for historical SAF claims. No existing
+installed journal or caller has been changed. Hosted successor controls are
+pending; actual Android selection, app-authenticated encrypted writer and
+restart/UNKNOWN recovery remain unbound.
+
 Hosted [run 40911881847](https://github.com/Sodelin/purple-patches/actions/runs/40911881847)
 at `ef58831a2e18bb966f173ac6ca394c4b2537fba4` passed 42 Rust library
 controls and cross-built the checker. The fixtures cover matching remote

@@ -26,13 +26,15 @@ public final class MediaStoreAudioDestinationControls {
         public ContentResolver getContentResolver(){return store;}
     }
     static final class Store extends ContentResolver {
-        String owner="example.natune",folder,returned="content://media/external_primary/audio/media/42";
+        String owner="example.natune",folder,name,mime,returned="content://media/external_primary/audio/media/42";
         int pending=1,inserts,opens,reads,updates;
         boolean missing,duplicate,nullOutput,nullInput,corruptRead,updateZeroAfterChange,throwAfterUpdate,mutateOnUpdate;
         byte[] body=new byte[0];
         ContentValues inserted;
         public Uri insert(Uri collection,ContentValues values){
             inserts++;inserted=values;folder=(String)values.get(MediaStore.MediaColumns.RELATIVE_PATH);
+            name=(String)values.get(MediaStore.MediaColumns.DISPLAY_NAME);
+            mime=(String)values.get(MediaStore.MediaColumns.MIME_TYPE);
             return returned==null?null:Uri.parse(returned);
         }
         public Cursor query(Uri ignored,String[] columns,String selection,String[] args,String order){
@@ -40,7 +42,7 @@ public final class MediaStoreAudioDestinationControls {
             return new Cursor(){
                 public boolean moveToFirst(){return true;}
                 public boolean moveToNext(){return duplicate;}
-                public String getString(int i){return i==0?owner:i==2?folder:null;}
+                public String getString(int i){return i==0?owner:i==2?folder:i==3?name:i==4?mime:null;}
                 public int getInt(int i){return pending;}
                 public void close(){}
             };
@@ -109,6 +111,10 @@ public final class MediaStoreAudioDestinationControls {
         App wrongOwner=new App();wrongOwner.store.owner="another.app";
         var other=create(wrongOwner);
         refuses(other::openNewOutput,"Wrong row owner");need(wrongOwner.store.opens==0,"No output to other owner");
+        App wrongMime=new App();var mistyped=create(wrongMime);wrongMime.store.mime="audio/mpeg";
+        refuses(mistyped::openNewOutput,"Wrong returned row MIME");need(wrongMime.store.opens==0,"No output to wrong MIME");
+        App wrongName=new App();var badName=create(wrongName);wrongName.store.name="../other";
+        refuses(badName::openNewOutput,"Invalid returned row name");need(wrongName.store.opens==0,"No output to invalid name");
         App duplicate=new App();duplicate.store.duplicate=true;
         var duplicated=create(duplicate);refuses(duplicated::openNewOutput,"Duplicate query rows");
 

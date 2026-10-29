@@ -27,37 +27,49 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
     private final String ownerPackage;
     private final String selectedFolder;
     private final String selectedVolume;
+    private final String selectedMime;
     private final Uri row;
     private boolean outputAttempted;
     private boolean publishAttempted;
 
-    private MediaStoreAudioDestination(ContentResolver resolver, String ownerPackage, String selectedFolder, String selectedVolume, Uri row) {
+    private MediaStoreAudioDestination(ContentResolver resolver, String ownerPackage, String selectedFolder,
+            String selectedVolume, String selectedMime, Uri row) {
         this.resolver = resolver;
         this.ownerPackage = ownerPackage;
         this.selectedFolder = selectedFolder;
         this.selectedVolume = selectedVolume;
+        this.selectedMime = selectedMime;
         this.row = row;
     }
 
-    /** Call only after the real operation and complete peak allocation are admitted. */
-    public static MediaStoreAudioDestination create(Context context, String volume,
-            String relativeFolder, String displayName, String actualMime) throws IOException {
+    /** Read-only preflight; actual volume/provider state can still change. */
+    public static void validateTarget(Context context, String volume, String relativeFolder,
+            String displayName, String actualMime) throws IOException {
         Objects.requireNonNull(context, "context");
         if (Build.VERSION.SDK_INT < 29) throw new IOException("Pending audio requires Android 10 or later");
         Context app = context.getApplicationContext();
         if (app == null || app.getPackageName() == null || app.getPackageName().isEmpty())
             throw new IOException("Application owner unavailable");
-        if (volume == null || !MediaStore.getExternalVolumeNames(app).contains(volume))
+        if (!validVolume(volume) || !MediaStore.getExternalVolumeNames(app).contains(volume))
             throw new IOException("Selected writable volume unavailable");
-        if (!relativeFolder(relativeFolder) || !fileName(displayName) || actualMime == null ||
-                !actualMime.startsWith("audio/") || actualMime.length() <= "audio/".length())
+        if (normalizedFolder(relativeFolder) == null || !fileName(displayName) || !audioMime(actualMime))
             throw new IOException("Selected folder, audio filename and actual MIME required");
+        if (app.getContentResolver() == null) throw new IOException("Media provider unavailable");
+    }
+
+    /** Call only after the real operation and complete peak allocation are admitted. */
+    public static MediaStoreAudioDestination create(Context context, String volume,
+            String relativeFolder, String displayName, String actualMime) throws IOException {
+        validateTarget(context, volume, relativeFolder, displayName, actualMime);
+        Context app = context.getApplicationContext();
+        if (app == null || app.getPackageName() == null || app.getPackageName().isEmpty())
+            throw new IOException("Application owner changed");
         ContentResolver resolver = app.getContentResolver();
         if (resolver == null) throw new IOException("Media provider unavailable");
         ContentValues values = new ContentValues();
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
         values.put(MediaStore.MediaColumns.MIME_TYPE, actualMime);
-        String folder = relativeFolder.endsWith("/") ? relativeFolder : relativeFolder + "/";
+        String folder = normalizedFolder(relativeFolder);
         values.put(MediaStore.MediaColumns.RELATIVE_PATH, folder);
         values.put(MediaStore.MediaColumns.IS_PENDING, 1);
         Uri row = resolver.insert(MediaStore.Audio.Media.getContentUri(volume), values);
@@ -65,20 +77,40 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
         // Return the exact provider result to the owner before a validation
         // query can fail. The owner must durably retain it; a wrong URI is
         // evidence to reconcile, not permission to open or delete a row.
-        return new MediaStoreAudioDestination(resolver, app.getPackageName(), folder, volume, row);
+        return new MediaStoreAudioDestination(resolver, app.getPackageName(), folder, volume, actualMime, row);
     }
 
-    private static boolean fileName(String name) {
+    static boolean fileName(String name) {
         if (name == null || name.trim().isEmpty() || name.equals(".") || name.equals("..")) return false;
-        return name.indexOf('/') < 0 && name.indexOf('\\') < 0 && name.indexOf('\0') < 0;
-    }
-    private static boolean relativeFolder(String path) {
-        if (path == null || path.isEmpty() || path.startsWith("/") || path.indexOf('\\') >= 0 ||
-                path.indexOf('\0') >= 0) return false;
-        String normalized = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
-        if (normalized.isEmpty()) return false;
-        for (String part : normalized.split("/", -1)) if (!fileName(part)) return false;
+        if (name.indexOf('/') >= 0 || name.indexOf('\\') >= 0) return false;
+        for (int i = 0; i < name.length(); i++) if (Character.isISOControl(name.charAt(i))) return false;
         return true;
+    }
+    static boolean validVolume(String volume) {
+        if (volume == null || volume.isEmpty()) return false;
+        for (int i = 0; i < volume.length(); i++) {
+            char c = volume.charAt(i);
+            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                (c >= '0' && c <= '9') || c == '_' || c == '-')) return false;
+        }
+        return true;
+    }
+    static boolean audioMime(String mime) {
+        if (mime == null || !mime.startsWith("audio/") || mime.length() <= 6 || mime.equals("audio/*")) return false;
+        for (int i = 6; i < mime.length(); i++) {
+            char c = mime.charAt(i);
+            if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                (c >= '0' && c <= '9') || "!#$%&'*+-.^_`|~".indexOf(c) >= 0)) return false;
+        }
+        return true;
+    }
+    static String normalizedFolder(String path) {
+        if (path == null || path.isEmpty() || path.startsWith("/") || path.indexOf('\\') >= 0 ||
+                path.indexOf('\0') >= 0) return null;
+        String normalized = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
+        if (normalized.isEmpty()) return null;
+        for (String part : normalized.split("/", -1)) if (!fileName(part)) return null;
+        return normalized + "/";
     }
     private static boolean selectedRow(Uri row, String volume) {
         if (row == null || !"content".equals(row.getScheme()) || !"media".equals(row.getAuthority())) return false;
@@ -93,11 +125,12 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
     private void requireOwnedState(boolean pending) throws IOException {
         if (!selectedRow(row, selectedVolume)) throw new IOException("Unexpected media row identity");
         String[] columns = {MediaStore.MediaColumns.OWNER_PACKAGE_NAME, MediaStore.MediaColumns.IS_PENDING,
-            MediaStore.MediaColumns.RELATIVE_PATH};
+            MediaStore.MediaColumns.RELATIVE_PATH, MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.MIME_TYPE};
         try (Cursor cursor = resolver.query(row, columns, null, null, null)) {
             if (cursor == null || !cursor.moveToFirst() ||
                     !ownerPackage.equals(cursor.getString(0)) || cursor.getInt(1) != (pending ? 1 : 0) ||
                     !selectedFolder.equals(cursor.getString(2)) ||
+                    !fileName(cursor.getString(3)) || !selectedMime.equals(cursor.getString(4)) ||
                     cursor.moveToNext()) throw new IOException("Media row owner/state unavailable or changed");
         }
     }
