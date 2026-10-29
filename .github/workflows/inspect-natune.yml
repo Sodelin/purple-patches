@@ -1,0 +1,53 @@
+name: Inspect exact Natune APK hooks off phone
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: purple-natune-inspection
+  cancel-in-progress: false
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Fetch public input matching installed bytes
+        run: python natune/fetch_target.py "$RUNNER_TEMP/natune-original.apk"
+      - name: Verify signature and Android package identity
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)"
+          AAPT2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -1)"
+          "$APKSIGNER" verify --print-certs "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-signers.txt"
+          "$AAPT2" dump badging "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-badging.txt"
+          python - <<'PY'
+          import json, os, pathlib, re
+          pin = json.loads(pathlib.Path('natune/target.json').read_text())
+          tmp = pathlib.Path(os.environ['RUNNER_TEMP'])
+          signers = re.findall(r'Signer #\d+ certificate SHA-256 digest: ([0-9a-f]{64})', (tmp/'natune-signers.txt').read_text())
+          assert signers == [pin['signer_sha256']], 'Original signer mismatch'
+          match = re.search(r"^package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'", (tmp/'natune-badging.txt').read_text(), re.M)
+          assert match and match.groups() == (pin['package'], str(pin['version_code']), pin['version_name']), 'Wrong APK target'
+          pathlib.Path('dist').mkdir()
+          pathlib.Path('dist/target-proof.json').write_text(json.dumps({'source_commit':os.environ['GITHUB_SHA'], 'public_input':pin, 'original_signature_verified':True, 'package_version_verified':True, 'apk_executed':False}, indent=2)+'\n')
+          PY
+      - name: Acquire proven hash-pinned DEX reader
+        run: |
+          curl -fL https://github.com/MorpheApp/morphe-desktop/releases/download/v1.19.1/morphe-desktop-1.19.1-all.jar -o "$RUNNER_TEMP/morphe.jar"
+          echo "a51472252cd63b2eac635dbb5a154ff918bfc15268da89679feb3d760230c573  $RUNNER_TEMP/morphe.jar" | sha256sum -c -
+      - name: Inspect release bytecode without loading app classes
+        run: |
+          mkdir -p "$RUNNER_TEMP/natune-inspector"
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-inspector" natune/InspectNatune.java
+          java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" InspectNatune "$RUNNER_TEMP/natune-original.apk" > dist/policy-hooks.txt
+          cd dist
+          sha256sum target-proof.json policy-hooks.txt > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: natune-public-hook-inspection
+          path: dist/
+          retention-days: 14

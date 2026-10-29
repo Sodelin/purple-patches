@@ -1,0 +1,18 @@
+{
+  "package": "moe.rukamori.archivetune",
+  "label": "Natune",
+  "version_name": "N202610191717",
+  "version_code": 6900,
+  "repository": "NatuneGroup/ArchiveTune",
+  "release_id": 417556523,
+  "release_tag": "N202610191717",
+  "source_commit": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+  "asset_id": 656932810,
+  "asset_name": "app-gms-mobile-universal-nightly.apk",
+  "asset_bytes": 20718081,
+  "sha256": "b5dc57b49bc049ea9afa9230a0fb859e754a9fff226d8a2ffc8fedfdcad2814f",
+  "signer_sha256": "6db8326a550861f0f96b9adcb706207d75ac4480de454fb8af95daa5d6c7f9d9",
+  "installed_correspondence": "Installed base APK full SHA256/size match this exact official release asset; installed signature verified with apksigner. App preferences and runtime data were not read.",
+  "installed_evidence": "record-11391-1793270319490343809.age",
+  "patch_state": "target identified; binary hook inspection pending; no device patch applied"
+}
