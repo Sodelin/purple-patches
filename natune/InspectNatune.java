@@ -10,6 +10,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction;
 import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction;
+import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload;
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
 import com.android.tools.smali.dexlib2.iface.reference.StringReference;
@@ -46,9 +47,16 @@ public final class InspectNatune {
             "\tregisters="+body.getRegisterCount()+"\tunits="+
             java.util.stream.StreamSupport.stream(body.getInstructions().spliterator(),false).mapToInt(x->x.getCodeUnits()).sum()+
             "\ttry_blocks="+body.getTryBlocks().size());
+        for (var region : body.getTryBlocks()) for (var handler : region.getExceptionHandlers())
+            System.out.println("CODEC_CATCH\tstart="+region.getStartCodeAddress()+
+                "\tunits="+region.getCodeUnitCount()+"\ttype="+handler.getExceptionType()+
+                "\thandler="+handler.getHandlerCodeAddress());
         int offset=0,index=0;
         for(var instruction:body.getInstructions()) {
-            if(index++>=maximum)break;
+            if(index++>=maximum) {
+                System.out.println("CODEC_TRUNCATED\t"+signature(method)+"\tlimit="+maximum);
+                break;
+            }
             var row=new StringBuilder("CODEC_NODE\t"+offset+"\t"+instruction.getOpcode().name());
             if(instruction instanceof OneRegisterInstruction r)row.append("\tA=").append(r.getRegisterA());
             if(instruction instanceof TwoRegisterInstruction r)row.append("\tB=").append(r.getRegisterB());
@@ -60,6 +68,8 @@ public final class InspectNatune {
                 .append("\tstart=").append(r.getStartRegister());
             if(instruction instanceof WideLiteralInstruction r)row.append("\tliteral=").append(r.getWideLiteral());
             if(instruction instanceof OffsetInstruction r)row.append("\ttarget=").append(offset+r.getCodeOffset());
+            if(instruction instanceof SwitchPayload payload) for (var element : payload.getSwitchElements())
+                row.append("\tswitch=").append(element.getKey()).append(":").append(element.getOffset());
             if(instruction instanceof ReferenceInstruction r) {
                 var ref=r.getReference();
                 if(ref instanceof FieldReference f)row.append("\tfield=").append(f);
@@ -211,21 +221,36 @@ public final class InspectNatune {
             owners.add(owner.getType());
             System.out.println("CACHE_REMOVE_SITE\t" + entry.getKey());
             codecBody(method, 300);
-            // Calls through the exact direct interfaces are separate references
-            // after R8; include matching interface declarations for caller scan.
-            for (String type : owner.getInterfaces()) {
-                var iface = classes.get(type);
-                if (iface == null) continue;
-                for (var candidate : iface.getMethods()) {
-                    if (candidate.getName().equals(method.getName()) &&
-                        String.join("",candidate.getParameterTypes()).equals(String.join("",method.getParameterTypes())) &&
-                        candidate.getReturnType().equals(method.getReturnType())) {
-                        dispatched.add(signature(candidate));
-                        System.out.println("CACHE_REMOVE_DISPATCH\t" + signature(candidate) + "\timplementation=" + entry.getKey());
+            // Resolve the downloader's specific remove() interface. Generic
+            // Kotlin lambda interfaces have many unrelated implementors; their
+            // call sites do not identify a particular cache-removal lambda.
+            if (method.getName().equals("remove") && method.getParameterTypes().isEmpty() &&
+                method.getReturnType().equals("V")) {
+                for (String type : owner.getInterfaces()) {
+                    var iface = classes.get(type);
+                    if (iface == null) continue;
+                    for (var candidate : iface.getMethods()) {
+                        if (candidate.getName().equals(method.getName()) &&
+                            candidate.getParameterTypes().isEmpty() && candidate.getReturnType().equals("V")) {
+                            dispatched.add(signature(candidate));
+                            System.out.println("CACHE_REMOVE_DISPATCH\t" + signature(candidate) + "\timplementation=" + entry.getKey());
+                        }
                     }
                 }
             }
         }
+        var constructorRefs = new TreeSet<String>();
+        for (String type : List.of("Lr8/uk9;", "Lr8/sx4;")) {
+            var owner = classes.get(type);
+            if (owner == null || !owners.contains(type))
+                throw new IllegalStateException("Expected downloader removal owner unavailable: " + type);
+            for (var method : owner.getMethods()) if (method.getName().equals("<init>")) {
+                constructorRefs.add(signature(method));
+                System.out.println("CACHE_REMOVE_CONSTRUCTOR\t" + signature(method));
+                codecBody(method, 200);
+            }
+        }
+        if (constructorRefs.isEmpty()) throw new IllegalStateException("Downloader constructors unavailable");
         for (String type : owners) {
             var owner = classes.get(type);
             System.out.println("CACHE_REMOVE_OWNER\t" + type + "\tsuper=" + owner.getSuperclass() +
@@ -237,24 +262,41 @@ public final class InspectNatune {
                 System.out.println("CACHE_REMOVE_METHOD\t" + signature(method) + "\tflags=" + method.getAccessFlags());
         }
         int callers = 0;
+        var constructorCallers = new TreeMap<String,Method>();
         for (var clazz : classes.values()) for (var method : clazz.getMethods()) {
             var body = method.getImplementation();
             if (body == null) continue;
             var targets = new TreeSet<String>();
             for (var instruction : body.getInstructions())
-                if (instruction instanceof ReferenceInstruction r && r.getReference() instanceof MethodReference ref &&
-                    dispatched.contains(signature(ref))) targets.add(signature(ref));
+                if (instruction instanceof ReferenceInstruction r && r.getReference() instanceof MethodReference ref) {
+                    if (dispatched.contains(signature(ref))) targets.add(signature(ref));
+                    if (constructorRefs.contains(signature(ref))) {
+                        constructorCallers.put(signature(method), method);
+                        System.out.println("CACHE_REMOVE_CONSTRUCTOR_CALLER\t" + signature(method) + "\t" + signature(ref));
+                    }
+                }
             for (String target : targets) {
                 System.out.println("CACHE_REMOVE_CALLER\t" + signature(method) + "\t" + target);
+                if (target.equals("Lr8/bf3;->remove()V")) codecBody(method, 300);
                 callers++;
             }
         }
+        if (constructorCallers.size() > 32) throw new IllegalStateException("Unexpectedly broad downloader constructor graph");
+        for (var entry : constructorCallers.entrySet()) {
+            System.out.println("CACHE_REMOVE_CONSTRUCTOR_CALLER_BODY\t" + entry.getKey());
+            codecBody(entry.getValue(), 200);
+        }
+        var task = classes.get("Lr8/zd3;");
+        if (task == null) throw new IllegalStateException("Download task unavailable");
+        for (var field : task.getFields())
+            System.out.println("DOWNLOAD_TASK_FIELD\t" + task.getType() + "->" + field.getName() + ":" + field.getType());
         var handler = classes.get("Lr8/xd3;");
         if (handler == null) throw new IllegalStateException("Download manager handler unavailable");
         System.out.println("DOWNLOAD_HANDLER\t" + handler.getType() + "\tsuper=" + handler.getSuperclass());
         for (var method : handler.getMethods())
-            if (method.getName().equals("handleMessage")) codecBody(method, 350);
-        System.out.println("CACHE_REMOVE_TOTAL\tsites=" + removers.size() + "\towners=" + owners.size() + "\tcallers=" + callers);
+            if (method.getName().equals("handleMessage")) codecBody(method, 1000);
+        System.out.println("CACHE_REMOVE_TOTAL\tsites=" + removers.size() + "\towners=" + owners.size() +
+            "\tcallers=" + callers + "\tconstructor_callers=" + constructorCallers.size());
     }
     static final Set<String> STORAGE_ANCHORS = Set.of(
         "export_tmp", "Could not open destination stream", "Download cache is empty for this song"

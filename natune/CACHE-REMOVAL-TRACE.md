@@ -1,0 +1,9 @@
+# Exact-release cache-removal tracing
+
+The first public APK inspection ran on GitHub Actions at source `02c5834d095d1742b8d6b1c39defbc33570bd532` ([run 40908979134](https://github.com/Sodelin/purple-patches/actions/runs/40908979134)). Its downloaded artifact ZIP SHA-256 was `40203de8d59e7e0c3d31ed55e4fa4528d816df472058d65ae906b1578903fcc5`; artifact retention is temporary. The target proof identified the pinned NaTune N202610191717 package and signer.
+
+It located 17 methods in 14 classes invoking the optimized cache-removal interface. Two implementations, `Lr8/uk9;->remove()V` and `Lr8/sx4;->remove()V`, implement `Lr8/bf3;->remove()V`; an optimized task calls that interface. Other direct call sites include player error handling, cache trimming, and export deletion. This establishes static call sites, not their reachability for a particular download or coverage of all indirect/native writers.
+
+The initial caller scan also reported 1,216 references because it treated generic Kotlin lambda interfaces as if every invocation identified the specific removal lambda. That count is **not** a set of proven removal callers. The successor scan limits interface expansion to the downloader's no-argument `remove()` method while retaining all direct call sites. It explicitly omits generic-interface dispatch; their actual receiver/reachability still requires separate analysis. The improved trace also records downloader construction, the task body, exception ranges, and switch payload offsets. Switch element offsets are raw DEX values relative to the switch instruction, not absolute payload addresses.
+
+No app was run and no cache entry or music file was touched. A safe Move still requires the actual track/rendition and complete-source proof, durable destination and exact cache/index mapping, verified player behavior, and coordination with all relevant live readers and writers. An asynchronous removal callback alone does not establish those conditions.
