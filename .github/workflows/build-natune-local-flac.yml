@@ -49,7 +49,7 @@ jobs:
       - name: Patch exact APK with validation and inspect expected changes
         run: |
           java -jar "$RUNNER_TEMP/morphe.jar" patch \
-            --patches dist/patches-0.2.0-dev.1.mpp --exclusive \
+            --patches dist/patches-0.2.0-dev.2.mpp --exclusive \
             --enable "Allow full-quality audio on mobile data" \
             --enable "Require FLAC for local audio decoding" \
             --bytecode-mode FULL --validate --unsigned \
