@@ -178,6 +178,10 @@ the phone; actual backend, app-owner and device acceptance remain open.
 The current v3 checker source exercises the remote-verified and cleaned-staging
 states using only synthetic receiver and cleanup observations. It creates no
 audio or staging document and must not be reported as an actual Fuji transfer.
+Hosted [run 40913495559](https://github.com/Sodelin/purple-patches/actions/runs/40913495559)
+at `e1d10051d5de553696df059f33220c2919d8e0da` passed 42 library controls and
+cross-built that checker; `remote-journal-checker-verification.json` records
+the artifact/source hashes. The checker itself was not executed on the phone.
 
 Hosted run40905442006 at2dd1a59201b4d90d39514365c4f0efe8bdccdc97
 passed36 Rust library controls and cross-built the checker for AArch64 Android.

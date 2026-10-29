@@ -1,0 +1,40 @@
+{
+  "schema": "purple.natune.remote-journal-checker-verification.v1",
+  "source_commit": "e1d10051d5de553696df059f33220c2919d8e0da",
+  "run_id": 40913495559,
+  "run_url": "https://github.com/Sodelin/purple-patches/actions/runs/40913495559",
+  "artifact_id": 12914752721,
+  "artifact_zip_sha256": "e1a7da4ecc61344144942d79b043f5f0e46269fb03af537c01811b2fff669278",
+  "artifact_files_sha256": {
+    "native-controls.txt": "7901a548ee4df791840580caf22e0a97d38b839ab54b8a8d061a9985b6bc9c57",
+    "natune-journal-check": "1084ebaf4cd42585c5082e2350bc530bbae86906985d562abce87914c971f9a1",
+    "purple-gboard-service": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91",
+    "purple-keyboard-bridge": "33a8a38e303ca81cb17ceeb72f14a978e0b34b2603255d506b4c428952bb4220",
+    "response-schema.json": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
+    "source-SHA256SUMS": "8bc094f6407042cbef2a0a74eb93cfe074be9177aa3c5feaa1cf2997f0f9d683"
+  },
+  "source_files_sha256": {
+    "companion/Cargo.toml": "e6cab69c08a51d51b936d6739b33b03e3cc05b4acd0f152adcdf9aa6b687d5e0",
+    "companion/Cargo.lock": "bb0b1fc7d4611d120a39afbf107238ea22034ef9bd65995e336519ec693a32e3",
+    "companion/src/cli.rs": "504ca36c12a8627b00a7e2f33d8ed9f829ad1e499da2d363b72f72e9ea4d7546",
+    "companion/src/http.rs": "2933781ca9e8e785c598ee3ccec4266bf628dedca19ceed43c338f55a6eacfea",
+    "companion/src/jobs.rs": "2be689495355610f9075e05eb4de1e6e09cd01d4da573c01c7baf18560fd4abd",
+    "companion/src/lib.rs": "01c94b9939ec65148683a221ea0fa0bd55b7f9d4a03483a0a4fafb3ce9bad068",
+    "companion/src/main.rs": "16147887864ab191726a910759f90abf2ef365ee11960b534928f03e87d25667",
+    "companion/src/memory.rs": "caf71a444975569fac7e97d677eeffca3caa53e2ae242ac7a2d6932592131419",
+    "companion/src/natune_journal.rs": "51d538612db085541463794ef1244eee25c18cc91dfde1a99417bf74832c0074",
+    "companion/src/private.rs": "8262df14c2cfe673b7d927f8e3119c50986b193afee2db3feeb3ef926b4e36c1",
+    "companion/src/vault.rs": "c30cb1e4556dc809003a18965dbbcf70f10facc917899b3bcde5b96af9990683",
+    "companion/src/whisper.rs": "c350f8023c3f47840a8dbc4d330d4a12beccd5468c98191ece70cc45a641bfc3",
+    "companion/src/bin/natune-journal-check.rs": "244d9b885a3d616ead64f25889222aca308f3b435b046291fcb6948d832cfedc"
+  },
+  "rust_test_summary": [
+    "test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s"
+  ],
+  "cross_build": "AArch64 Android checker",
+  "phone_execution": false,
+  "limitations": [
+    "Hosted tests use synthetic in-memory journal events; the encrypted backend checker was cross-built but not run on the phone.",
+    "No actual receiver, app, staging document, original music, deletion, or phone acceptance was tested."
+  ]
+}
