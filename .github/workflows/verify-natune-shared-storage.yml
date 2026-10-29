@@ -21,6 +21,10 @@ jobs:
           mkdir -p "$RUNNER_TEMP/copy-core" dist
           javac -Xlint:all -Werror -d "$RUNNER_TEMP/copy-core" \
             natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
+            natune/NatuneDataSpecBinding.java \
+            natune/NatuneDataSpecBindingControls.java \
+            natune/test-fixtures/android/net/Uri.java \
+            natune/test-fixtures/r8/km2.java \
             natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
             natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java \
             natune/runtime/dev/purple/patches/natune/NatuneCoroutineStop.java \
@@ -30,6 +34,7 @@ jobs:
             natune/storage-tests/NatuneCoroutineStopControls.java \
             natune/storage-tests/fixtures/r8/*.java
           java -cp "$RUNNER_TEMP/copy-core" VerifiedStreamCopyControls > dist/stream-copy-controls.txt
+          java -cp "$RUNNER_TEMP/copy-core" NatuneDataSpecBindingControls > dist/shared-document-request-controls.txt
           java -cp "$RUNNER_TEMP/copy-core" NatuneCachedSourceControls > dist/cache-source-controls.txt
           java -cp "$RUNNER_TEMP/copy-core" TemporarySpaceBudgetControls > dist/temporary-budget-controls.txt
           java -cp "$RUNNER_TEMP/copy-core" NatuneCoroutineStopControls > dist/coroutine-stop-controls.txt
@@ -44,6 +49,10 @@ jobs:
       - name: Retain compact public verification
         run: |
           sha256sum natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
+            natune/NatuneDataSpecBinding.java \
+            natune/NatuneDataSpecBindingControls.java \
+            natune/test-fixtures/android/net/Uri.java \
+            natune/test-fixtures/r8/km2.java \
             natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java \
             natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
             natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java \
@@ -54,7 +63,7 @@ jobs:
             natune/storage-tests/NatuneCoroutineStopControls.java \
             natune/storage-tests/fixtures/r8/*.java > dist/source-SHA256SUMS
           cd dist
-          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt coroutine-stop-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
+          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt coroutine-stop-controls.txt shared-document-request-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: natune-shared-storage-controls

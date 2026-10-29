@@ -1,0 +1,1071 @@
+{
+  "schema": "purple.natune.shared-document-playback-review.v1",
+  "source_only": true,
+  "files": [
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/db/entities/SongEntity.kt",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/db/entities/SongEntity.kt",
+      "bytes": 2699,
+      "sha256": "1565cc62620401a3264aa07f5907d351bb4ad12c1bfcf140aec3c93e1ed38a0c",
+      "selected_lines": [
+        {
+          "line": 40,
+          "text": "    val dateModified: LocalDateTime? = null, // file property"
+        },
+        {
+          "line": 41,
+          "text": "    val liked: Boolean = false,"
+        },
+        {
+          "line": 42,
+          "text": "    val likedDate: LocalDateTime? = null,"
+        },
+        {
+          "line": 43,
+          "text": "    val totalPlayTime: Long = 0, // in milliseconds"
+        },
+        {
+          "line": 44,
+          "text": "    val inLibrary: LocalDateTime? = null,"
+        },
+        {
+          "line": 45,
+          "text": "    val dateDownload: LocalDateTime? = LocalDateTime.now(),"
+        },
+        {
+          "line": 46,
+          "text": "    @ColumnInfo(name = \"isMusicVideo\", defaultValue = \"0\")"
+        },
+        {
+          "line": 47,
+          "text": "    val isMusicVideo: Boolean = false,"
+        },
+        {
+          "line": 48,
+          "text": "    @ColumnInfo(name = \"isLocal\", defaultValue = \"0\")"
+        },
+        {
+          "line": 49,
+          "text": "    val isLocal: Boolean = false,"
+        },
+        {
+          "line": 50,
+          "text": "    // Set when the user has chosen \"Don't recommend this song again\" from the song overflow"
+        },
+        {
+          "line": 51,
+          "text": "    // menu. Recommendations / discovery feeds filter out songs where this is non-null, so"
+        },
+        {
+          "line": 52,
+          "text": "    // the user can permanently banish a track from auto-generated radio/mixes regardless of"
+        },
+        {
+          "line": 53,
+          "text": "    // artist. Mirrors ArtistEntity.blockedAt semantics. Cleared by re-tapping the menu item."
+        },
+        {
+          "line": 54,
+          "text": "    val blockedAt: LocalDateTime? = null,"
+        }
+      ]
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/models/MediaMetadata.kt",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/models/MediaMetadata.kt",
+      "bytes": 6194,
+      "sha256": "8a003d047942a0edcfd518316a4209431ea54caedb0734ecbcdf0f6317dcc1db",
+      "selected_lines": [
+        {
+          "line": 23,
+          "text": "@Immutable"
+        },
+        {
+          "line": 24,
+          "text": "data class MediaMetadata("
+        },
+        {
+          "line": 25,
+          "text": "    val id: String,"
+        },
+        {
+          "line": 26,
+          "text": "    val title: String,"
+        },
+        {
+          "line": 27,
+          "text": "    val artists: List<Artist>,"
+        },
+        {
+          "line": 28,
+          "text": "    val duration: Int,"
+        },
+        {
+          "line": 29,
+          "text": "    val thumbnailUrl: String? = null,"
+        },
+        {
+          "line": 30,
+          "text": "    val album: Album? = null,"
+        },
+        {
+          "line": 31,
+          "text": "    val setVideoId: String? = null,"
+        },
+        {
+          "line": 32,
+          "text": "    val spotifyTrackId: String? = null,"
+        },
+        {
+          "line": 33,
+          "text": "    val explicit: Boolean = false,"
+        },
+        {
+          "line": 34,
+          "text": "    val liked: Boolean = false,"
+        },
+        {
+          "line": 35,
+          "text": "    val likedDate: LocalDateTime? = null,"
+        },
+        {
+          "line": 36,
+          "text": "    val inLibrary: LocalDateTime? = null,"
+        },
+        {
+          "line": 37,
+          "text": "    val isMusicVideo: Boolean = false,"
+        },
+        {
+          "line": 38,
+          "text": "    // Podcast-episode marker (upstream 15.0.0 parity): episodes share the song"
+        },
+        {
+          "line": 39,
+          "text": "    // shape but must skip lyrics, SponsorBlock, stats and crossfade paths."
+        },
+        {
+          "line": 40,
+          "text": "    // Default false keeps every existing constructor and copy() call intact."
+        },
+        {
+          "line": 41,
+          "text": "    val isPodcast: Boolean = false,"
+        },
+        {
+          "line": 42,
+          "text": "    /** ISRC of the recording this item represents, when the source catalogue supplied one. */"
+        },
+        {
+          "line": 43,
+          "text": "    val isrc: String? = null,"
+        },
+        {
+          "line": 44,
+          "text": "    // PORT-NOTE: Listen Together attribution \u2014 ported from vivi-music's MediaMetadata"
+        },
+        {
+          "line": 45,
+          "text": "    // (suggestedBy: String? = null). Carries who suggested a queued track so the queue"
+        },
+        {
+          "line": 46,
+          "text": "    // can show \"suggested by X\". Additive defaulted field: existing constructors,"
+        },
+        {
+          "line": 47,
+          "text": "    // copy() calls and componentN order are unaffected."
+        },
+        {
+          "line": 48,
+          "text": "    val suggestedBy: String? = null,"
+        },
+        {
+          "line": 49,
+          "text": ") : Serializable {"
+        },
+        {
+          "line": 73,
+          "text": "    fun toSongEntity() ="
+        },
+        {
+          "line": 74,
+          "text": "        SongEntity("
+        },
+        {
+          "line": 75,
+          "text": "            id = id,"
+        },
+        {
+          "line": 76,
+          "text": "            title = title,"
+        },
+        {
+          "line": 77,
+          "text": "            duration = duration,"
+        },
+        {
+          "line": 78,
+          "text": "            thumbnailUrl = thumbnailUrl,"
+        },
+        {
+          "line": 79,
+          "text": "            albumId = album?.id,"
+        },
+        {
+          "line": 80,
+          "text": "            albumName = album?.title,"
+        },
+        {
+          "line": 81,
+          "text": "            explicit = explicit,"
+        },
+        {
+          "line": 82,
+          "text": "            isMusicVideo = isMusicVideo,"
+        },
+        {
+          "line": 83,
+          "text": "            liked = liked,"
+        },
+        {
+          "line": 84,
+          "text": "            likedDate = likedDate,"
+        },
+        {
+          "line": 85,
+          "text": "            inLibrary = inLibrary,"
+        }
+      ]
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/utils/LocalMediaIntents.kt",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/utils/LocalMediaIntents.kt",
+      "bytes": 1341,
+      "sha256": "6d125f06d79e740793fa11cf5a8d79d5178c9526e9951801285095c639ea4c9c",
+      "selected_lines": [
+        {
+          "line": 17,
+          "text": "fun String.isLocalMediaId(): Boolean ="
+        },
+        {
+          "line": 18,
+          "text": "    runCatching {"
+        },
+        {
+          "line": 19,
+          "text": "        when (toUri().scheme?.lowercase(Locale.US)) {"
+        },
+        {
+          "line": 20,
+          "text": "            \"content\", \"file\", \"android.resource\" -> true"
+        },
+        {
+          "line": 21,
+          "text": "            else -> false"
+        },
+        {
+          "line": 22,
+          "text": "        }"
+        },
+        {
+          "line": 23,
+          "text": "    }.getOrDefault(false)"
+        }
+      ]
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/localmedia/LocalSongScanner.kt",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/localmedia/LocalSongScanner.kt",
+      "bytes": 44431,
+      "sha256": "c755ecd05bbb448aae4fe215aa8cd02cbf31e666a30d7d4cc337cfa82b819775",
+      "selected_lines": [
+        {
+          "line": 398,
+          "text": "                        val mediaId = cursor.getLong(idIndex)"
+        },
+        {
+          "line": 399,
+          "text": "                        val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, mediaId)"
+        },
+        {
+          "line": 433,
+          "text": "                            )"
+        },
+        {
+          "line": 434,
+          "text": "                        val dateModifiedSeconds = cursor.getLong(dateModifiedIndex)"
+        },
+        {
+          "line": 435,
+          "text": "                        val sizeBytes = cursor.getLong(sizeIndex).coerceAtLeast(0L)"
+        },
+        {
+          "line": 436,
+          "text": "                        val trackId = contentUri.toString()"
+        },
+        {
+          "line": 437,
+          "text": "                        val dateModified ="
+        }
+      ]
+    },
+    {
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/playback/MusicService.kt",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/MusicService.kt",
+      "bytes": 630107,
+      "sha256": "472266e7e3cf6bd503d2916dcb3b75a8d1e66b54fb03faf368ca9f0e005b912b",
+      "selected_lines": [
+        {
+          "line": 8661,
+          "text": "    private fun createPlayerCacheDataSourceFactory(cacheWriteEnabled: Boolean): CacheDataSource.Factory ="
+        },
+        {
+          "line": 8662,
+          "text": "        CacheDataSource"
+        },
+        {
+          "line": 8663,
+          "text": "            .Factory()"
+        },
+        {
+          "line": 8664,
+          "text": "            .setCache(playerCache)"
+        },
+        {
+          "line": 8665,
+          "text": "            .setUpstreamDataSourceFactory(createResolvedUpstreamDataSourceFactory())"
+        },
+        {
+          "line": 8666,
+          "text": "            .apply {"
+        },
+        {
+          "line": 8667,
+          "text": "                if (!cacheWriteEnabled) {"
+        },
+        {
+          "line": 8668,
+          "text": "                    setCacheWriteDataSinkFactory(null)"
+        },
+        {
+          "line": 8669,
+          "text": "                }"
+        },
+        {
+          "line": 8670,
+          "text": "            }.setFlags(FLAG_IGNORE_CACHE_ON_ERROR)"
+        },
+        {
+          "line": 8671,
+          "text": ""
+        },
+        {
+          "line": 8672,
+          "text": "    private fun createCacheDataSource(): CacheDataSource.Factory ="
+        },
+        {
+          "line": 8673,
+          "text": "        CacheDataSource"
+        },
+        {
+          "line": 8674,
+          "text": "            .Factory()"
+        },
+        {
+          "line": 8675,
+          "text": "            .setCache(downloadCache)"
+        },
+        {
+          "line": 8676,
+          "text": "            .setUpstreamDataSourceFactory("
+        },
+        {
+          "line": 8677,
+          "text": "                DataSource.Factory {"
+        },
+        {
+          "line": 8678,
+          "text": "                    createPlayerCacheDataSourceFactory("
+        },
+        {
+          "line": 8679,
+          "text": "                        cacheWriteEnabled = !isLowDataModeActive(),"
+        },
+        {
+          "line": 8680,
+          "text": "                    ).createDataSource()"
+        },
+        {
+          "line": 8681,
+          "text": "                },"
+        },
+        {
+          "line": 8682,
+          "text": "            ).setCacheWriteDataSinkFactory(null)"
+        },
+        {
+          "line": 8683,
+          "text": "            .setFlags(FLAG_IGNORE_CACHE_ON_ERROR)"
+        },
+        {
+          "line": 8684,
+          "text": ""
+        },
+        {
+          "line": 8685,
+          "text": "    private fun createDataSourceFactory(): DataSource.Factory {"
+        },
+        {
+          "line": 8686,
+          "text": "        val cachedFactory ="
+        },
+        {
+          "line": 8687,
+          "text": "            ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->"
+        },
+        {
+          "line": 8688,
+          "text": "                resolvePlaybackDataSpec("
+        },
+        {
+          "line": 8689,
+          "text": "                    dataSpec = dataSpec,"
+        },
+        {
+          "line": 8690,
+          "text": "                    allowCacheShortCircuit = true,"
+        },
+        {
+          "line": 8691,
+          "text": "                )"
+        },
+        {
+          "line": 8692,
+          "text": "            }"
+        },
+        {
+          "line": 8693,
+          "text": "        val directFactory = createResolvedUpstreamDataSourceFactory()"
+        },
+        {
+          "line": 8694,
+          "text": "        val telegramFactory = TelegramDataSource.Factory()"
+        },
+        {
+          "line": 8721,
+          "text": "        return DataSource.Factory {"
+        },
+        {
+          "line": 8722,
+          "text": "            SchemeRoutingDataSource("
+        },
+        {
+          "line": 8723,
+          "text": "                cachedFactory = cachedFactory,"
+        },
+        {
+          "line": 8724,
+          "text": "                directFactory = directFactory,"
+        },
+        {
+          "line": 8725,
+          "text": "                telegramFactory = telegramFactory,"
+        },
+        {
+          "line": 8726,
+          "text": "                deezerFactory = deezerFactory,"
+        },
+        {
+          "line": 8727,
+          "text": "                tidalProgressiveDashFactory = tidalProgressiveDashFactory,"
+        },
+        {
+          "line": 8728,
+          "text": "                spotifyEchoFactory = spotifyEchoFactory,"
+        },
+        {
+          "line": 8729,
+          "text": "            )"
+        },
+        {
+          "line": 8733,
+          "text": "    private fun createResolvedUpstreamDataSourceFactory(): DataSource.Factory {"
+        },
+        {
+          "line": 8734,
+          "text": "        val youtubeMediaFactory ="
+        },
+        {
+          "line": 8735,
+          "text": "            DefaultDataSource.Factory("
+        },
+        {
+          "line": 8736,
+          "text": "                this,"
+        },
+        {
+          "line": 8737,
+          "text": "                OkHttpDataSource.Factory(mediaOkHttpClient),"
+        },
+        {
+          "line": 8738,
+          "text": "            )"
+        },
+        {
+          "line": 8739,
+          "text": "        // Resolved source URIs pass through this factory a second time after the outer resolver has"
+        },
+        {
+          "line": 8740,
+          "text": "        // selected a provider. Route those private schemes here instead of asking DefaultDataSource"
+        },
+        {
+          "line": 8741,
+          "text": "        // to handle an unknown `deezer://` or `tidal-dash://` URI."
+        },
+        {
+          "line": 8742,
+          "text": "        val routingFactory ="
+        },
+        {
+          "line": 8743,
+          "text": "            DataSource.Factory {"
+        },
+        {
+          "line": 8744,
+          "text": "                ResolvedSchemeRoutingDataSource("
+        },
+        {
+          "line": 8745,
+          "text": "                    defaultFactory = youtubeMediaFactory,"
+        },
+        {
+          "line": 8746,
+          "text": "                    deezerFactory = DeezerDecryptingDataSource.Factory(OkHttpDataSource.Factory(mediaOkHttpClient)),"
+        },
+        {
+          "line": 8747,
+          "text": "                    tidalProgressiveDashFactory = TidalProgressiveDashDataSource.Factory(mediaOkHttpClient),"
+        },
+        {
+          "line": 8748,
+          "text": "                    spotifyEchoFactory = EchoDecryptingDataSource.Factory(OkHttpDataSource.Factory(mediaOkHttpClient)),"
+        },
+        {
+          "line": 8749,
+          "text": "                )"
+        },
+        {
+          "line": 8750,
+          "text": "            }"
+        },
+        {
+          "line": 8751,
+          "text": ""
+        },
+        {
+          "line": 8752,
+          "text": "        return ResolvingDataSource.Factory(routingFactory) { dataSpec ->"
+        },
+        {
+          "line": 8753,
+          "text": "            val scheme = dataSpec.uri.scheme?.lowercase(Locale.US)"
+        },
+        {
+          "line": 8754,
+          "text": "            if ("
+        },
+        {
+          "line": 8755,
+          "text": "                scheme == DeezerCrypto.SCHEME ||"
+        },
+        {
+          "line": 8756,
+          "text": "                scheme == TidalAudioProvider.PROGRESSIVE_DASH_SCHEME ||"
+        },
+        {
+          "line": 8757,
+          "text": "                scheme == SpotifyEchoResolver.SCHEME"
+        },
+        {
+          "line": 8758,
+          "text": "            ) {"
+        },
+        {
+          "line": 8759,
+          "text": "                dataSpec"
+        },
+        {
+          "line": 8760,
+          "text": "            } else {"
+        },
+        {
+          "line": 8761,
+          "text": "                resolvePlaybackDataSpec("
+        },
+        {
+          "line": 8762,
+          "text": "                    dataSpec = dataSpec,"
+        },
+        {
+          "line": 8763,
+          "text": "                    allowCacheShortCircuit = false,"
+        },
+        {
+          "line": 8764,
+          "text": "                )"
+        },
+        {
+          "line": 8765,
+          "text": "            }"
+        },
+        {
+          "line": 8766,
+          "text": "        }"
+        },
+        {
+          "line": 11032,
+          "text": "        dataSpec: DataSpec,"
+        },
+        {
+          "line": 11033,
+          "text": "        allowCacheShortCircuit: Boolean,"
+        },
+        {
+          "line": 11034,
+          "text": "    ): DataSpec {"
+        },
+        {
+          "line": 11035,
+          "text": "        if (dataSpec.uri.shouldBypassYouTubeResolver()) {"
+        },
+        {
+          "line": 11036,
+          "text": "            return dataSpec"
+        },
+        {
+          "line": 11037,
+          "text": "        }"
+        },
+        {
+          "line": 11038,
+          "text": "        val mediaId = dataSpec.key ?: return dataSpec"
+        },
+        {
+          "line": 11039,
+          "text": "        val lowDataModeActive = isLowDataModeActive()"
+        },
+        {
+          "line": 11040,
+          "text": "        // One settings snapshot for this whole resolution: the cache gates, the multi-source"
+        },
+        {
+          "line": 11041,
+          "text": "        // chain, the pins and the terminal YouTube gate below all read the same order and"
+        },
+        {
+          "line": 11042,
+          "text": "        // toggles, so they cannot disagree with each other or with the settings UI."
+        },
+        {
+          "line": 11043,
+          "text": "        val prefs = sourcePrefsSnapshot()"
+        },
+        {
+          "line": 11044,
+          "text": "        val authenticityRejectedSources = authenticityRejectedSourcesByMediaId[mediaId].orEmpty()"
+        },
+        {
+          "line": 11045,
+          "text": "        val storedFormat ="
+        },
+        {
+          "line": 11046,
+          "text": "            runBlocking(Dispatchers.IO) {"
+        },
+        {
+          "line": 11047,
+          "text": "                database.format(mediaId).first()"
+        },
+        {
+          "line": 11048,
+          "text": "            }"
+        },
+        {
+          "line": 11049,
+          "text": "        storedFormat?.let { format ->"
+        },
+        {
+          "line": 11050,
+          "text": "            audioNormalizationFactorCache[mediaId] = resolveAudioNormalizationFactor(mediaId, storedFormat, normalizeAudio = true)"
+        },
+        {
+          "line": 11051,
+          "text": "        }"
+        },
+        {
+          "line": 11052,
+          "text": "        val knownContentLength ="
+        },
+        {
+          "line": 11053,
+          "text": "            contentLengthCache[mediaId] ?: storedFormat?.contentLength?.takeIf { it > 0L } ?: runCatching {"
+        },
+        {
+          "line": 11054,
+          "text": "                downloadCache"
+        },
+        {
+          "line": 11055,
+          "text": "                    .getContentMetadata(mediaId)"
+        },
+        {
+          "line": 11056,
+          "text": "                    .get(ContentMetadata.KEY_CONTENT_LENGTH, -1L)"
+        },
+        {
+          "line": 11057,
+          "text": "            }.getOrNull()?.takeIf { it > 0L } ?: runCatching {"
+        },
+        {
+          "line": 11058,
+          "text": "                playerCache"
+        },
+        {
+          "line": 11059,
+          "text": "                    .getContentMetadata(mediaId)"
+        },
+        {
+          "line": 11060,
+          "text": "                    .get(ContentMetadata.KEY_CONTENT_LENGTH, -1L)"
+        },
+        {
+          "line": 11061,
+          "text": "            }.getOrNull()?.takeIf { it > 0L }"
+        },
+        {
+          "line": 11062,
+          "text": ""
+        },
+        {
+          "line": 11063,
+          "text": "        knownContentLength?.takeIf { it > 0L }?.let { contentLengthCache[mediaId] = it }"
+        },
+        {
+          "line": 11064,
+          "text": ""
+        },
+        {
+          "line": 11065,
+          "text": "        // When any external source is enabled for this track, the ephemeral YouTube player cache"
+        },
+        {
+          "line": 11505,
+          "text": "                    length = span.length,"
+        },
+        {
+          "line": 11506,
+          "text": "                    isCached = span.isCached,"
+        },
+        {
+          "line": 11507,
+          "text": "                )"
+        },
+        {
+          "line": 11508,
+          "text": "            }"
+        },
+        {
+          "line": 11509,
+          "text": ""
+        },
+        {
+          "line": 11510,
+          "text": ""
+        },
+        {
+          "line": 11511,
+          "text": "    private fun Uri.shouldBypassYouTubeResolver(): Boolean {"
+        },
+        {
+          "line": 11512,
+          "text": "        val normalizedScheme = scheme?.lowercase(Locale.US)"
+        },
+        {
+          "line": 11513,
+          "text": "        return normalizedScheme == \"content\" ||"
+        },
+        {
+          "line": 11514,
+          "text": "            normalizedScheme == \"file\" ||"
+        },
+        {
+          "line": 11515,
+          "text": "            normalizedScheme == \"android.resource\" ||"
+        },
+        {
+          "line": 11516,
+          "text": "            normalizedScheme == \"telegram\" ||"
+        },
+        {
+          "line": 11517,
+          "text": "            normalizedScheme == DeezerCrypto.SCHEME ||"
+        },
+        {
+          "line": 11518,
+          "text": "            normalizedScheme == TidalAudioProvider.PROGRESSIVE_DASH_SCHEME ||"
+        },
+        {
+          "line": 11519,
+          "text": "            normalizedScheme == SpotifyEchoResolver.SCHEME ||"
+        },
+        {
+          "line": 11520,
+          "text": "            normalizedScheme == \"http\" ||"
+        },
+        {
+          "line": 11521,
+          "text": "            normalizedScheme == \"https\""
+        },
+        {
+          "line": 11522,
+          "text": "    }"
+        },
+        {
+          "line": 11523,
+          "text": ""
+        },
+        {
+          "line": 11524,
+          "text": "    private fun Uri.shouldBypassPlayerCache(): Boolean {"
+        },
+        {
+          "line": 11525,
+          "text": "        val normalizedScheme = scheme?.lowercase(Locale.US)"
+        },
+        {
+          "line": 11526,
+          "text": "        return normalizedScheme == \"content\" ||"
+        },
+        {
+          "line": 11527,
+          "text": "            normalizedScheme == \"file\" ||"
+        },
+        {
+          "line": 11528,
+          "text": "            normalizedScheme == \"android.resource\" ||"
+        },
+        {
+          "line": 11529,
+          "text": "            normalizedScheme == \"telegram\""
+        },
+        {
+          "line": 11530,
+          "text": "    }"
+        },
+        {
+          "line": 11702,
+          "text": "        override fun open(dataSpec: DataSpec): Long {"
+        },
+        {
+          "line": 11703,
+          "text": "            val normalizedScheme = dataSpec.uri.scheme?.lowercase(Locale.US)"
+        },
+        {
+          "line": 11704,
+          "text": "            val selectedFactory ="
+        },
+        {
+          "line": 11705,
+          "text": "                if (normalizedScheme == \"telegram\") {"
+        },
+        {
+          "line": 11706,
+          "text": "                    // Telegram tracks stream through TDLib's own partial-file cache; Media3's"
+        },
+        {
+          "line": 11707,
+          "text": "                    // caches and the YouTube resolver chain must both stay out of the way."
+        },
+        {
+          "line": 11708,
+          "text": "                    telegramFactory"
+        },
+        {
+          "line": 11709,
+          "text": "                } else if (normalizedScheme == DeezerCrypto.SCHEME) {"
+        },
+        {
+          "line": 11710,
+          "text": "                    // Carries its own cache; the YouTube resolver would rewrite the URI."
+        },
+        {
+          "line": 11711,
+          "text": "                    deezerFactory"
+        },
+        {
+          "line": 11712,
+          "text": "                } else if (normalizedScheme == TidalAudioProvider.PROGRESSIVE_DASH_SCHEME) {"
+        },
+        {
+          "line": 11713,
+          "text": "                    // Streams through its own progressive-DASH source; the YouTube resolver"
+        },
+        {
+          "line": 11714,
+          "text": "                    // would rewrite the URI."
+        },
+        {
+          "line": 11715,
+          "text": "                    tidalProgressiveDashFactory"
+        },
+        {
+          "line": 11716,
+          "text": "                } else if (normalizedScheme == SpotifyEchoResolver.SCHEME) {"
+        },
+        {
+          "line": 11717,
+          "text": "                    spotifyEchoFactory"
+        },
+        {
+          "line": 11718,
+          "text": "                } else if ("
+        },
+        {
+          "line": 11719,
+          "text": "                    normalizedScheme == \"content\" ||"
+        },
+        {
+          "line": 11720,
+          "text": "                    normalizedScheme == \"file\" ||"
+        },
+        {
+          "line": 11721,
+          "text": "                    normalizedScheme == \"android.resource\""
+        },
+        {
+          "line": 11722,
+          "text": "                ) {"
+        },
+        {
+          "line": 11723,
+          "text": "                    directFactory"
+        },
+        {
+          "line": 11724,
+          "text": "                } else {"
+        },
+        {
+          "line": 11725,
+          "text": "                    cachedFactory"
+        },
+        {
+          "line": 11726,
+          "text": "                }"
+        },
+        {
+          "line": 11727,
+          "text": "            val selectedDataSource = selectedFactory.createDataSource()"
+        },
+        {
+          "line": 8298,
+          "text": "        val currentMediaId = player.currentMediaItem?.mediaId ?: return"
+        },
+        {
+          "line": 8299,
+          "text": "        val isLocalMedia = currentMediaId.isLocalMediaId()"
+        },
+        {
+          "line": 8300,
+          "text": ""
+        },
+        {
+          "line": 8301,
+          "text": "        val isFullyDownloadedMedia ="
+        },
+        {
+          "line": 8302,
+          "text": "            runCatching {"
+        },
+        {
+          "line": 8303,
+          "text": "                val contentLength ="
+        },
+        {
+          "line": 8304,
+          "text": "                    downloadCache"
+        },
+        {
+          "line": 8305,
+          "text": "                        .getContentMetadata(currentMediaId)"
+        },
+        {
+          "line": 8306,
+          "text": "                        .get(ContentMetadata.KEY_CONTENT_LENGTH, -1L)"
+        },
+        {
+          "line": 8307,
+          "text": "                contentLength > 0L && downloadCache.isCached(currentMediaId, 0L, contentLength)"
+        },
+        {
+          "line": 8308,
+          "text": "            }.getOrDefault(false)"
+        },
+        {
+          "line": 7640,
+          "text": "        nextMediaItemPrefetchJob?.cancel()"
+        },
+        {
+          "line": 7641,
+          "text": "        // Skip prefetch for local/telegram files (no network resolution needed)."
+        },
+        {
+          "line": 7642,
+          "text": "        if (mediaId.isLocalMediaId() || mediaId.isTelegramMediaId()) return"
+        },
+        {
+          "line": 7643,
+          "text": "        // Skip if we already have a fresh cached entry."
+        },
+        {
+          "line": 7644,
+          "text": "        if (playbackUrlCache[mediaId] != null) return"
+        },
+        {
+          "line": 7645,
+          "text": "        if (directStreamCache[mediaId]?.let { it.expiresAtMs > System.currentTimeMillis() } == true) return"
+        },
+        {
+          "line": 7646,
+          "text": "        // Skip in low-data mode (user wants minimal background data)."
+        },
+        {
+          "line": 7647,
+          "text": "        if (isLowDataModeActive()) return"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "SongEntity has isLocal, but reviewed identity/metadata has no arbitrary original-ID to shared-document URI field. Setting isLocal alone supplies no playback path.",
+    "MediaStore scanning uses content URI as trackId; using it alone would create another identity rather than preserve the original song/favorites/playlists.",
+    "SchemeRoutingDataSource chooses directFactory for content/file/android.resource before cache wrappers; DefaultDataSource handles the final local resource.",
+    "Preserve original DataSpec key, native byte range and flags while selecting an owner-verified content URI BEFORE SchemeRoutingDataSource factory selection. Redirecting only below cachedFactory risks serving an old cached rendition.",
+    "Current prefetch/error logic also checks original media ID and can still consider a moved original-ID song remote. It needs map-aware guards, not just one data-source rewrite."
+  ],
+  "remaining": [
+    "Actual original-ID/rendition mapping, URI grant/index recovery and lookup authority remain unbound.",
+    "Actual optimized APK scheme-router open hook and prefetch/recovery sites need target admission and preservation verification.",
+    "Correct local document ranges are a source primitive, not proof of stored media, provider access, Move completion or phone playback."
+  ],
+  "actions_performed": [
+    "Read public source and retain selected exact source hashes/lines only."
+  ],
+  "device_execution": false
+}

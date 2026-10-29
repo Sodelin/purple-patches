@@ -170,3 +170,32 @@ All links below refer to the exact installed-target source revision:
 - [Bulk export and separate deletion](https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/screens/settings/ExportDownloadedSongsScreen.kt)
 - [Single-song export](https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/ui/menu/SongMenu.kt)
 - [Local indexing](https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/localmedia/LocalSongScanner.kt)
+
+## Reuse the native local-document playback route
+
+The exact public target source already routes content/file/android.resource
+URIs through directFactory before the two cache layers. The native resolver
+also returns content URIs before YouTube resolution. This can support an
+original song ID with a different physical document URI: those are separate
+DataSpec fields. MediaStore scanning alone instead uses the content URI as the
+song ID; setting SongEntity.isLocal alone supplies no file location.
+
+NatuneDataSpecBinding.forSharedDocument now implements the native constructor
+conversion while preserving original key, byte range and flags. It requires a
+complete positive resource extent, canonical GET, a native content URI with an
+authority and an in-bounds range. Fragment offsets, POST/HEAD, request bodies,
+conflicting Range headers and file/network redirects refuse. HTTP headers/body
+are removed rather than sent to a document provider. The original spec is not
+mutated. Supplied URI/extent are inputs, not verified-map or grant authority.
+
+The actual hook must run BEFORE SchemeRoutingDataSource chooses its factory.
+Doing this only in the upstream resolver below CacheDataSource could serve an
+old cached rendition instead of the verified document. The persisted original
+song/rendition map, URI access/recovery, exact bytecode hook and prefetch/error
+recovery guards remain unbound. In particular, existing error/prefetch code
+still tests whether the original media ID itself is local; it must not silently
+re-resolve a moved file through a network source on a local-access failure.
+
+shared-document-playback-source-review.json retains the exact source bodies'
+hashes and selected lines. This is source and request-conversion evidence,
+not phone playback acceptance or an installed Move action.

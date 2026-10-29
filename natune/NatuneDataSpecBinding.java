@@ -78,6 +78,40 @@ public final class NatuneDataSpecBinding {
     public long uriPositionOffset(){return uriOffset;}
     public long originalAbsolutePosition(){return uriOffset+position;}
 
+    /**
+     * Native request conversion for an owner-selected complete shared document.
+     * This preserves the original song/cache key, byte range and flags rather
+     * than replacing library identity with the content URI. HTTP headers/body
+     * are not forwarded to the document provider. No network/file URI fallback.
+     *
+     * The caller MUST own the actual verified song/rendition -> document map,
+     * grant, index and recovery state. A URI and length are not verification or
+     * access authority. Call before SchemeRoutingDataSource selects its factory;
+     * redirecting below CacheDataSource could serve another cached rendition.
+     */
+    public Object forSharedDocument(Object contentUri,long completeBytes) throws IOException {
+        if(completeBytes<=0 || uriOffset!=0 || method!=1 || (body!=null && body.length!=0))
+            throw new IOException("Complete canonical GET resource required");
+        if(position>completeBytes || (length!=-1 && length>completeBytes-position))
+            throw new IOException("Original range exceeds shared document");
+        for(String name:headers.keySet())if(name.equalsIgnoreCase("Range"))
+            throw new IOException("Original explicit Range header requires its owner");
+        try {
+            Class<?> uriType=constructor.getParameterTypes()[0];
+            if(contentUri==null || !uriType.isInstance(contentUri))
+                throw new IOException("Native content URI required");
+            Object scheme=uriType.getMethod("getScheme").invoke(contentUri);
+            Object authority=uriType.getMethod("getAuthority").invoke(contentUri);
+            if(!(scheme instanceof String) || !"content".equalsIgnoreCase((String)scheme) ||
+                    !(authority instanceof String) || ((String)authority).isEmpty())
+                throw new IOException("Shared document content URI required");
+            return constructor.newInstance(contentUri,0L,1,null,Collections.emptyMap(),
+                                           position,length,key,flags);
+        } catch(ReflectiveOperationException error) {
+            throw new IOException("Native shared document request unavailable",error);
+        }
+    }
+
     /** Preserves original URI, URI offset, method/body, headers, key and flags. */
     public Object copyRange(long start,long count) throws IOException {
         if(start<0 || (count<=0 && count!=-1) || uriOffset>Long.MAX_VALUE-start || uriOffset+start<0)

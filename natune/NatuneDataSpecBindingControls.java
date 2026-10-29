@@ -55,6 +55,26 @@ public final class NatuneDataSpecBindingControls {
         refuses(()->new NatuneDataSpecBinding(spec(Long.MAX_VALUE,1,null,Map.of(),1,1)),"original absolute overflow");
         NatuneDataSpecBinding large=new NatuneDataSpecBinding(spec(Long.MAX_VALUE,1,null,Map.of(),0,1));
         refuses(()->large.copyRange(1,1),"copied absolute overflow");
+        Uri document=Uri.parse("content://fixture.documents/document/controlled-audio");
+        km2 local=(km2)binding.forSharedDocument(document,100);
+        need(local.a==document && local.b==0 && local.f==50 && local.g==7,"shared document keeps exact native byte range");
+        need(local.h.equals(original.h) && local.i==original.i,"original song key/flags survive URI routing");
+        need(local.c==1 && local.d==null && local.e.isEmpty(),"remote-only request data not sent to document provider");
+        need(original.a!=document && original.e.equals(Map.of("X-Control","unchanged")),"original request is unchanged");
+        km2 eof=(km2)new NatuneDataSpecBinding(spec(0,1,null,Map.of(),100,-1)).forSharedDocument(document,100);
+        need(eof.f==100 && eof.g==-1,"exact EOF remains a native open-ended range");
+        int localBefore=km2.constructed;
+        for(Object badUri:new Object[]{null,new Object(),Uri.parse("https://example.invalid/audio"),
+                Uri.parse("file:///controlled-audio"),Uri.parse("content:missing-authority")})
+            refuses(()->binding.forSharedDocument(badUri,100),"no arbitrary URI/file/network routing");
+        for(long bytes:new long[]{0,-1,49,56})
+            refuses(()->binding.forSharedDocument(document,bytes),"unknown/truncated/out-of-bounds shared document");
+        refuses(()->fragment.forSharedDocument(document,1000),"cannot reinterpret a URI fragment as a shared full file");
+        refuses(()->postBinding.forSharedDocument(document,100),"no POST redirected to shared file");
+        refuses(()->head.forSharedDocument(document,100),"no HEAD redirected to shared file");
+        refuses(()->getBody.forSharedDocument(document,100),"no GET body redirected to shared file");
+        refuses(()->explicitRange.forSharedDocument(document,100),"no conflicting explicit range redirected");
+        need(km2.constructed==localBefore,"refused shared routes do not construct native requests");
         System.out.println("NATUNE_DATASPEC_CONTROLS\tpassed="+checks+"\tandroid_fixture_only=true\tapp_authority=false");
     }
 }
