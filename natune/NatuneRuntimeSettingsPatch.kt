@@ -16,7 +16,9 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.WideLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference
@@ -29,6 +31,10 @@ private val appStart = Fingerprint(
             it.instructions.sumOf { i -> i.codeUnits } == 813
     } == true },
 )
+private val originalSettingsScreen = Fingerprint(
+    definingClass = "Lmoe/rukamori/archivetune/ui/screens/settings/l4;", name = "b",
+    parameters = listOf("Lr8/f48;", "Ljava/lang/String;", "Lr8/si4;", "Lr8/o72;", "I"), returnType = "V",
+)
 private fun settingsMethod(name: String, args: List<String> = emptyList()) = Fingerprint(
     definingClass = SETTINGS, name = name, parameters = args, returnType = "Z",
 )
@@ -36,7 +42,7 @@ private fun settingsMethod(name: String, args: List<String> = emptyList()) = Fin
 @Suppress("unused")
 val natuneRuntimeSettingsPatch = bytecodePatch(
     name = "Runtime switches for Natune audio policies",
-    description = "Makes both experimental audio policies read private runtime preferences and preserves the original behavior when disabled. Settings navigation and phone acceptance remain experimental.",
+    description = "Adds Purple audio controls to Natune settings, preserving the original policy when disabled. Phone acceptance remains experimental.",
     default = false,
 ) {
     compatibleWith(Compatibility(name = "Natune", packageName = "moe.rukamori.archivetune", apkFileType = ApkFileType.APK,
@@ -46,6 +52,52 @@ val natuneRuntimeSettingsPatch = bytecodePatch(
     extendWith("extensions/extension.mpe")
     execute {
         val app = appStart.method
+        val screen = originalSettingsScreen.method
+        val screenBody = screen.implementation ?: error("Original settings screen unavailable")
+        check(screenBody.tryBlocks.isEmpty()) { "Settings entry has unreviewed exception ranges" }
+        val screenCode = screenBody.instructions.toList()
+        var screenOffset = 0
+        val screenAddresses = screenCode.map { instruction ->
+            val here = screenOffset
+            screenOffset += instruction.codeUnits
+            here
+        }
+        val settingsCall = screenAddresses.indexOf(376)
+        check(settingsCall >= 0 && settingsCall + 2 < screenCode.size) { "Original settings entry moved" }
+        val call = screenCode[settingsCall] as? FiveRegisterInstruction ?: error("Settings builder invocation changed")
+        val callTarget = (screenCode[settingsCall] as? ReferenceInstruction)?.reference as? MethodReference
+        check(screenCode[settingsCall].opcode == Opcode.INVOKE_STATIC && call.registerCount == 5 &&
+            listOf(call.registerC,call.registerD,call.registerE,call.registerF,call.registerG) == listOf(3,10,5,6,8) &&
+            callTarget?.definingClass == "Lr8/ld6;" && callTarget.name == "p" &&
+            callTarget.parameterTypes.map { it.toString() } == listOf("Lr8/f48;", "Z", "Z", "Landroid/content/Context;", "Lr8/ry1;") &&
+            callTarget.returnType == "Ljava/util/List;") { "Original settings builder or context changed" }
+        check(screenCode[settingsCall+1].opcode == Opcode.MOVE_RESULT_OBJECT &&
+            (screenCode[settingsCall+1] as OneRegisterInstruction).registerA == 4 &&
+            screenAddresses[settingsCall+2] == 380) { "Settings result changed" }
+        val next = (screenCode[settingsCall+2] as? ReferenceInstruction)?.reference as? MethodReference
+        check(screenCode[settingsCall+2].opcode == Opcode.INVOKE_VIRTUAL && next?.definingClass == "Lr8/el4;" &&
+            next.name == "m0" && next.parameterTypes.map { it.toString() } == listOf("Ljava/lang/Object;") &&
+            next.returnType == "V") { "Settings remember boundary changed" }
+        // A branch into the inserted prefix could use an unrelated context/list.
+        // Include switch payload targets as well as ordinary branch offsets.
+        val switchOwners = mutableMapOf<Int,MutableList<Int>>()
+        screenCode.forEachIndexed { index,instruction ->
+            if(instruction is OffsetInstruction) {
+                val source = screenAddresses[index]
+                val target = source + instruction.codeOffset
+                check(target != 380) { "Unreviewed branch enters settings insertion" }
+                if(instruction.opcode == Opcode.PACKED_SWITCH || instruction.opcode == Opcode.SPARSE_SWITCH)
+                    switchOwners.getOrPut(target) { mutableListOf() }.add(source)
+            }
+        }
+        screenCode.forEachIndexed { index,instruction ->
+            if(instruction is SwitchPayload) {
+                val owners = switchOwners[screenAddresses[index]] ?: error("Unowned settings switch payload")
+                owners.forEach { owner -> instruction.switchElements.forEach { element ->
+                    check(owner + element.offset != 380) { "Unreviewed switch enters settings insertion" }
+                } }
+            }
+        }
         val wrapper = settingsMethod("lowData", listOf("Landroid/content/Context;")).method
         check(wrapper.implementation!!.registerCount in 2..16 && wrapper.implementation!!.tryBlocks.isEmpty()) {
             "Original helper wrapper scratch layout changed"
@@ -85,6 +137,12 @@ val natuneRuntimeSettingsPatch = bytecodePatch(
         // Context is initialized before original Application.onCreate work.
         // Its existing four handler regions and original body remain intact.
         app.addInstructions(0, "invoke-static/range {p0 .. p0}, $SETTINGS->initialize(Landroid/content/Context;)V")
+        // The original builder has just returned v4 and still holds its actual
+        // UI Context in v6. Preserve the memoized original list and screen.
+        screen.addInstructions(settingsCall+2, """
+            invoke-static {v4, v6}, Ldev/purple/patches/natune/NatuneSettingsNavigation;->append(Ljava/util/List;Landroid/content/Context;)Ljava/util/List;
+            move-result-object v4
+        """.trimIndent())
         wrapper.addInstructions(0, """
             invoke-static {p0}, Lr8/hg6;->p(Landroid/content/Context;)Z
             move-result v0

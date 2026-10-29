@@ -5,4 +5,5 @@ public abstract class Context {
     public abstract Context getApplicationContext();
     public abstract String getPackageName();
     public abstract ContentResolver getContentResolver();
+    public ClassLoader getClassLoader(){return getClass().getClassLoader();}
 }

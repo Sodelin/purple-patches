@@ -36,6 +36,19 @@ jobs:
           ./gradlew --no-daemon :patches:buildAndroid :patches:generatePatchesList
           mkdir -p "$GITHUB_WORKSPACE/dist"
           cp patches/build/libs/*.mpp patches-list.json purple-natune-provenance.json "$GITHUB_WORKSPACE/dist/"
+      - name: Exercise settings entry against synthetic release ABI
+        run: |
+          mkdir -p "$RUNNER_TEMP/settings-controls"
+          javac -Xlint:all -Werror -d "$RUNNER_TEMP/settings-controls" \
+            natune/runtime/dev/purple/patches/natune/NatuneSettingsNavigation.java \
+            natune/settings-tests/fixtures/dev/purple/patches/natune/RuntimeSettings.java \
+            natune/settings-tests/fixtures/android/widget/Toast.java \
+            natune/settings-tests/fixtures/r8/*.java \
+            natune/storage-tests/media-fixtures/android/content/*.java \
+            natune/storage-tests/media-fixtures/android/database/*.java \
+            natune/test-fixtures/android/net/Uri.java \
+            natune/settings-tests/NatuneSettingsNavigationControls.java
+          java -cp "$RUNNER_TEMP/settings-controls" NatuneSettingsNavigationControls > dist/settings-navigation-controls.txt
       - name: Acquire exact verified public original and proven patching tool
         run: |
           python natune/fetch_target.py "$RUNNER_TEMP/natune-original.apk"

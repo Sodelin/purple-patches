@@ -1,7 +1,6 @@
 package dev.purple.patches.natune;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 
 /** Private app configuration only. No account, model, media, log or service. */
@@ -65,8 +64,6 @@ public final class RuntimeSettings {
         return preferences(context).edit().clear().commit();
     }
     public static void open(Context context) {
-        Intent intent = new Intent(context,PurpleSettingsActivity.class);
-        if (!(context instanceof android.app.Activity)) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        PurpleSettingsPage.show(context);
     }
 }

@@ -1,6 +1,6 @@
 # Runtime settings extension source increment
 
-`RuntimeSettings.java` and `PurpleSettingsActivity.java` implement native Android
+`RuntimeSettings.java`, `PurpleSettingsPage.java` and `NatuneSettingsNavigation.java` implement native Android
 configuration/accessor/page source for the existing two Natune policy features.
 They read/write only the owned patch preference file; reset touches no music or
 original app settings. Disabling the mobile policy is designed to return the
@@ -14,12 +14,15 @@ applied it to the exact pinned APK, and independently compared the original
 program and resources after checking those additions. It did not execute the
 Android settings or player. See `../runtime-settings-verification.json`. The original application
 entry was inspected at 22 registers, 813 code units and four try blocks; the
-new verifier checks handler boundaries as well as the added prefix. The
-settings Activity is not yet declared in the target manifest or reachable from
-the original app. No settings UI has been installed or accepted on a phone.
+new verifier checks handler boundaries as well as the added prefix. That earlier
+run had no settings navigation. A successor source candidate adds a settings
+section at the original list's remembered-construction boundary and opens a
+dialog using the original UI context, so no extra Activity is needed. Its
+updated APK comparison and controls are still pending. No settings UI has been
+installed or accepted on a phone.
 
 `materialize.py --local-flac --runtime-settings` selects the development profile
-and copies exactly these two Android Java sources into the extension module.
+and copies exactly these three Android Java sources into the extension module.
 The incomplete folder-copy components remain source-only until their actual
 host is selected. The settings profile excludes an otherwise unnecessary second
 Kotlin standard library. Current selected feeds and installed behavior are

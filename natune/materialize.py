@@ -9,7 +9,7 @@ import sys
 
 PIN = 'e721536ab19e30d16ce9d31ae1830ca299aad383'
 ROOT = Path(__file__).resolve().parent
-SETTINGS_SOURCES = ('RuntimeSettings.java', 'PurpleSettingsActivity.java')
+SETTINGS_SOURCES = ('RuntimeSettings.java', 'PurpleSettingsPage.java', 'NatuneSettingsNavigation.java')
 
 
 def materialize(destination, local_flac=False, runtime_settings=False):
@@ -82,7 +82,7 @@ configurations.configureEach {
              'local_decoder_guard_sha256': hashlib.sha256((ROOT / 'NatuneLocalFlacPatch.kt').read_bytes()).hexdigest() if local_flac else None,
              'runtime_settings_extension_included': runtime_settings,
              'runtime_settings_app_binding': runtime_settings,
-             'runtime_settings_navigation_binding': False,
+             'runtime_settings_navigation_binding': runtime_settings,
              'runtime_settings_patch_sha256': hashlib.sha256((ROOT / 'NatuneRuntimeSettingsPatch.kt').read_bytes()).hexdigest() if runtime_settings else None,
              'runtime_settings_sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in
                  (ROOT / 'runtime/dev/purple/patches/natune' / name for name in SETTINGS_SOURCES)} if runtime_settings else {},
