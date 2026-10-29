@@ -1,0 +1,27 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40928996387,
+  "artifact_id": 12921312712,
+  "source_commit": "9f4dad58249cf877f7089115389cf701f31a5015",
+  "version": "0.1.0-alpha.7",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15466851,
+  "artifact_zip_sha256": "d25cfbac8209b31fdd834ac72addbd1789f0d84a1141ec5ef67f7fc433a38184",
+  "members_sha256": {
+    "SHA256SUMS": "c74c3eb96a1d22d38cc75cd98aa8af8448e6690159d7d1d1d201644ce5f164cf",
+    "patches-0.1.0-alpha.7-javadoc.mpp": "5529cb4a260f06bd4bb8e9a7f96b3750ce9986e8b33442e2c310290c813aa59d",
+    "patches-0.1.0-alpha.7-sources.mpp": "184902e94fa8b537307cf89488432c0aeb51a733fdbc99c1d51aab0faa66e080",
+    "patches-0.1.0-alpha.7.mpp": "9341829d87124824cab6cc04eb5a615e1bcb036f26c8055a9edb9d92e617319c",
+    "patches-bundle.json": "5f93ef52db277b438497c5dbcd95ce5b0f966c8c2cf94ffb24cd225ef4ba85ae",
+    "patches-list.json": "3addfbb85581b1e98a3c400ae90df01f120157ce67e1a805279d2588b4fec12d",
+    "purple-provenance.json": "e694f6f69fc0421d66bd973ae9ec2e76b2a0784cb3bad83d90ebf7e9baf95f14"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "checks": "Hosted pure editor/session, scoped-permission activity using JVM Android stubs, and finite-capture controls passed; upstream build passed.",
+  "checks_scope": "Synthetic stubs and source build; no Android permission dialog, microphone, live model or device execution.",
+  "apk_patching_at_build_time": false,
+  "privacy_release_gate": "OPEN: the Termux command still emits the bearer in stdout; the alpha.7 logging extra is defense in depth only.",
+  "device_accepted": false,
+  "notes": "All artifact members were read and hashed in memory; bundled source provenance was matched against the exact Git commit."
+}

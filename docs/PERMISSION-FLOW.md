@@ -22,8 +22,10 @@ access to one translation function and is separate from the open
 The pure-policy checks include both one-permission mappings and unknown scopes.
 A JVM fixture compiles the actual permission activity against small fake Android
 classes and exercises the two requests, refusal, invalid input, already-granted
-and request-error cases. The alpha.7 source has not yet run those hosted checks.
-The fixture does not demonstrate Android's actual permission dialog, lifecycle,
+and request-error cases. Those checks passed in the [alpha.7 hosted build](gboard-alpha7-build-verification.json).
+The [exact-APK check](gboard-alpha7-apk-verification.json) also found the relevant
+permission-scope references in the patched DEX. Neither check demonstrates
+Android's actual permission dialog, lifecycle,
 rationale, denial/revocation or behavior of stock Gboard. Those remain device
 acceptance gates. [Android's runtime permission guidance](https://developer.android.com/training/permissions/requesting)
 recommends requesting permissions in the context of the action needing them.

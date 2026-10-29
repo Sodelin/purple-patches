@@ -1,0 +1,65 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40929591257,
+  "workflow_source_commit": "8f3e532b7c18123dc2e3dcbff9834e144491b37a",
+  "bundle_build_run": 40928996387,
+  "bundle_source_commit": "9f4dad58249cf877f7089115389cf701f31a5015",
+  "bundle_version": "0.1.0-alpha.7",
+  "bundle_sha256": "9341829d87124824cab6cc04eb5a615e1bcb036f26c8055a9edb9d92e617319c",
+  "artifact_id": 12921548876,
+  "artifact_zip_bytes": 49115321,
+  "artifact_zip_sha256": "6189b0e3226d4db198be2236fda936aa8ae644d84bc338cfb17d62976b3f93ad",
+  "members": {
+    "SHA256SUMS": {
+      "bytes": 354,
+      "sha256": "ddd3ef6790a1b32e4b316184ec3ea5b126e2a33753c6d4f9a5d742f719fe37cf"
+    },
+    "build-run.json": {
+      "bytes": 152,
+      "sha256": "b5cd870eb892981a62ccd1f02ba36573b700f7b07d6c4c4094861810a1c8568c"
+    },
+    "gboard-patch-result.json": {
+      "bytes": 401,
+      "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"
+    },
+    "gboard-purple-unsigned.apk": {
+      "bytes": 84550794,
+      "sha256": "f339819080827344e17c8643e3a9d2525fe59ac381f6849387ebee7615355d67"
+    },
+    "purple-provenance.json": {
+      "bytes": 1992,
+      "sha256": "e694f6f69fc0421d66bd973ae9ec2e76b2a0784cb3bad83d90ebf7e9baf95f14"
+    }
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified_by_workflow": true
+  },
+  "hosted_static_verification": {
+    "original_classes_retained": 22860,
+    "output_classes": 26014,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "translation_effort_references_present": true,
+    "scoped_permission_and_background_log_extra_references_present": true,
+    "limitations": "DEX references are static linkage evidence, not Android execution or proof of control flow or privacy. The candidate still sends its bootstrap bearer through Termux stdout."
+  },
+  "independent_artifact_verification": "ZIP and every member read and hashed in memory; all four member checksums, bundle source commit, version and upstream provenance matched.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7,
+  "patch_result": {
+    "success": true,
+    "applied_patches": [
+      "Add Gboard Signature Bypass",
+      "Whisper 3 dictation and AI Translate",
+      "Package Rename"
+    ],
+    "failed_patches": [],
+    "patching_and_rebuilding_passed": true
+  }
+}

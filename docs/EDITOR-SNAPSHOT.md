@@ -31,3 +31,30 @@ recorded in [gboard-alpha3-build-verification.json](gboard-alpha3-build-verifica
 and [gboard-alpha3-apk-verification.json](gboard-alpha3-apk-verification.json).
 Actual editor behavior and rollback remain to be verified before release or
 activation.
+
+## Active composition and insertion result: open release gate
+
+Android documents that [`InputConnection.commitText`](https://developer.android.com/reference/android/view/inputmethod/InputConnection#commitText(java.lang.CharSequence,%20int))
+replaces the editor's current composing text if a composing region exists; only
+when there is no composing region does it describe inserting at the cursor and
+removing any selection. The current snapshot captures selection positions and
+surrounding text but does not establish the composing region. Its unchanged
+selection check therefore does not prove that `commitText` will replace the
+intended selection rather than another active composition. This is a source and
+platform-contract finding, not a demonstrated device incident.
+
+The current positive button also dismisses the preview while ignoring the
+`commitText` boolean. If the connection is no longer valid and returns false,
+the user can lose the visible preview even though the input field was not
+updated. Android documents false for an invalid connection. A thrown or delayed
+call may leave a different outcome uncertain; automatic insertion retry is not
+safe without an actual outcome and anchor check.
+
+Before activation, select and verify an insertion protocol that handles active
+composition deliberately, keeps a recoverable preview when insertion fails or
+is uncertain, and does not claim cross-process atomic compare-and-replace.
+Calling `finishComposingText` itself changes editor state and needs its own
+explicit UX and regression analysis; it is not assumed to be a free fix.
+Authorized tests must cover active composition, selection changes, input
+connection loss, refusal, exception, delayed response, and duplicate gestures in
+real representative editors. Preserve original text and all privacy holds.

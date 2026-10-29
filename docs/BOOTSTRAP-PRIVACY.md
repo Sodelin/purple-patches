@@ -52,8 +52,9 @@ Alpha.7 source requests `com.termux.RUN_COMMAND_BACKGROUND_CUSTOM_LOG_LEVEL`
 as the **string** `"0"`, the type expected by the reviewed parser. For that
 pinned source, static analysis indicates this disables both identified
 custom-level output paths. It does not change the phone's global log setting.
-This source change has not been built or exercised on Android; the installed
-Termux version and all other success/error/logging paths remain unverified.
+The [alpha.7 bundle built off phone](gboard-alpha7-build-verification.json), but
+this change has not been exercised on Android; the installed Termux version and
+all other success/error/logging paths remain unverified.
 Older or different implementations may ignore the extra. It does not remove
 the bearer from stdout or prove the callback and its surrounding system safe.
 
