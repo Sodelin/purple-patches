@@ -29,8 +29,8 @@ not taken from an Android URI or arbitrary app message.
 
 **Current source gate:** New `RemovalPending` events are refused before any
 journal write. The v1 journal has no actual binding to an independently
-verified computer copy, Screening Room Omni phone acceptance, or the user's
-reconciled selection/KEEP decisions. A serialized event or a successful local
+verified computer copy or the user's reconciled selection/KEEP decisions.
+A serialized event or a successful local
 copy cannot supply those missing checks. Old v1 `RemovalPending` histories can
 still be read, and the existing owner's later `Moved` observation can reconcile
 them; replay does not perform removal. The host must verify that observation.
@@ -42,7 +42,7 @@ state for a verified computer copy and removed temporary shared document while
 the phone's original cache remains. V1 cannot release that staging charge
 without claiming the original was moved or abandoned, so it is not a compatible
 computer-transfer scheduler yet. Keep existing history readable; do not invent
-remote receipt, playback acceptance or a disposable-document mapping.
+remote receipt or a disposable-document mapping.
 
 The journal records observations; none of these enums authenticates a caller,
 recreates a native permit or executes a copy/removal. Android may not submit

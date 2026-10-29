@@ -10,13 +10,16 @@ installation holds remain intact. Execute one project production job at a time.
 The user selects existing downloaded songs and a local shared folder. A bounded
 batch streams each exact complete track, verifies the shared document, and
 hands that explicitly selected file to the existing computer receiver. Verify
-the independently saved computer bytes and the final library placement. Remove
+the independently saved computer bytes at the owner-selected destination. Remove
 only a verified disposable staging copy when its ownership and cleanup are
-settled; keep the original cached song. Removing original phone music is a
-later step, conditional on an independently verified corresponding computer
-copy and actual Screening Room Omni playback working on the phone. The three
-earlier KEEP exceptions remain until their scope is reconciled with the user's
-later intention. Preserve other renditions and library identity.
+settled. Original removal requires complete source/rendition correspondence,
+an independently verified corresponding computer copy and the applicable
+selection. Nolan clarified that additional music outside the earlier priority
+list can be moved gradually and its original removed after that verification;
+Screening Room Omni does not have to be working first for that additional
+music. Preserve the three albums explicitly marked KEEP and follow the actual
+per-album authorization and any applicable earlier conditions. Preserve other
+renditions and library identity.
 
 Failure, cancellation and interruption retain the original or an explicitly
 recoverable verified copy; reconcile uncertain destructive work instead of
@@ -68,10 +71,10 @@ A verified local document remains charged as a duplicate while both it and the
 original exist. For the computer-transfer lane, the owner can settle its staging
 reservation only after independent remote byte/hash verification and confirmed
 removal of that job's disposable shared document and any uploader staging. A
-verified receipt alone does not prove that local cleanup completed. Until the
-phone's Screening Room Omni acceptance and the applicable KEEP decisions are
-established, original cache bytes remain; this transfer stage alone does not
-reclaim their storage. A remote receiver streaming an existing staged document
+verified receipt alone does not prove that local cleanup completed. Original
+cache bytes remain until the matching source and computer copy are verified and
+the applicable selection permits removal; transfer alone does not establish
+that removal occurred. A remote receiver streaming an existing staged document
 without extra phone staging can overlap another admitted track if the aggregate
 peak still fits the pool.
 
@@ -122,9 +125,9 @@ all Android writers.
 |4. Exact complete source | Real original cache locks, original coroutine/job stops, exact rendition and complete spans; no network fallback or active-track removal. | Cache ABI/source reader implemented;46 controlled cache checks and49 copy checks passed. Original-coroutine cancellation bridge source is implemented; actual app/UI hook and phone behavior remain unverified. |
 |5. Verified output | Bounded streaming, complete count/hash readback, real format/extension and usable URI; no full tagging temp. | Actual copy core and SAF adapter implemented/host-checked; real provider and low-space behavior remain untested. |
 |6. Transaction and recovery | Original operation identity with required encrypted-before-persistence claim/result/recovery; restart/UNKNOWN reconciliation. | Rust journal and production encrypted-file backend reuse the existing vault;8 RAM lifecycle/recovery tests and Android cross-build pass. Actual app-scoped writer/delegation and real journal acceptance remain unbound; no new identity is authorized. |
-|7. Exact cache release | First verify the corresponding computer copy, actual Screening Room Omni phone playback and applicable KEEP selection; then settle the original request, preserve other source variants/readers/owners, release only eligible unchanged cached bytes and reconcile counters. | Original request-key remover and all-source listener both affect deletion scope; even a removal callback may follow task/index/purge failure. The real receiver, phone acceptance, scoped listener/removal and settlement bindings remain open; no deletion path exists in the new reader. |
+|7. Exact cache release | First verify the complete matching source and computer copy and applicable selection/KEEP decisions; then settle the original request, preserve other source variants/readers/owners, release only eligible unchanged cached bytes and reconcile counters. Omni acceptance is not required for the additional music covered by Nolan's clarification. | Original request-key remover and all-source listener both affect deletion scope; even a removal callback may follow task/index/purge failure. The real receiver, scoped listener/removal and settlement bindings remain open; no deletion path exists in the new reader. |
 |8. Library and playback | Stable original song/rendition→content URI mapping, coherent download indicators/playlists/favorites and offline playback after cache release. | Native content-URI bypass is reusable; request conversion preserves original key/range. Rust original-ID/rendition index is implemented; Android lookup/delegation, pre-router bytecode hook and prefetch/recovery guards remain unbound (shared-document-playback-source-review.json). |
-|9. Remote transfer and cleanup | Selected receiver gets complete verified bytes and final placement; disposable staging is confirmed removed before its reservation settles. Original phone-file removal separately requires Omni phone acceptance and reconciled selection. No unaccounted upload staging. | Existing route/owners are retained. The v1 journal cannot yet represent remote-verified staging cleanup while the source remains; no media transfer/deletion is performed by this plan or the current source checks. |
+|9. Remote transfer and cleanup | Selected receiver gets complete verified bytes at the owner-selected destination; disposable staging is confirmed removed before its reservation settles. Original phone-file removal separately requires verified source/copy and applicable selection. No unaccounted upload staging. | Existing route/owners are retained. The v1 journal cannot yet represent remote-verified staging cleanup while the source remains; no media transfer/deletion is performed by this plan or the current source checks. |
 |10. Packaging and phone proof | Reproducible off-phone MPP/APK patching, declared compatibility, full unrelated-code/resource preservation, finite install/regression/rollback acceptance and verified update source. | Previous unrelated quality candidates are not a Move release. A storage MPP, complete patched APK verification, installation route and device acceptance remain open. |
 
 ## First gate: signer/data continuity

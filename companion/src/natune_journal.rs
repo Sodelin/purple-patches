@@ -199,13 +199,13 @@ impl<S: Store> Journal<S> {
     pub fn record(&mut self, operation_id: &str, expected_generation: Option<u64>, event: Event)
             -> Result<(), String> {
         self.certain()?;
-        // A v1 journal has no bound computer-copy receipt, phone playback
-        // acceptance, or reconciled KEEP decision. A caller-supplied event is
+        // A v1 journal has no bound computer-copy receipt or reconciled
+        // selection/KEEP decision. A caller-supplied event is
         // not that proof. Keep historical pending records readable so their
         // original owners can reconcile them, but never start a NEW removal
         // until a versioned real-owner admission path has been integrated.
         if matches!(&event, Event::RemovalPending) {
-            return Err("New original removal requires bound remote-copy, phone-playback and selection checks".into());
+            return Err("New original removal requires bound remote-copy and selection checks".into());
         }
         if !hex64(operation_id) { return Err("Move operation identity invalid".into()); }
         let prior = self.rows.get(operation_id);
