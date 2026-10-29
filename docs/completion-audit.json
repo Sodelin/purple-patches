@@ -1,5 +1,7 @@
 {
   "date": "2026-10-27",
+  "historical_note": "This is the 27 October snapshot, not the current blocked or completion assessment.",
+  "superseded_by": "completion-audit-20261029.json",
   "full_objective_complete": false,
   "previous_goal_turn_classification": "progress: real private candidate source published and remotely verified",
   "prepared_requirements": {

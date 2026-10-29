@@ -7,20 +7,22 @@ whole objective to a single scaffold or successful static check.
 
 | Component | User-requested behavior | Current evidence / remaining work |
 | --- | --- | --- |
-| Gboard | Full Whisper large-v3 dictation; explicit gpt-6.1-sol translation with preview/insertion; retain stock keyboard | Existing built public candidate and source-feed proof. `completion-audit.json` still records unproven live model, privacy/control, installation, rollback and actual Manager update acceptance. Original holds remain. |
-| Natune / renamed ArchiveTune fork | Strict FLAC streaming/downloads, full quality on mobile data, reliable additional compatible providers alongside Qobuz | Exact installed public APK bytes/signer pinned. Five-site mobile-data patch compiled/applied off phone; independent DEX, manifest and resource preservation passed. Experimental MPP/source release and anonymous full-bundle/feed verification passed. No accepted phone installation/behavior, strict-FLAC enforcement or additional provider integration yet. |
+| Gboard | Full Whisper large-v3 dictation; explicit gpt-6.1-sol translation with preview/insertion; retain stock keyboard | Alpha.11 source/bundle and pinned-APK static checks passed; its bundle has a private full-readback archive. [Current completion audit](completion-audit-20261029.json) records the open privacy, job recovery, model, installation, rollback and Manager-update gates. |
+| Natune / renamed ArchiveTune fork | Strict FLAC streaming/downloads, full quality on mobile data, reliable additional compatible providers alongside Qobuz | The separate existing owner has a [combined development build](https://github.com/Sodelin/purple-patches/blob/8dd56b1877d34a49ab20f1db59c510e4a44190ab/natune/combined-dev-verification.json) with audio settings and a folder/FLAC carrier. It is uninstalled, needs separate native finalization, and does not yet implement the Move action or complete FLAC/provider selection. Original data continuity and real app/receiver acceptance remain open. |
 | MPV | Automatic subtitle lookup based on media filename / suitable subtitle provider | Earlier requested idea retained. Need exact installed app/version, existing script/plugin support, provider terms/interface and acceptance before implementing. No media access or provider account operation inferred. |
 | Existing Discord modifications | Review already-applied changes, including separate microphone/output audio behavior | User said patches were already applied. Need actual patch source/version before reviewing; do not repeat installation or invent a new patch need. |
 | Existing chess / Stockfish modification | Review existing local-engine patch and retain useful integration ideas | Already-applied modification reported by user; source/version and actual review remain unverified. No replacement engine or model operation selected. |
 
 Shared support: existing standalone storage migration retains its own root,
 goal, owners and holds. Its queued historical messages are not cleanup grants.
-The Natune work changes no source-owner scope outside this repository. Current
+The separate NaTune owner retains its worktree, source/index and media scope. Current
 Morphe authentication and RuStore source reviews are in the parent coordination
 records; neither credential configuration nor assumed RuStore compatibility is
 a patch deliverable.
 
-Next concrete implementation gate: implement Natune strict media validation and resolver/cache policy
-as separate selectable functionality. Do not substitute a mobile-data override
-for the complete FLAC/provider request. While runtime/model/device holds
-persist, source/build/interface work stays eligible within its own boundaries.
+Next concrete Gboard gates are the authenticated private bootstrap, durable
+job recovery and safe editor/device acceptance. The NaTune owner continues its
+own app/data and transaction integration. Do not substitute the mobile-data
+override or source carrier for the complete FLAC/provider request. While
+runtime/model/device holds persist, source/build/interface work stays eligible
+within its own boundaries.
