@@ -18,6 +18,11 @@ on:
         description: SHA-256 of that exact main MPP
         required: true
         type: string
+      verify_historical_controls:
+        description: Also check the retained alpha.19 and alpha.20 APKs while their hosted artifacts are available
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: read
   actions: read
@@ -31,6 +36,7 @@ jobs:
       SOURCE_COMMIT: ${{ inputs.source_commit }}
       BUNDLE_VERSION: ${{ inputs.version }}
       BUNDLE_SHA256: ${{ inputs.bundle_sha256 }}
+      HISTORICAL_CONTROLS: ${{ inputs.verify_historical_controls }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -120,7 +126,7 @@ jobs:
           "$AAPT2" dump badging "$RUNNER_TEMP/gboard-purple-unsigned.apk" > "$RUNNER_TEMP/output-badging.txt"
           "$AAPT2" dump xmltree "$RUNNER_TEMP/gboard-purple-unsigned.apk" --file AndroidManifest.xml > "$RUNNER_TEMP/output-manifest.txt"
           mkdir -p "$RUNNER_TEMP/apk-check" dist
-          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/apk-check" companion/deployment/VerifyGboardApk.java companion/deployment/VerifyGboardEditorSnapshot.java companion/deployment/VerifyGboardCapture.java companion/deployment/VerifyGboardReadiness.java companion/deployment/VerifyGboardTranslationChoice.java companion/deployment/VerifyGboardAccessPointFallback.java
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/apk-check" companion/deployment/VerifyGboardApk.java companion/deployment/VerifyGboardEditorSnapshot.java companion/deployment/VerifyGboardCapture.java companion/deployment/VerifyGboardReadiness.java companion/deployment/VerifyGboardTranslationChoice.java companion/deployment/VerifyGboardAccessPointFallback.java companion/deployment/VerifyGboardDirectLoopback.java
           java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardApk "$RUNNER_TEMP/gboard-original.apk" "$RUNNER_TEMP/gboard-purple-unsigned.apk" "$RUNNER_TEMP/output-badging.txt" "$RUNNER_TEMP/output-manifest.txt"
           java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardEditorSnapshot "$RUNNER_TEMP/gboard-purple-unsigned.apk"
           case "$BUNDLE_VERSION" in
@@ -137,14 +143,29 @@ jobs:
           esac
           if [[ "$BUNDLE_VERSION" =~ ^0\.1\.0-alpha\.([0-9]+)$ ]] && (( 10#${BASH_REMATCH[1]} >= 20 )); then
             java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardAccessPointFallback "$RUNNER_TEMP/gboard-purple-unsigned.apk"
-            gh run download 40962960374 --repo Sodelin/purple-patches --name purple-gboard-verified-unsigned-candidate --dir "$RUNNER_TEMP/alpha19-negative"
-            printf '%s  %s\n' '91bd1db4bf6de923cfead3b651d324b894c89eed6589c21e19cf5aca1cc7632b' "$RUNNER_TEMP/alpha19-negative/gboard-purple-unsigned.apk" | sha256sum -c -
-            if java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardAccessPointFallback "$RUNNER_TEMP/alpha19-negative/gboard-purple-unsigned.apk" > "$RUNNER_TEMP/alpha19-negative.txt" 2>&1; then
-              echo 'Old alpha.19 unexpectedly passed the fallback verifier' >&2
-              exit 1
+            if [[ "$HISTORICAL_CONTROLS" == "true" ]]; then
+              gh run download 40962960374 --repo Sodelin/purple-patches --name purple-gboard-verified-unsigned-candidate --dir "$RUNNER_TEMP/alpha19-negative"
+              printf '%s  %s\n' '91bd1db4bf6de923cfead3b651d324b894c89eed6589c21e19cf5aca1cc7632b' "$RUNNER_TEMP/alpha19-negative/gboard-purple-unsigned.apk" | sha256sum -c -
+              if java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardAccessPointFallback "$RUNNER_TEMP/alpha19-negative/gboard-purple-unsigned.apk" > "$RUNNER_TEMP/alpha19-negative.txt" 2>&1; then
+                echo 'Old alpha.19 unexpectedly passed the fallback verifier' >&2
+                exit 1
+              fi
+              grep -F 'extend calls enabled outside a LinkageError handler' "$RUNNER_TEMP/alpha19-negative.txt"
+              echo 'Old alpha.19 correctly refused by access-point fallback verifier.'
             fi
-            grep -F 'extend calls enabled outside a LinkageError handler' "$RUNNER_TEMP/alpha19-negative.txt"
-            echo 'Old alpha.19 correctly refused by access-point fallback verifier.'
+          fi
+          if [[ "$BUNDLE_VERSION" =~ ^0\.1\.0-alpha\.([0-9]+)$ ]] && (( 10#${BASH_REMATCH[1]} >= 21 )); then
+            java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardDirectLoopback "$RUNNER_TEMP/gboard-purple-unsigned.apk"
+            if [[ "$HISTORICAL_CONTROLS" == "true" ]]; then
+              gh run download 40969660308 --repo Sodelin/purple-patches --name purple-gboard-verified-unsigned-candidate --dir "$RUNNER_TEMP/alpha20-negative"
+              printf '%s  %s\n' '8fb7482e0eae001f4173a539708bd23cd0fa242eb23d330d2965d234da2be0c8' "$RUNNER_TEMP/alpha20-negative/gboard-purple-unsigned.apk" | sha256sum -c -
+              if java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardDirectLoopback "$RUNNER_TEMP/alpha20-negative/gboard-purple-unsigned.apk" > "$RUNNER_TEMP/alpha20-negative.txt" 2>&1; then
+                echo 'Old alpha.20 unexpectedly passed the direct-loopback verifier' >&2
+                exit 1
+              fi
+              grep -F 'Expected one explicit URL.openConnection(Proxy) and NO_PROXY' "$RUNNER_TEMP/alpha20-negative.txt"
+              echo 'Old alpha.20 correctly refused by direct-loopback verifier.'
+            fi
           fi
           cp "$RUNNER_TEMP/gboard-purple-unsigned.apk" "$RUNNER_TEMP/gboard-patch-result.json" "$RUNNER_TEMP/build-run.json" "$RUNNER_TEMP/purple-bundle/purple-provenance.json" dist/
           cd dist
