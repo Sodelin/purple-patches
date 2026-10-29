@@ -181,3 +181,12 @@ Primary pinned implementation references:
 - https://github.com/androidx/media/blob/1.10.1/libraries/exoplayer/src/main/java/androidx/media3/exoplayer/audio/MediaCodecAudioRenderer.java
 - https://github.com/androidx/media/blob/1.10.1/libraries/exoplayer/src/main/java/androidx/media3/exoplayer/mediacodec/MediaCodecInfo.java
 - https://github.com/MorpheApp/morphe-patcher/blob/v2.0.0/src/main/kotlin/app/morphe/patcher/patch/Compatibility.kt
+
+Actual hosted run40875761792 at sourceb7abfd2 built the prototype MPP and
+successfully patched/validated the pinned APK with both selected patches.
+`local-flac-build-verification.json` retains full artifact/member hashes,
+generated signer/version-code compatibility,39controls on the ACTUAL emitted
+prefixes and the full27129class/114583method preservation result, including
+24native libraries,12assets and1884non-DEX/signature entries. All current patch
+source hashes matched the build provenance. These are static APK/build results;
+no Android decoder, lifecycle, next-track transition or phone UI was exercised.

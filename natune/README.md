@@ -104,3 +104,13 @@ included in the selected mobile-data MPP. The Android classes in
 Real cache identity/lifecycle and complete decoder admission remain the next
 integration gates, with provider work separately tracked in
 `PROVIDER-INTERFACES.md`.
+
+The separate local-decoder prototype `0.2.0-dev.1` now builds and patches the
+exact original off phone. [Hosted run40875761792](https://github.com/Sodelin/purple-patches/actions/runs/40875761792)
+passed three actual emitted FLAC guards,39guard controls and complete remaining
+program/resource preservation. The prototype is optional/default-off, pins the
+original signer and version code6900, and does not change the selected0.1.0 feed.
+See [full artifact evidence](local-flac-build-verification.json) and
+[scope and remaining integration](STRICT-FLAC-INTEGRATION.md).
+This is local decoder admission, not complete FLAC downloads, new providers or
+phone playback acceptance. No patched third-party APK is distributed.

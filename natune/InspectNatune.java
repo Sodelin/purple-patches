@@ -85,6 +85,15 @@ public final class InspectNatune {
                         predicates.add(signature(m));
             }
         }
+        // Verify the actual optimized decoder-reuse fence rather than assuming
+        // upstream source survived R8 unchanged across format transitions.
+        var codecInfo=classes.get("Lr8/je7;");
+        if(codecInfo!=null)for(var method:codecInfo.getMethods())
+            if(method.getName().equals("b") && String.join("",method.getParameterTypes()).equals("Lr8/yf4;Lr8/yf4;"))
+                codecBody(method,120);
+        var audioRenderer=classes.get("Lr8/ge7;");
+        if(audioRenderer!=null)for(var method:audioRenderer.getMethods())
+            if(method.getName().equals("e0"))codecBody(method,60);
         for(String type:formatTypes) {
             var clazz=classes.get(type);if(clazz==null)continue;
             for(var field:clazz.getFields())if(field.getType().equals("Ljava/lang/String;"))

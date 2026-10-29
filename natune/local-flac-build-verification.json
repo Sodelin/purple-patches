@@ -1,0 +1,63 @@
+{
+  "schema": "purple.natune-local-flac-build.v1",
+  "run_id": 40875761792,
+  "run_url": "https://github.com/Sodelin/purple-patches/actions/runs/40875761792",
+  "source_commit": "b7abfd2b9f3615c19c85f569797fb581c31c29d3",
+  "artifact_id": 12897878335,
+  "artifact_zip_sha256": "de0a887b9f7044283aa027150e338c092a31cb3f99e54c80bdf0e0eff91557a7",
+  "artifact_files_sha256": {
+    "SHA256SUMS": "b8c2c6f1d6b6cf949b5037cd04a75357d572ed1ba6f4615c99777514d0cffca2",
+    "patch-result.json": "3030e3dc964b63a29868934d232e6d26fa12caf06e1e3f8628159ca197f64279",
+    "patches-0.2.0-dev.1-javadoc.mpp": "21b55f03be0890004e0829d7921ccd950f6efe4948b59b0be405ddbeb3e2daaf",
+    "patches-0.2.0-dev.1-sources.mpp": "309a8d144b28080f702beaa850ae58ab728c63605fb104c9b11a28d0067c1bfb",
+    "patches-0.2.0-dev.1.mpp": "d9ce129eb5b474724b4c626b771075e67956c7c8dc8777b3eacf77254be2e460",
+    "patches-list.json": "18d102c2dd1e004953e199b4ca6c1d5a4d7a06e3dcba22ee10acc9d23778bc74",
+    "purple-natune-provenance.json": "c3957c1f2c5c927f1224e998786dccde52c8b32a4db3aac3f8b1543ea9cb47fe",
+    "static-preservation.txt": "e5fe66aeca58311ea3743d7d2560eda86e55a87a6accfcc6429ca92c920f519c",
+    "target-proof.json": "e1a4329681cbf3bfd0857ec78fe9041c1ce31b03bf3aa20487c5449fe8be9c75"
+  },
+  "main_mpp_bytes": 712860,
+  "static_verification": [
+    "Initializer preservation controls passed: 14",
+    "Verified five mobile-data overrides and three exact local FLAC guards; every original remaining method/body/resource preserved.",
+    "Classes=27129; methods=114583; retained native files=24; retained assets=12; all retained non-DEX/signature entries=1884",
+    "Compared instructions/references/registers/constants/branch targets/try handlers, class and field metadata; debug items and APK signing are outside this comparison.",
+    "LOCAL_FLAC_GUARD_CONTROLS passed=39 actual_patched_bytecode=true android_decoder_acceptance=false full_download_admission=false"
+  ],
+  "patch_result": {
+    "success": true,
+    "applied_patches": [
+      "Allow full-quality audio on mobile data",
+      "Require FLAC for local audio decoding"
+    ]
+  },
+  "compatibility": {
+    "packageName": "moe.rukamori.archivetune",
+    "name": "Natune",
+    "description": null,
+    "apkFileType": "APK",
+    "appIconColor": null,
+    "signatures": [
+      "6db8326a550861f0f96b9adcb706207d75ac4480de454fb8af95daa5d6c7f9d9"
+    ],
+    "formFactor": "MOBILE",
+    "targets": [
+      {
+        "version": "N202610191717",
+        "versionCodes": {
+          "ARM64_V8A": 6900,
+          "ARMEABI_V7A": 6900,
+          "X86_64": 6900,
+          "X86": 6900
+        },
+        "isExperimental": true,
+        "minSdk": null,
+        "description": null
+      }
+    ]
+  },
+  "phone_acceptance": false,
+  "full_download_admission": false,
+  "additional_providers_implemented": false,
+  "published_feed_changed": false
+}
