@@ -1,0 +1,24 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40921539615,
+  "artifact_id": 12919450498,
+  "source_commit": "58e1d65be69409adff0d3f3e695463920f09ef30",
+  "version": "0.1.0-alpha.5",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15463159,
+  "artifact_zip_sha256": "dc0793a6a211ca72d2eb88f761736ab2011e4b32736d02eb68114bbf9873d99f",
+  "members_sha256": {
+    "SHA256SUMS": "c619d683b069c11dc04645a8ffc2bfb14b27b9b820891c9773cc3940dca5151a",
+    "patches-0.1.0-alpha.5.mpp": "091ea2715818dd261b3017662761a494e41e2c644243d263a9e9e9ffc91f33e4",
+    "patches-0.1.0-alpha.5-javadoc.mpp": "3aeb6f9b393d1f789afea4c93e4356ed1b298ded80262161d2f5ccdf99c3fb69",
+    "patches-0.1.0-alpha.5-sources.mpp": "7725b2cea6dd7727ca2d59021f10287c0cca0147af22e3fc3982e7a44da4331a",
+    "patches-bundle.json": "2a6dbea3e1c461c93e6e1dea7921aea89ef521e63f85534f101cffc777e498ab",
+    "patches-list.json": "7dee842037f4ca2ad60299eade1b55cf5421929ffc866544b568b65a18e719a2",
+    "purple-provenance.json": "3ade05b0b165a88d6988bc700dd5c2f2d6708f367691e86d64e7727185212af5"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "checks": "Hosted policy and finite-capture synthetic controls passed; no microphone or model opened.",
+  "actual_apk_patch_or_device_acceptance": false,
+  "notes": "Artifact and all members read and verified in memory. This does not establish device behavior."
+}

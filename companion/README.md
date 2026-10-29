@@ -49,8 +49,9 @@ historical artifact and is not silently replaced.
 Hosted synthetic controls and the Android ARM64 cross-build passed for dev.2;
 see [verification](../docs/companion-022-dev2-verification.json). Dev.3 adds an
 explicit health capability marker, which Gboard alpha.5 requires before opening
-the microphone. It must be built and verified separately; old companions cannot
-silently satisfy the new keyboard's voice-preflight contract.
+the microphone. Its [hosted controls and Android cross-build](../docs/companion-022-dev3-verification.json)
+also passed; old companions cannot silently satisfy the new keyboard's
+voice-preflight contract. No phone installation or model test is established.
 
 
 Companion0.2.1 corrects an actual Android transport failure: `/proc/self/fd/N`
