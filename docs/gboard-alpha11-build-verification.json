@@ -1,0 +1,28 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40941972091,
+  "artifact_id": 12926892788,
+  "source_commit": "77d4d2676eb414325c262b5ca83434b28ecbb562",
+  "version": "0.1.0-alpha.11",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15479072,
+  "artifact_zip_sha256": "ab9aeb84ee29499499d1c36665be98690fdbdf6a7eb455499511afc3bcba4a39",
+  "members_sha256": {
+    "SHA256SUMS": "4e50a673d21a33d9a413017962338af247b90d1187d376bf54fb08cba4cb7309",
+    "patches-0.1.0-alpha.11-javadoc.mpp": "31a65fd7f5fe57b906f18270625862e63cc6c2e8bfdc6bd9a1bd618f59f5cf03",
+    "patches-0.1.0-alpha.11-sources.mpp": "c1ba47d1994c300adb10556b1831decef1021cd678969781051a36bab36c5c7e",
+    "patches-0.1.0-alpha.11.mpp": "d03210d1a1305dcb5e5bdbe51f633eb407cfa841bec5944a82816029eb50d751",
+    "patches-bundle.json": "3d8640b765542da6314493914ce8a49ccc8c0fb2cdd519178d66f49bbe03f306",
+    "patches-list.json": "2eeb93751f9b9a8c451487aaed6f4c0d3ba9b14bddd30cd0ada2bf1885096781",
+    "purple-provenance.json": "87e3f8fded9804585fd61c4194c4a89b0a44c0481559156dbdcb204dc41a2ece"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "checks": "Hosted feed, editor/session, bootstrap, exact Sol/effort catalog, actual bridge adapter with controlled JSON stubs, scoped permissions, capture and upstream patch build passed.",
+  "checks_scope": "Synthetic policy and stub controls plus source/bundle build; no actual Android JSON parser, UI, callback, microphone, model, account or phone execution.",
+  "apk_patching_at_build_time": false,
+  "unreleased_feed_has_download_url": false,
+  "privacy_release_gate": "OPEN: Termux command still emits the bearer in stdout; the selected Codex no-tools and writer boundary is also unverified.",
+  "device_accepted": false,
+  "notes": "All archive members were read and hashed in memory, and every overlay source hash matched the exact Git commit. Hosted artifacts expire; retain source and rebuild if needed."
+}

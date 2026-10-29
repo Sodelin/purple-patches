@@ -34,7 +34,8 @@ activation.
 
 Alpha.11 source also catches `RuntimeException` around the complete anchor
 comparison and refuses it, so an unavailable or throwing editor accessor does
-not escape that check. Its build and Android behavior remain unverified; the
+not escape that check. Its [hosted bundle build](gboard-alpha11-build-verification.json)
+passed; Android behavior remains unverified. The
 catch does not make the multi-call observation atomic or identify an active
 composing region.
 

@@ -23,7 +23,9 @@ parses an in-range integral JSON number as an `Integer`, as used by this check;
 the phone's actual parser has not been tested. A health marker is not proof of
 privacy or an account entitlement.
 A catalog listing does not establish account entitlement or a successful
-request. Alpha.11 build and Android behavior remain unverified. Dev.5 passed its
+request. The [alpha.11 hosted build and synthetic catalog controls](gboard-alpha11-build-verification.json)
+passed, including the actual bridge adapter with controlled JSON stubs; the
+Android parser, UI and real account availability remain unverified. Dev.5 passed its
 [hosted controls and Android cross-build](companion-022-dev5-verification.json),
 including single-choice catalog fixtures. No live translation or phone UI has
 been tested under the current model/device holds.
