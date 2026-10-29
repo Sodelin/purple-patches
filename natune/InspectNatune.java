@@ -39,7 +39,7 @@ public final class InspectNatune {
             if (inheritedMethod(parent, parameters, result, classes, seen)) return true;
         return clazz.getSuperclass() != null && inheritedMethod(clazz.getSuperclass(), parameters, result, classes, seen);
     }
-    static final Set<String> CODEC_ANCHORS = Set.of("audio", "video", "audio/raw", "audio/flac", "audio/ac4", "qobuz:", "tidal:");
+    static final Set<String> CODEC_ANCHORS = Set.of("audio", "video", "audio/raw", "audio/flac", "audio/ac4", "qobuz:", "tidal:", "downloaded", "root");
     static void codecBody(Method method, int maximum) {
         var body=method.getImplementation();
         if(body==null)return;
@@ -189,6 +189,32 @@ public final class InspectNatune {
         inspectCodecHooks(classes);
         inspectStorageHooks(classes);
         inspectRemovalGraph(classes);
+        inspectLibraryHooks(classes);
+    }
+
+    /** Inspect publicly compiled browser entrypoints, without opening the app. */
+    static void inspectLibraryHooks(Map<String,ClassDef> classes) {
+        String callback = "Lmoe/rukamori/archivetune/playback/MediaLibrarySessionCallback;";
+        for (String type : List.of("Lmoe/rukamori/archivetune/playback/MusicService;", callback)) {
+            var owner = classes.get(type);
+            System.out.println("LIBRARY_CLASS\t" + type + "\tpresent=" + (owner != null));
+            if (owner == null) continue;
+            for (var method : owner.getMethods())
+                if (Set.of("onConnect", "onGetChildren", "onGetItem", "onGetLibraryRoot").contains(method.getName())) {
+                    System.out.println("LIBRARY_METHOD\t" + signature(method));
+                    codecBody(method, 350);
+                }
+        }
+        int children = 0;
+        for (var owner : classes.values()) {
+            if (!owner.getType().contains("MediaLibrarySessionCallback$onGetChildren")) continue;
+            System.out.println("LIBRARY_CHILDREN_CLASS\t" + owner.getType());
+            for (var method : owner.getMethods()) if (method.getName().equals("invokeSuspend")) {
+                codecBody(method, 1200);
+                children++;
+            }
+        }
+        System.out.println("LIBRARY_CHILDREN_TOTAL\t" + children);
     }
 
     /**

@@ -25,6 +25,7 @@ jobs:
           "$APKSIGNER" verify --print-certs "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-signers.txt"
           "$AAPT2" dump badging "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-badging.txt"
           mkdir -p dist
+          "$AAPT2" dump xmltree "$RUNNER_TEMP/natune-original.apk" --file AndroidManifest.xml > dist/target-manifest.xmltree.txt
           python -m unittest discover -s natune -p test_apk_metadata.py -v
           python natune/verify_apk_metadata.py "$RUNNER_TEMP/natune-signers.txt" "$RUNNER_TEMP/natune-badging.txt" > dist/target-proof.json
       - name: Acquire proven hash-pinned DEX reader
@@ -41,7 +42,7 @@ jobs:
           java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" NatuneDataSpecBindingControls > dist/data-spec-controls.txt
           java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" InspectNatune "$RUNNER_TEMP/natune-original.apk" > dist/policy-hooks.txt
           cd dist
-          sha256sum target-proof.json policy-hooks.txt flac-prefix-controls.txt flac-stream-controls.txt data-spec-controls.txt offline-selection-controls.txt > SHA256SUMS
+          sha256sum target-proof.json target-manifest.xmltree.txt policy-hooks.txt flac-prefix-controls.txt flac-stream-controls.txt data-spec-controls.txt offline-selection-controls.txt > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: natune-public-hook-inspection
