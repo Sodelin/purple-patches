@@ -1,5 +1,10 @@
 # Purple Patches
 
+**Public community project**, made public on 29 October 2026 at Nolan's request.
+Published components are experimental prereleases, not phone-accepted stable
+releases. Natune patch development is being prepared alongside the existing
+Gboard candidate. This project is independent of the Morphe maintainers.
+
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
 stock Gboard. No chat window, automatic per-keystroke inference or replacement
@@ -36,14 +41,16 @@ Native controls and the Android cross-build are verified separately from the
 Gboard bundle and actual phone behavior. The candidate has its own version;
 its selected update feed points only at the exact own versioned MPP, never an upstream binary.
 
-The verified main MPP is retained in a private candidate prerelease alongside its
+The verified main MPP is retained in a candidate prerelease alongside its
 corresponding source and hashes. A verified local copy is in the phone's
 `Download/Purple-Patches/` folder. This does not install the keyboard or turn
 on the companion. See [candidate delivery](docs/MORPHE-SOURCE.md) and the
 [local readback record](docs/local-patch-delivery.json).
 
-The private candidate source URL is
+The candidate source URL is
 `https://raw.githubusercontent.com/Sodelin/purple-patches/main/channels/candidate.json`.
-Its authenticated feed/tag/full-asset route is verified. Manager needs its own
-existing repository-access credential; no Manager credential or device setting
-was changed. See[network proof](docs/candidate-source-verification.json).
+It is now publicly accessible; a repository-access token is not needed for
+public downloads. Its earlier private authenticated feed/tag/full-asset proof
+is retained as dated history in [network proof](docs/candidate-source-verification.json).
+No Manager credential or device setting was changed. Older documents describing
+private custody refer to the state before the repository became public.
