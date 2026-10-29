@@ -2,8 +2,8 @@
 
 **Public community project**, made public on 29 October 2026 at Nolan's request.
 Published components are experimental prereleases, not phone-accepted stable
-releases. Natune patch development is being prepared alongside the existing
-Gboard candidate. This project is independent of the Morphe maintainers.
+releases. The Natune mobile-data patch has a verified off-phone build alongside the
+Gboard candidate; strict FLAC/provider integration remains in development. This project is independent of the Morphe maintainers.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
@@ -31,7 +31,7 @@ model family is whisper-large-v3. The older retained bridge does not satisfy
 those gates merely because it can start. No live model test is selected here.
 
 Workflow output contains a Morphe .mpp candidate, source metadata, provenance
-and hashes. The selected private candidate feed is now published after static artifact verification;
+and hashes. The selected public candidate feed is published after static artifact verification;
 actual Manager import/update and phone acceptance remain pending. Stable
 releases require device acceptance. A friend still needs the supported local
 Whisper/Codex companion, not just the keyboard patch bundle.

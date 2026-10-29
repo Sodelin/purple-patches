@@ -22,8 +22,10 @@ Whisper large-v3 acceptance, Gboard device regression or stable-release quality.
 Existing model/privacy/installation holds persist. No app setting, token,
 model asset, source-owner scope or phone runtime was changed.
 
-The current development OAuth credential still cannot create/update GitHub
-workflow files. Natune's new inspection workflow/source are retained locally;
-the attempted push was refused and no inspection run was started. Making the
-repository public does not grant missing workflow permissions. This is distinct
-from Morphe's optional download token; neither credential was broadened.
+The original development OAuth workflow-scope rejection remains historical
+evidence. The existing connected GitHub application subsequently registered
+both reviewed Natune workflows without broadening a credential. Independent
+inspection and an actual mobile-data candidate build/patch/preservation check
+have passed; see `natune/inspection-verification.json` and
+`natune/build-verification.json`. Phone acceptance and the full Natune
+FLAC/provider scope remain incomplete.
