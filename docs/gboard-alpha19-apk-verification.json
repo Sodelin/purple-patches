@@ -37,6 +37,17 @@
     "patched_network_resource": "res/xml/purple_keyboard_network.xml",
     "compiled_xml": "base-config cleartextTrafficPermitted=false; domain-config cleartextTrafficPermitted=true; domain 127.0.0.1 includeSubdomains=false"
   },
+  "strict_network_followup": {
+    "workflow_run": 40963974297,
+    "workflow_source_commit": "50a94cb28c5a91515da63eaaf6a3355085a5f723",
+    "artifact_id": 12936799213,
+    "artifact_zip_bytes": 49125200,
+    "artifact_zip_sha256": "38db161e94c774a28da09c8ab76fd988842fe43a38a105e6fa0fe72b6b5ce2da",
+    "unsigned_apk_sha256": "601d4a7cc5879103938ed9bb8dc9e20c9920ebd5b31952f4caecca9773b6141a",
+    "network_observation_sha256": "5d85741f46f658d16d14ee234fd0601e4aee0b0c947ae25b8bc637ab9bb4fd3d",
+    "result": "The original APK resource table contains no entry with the generated name. The original explicit false manifest setting and the output compiled false base plus sole IPv4 loopback rule passed a strict static check; five negative controls passed.",
+    "independent_readback": "All five checksum-listed members of the complete ZIP were streamed and verified in memory. This does not prove runtime policy or cover other APKs."
+  },
   "independent_readback": "Complete ZIP checked in memory; all five checksum-listed members streamed and verified, with source/version provenance checked.",
   "limitations": "The original/output manifests and compiled XML were inspected, not Android's effective network-policy runtime. The verifier does not compare every original resource or method body. No Manager-on-Android execution, signing, install, model, microphone or live keyboard acceptance occurred. The alternate XML alias collision remains open.",
   "installed": false,

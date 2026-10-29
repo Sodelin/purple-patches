@@ -51,3 +51,9 @@ Android parser behavior, stock networking, or Manager compatibility. Review of
 alias collisions, alternative handling for shared and nested policies, other
 supported APK resource configurations, and authorized device regression remains
 open. Existing bootstrap, bearer, model and install holds remain in force.
+
+A separate strict hosted check read the original resource table and found no
+entry with the generated resource name for this exact APK. It also checked the
+compiled false base and sole IPv4 loopback rule, with negative verifier controls.
+That resolves this particular name collision question; the patch-time selector
+still does not generally inspect `res/values*` aliases for other APKs.
