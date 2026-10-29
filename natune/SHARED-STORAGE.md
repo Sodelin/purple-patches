@@ -132,7 +132,8 @@ an existing file was protected.
 Android 10+ MediaStore audio folder. It creates a pending audio row on a selected
 real volume, checks its owner, volume, folder and pending state, and implements
 the existing verified-copy destination. It publishes only the original copy
-result for the same live source and destination after another full readback;
+result for the same live source and destination after another full readback,
+and rechecks the published bytes before reporting success;
 an uncertain publication is not automatically retried. It never removes a
 source or claims a computer copy. The actual app still must select a folder,
 admit peak space, bind a durable encrypted operation and reconcile uncertain

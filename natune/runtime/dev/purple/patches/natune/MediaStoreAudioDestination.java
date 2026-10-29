@@ -117,7 +117,7 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
 
     /**
      * Publish only this copy result, while its exact source lease is still held.
-     * Recheck the complete pending bytes immediately before the one update.
+     * Recheck the complete bytes before and after the one publication update.
      * Returned publication is not a computer receipt or source-removal permit.
      */
     public synchronized void publish(VerifiedStreamCopy.VerifiedCopy proof,
@@ -130,25 +130,7 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
         stop.check();
         source.assertUnchanged();
         if (!source.complete() || source.length() != proof.bytes) throw new IOException("Source changed");
-        MessageDigest hash;
-        try { hash = MessageDigest.getInstance("SHA-256"); }
-        catch (NoSuchAlgorithmException impossible) { throw new AssertionError(impossible); }
-        long count = 0;
-        byte[] buffer = new byte[VerifiedStreamCopy.BUFFER_BYTES];
-        try (InputStream input = reopen()) {
-            while (true) {
-                stop.check();
-                int n = input.read(buffer);
-                stop.check();
-                if (n == -1) break;
-                if (n <= 0 || n > buffer.length || n > proof.bytes - count)
-                    throw new IOException("Pending readback length changed");
-                hash.update(buffer, 0, n);
-                count += n;
-            }
-        }
-        if (count != proof.bytes || !MessageDigest.isEqual(hash.digest(), proof.sha256()))
-            throw new IOException("Pending audio changed after verification");
+        verifyBytes(reopen(), proof, stop);
         stop.check();
         source.assertUnchanged();
         if (!source.complete() || source.length() != proof.bytes) throw new IOException("Source changed");
@@ -162,5 +144,35 @@ public final class MediaStoreAudioDestination implements VerifiedStreamCopy.Dest
         if (resolver.update(row, values, null, null) != 1) throw new IOException("Publication uncertain");
         requireOwnedState(false);
         stop.check();
+        InputStream published = resolver.openInputStream(row);
+        if (published == null) throw new IOException("Published audio readback unavailable");
+        verifyBytes(published, proof, stop);
+        source.assertUnchanged();
+        if (!source.complete() || source.length() != proof.bytes) throw new IOException("Source changed");
+        requireOwnedState(false);
+        stop.check();
+    }
+
+    private static void verifyBytes(InputStream stream, VerifiedStreamCopy.VerifiedCopy proof,
+            VerifiedStreamCopy.StopCheck stop) throws IOException {
+        MessageDigest hash;
+        try { hash = MessageDigest.getInstance("SHA-256"); }
+        catch (NoSuchAlgorithmException impossible) { throw new AssertionError(impossible); }
+        long count = 0;
+        byte[] buffer = new byte[VerifiedStreamCopy.BUFFER_BYTES];
+        try (InputStream input = stream) {
+            while (true) {
+                stop.check();
+                int n = input.read(buffer);
+                stop.check();
+                if (n == -1) break;
+                if (n <= 0 || n > buffer.length || n > proof.bytes - count)
+                    throw new IOException("Media readback length changed");
+                hash.update(buffer, 0, n);
+                count += n;
+            }
+        }
+        if (count != proof.bytes || !MessageDigest.isEqual(hash.digest(), proof.sha256()))
+            throw new IOException("Media bytes changed after verification");
     }
 }

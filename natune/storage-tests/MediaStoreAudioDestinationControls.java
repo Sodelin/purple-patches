@@ -28,7 +28,7 @@ public final class MediaStoreAudioDestinationControls {
     static final class Store extends ContentResolver {
         String owner="example.natune",folder,returned="content://media/external_primary/audio/media/42";
         int pending=1,inserts,opens,reads,updates;
-        boolean missing,duplicate,nullOutput,nullInput,corruptRead,updateZeroAfterChange,throwAfterUpdate;
+        boolean missing,duplicate,nullOutput,nullInput,corruptRead,updateZeroAfterChange,throwAfterUpdate,mutateOnUpdate;
         byte[] body=new byte[0];
         ContentValues inserted;
         public Uri insert(Uri collection,ContentValues values){
@@ -58,6 +58,7 @@ public final class MediaStoreAudioDestinationControls {
         }
         public int update(Uri ignored,ContentValues values,String selection,String[] args){
             updates++;pending=(Integer)values.get(MediaStore.MediaColumns.IS_PENDING);
+            if(mutateOnUpdate&&body.length>0)body[0]^=1;
             if(throwAfterUpdate)throw new IllegalStateException("Uncertain provider outcome");
             return updateZeroAfterChange?0:1;
         }
@@ -131,6 +132,11 @@ public final class MediaStoreAudioDestinationControls {
         catch(IllegalStateException expected){need(expected.getMessage().equals("Uncertain provider outcome"),"Propagate provider uncertainty");}
         refuses(()->td.publish(tp,t,()->{}),"Provider exception is not replayed");
         need(thrown.store.updates==1&&Arrays.equals(t.bytes,bytes),"Throwing update remains unresolved; source retained");
+        App altered=new App();Source s=new Source(bytes);var sd=create(altered);
+        var sp=VerifiedStreamCopy.copy(s,sd,()->{});altered.store.mutateOnUpdate=true;
+        refuses(()->sd.publish(sp,s,()->{}),"Publication changed stored bytes");
+        refuses(()->sd.publish(sp,s,()->{}),"Changed published row is not blindly retried");
+        need(altered.store.updates==1&&Arrays.equals(s.bytes,bytes),"Post-publication mismatch retains original");
         App unavailable=new App();unavailable.store.nullOutput=true;var n=create(unavailable);
         refuses(()->VerifiedStreamCopy.copy(new Source(bytes),n,()->{}),"Null output");
         refuses(n::openNewOutput,"Uncertain output is not reopened");
