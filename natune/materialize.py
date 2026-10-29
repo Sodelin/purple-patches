@@ -30,6 +30,9 @@ def materialize(destination, local_flac=False, runtime_settings=False):
     if local_flac:
         (target.parent / 'NatuneLocalFlacPatch.kt').write_bytes((ROOT / 'NatuneLocalFlacPatch.kt').read_bytes())
     if runtime_settings:
+        if not local_flac:
+            raise RuntimeError('Runtime settings currently bind both selected audio dependencies')
+        (target.parent / 'NatuneRuntimeSettingsPatch.kt').write_bytes((ROOT / 'NatuneRuntimeSettingsPatch.kt').read_bytes())
         extension = destination / 'extensions/extension'
         shutil.rmtree(extension / 'src/main/java/app/template')
         shutil.copytree(ROOT / 'runtime/dev', extension / 'src/main/java/dev')
@@ -74,7 +77,9 @@ configurations.configureEach {
              'local_decoder_guard_included': local_flac,
              'local_decoder_guard_sha256': hashlib.sha256((ROOT / 'NatuneLocalFlacPatch.kt').read_bytes()).hexdigest() if local_flac else None,
              'runtime_settings_extension_included': runtime_settings,
-             'runtime_settings_app_binding': False,
+             'runtime_settings_app_binding': runtime_settings,
+             'runtime_settings_navigation_binding': False,
+             'runtime_settings_patch_sha256': hashlib.sha256((ROOT / 'NatuneRuntimeSettingsPatch.kt').read_bytes()).hexdigest() if runtime_settings else None,
              'runtime_settings_sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted((ROOT / 'runtime').rglob('*.java'))} if runtime_settings else {},
              'strict_flac_implemented': False, 'additional_providers_implemented': False,
              'phone_acceptance': False}

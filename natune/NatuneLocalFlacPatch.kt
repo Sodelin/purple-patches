@@ -16,7 +16,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 /** Parsed extractor Format, never filename/provider MIME or decoded PCM output. */
-private class LocalCodecSite(
+internal class LocalCodecSite(
     val name: String,
     val parameters: List<String>,
     val result: String,
@@ -34,7 +34,7 @@ private class LocalCodecSite(
     )
 }
 
-private val localCodecSites = listOf(
+internal val localCodecSites = listOf(
     LocalCodecSite("z0", listOf("Lr8/hv3;", "Lr8/yf4;"), "I", 21, 270, 20,
         "const/4 v0, 0x1\nreturn v0"), // FORMAT_UNSUPPORTED_SUBTYPE
     LocalCodecSite("y0", listOf("Lr8/yf4;"), "Z", 6, 52, 5,
@@ -46,7 +46,7 @@ private val localCodecSites = listOf(
             "invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V\nreturn-object v0"),
 )
 
-private val localInputChange = Fingerprint(
+internal val localInputChange = Fingerprint(
     definingClass = "Lr8/ge7;", name = "e0", parameters = listOf("Lr8/ie3;"), returnType = "Lr8/bt2;",
     custom = { method, _ -> method.accessFlags == 17 && method.implementation?.let {
         it.registerCount == 6 && it.tryBlocks.isEmpty() &&

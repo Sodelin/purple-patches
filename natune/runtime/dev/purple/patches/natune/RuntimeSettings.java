@@ -36,6 +36,10 @@ public final class RuntimeSettings {
     }
     /** Called with the ACTUAL original audio-only policy result. A disabled
      * switch returns that exact value, not a reconstructed network guess. */
+    /** Morphe binds the exact original helper in front of this refusal body. */
+    public static boolean lowData(Context context) {
+        throw new IllegalStateException("Original low-data helper is not bound");
+    }
     public static boolean mobilePolicy(Context context,boolean originalLowData) {
         return fullQualityMobile(context) ? false : originalLowData;
     }

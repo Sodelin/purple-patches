@@ -13,7 +13,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 /** Exact release sites proven in policy-hooks.json, not source-name guesses. */
-private class AudioSite(
+internal class AudioSite(
     owner: String,
     name: String,
     parameters: List<String>,
@@ -36,7 +36,7 @@ private class AudioSite(
     )
 }
 
-private val audioSites = listOf(
+internal val audioSites = listOf(
     AudioSite("Lmoe/rukamori/archivetune/playback/MusicService\$prefetchNextMediaItemStream\$2;",
         "invokeSuspend", listOf("Ljava/lang/Object;"), "Ljava/lang/Object;", 23, 287, 73, 20),
     AudioSite("Lmoe/rukamori/archivetune/playback/MusicService;",
