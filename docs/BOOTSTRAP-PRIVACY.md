@@ -68,3 +68,25 @@ synthetic encryption example alone is not acceptance. Verify the actual chosen
 implementation with suitable public fixtures and authorized device evidence
 before any installation, keyboard activation or model use. Preserve all
 existing device, model and privacy holds in the meantime.
+
+## Caller authority is a separate boundary
+
+The pinned upstream [Termux manifest](https://github.com/termux/termux-app/blob/8629e632fcb95da272221be327db653fb24befe9/app/src/main/AndroidManifest.xml)
+declares `RUN_COMMAND` a dangerous permission and protects its exported command
+service with that permission. The reviewed service also checks its existing
+allow-external-apps policy. The current fixed wrapper accepts `bootstrap` and
+the companion returns the existing service bearer. Consequently, another app
+already granted that broad permission, with external commands enabled, may be
+able to invoke the wrapper and request its own result. This is a source-level
+consequence requiring actual selected-version and caller-authority review; it
+is not a claim about any installed app's permissions or an observed exploit.
+Encrypting a response to a caller-supplied public key could protect it from
+stdout logging but would not, by itself, establish that the caller is the
+intended keyboard. The scope and implications of the broad Termux command
+permission must be explicit in the design and user-facing consent.
+
+For prospective compatibility analysis only, Android documents `ECDH` key
+agreement from API 11 and `XDH` from API 33 in its [KeyAgreement reference](https://developer.android.com/reference/javax/crypto/KeyAgreement).
+That API list does not establish the supported Gboard target range, provider
+behavior, protocol security or a chosen implementation. No key was generated
+and no encrypted transport was implemented by this source review.
