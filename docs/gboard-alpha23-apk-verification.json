@@ -1,0 +1,22 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40975115353,
+  "source_commit": "42de89706d8c326ab1074670dc87de689b876f60",
+  "build_run": 40974389461,
+  "bundle_version": "0.1.0-alpha.23",
+  "bundle_sha256": "384946bf207aea81774ea3c5b814c2da06bc39b4ea18ede87185cc6f5f3a269b",
+  "original_version": "18.5.4.993608717-release-arm64-v8a",
+  "original_apk_sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+  "expected_original_signer_sha256": "f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83",
+  "output_package": "dev.jason.com.google.android.inputmethod.latin",
+  "output_unsigned_apk_sha256": "6ddb3981f9c988dd1de66af5e62e1cdfd8674bb6b8a396a74178ef412cd8c930",
+  "artifact_id": 12941693639,
+  "artifact_zip_bytes": 49129052,
+  "artifact_zip_sha256": "0ce111d8bc4cd68e21903a9ada07bb9be176edadf5e0b3237c61f9ff6bd57ec0",
+  "artifact_readback": "The complete ZIP and all five selected member hashes were checked in memory; source/version and successful build-run provenance matched. No artifact was installed.",
+  "patches_applied": ["Add Gboard Signature Bypass", "Whisper 3 dictation and AI Translate", "Package Rename"],
+  "static_preservation": {"original_classes": 22860, "original_method_signatures": 118230, "original_field_signatures": 85104, "original_native_libraries": 15, "original_assets": 140},
+  "worker_definition_observation": "An additional in-memory DEX class-data scan of classes4.dex found WorkerStart, WorkerStart$Gate and PurpleAiRuntime definitions, with code bodies for the launch overloads and the submit, chooseTranslationEffort and workerStartFailed methods. This ad hoc scan did not inspect their call sites or control flow.",
+  "network_observation": "Compiled output has a false base cleartext policy and an explicit IPv4 loopback exception; original target did not have a matching resource name. Android runtime behavior is not established.",
+  "limits": "The APK is unsigned. Static class/member preservation does not prove stock method behavior; the worker definition scan is not a runtime or control-flow test. No phone installation, keyboard/UI, microphone, model or translation request was performed. Historical negative APK controls were not selected for this run."
+}

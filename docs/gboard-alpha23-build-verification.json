@@ -1,0 +1,23 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "source_commit": "42de89706d8c326ab1074670dc87de689b876f60",
+  "local_source_commit": "0a465b909d3a812d0f34a19e9ee96c842b2973cc",
+  "shared_source_tree": "279cec37432bd3cccc73636754e8ec22183ca5b1",
+  "version": "0.1.0-alpha.23",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "workflow_runs": [40974389461, 40974719927],
+  "artifact_ids": [12942111915, 12942516197],
+  "artifact_zip_bytes": [15584497, 15584497],
+  "artifact_zip_sha256": ["76c219c5327ad586836854219bfcd37b344d94e677d9b6ad5961a9a5fe9376a9", "b4eb9dec9e9509669546aa0ab84a997ad4c80a50ded1f14f91bebb616369ab82"],
+  "main_mpp_sha256": "384946bf207aea81774ea3c5b814c2da06bc39b4ea18ede87185cc6f5f3a269b",
+  "all_seven_artifact_members_identical": true,
+  "outer_zip_bytes_identical": false,
+  "overlay_files_verified": 30,
+  "build_inputs_verified": 5,
+  "android_36_jar_sha256_both_runs": "d9eb9da824d9e247a352f570f01e1169e725b2954bca9e283a71786c59b59f9a",
+  "checks": "Both runs passed the worker-start synthetic controls, including a worker scheduled before a simulated start exception. Complete artifact member checksums, committed overlay/build inputs, version, timestamp and provenance were compared in memory.",
+  "previous_candidate": "Alpha.22 hosted builds 40973746127 and 40974044737 passed, but lacked the later gate for a worker scheduled before a start exception. They were not published or patched to an APK.",
+  "limitations": "Synthetic controls exercise the helper, not actual Android UI cleanup or resource exhaustion. Two hosted builds do not establish installed behavior, model use, private bootstrap or device acceptance.",
+  "release_published": false,
+  "device_accepted": false
+}

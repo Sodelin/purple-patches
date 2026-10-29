@@ -25,6 +25,9 @@ version or every possible runtime failure.
 
 Synthetic controls inject start refusals and thread exhaustion both before and
 after a worker is scheduled, and also start one ordinary test thread. They
-exercise the worker-start helper, not Android's actual UI cleanup, the installed keyboard,
-microphone, local companion or model. A full hosted build and device regression
-are separate evidence and remain pending until actually performed.
+exercise the worker-start helper, not Android's actual UI cleanup, the installed
+keyboard, microphone, local companion or model. Two hosted builds produced
+identical artifact members; the exact supported public APK was patched and
+statically inspected. See the [build](gboard-alpha23-build-verification.json)
+and [APK](gboard-alpha23-apk-verification.json) records. Device regression is
+still pending.
