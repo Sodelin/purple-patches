@@ -81,3 +81,14 @@ explicit UX and regression analysis; it is not assumed to be a free fix.
 Authorized tests must cover active composition, selection changes, input
 connection loss, refusal, exception, delayed response, and duplicate gestures in
 real representative editors. Preserve original text and all privacy holds.
+
+The documented `InputConnection.setSelection` does not clear a composing region,
+so reselecting the same range alone does not resolve that risk. Android also
+documents that IMEs currently receive null from `InputConnection.takeSnapshot`,
+despite the API describing an atomic text snapshot for system use. A composing
+span helper operates on a supplied `Spannable`; the current connection contract
+does not establish that every editor returns one with complete composing state.
+See the [InputConnection reference](https://developer.android.com/reference/android/view/inputmethod/InputConnection)
+and [BaseInputConnection reference](https://developer.android.com/reference/android/view/inputmethod/BaseInputConnection).
+These are platform/source observations, not a claim that every editor behaves
+identically or that a safe user-directed alternative is impossible.
