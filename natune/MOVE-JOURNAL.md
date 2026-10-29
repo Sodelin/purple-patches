@@ -175,6 +175,9 @@ identity and leaves encrypted proof records under a fresh caller-provided case
 ID. An existing or uncertain case must not be replayed under a new ID. A
 cross-build by itself does not establish that this check ran successfully on
 the phone; actual backend, app-owner and device acceptance remain open.
+The current v3 checker source exercises the remote-verified and cleaned-staging
+states using only synthetic receiver and cleanup observations. It creates no
+audio or staging document and must not be reported as an actual Fuji transfer.
 
 Hosted run40905442006 at2dd1a59201b4d90d39514365c4f0efe8bdccdc97
 passed36 Rust library controls and cross-built the checker for AArch64 Android.

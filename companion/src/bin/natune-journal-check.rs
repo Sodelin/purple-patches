@@ -1,6 +1,6 @@
 //! Finite public-fixture acceptance for the existing encrypted record backend.
 //! Not an app endpoint, native writer permit, media operation or model trial.
-use purple_keyboard_bridge::natune_journal::{Claim, Document, EncryptedFiles, Event, Journal, Stage};
+use purple_keyboard_bridge::natune_journal::{Claim, Document, EncryptedFiles, Event, Journal, RemoteReceipt, Stage};
 use sha2::{Digest, Sha256};
 use std::fs::{self, DirBuilder};
 use std::os::unix::fs::{DirBuilderExt, MetadataExt};
@@ -54,6 +54,12 @@ fn check() -> Result<(), String> {
         bytes:9,
         sha256:format!("{:x}",Sha256::digest(b"123456789")),
     };
+    let receipt=RemoteReceipt {
+        receiver_id:"PUBLIC-FIXTURE-NOT-A-RECEIVER".into(),
+        transfer_id:"PUBLIC-FIXTURE-NOT-A-TRANSFER".into(),
+        bytes:document.bytes,
+        sha256:document.sha256.clone(),
+    };
     let open=|| Journal::open(EncryptedFiles::open(&case)?,2_097_152);
     let mut journal=open()?;
     journal.record(&claim.operation_id,None,Event::Begin{claim:claim.clone()})?;
@@ -69,15 +75,28 @@ fn check() -> Result<(), String> {
     if journal.reserved_bytes()?!=claim.peak_bytes || journal.document(&claim.song_id,&claim.rendition_key)?.is_some() {
         return Err("Verified-state recovery differs".into());
     }
-    journal.record(&claim.operation_id,Some(2),Event::Indexed)?;
+    journal.record(&claim.operation_id,Some(2),Event::RemoteVerified{receipt:receipt.clone()})?;
     if journal.record(&claim.operation_id,Some(3),Event::RemovalPending).is_ok() {
         return Err("Unbound original-removal gate unexpectedly opened".into());
     }
     drop(journal);
     let mut journal=open()?;
-    if journal.reserved_bytes()?!=claim.peak_bytes || journal.document(&claim.song_id,&claim.rendition_key)?!=Some(&document) ||
-        journal.snapshot(&claim.operation_id)?.map(|s|s.stage)!=Some(Stage::Indexed) {
-        return Err("Indexed/held-state recovery differs".into());
+    if journal.reserved_bytes()?!=claim.peak_bytes || journal.document(&claim.song_id,&claim.rendition_key)?.is_some() ||
+        journal.remote_receipt(&claim.song_id,&claim.rendition_key)?!=Some(&receipt) ||
+        journal.snapshot(&claim.operation_id)?.map(|s|s.stage)!=Some(Stage::RemoteVerified) {
+        return Err("Remote-observation held-state recovery differs".into());
+    }
+    // Synthetic observation only; no actual staging document or media exists.
+    journal.record(&claim.operation_id,Some(3),Event::StageCleaned)?;
+    drop(journal);
+    let mut journal=open()?;
+    if journal.reserved_bytes()?!=0 || journal.document(&claim.song_id,&claim.rendition_key)?.is_some() ||
+        journal.remote_receipt(&claim.song_id,&claim.rendition_key)?!=Some(&receipt) ||
+        journal.snapshot(&claim.operation_id)?.map(|s|s.stage)!=Some(Stage::StagedRemotely) {
+        return Err("Remote-staging recovery differs".into());
+    }
+    if journal.record(&claim.operation_id,Some(4),Event::RemovalPending).is_ok() {
+        return Err("Unbound original-removal gate unexpectedly opened after staging".into());
     }
     if journal.record(&claim.operation_id,None,Event::Begin{claim:claim.clone()}).is_ok() {
         return Err("Consumed operation unexpectedly readmitted".into());
@@ -97,11 +116,12 @@ fn check() -> Result<(), String> {
         }
         encrypted+=1;
     }
-    if encrypted!=4 { return Err("Check event count differs".into()); }
+    if encrypted!=5 { return Err("Check event count differs".into()); }
     println!("{}",serde_json::json!({
-        "schema":"purple.natune.encrypted-journal-public-check.v2",
+        "schema":"purple.natune.encrypted-journal-public-check.v3",
         "status":"PASS", "public_fixture_only":true, "encrypted_events":encrypted,
-        "actual_vault_backend":true, "reopened_stages":3, "unbound_original_removal_refused":true,
+        "actual_vault_backend":true, "reopened_stages":4, "unbound_original_removal_refused":true,
+        "remote_and_cleanup_observations":"synthetic_only",
         "original_app_data_access":false, "source_cache_removed":false,
         "actual_android_move":false, "model_invocation":false, "listener_started":false
     }));
