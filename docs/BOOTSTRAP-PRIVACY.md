@@ -18,8 +18,9 @@ or device incident was observed. Alpha.10 source invalidates and cancels the
 pending callback on session end, binds a new request to the offered session and
 owner, and checks session, owner presence, route, deadline and one-shot
 consumption before assigning the result. A shared lock covers initiation,
-session end and response acceptance. The source change and pure policy
-controls have not yet been built or exercised on Android. Canceling the
+session end and response acceptance. The [hosted alpha.10 build and pure policy
+controls](gboard-alpha10-build-verification.json) passed; Android behavior has
+not been exercised. Canceling the
 PendingIntent does not stop an already launched Termux command or revoke a
 previously issued bearer. The separate bearer-output and caller-identity gaps
 remain open.

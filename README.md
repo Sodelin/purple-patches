@@ -24,6 +24,12 @@ Alpha.8 makes the existing 60-second recording limit visible; its
 [off-phone build](docs/gboard-alpha8-build-verification.json) and
 [exact-APK static checks](docs/gboard-alpha8-apk-verification.json) passed.
 Longer dictation and Android validation remain open. See [long dictation](docs/LONG-DICTATION.md).
+Alpha.9 retains the result preview after an insertion request. Alpha.10 binds a
+pending local-tools connection to the offered keyboard session; its [hosted
+bundle and synthetic controls](docs/gboard-alpha10-build-verification.json)
+passed. These source/build checks do not establish Android behavior or resolve
+the bearer-output privacy blocker. The public Gboard feed still points to the
+older alpha.1 and warns against installing it.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
