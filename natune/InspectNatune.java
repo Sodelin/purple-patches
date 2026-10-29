@@ -204,7 +204,11 @@ public final class InspectNatune {
         // the original NavigableSet interface shape alone found no cache type.
         // Inspect the observed receiver and its original owner, not an assumed
         // public Media3 ABI. No field values or app objects are accessed.
-        for (String type : List.of("Lr8/td1;", "Lmoe/rukamori/archivetune/playback/g;")) {
+        var receiverTypes = new TreeSet<>(List.of("Lr8/td1;", "Lr8/d7b;", "Lr8/vu2;",
+            "Lr8/ye2;", "Lmoe/rukamori/archivetune/playback/g;"));
+        for (var clazz : classes.values())
+            if (clazz.getInterfaces().contains("Lr8/td1;")) receiverTypes.add(clazz.getType());
+        for (String type : receiverTypes) {
             var clazz = classes.get(type);
             if (clazz == null) throw new IllegalStateException("Observed storage receiver missing");
             System.out.println("STORAGE_RECEIVER\t" + type + "\tflags=" + clazz.getAccessFlags() +
@@ -214,9 +218,24 @@ public final class InspectNatune {
                     "\tflags=" + field.getAccessFlags());
             for (var method : clazz.getMethods()) {
                 System.out.println("STORAGE_RECEIVER_METHOD\t" + signature(method) + "\tflags=" + method.getAccessFlags());
-                if (type.equals("Lr8/td1;")) codecBody(method, 45);
+                if (clazz.getInterfaces().contains("Lr8/td1;") &&
+                    (Set.of("p", "l", "b", "o", "c", "j", "d").contains(method.getName()) ||
+                     method.getReturnType().equals("Lr8/td1;"))) codecBody(method, 60);
             }
         }
+        for (var clazz : classes.values())
+            if (clazz.getType().contains("ExportDownloadedSongsScreenKt$") &&
+                clazz.getType().contains("deleteSelected"))
+                for (var method : clazz.getMethods()) {
+                    if (!method.getName().equals("invokeSuspend")) continue;
+                    System.out.println("STORAGE_DELETE_COROUTINE\t" + signature(method));
+                    codecBody(method, 180);
+                    if (method.getImplementation() != null)
+                        for (var instruction : method.getImplementation().getInstructions())
+                            if (instruction instanceof ReferenceInstruction r &&
+                                r.getReference() instanceof MethodReference m)
+                                System.out.println("STORAGE_DELETE_CALL\t" + signature(m));
+                }
         // Resolve the actual optimized Cache-like interface, rather than
         // compiling an assumed upstream Media3 class name into an extension.
         for (var clazz : classes.values()) {
