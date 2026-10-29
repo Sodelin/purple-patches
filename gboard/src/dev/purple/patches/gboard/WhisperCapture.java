@@ -12,6 +12,7 @@ final class WhisperCapture {
 
     // The recording worker owns stop/release. UI cancellation never waits on AudioRecord.
     void stop() { session.stop(); }
+    boolean limitReached() { return session.limitReached(); }
 
     byte[] record(AtomicBoolean cancelled) throws Exception {
         return session.record(() -> {

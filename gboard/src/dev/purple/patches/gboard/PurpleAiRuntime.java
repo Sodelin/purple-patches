@@ -216,10 +216,19 @@ public final class PurpleAiRuntime {
                 // Check exact Whisper family and memory-only bridge before opening the microphone.
                 currentBridge.verify(voice);
                 if (stopped.get()) throw new InterruptedException();
+                boolean reachedLimit = false;
                 if (voice) {
-                    MAIN.post(() -> { if (!stopped.get()) progress.setMessage("Recording — tap Stop when finished"); });
+                    MAIN.post(() -> { if (!stopped.get() && request == operation && dialog == progress)
+                        progress.setMessage("Recording for up to " + SessionPolicy.AUDIO_SECONDS + " seconds. Tap Stop when finished."); });
                     audio = recorder.record(stopped);
+                    reachedLimit = recorder.limitReached();
+                    final boolean limited = reachedLimit;
+                    MAIN.post(() -> { if (!stopped.get() && request == operation && dialog == progress) {
+                        progress.setMessage(limited ? "Recording limit reached. Transcribing the captured audio…" : "Transcribing…");
+                        progress.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                    }});
                 }
+                final boolean recordingLimited = reachedLimit;
                 String text = currentBridge.execute(anchor.selected, language, effort, audio, stopped);
                 MAIN.post(() -> {
                     if (request != operation || stopped.get() || !anchor.matches(service.get(), generation)) return;
@@ -227,8 +236,11 @@ public final class PurpleAiRuntime {
                     InputMethodService current = service.get(); if (current == null) return;
                     TextView preview = new TextView(current); preview.setText(text); preview.setSaveEnabled(false);
                     preview.setTextIsSelectable(true); preview.setPadding(24,16,24,16);
-                    show(new AlertDialog.Builder(current).setTitle(voice ? "Whisper transcript" : "Translation")
-                            .setView(preview).setNegativeButton("Discard", null)
+                    AlertDialog.Builder result = new AlertDialog.Builder(current).setTitle(voice ? "Whisper transcript" : "Translation")
+                            .setView(preview).setNegativeButton("Discard", null);
+                    if (recordingLimited) result.setMessage("Recording reached the " + SessionPolicy.AUDIO_SECONDS
+                            + "-second limit. Only the captured audio is included.");
+                    show(result
                             .setPositiveButton("Insert", (d,w) -> {
                                 String replacement = text;
                                 if (request == operation && !stopped.get() && SessionPolicy.bounded(replacement) && anchor.matches(service.get(), generation))

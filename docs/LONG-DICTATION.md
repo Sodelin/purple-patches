@@ -1,11 +1,18 @@
 # Long dictation: current limits and integration requirements
 
-The current candidate's `CaptureSession` stops collecting after 60 seconds or
-the equivalent PCM byte allocation, then proceeds with the captured audio. The
-recording dialog currently says to tap Stop when finished and does not indicate
-that automatic limit. This is an observable source behavior, not a claim about
-an installed keyboard. A user speaking beyond that point could reasonably
-expect audio that the candidate did not collect.
+Through alpha.7, `CaptureSession` stops collecting after 60 seconds or the
+equivalent PCM byte allocation, then proceeds with the captured audio. Its
+recording dialog says to tap Stop when finished and does not indicate that
+automatic limit. A user speaking beyond that point could reasonably expect audio
+that the candidate did not collect. This is source behavior, not a claim about
+an installed keyboard.
+
+Alpha.8 source keeps the existing 60-second bound but states it while recording
+and, when the capture controller reaches the time or byte limit, identifies the
+result as covering only the captured audio. Its synthetic checks cover manual
+stop, a delayed read and the byte limit. This is a transparency improvement, not
+long-form support; the alpha.8 source still needs its own build and actual
+Android validation.
 
 Simply increasing one number does not provide complete long-form support. The
 companion currently validates at most 90 seconds per WAV; its HTTP request has a

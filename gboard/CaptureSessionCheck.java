@@ -75,6 +75,7 @@ public final class CaptureSessionCheck {
         Source one = new Source((s, out, offset, length) -> { int n = sample(s,out,offset,length); normal.stop(); return n; });
         byte[] result = normal.record(() -> one, clock, new AtomicBoolean());
         wav(result, 2); check(result[44] == 1 && result[45] == 2);
+        check(!normal.limitReached());
         check(one.starts == 1 && one.reads == 1 && one.closes == 1 && one.wiped());
         fails(IllegalStateException.class, () -> normal.record(() -> one, clock, new AtomicBoolean()));
 
@@ -117,13 +118,13 @@ public final class CaptureSessionCheck {
             return n;
         });
         byte[] bounded = late.record(() -> slow, cutoff, new AtomicBoolean());
-        wav(bounded, 2); check(slow.reads == 2 && slow.closes == 1 && slow.wiped());
+        wav(bounded, 2); check(slow.reads == 2 && slow.closes == 1 && slow.wiped() && late.limitReached());
 
         CaptureSession full = new CaptureSession(); Source fast = new Source((s, out, offset, length) -> {
             Arrays.fill(out, offset, offset + length, (byte)7); return length;
         });
         byte[] maximum = full.record(() -> fast, new Clock(), new AtomicBoolean());
-        wav(maximum, 60 * 32000); check(fast.closes == 1 && fast.wiped());
+        wav(maximum, 60 * 32000); check(fast.closes == 1 && fast.wiped() && full.limitReached());
 
         for (int bad : new int[]{-1, 1, 4097}) {
             CaptureSession invalid = new CaptureSession(); Source source = new Source((s, out, offset, length) -> bad);

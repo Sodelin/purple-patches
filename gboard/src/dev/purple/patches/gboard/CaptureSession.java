@@ -26,7 +26,9 @@ final class CaptureSession {
 
     private final AtomicBoolean stopped = new AtomicBoolean();
     private final AtomicBoolean claimed = new AtomicBoolean();
+    private volatile boolean limitReached;
     void stop() { stopped.set(true); }
+    boolean limitReached() { return limitReached; }
 
     private static long elapsed(Clock clock, long start) {
         long now = clock.nowMillis();
@@ -53,7 +55,10 @@ final class CaptureSession {
             int used = 0;
             while (true) {
                 if (cancelled.get()) throw new InterruptedException();
-                if (stopped.get() || used == MAX_BYTES || elapsed(clock, start) >= MAX_MILLIS) break;
+                if (stopped.get()) break;
+                if (used == MAX_BYTES || elapsed(clock, start) >= MAX_MILLIS) {
+                    limitReached = true; break;
+                }
                 int limit = Math.min(READ_BYTES, MAX_BYTES - used);
                 int count = source.read(pcm, used, limit);
                 if (cancelled.get()) throw new InterruptedException();
@@ -64,7 +69,7 @@ final class CaptureSession {
                 if (count > limit || (count & 1) != 0) throw new IllegalStateException("Invalid audio frame");
                 long elapsed = elapsed(clock, start);
                 // A delayed read cannot extend the accepted recording past its deadline.
-                if (elapsed >= MAX_MILLIS) break;
+                if (elapsed >= MAX_MILLIS) { limitReached = true; break; }
                 used += count;
                 if (count == 0 && !stopped.get()) clock.pause(Math.min(IDLE_WAIT_MILLIS, MAX_MILLIS - elapsed));
             }

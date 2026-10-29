@@ -20,6 +20,8 @@ Alpha.7 adds a source-level mitigation for a Termux bootstrap logging risk and
 separates the microphone request from the local-tools request. The mitigation
 and a replacement capability handoff remain unverified. See [bootstrap privacy](docs/BOOTSTRAP-PRIVACY.md)
 and [permission flow](docs/PERMISSION-FLOW.md). Do not activate the candidate.
+Alpha.8 source makes the existing 60-second recording limit visible; longer
+dictation and Android validation remain open. See [long dictation](docs/LONG-DICTATION.md).
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining

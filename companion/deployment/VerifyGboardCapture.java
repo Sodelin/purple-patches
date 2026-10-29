@@ -4,6 +4,7 @@ import com.android.tools.smali.dexlib2.iface.ClassDef;
 import com.android.tools.smali.dexlib2.iface.Method;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
+import com.android.tools.smali.dexlib2.iface.reference.StringReference;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,13 @@ public final class VerifyGboardCapture {
                     && target.getParameterTypes().size() == parameters) return true;
         return false;
     }
+    private static boolean contains(Method method, String text) {
+        if (method.getImplementation() == null) return false;
+        for (var instruction : method.getImplementation().getInstructions())
+            if (instruction instanceof ReferenceInstruction ref && ref.getReference() instanceof StringReference value
+                    && value.getString().contains(text)) return true;
+        return false;
+    }
     public static void main(String[] args) throws Exception {
         require(args.length == 1, "Expected one patched APK");
         var dex = DexFileFactory.loadDexContainer(new File(args[0]), Opcodes.getDefault());
@@ -63,5 +71,21 @@ public final class VerifyGboardCapture {
                 if (calls(method, "Landroid/media/AudioRecord;", "read", 4)) fourArgumentRead = true;
         require(fourArgumentRead, "Android four-argument audio read is missing");
         System.out.println("Verified finite capture, source lifecycle, deadline/cleanup and Android read references in APK DEX.");
+        String version = System.getenv("BUNDLE_VERSION");
+        require(version != null && !version.isEmpty(), "Missing selected bundle version");
+        if (!java.util.Set.of("0.1.0-alpha.4", "0.1.0-alpha.5", "0.1.0-alpha.6", "0.1.0-alpha.7").contains(version)) {
+            require(calls(find(classes, WRAPPER, "limitReached"), SESSION, "limitReached", 0),
+                    "Whisper capture does not expose its actual limit state");
+            boolean readsLimit = false, recordingNotice = false, resultNotice = false;
+            for (var type : classes.values()) if (type.getType().startsWith("Ldev/purple/patches/gboard/PurpleAiRuntime"))
+                for (var candidate : type.getMethods()) {
+                    readsLimit |= calls(candidate, WRAPPER, "limitReached", 0);
+                    recordingNotice |= contains(candidate, "Recording limit reached.");
+                    resultNotice |= contains(candidate, "Only the captured audio is included.");
+                }
+            require(readsLimit && recordingNotice && resultNotice,
+                    "Recording limit or partial-result notice references are missing");
+            System.out.println("Verified recording-limit state and notice references in APK DEX; device behavior is not established.");
+        }
     }
 }
