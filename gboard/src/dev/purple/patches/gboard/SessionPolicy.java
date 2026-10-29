@@ -47,7 +47,7 @@ public final class SessionPolicy {
     public interface InsertionAction { boolean run(); }
     public enum InsertionOutcome { REQUEST_SENT, EDITOR_CHANGED, UNKNOWN, ALREADY_ATTEMPTED }
     public enum PreviewDisposition { INSERTABLE, COPY_ONLY, REFUSE }
-    /** A changed anchor may still be shown for copying in the same safe session. */
+    /** An unmatched or unverifiable anchor may still be shown for copying in the same safe session. */
     public static PreviewDisposition previewDisposition(boolean currentRequest, boolean cancelled,
             boolean safeSession, boolean sameAnchor) {
         if (!currentRequest || cancelled || !safeSession) return PreviewDisposition.REFUSE;

@@ -330,7 +330,7 @@ public final class PurpleAiRuntime {
                             + "-second limit. Only the captured audio is included." : "";
                     if (disposition == SessionPolicy.PreviewDisposition.COPY_ONLY)
                         notice += (notice.isEmpty() ? "" : "\n\n")
-                                + "The selection changed. You can copy this result; insertion is disabled.";
+                                + "The editor or selection changed or could not be verified. You can copy this result; insertion is disabled.";
                     if (!notice.isEmpty()) result.setMessage(notice);
                     AlertDialog resultDialog = result.setPositiveButton("Insert", null).create();
                     SessionPolicy.InsertionAttempt insertion = new SessionPolicy.InsertionAttempt();

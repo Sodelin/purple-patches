@@ -79,7 +79,7 @@ Through alpha.11, when an operation completes, its queued UI callback returns
 without showing the result if the captured editor anchor no longer matches.
 Alpha.12 source instead displays a selectable, copy-only preview when the
 original request is still current in the same non-sensitive session but its
-anchor has changed. Insert is disabled for that preview. It still checks the
+anchor no longer matches or cannot be verified. Insert is disabled for that preview. It still checks the
 anchor before an insertion offered in the unchanged case. The source and pure
 policy controls have not yet been built or tested on Android.
 
