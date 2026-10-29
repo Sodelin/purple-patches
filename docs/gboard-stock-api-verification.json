@@ -1,0 +1,52 @@
+{
+  "schema": "purple.gboard-stock-api-verification.v1",
+  "workflow_run": 40932706735,
+  "verifier_source_commit": "a8092b418df4b53f842ad0c672a276b33cf0a38f",
+  "bundle_build_run": 40930173609,
+  "bundle_source_commit": "6b3cf5faa8190f43dfb7fa234cdaa6d70919abad",
+  "bundle_version": "0.1.0-alpha.8",
+  "bundle_sha256": "7abae1c07a4eed34981518ddc612e60901bec65bd513dc7a9c36f6e5dc7934e5",
+  "artifact_id": 12924130381,
+  "artifact_zip_bytes": 49115710,
+  "artifact_zip_sha256": "3cb4c868f40be4e69473db6500e74251f150c6831ba09669ad55f28e1a82261f",
+  "members": {
+    "build-run.json": {
+      "bytes": 152,
+      "sha256": "976f4dc2526d2aee363db971bd04e3f755988684fec2d26a467e239fe97219aa"
+    },
+    "gboard-patch-result.json": {
+      "bytes": 401,
+      "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"
+    },
+    "gboard-purple-unsigned.apk": {
+      "bytes": 84551527,
+      "sha256": "e227f9e077e70782198a6d52f89aeee3b9f879e6eba20e78efa2030911757743"
+    },
+    "SHA256SUMS": {
+      "bytes": 354,
+      "sha256": "deccd49fa571aa5d9c5ad1b1dd5a74a491cd8c2e0c3e215094fa9a169d20893a"
+    },
+    "purple-provenance.json": {
+      "bytes": 1992,
+      "sha256": "edce66c902a5c513c046b12acdb8759314ee1e51517be84c1b028d174e4d1c13"
+    }
+  },
+  "negative_controls": [
+    "missing original field",
+    "missing original method",
+    "missing concrete method body",
+    "changed superclass",
+    "missing interface"
+  ],
+  "original_classes": 22860,
+  "output_classes": 26015,
+  "original_method_signatures": 118230,
+  "original_field_signatures": 85104,
+  "original_native_libraries_exact": 15,
+  "original_assets_exact": 140,
+  "scope": "Original class definitions, method/field signatures, presence of bodies for originally concrete methods, superclass/interfaces, native libraries and assets. Does not compare method behavior or establish device acceptance.",
+  "independent_readback": "ZIP and all members hashed in memory; checksum list, upstream and bundle provenance and patch result verified.",
+  "installed": false,
+  "device_tested": false,
+  "live_model_tested": false
+}
