@@ -144,3 +144,32 @@ purge, not an exact verified-rendition remover. The existing selected-delete
 coroutine also directly removes source keys and sends asynchronous ae3.c(id).
 Neither returning void nor enqueueing removal settles our proposed move.
 Do not wire the Move button to this deletion path after merely copying one key.
+
+## Cancellation bridge and task settlement requirements
+
+NatuneCoroutineStop now binds the original cf2.getContext()/w21.J(yg2)
+public release ABI and preserves the exact RuntimeException/CancellationException
+from its invocation. It re-reads the original continuation's context on every
+check, with additional owner/headroom/deadline checks before and after it. No
+substitute context/Job, private access or default always-running owner is created.
+The selecting patch still must enforce the pinned original APK and supply the
+actual export continuation. No APK callsite uses this class yet.
+
+Primary Media3 source1.10.1 resolves to5fb306449733dd71595700c1227ad6087578c559.
+removal-lifecycle-source-review.json retains six full-source hashes and exact
+selected lines. DownloadManager's source logs a remove-task error but still
+runs onRemoveTaskStopped; a database-removal IOException is caught and a removal
+update is sent with finalException=null. Natune's listener separately suppresses
+individual purge errors. Thus onDownloadRemoved is an event to RECONCILE, not
+proof that the exact index/cache was removed or space can be reused. The
+optimized internal handler/task hooks are not yet mapped by this source review.
+
+ProgressiveDownloader.remove also uses the original request-derived key before
+the broad Natune listener. A patch that filters only the listener can still
+remove an unexported bare-key rendition. Both paths need actual move ownership
+and exact scope. Do not replace task settlement with a direct index edit.
+
+PRDownloader's DownloadRequestLifetime.cancel immediately releases its latch;
+cleanup may happen on a later completion callback. Pausing competing downloads
+must therefore verify final staging disposition, not equate latch release with
+returned disk space. Reservation cleanup stays charged through uncertainty.

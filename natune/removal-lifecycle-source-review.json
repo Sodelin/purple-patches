@@ -1,0 +1,840 @@
+{
+  "schema": "purple.natune.removal-lifecycle-review.v1",
+  "source_only": true,
+  "natune_target": "N202610191717/code6900",
+  "media3_declared_version": "1.10.1",
+  "media3_tag_resolved_commit": "5fb306449733dd71595700c1227ad6087578c559",
+  "files": [
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt",
+      "bytes": 65834,
+      "sha256": "a68822b3d885aff03097eb2df3c416ad77c7ccd03a591c031d2158d208189222",
+      "selected_lines": [
+        {
+          "line": 411,
+          "text": "        val downloadManager: DownloadManager ="
+        },
+        {
+          "line": 412,
+          "text": "            DownloadManager("
+        },
+        {
+          "line": 413,
+          "text": "                context,"
+        },
+        {
+          "line": 414,
+          "text": "                databaseProvider,"
+        },
+        {
+          "line": 415,
+          "text": "                downloadCache,"
+        },
+        {
+          "line": 416,
+          "text": "                dataSourceFactory,"
+        },
+        {
+          "line": 417,
+          "text": "                downloadExecutor,"
+        },
+        {
+          "line": 418,
+          "text": "            ).apply {"
+        },
+        {
+          "line": 419,
+          "text": "                maxParallelDownloads = DEFAULT_MAX_PARALLEL_DOWNLOADS"
+        },
+        {
+          "line": 420,
+          "text": "                addListener("
+        },
+        {
+          "line": 421,
+          "text": "                    object : DownloadManager.Listener {"
+        },
+        {
+          "line": 422,
+          "text": "                        override fun onDownloadChanged("
+        },
+        {
+          "line": 423,
+          "text": "                            downloadManager: DownloadManager,"
+        },
+        {
+          "line": 424,
+          "text": "                            download: Download,"
+        },
+        {
+          "line": 425,
+          "text": "                            finalException: Exception?,"
+        },
+        {
+          "line": 426,
+          "text": "                        ) {"
+        },
+        {
+          "line": 427,
+          "text": "                            if (finalException != null || download.state == Download.STATE_FAILED) {"
+        },
+        {
+          "line": 428,
+          "text": "                                songUrlCache.keys.removeIf { it.startsWith(\"${download.request.id}:\") }"
+        },
+        {
+          "line": 429,
+          "text": "                                // Purge both the failed download's own bytes and any partial bytes"
+        },
+        {
+          "line": 430,
+          "text": "                                // written to playerCache during the prewarm (prewarmSongForDownload)"
+        },
+        {
+          "line": 431,
+          "text": "                                // or a prior playback attempt."
+        },
+        {
+          "line": 432,
+          "text": "                                purgeSongCacheEntries(download.request.id)"
+        },
+        {
+          "line": 433,
+          "text": "                            }"
+        },
+        {
+          "line": 434,
+          "text": "                            downloads.update { map ->"
+        },
+        {
+          "line": 435,
+          "text": "                                map.toMutableMap().apply {"
+        },
+        {
+          "line": 436,
+          "text": "                                    set(download.request.id, download)"
+        },
+        {
+          "line": 437,
+          "text": "                                }"
+        },
+        {
+          "line": 438,
+          "text": "                            }"
+        },
+        {
+          "line": 439,
+          "text": "                        }"
+        },
+        {
+          "line": 440,
+          "text": ""
+        },
+        {
+          "line": 441,
+          "text": "                        override fun onDownloadRemoved("
+        },
+        {
+          "line": 442,
+          "text": "                            downloadManager: DownloadManager,"
+        },
+        {
+          "line": 443,
+          "text": "                            download: Download,"
+        },
+        {
+          "line": 444,
+          "text": "                        ) {"
+        },
+        {
+          "line": 445,
+          "text": "                            // Mirror the failure path: when a download is removed"
+        },
+        {
+          "line": 446,
+          "text": "                            // (user-initiated delete), also purge the related cache"
+        },
+        {
+          "line": 447,
+          "text": "                            // spans so the bytes are actually freed and stale partial"
+        },
+        {
+          "line": 448,
+          "text": "                            // data can't cause parser errors on the next playback"
+        },
+        {
+          "line": 449,
+          "text": "                            // attempt."
+        },
+        {
+          "line": 450,
+          "text": "                            purgeSongCacheEntries(download.request.id)"
+        },
+        {
+          "line": 451,
+          "text": "                            downloads.update { map -> map - download.request.id }"
+        },
+        {
+          "line": 452,
+          "text": "                        }"
+        },
+        {
+          "line": 483,
+          "text": "        /**"
+        },
+        {
+          "line": 484,
+          "text": "         * Frees every byte a song may occupy in both caches: its bare media id and each"
+        },
+        {
+          "line": 485,
+          "text": "         * source-prefixed key. [resolvePreferredDownloadDataSpec] re-keys a lossless download to the"
+        },
+        {
+          "line": 486,
+          "text": "         * source it resolved, so that copy lives under e.g. \"qobuz:$mediaId\" \u2014 and Media3's"
+        },
+        {
+          "line": 487,
+          "text": "         * ProgressiveDownloader.remove() can only remove the download request's own key. Left alone,"
+        },
+        {
+          "line": 488,
+          "text": "         * the prefixed copy survives the delete: real bytes under filesDir/download that nothing"
+        },
+        {
+          "line": 489,
+          "text": "         * references and no evictor reclaims."
+        },
+        {
+          "line": 490,
+          "text": "         */"
+        },
+        {
+          "line": 491,
+          "text": "        private fun purgeSongCacheEntries(mediaId: String) {"
+        },
+        {
+          "line": 492,
+          "text": "            for (key in DownloadSourceConfig.cacheKeysFor(mediaId)) {"
+        },
+        {
+          "line": 493,
+          "text": "                runCatching { downloadCache.removeResource(key) }"
+        },
+        {
+          "line": 494,
+          "text": "                runCatching { playerCache.removeResource(key) }"
+        },
+        {
+          "line": 495,
+          "text": "            }"
+        }
+      ]
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadRequestLifetime.kt",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadRequestLifetime.kt",
+      "bytes": 1785,
+      "sha256": "b3a1c7f9101653b04525e0b7b57b138fcd2a79613d9afdca227dc125cb46f200",
+      "selected_lines": [
+        {
+          "line": 16,
+          "text": "internal open class DownloadRequestLifetime<E>(val directory: File) {"
+        },
+        {
+          "line": 17,
+          "text": "    val latch = CountDownLatch(1)"
+        },
+        {
+          "line": 18,
+          "text": "    val error = AtomicReference<E?>(null)"
+        },
+        {
+          "line": 19,
+          "text": "    @Volatile var cancelled = false"
+        },
+        {
+          "line": 20,
+          "text": "        private set"
+        },
+        {
+          "line": 21,
+          "text": ""
+        },
+        {
+          "line": 22,
+          "text": "    fun completed() {"
+        },
+        {
+          "line": 23,
+          "text": "        latch.countDown()"
+        },
+        {
+          "line": 24,
+          "text": "        if (cancelled) cleanup()"
+        },
+        {
+          "line": 25,
+          "text": "    }"
+        },
+        {
+          "line": 26,
+          "text": ""
+        },
+        {
+          "line": 27,
+          "text": "    fun failed(value: E) {"
+        },
+        {
+          "line": 28,
+          "text": "        error.set(value)"
+        },
+        {
+          "line": 29,
+          "text": "        completed()"
+        },
+        {
+          "line": 30,
+          "text": "    }"
+        },
+        {
+          "line": 31,
+          "text": ""
+        },
+        {
+          "line": 32,
+          "text": "    fun cancel() {"
+        },
+        {
+          "line": 33,
+          "text": "        cancelled = true"
+        },
+        {
+          "line": 34,
+          "text": "        latch.countDown()"
+        },
+        {
+          "line": 35,
+          "text": "    }"
+        },
+        {
+          "line": 36,
+          "text": ""
+        },
+        {
+          "line": 37,
+          "text": "    fun cleanup() {"
+        },
+        {
+          "line": 38,
+          "text": "        // Includes transport partials, but never another request's directory."
+        },
+        {
+          "line": 39,
+          "text": "        directory.listFiles()?.forEach { it.delete() }"
+        },
+        {
+          "line": 40,
+          "text": "        directory.delete()"
+        }
+      ]
+    },
+    {
+      "repository": "NatuneGroup/ArchiveTune",
+      "revision": "b7e4dd444fea202a5c32e96f7b1199a74fe3ae70",
+      "path": "app/src/main/kotlin/moe/rukamori/archivetune/downloads/DownloadRepository.kt",
+      "url": "https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/downloads/DownloadRepository.kt",
+      "bytes": 3299,
+      "sha256": "cb9ef4d6cc84c70b20df31962af91b0e51076a6e6f0f33a7343cfcd83c751864",
+      "selected_lines": [
+        {
+          "line": 68,
+          "text": "        override fun pause(songIds: Collection<String>) {"
+        },
+        {
+          "line": 69,
+          "text": "            songIds.distinct().forEach { songId ->"
+        },
+        {
+          "line": 70,
+          "text": "                downloadUtil.downloadManager.setStopReason(songId, PAUSED_STOP_REASON)"
+        },
+        {
+          "line": 71,
+          "text": "            }"
+        },
+        {
+          "line": 72,
+          "text": "        }"
+        },
+        {
+          "line": 73,
+          "text": ""
+        },
+        {
+          "line": 74,
+          "text": "        override fun resume(songIds: Collection<String>) {"
+        },
+        {
+          "line": 75,
+          "text": "            songIds.distinct().forEach { songId ->"
+        },
+        {
+          "line": 76,
+          "text": "                val download = downloadUtil.downloads.value[songId]"
+        },
+        {
+          "line": 77,
+          "text": "                if (download?.state == Download.STATE_FAILED) {"
+        },
+        {
+          "line": 78,
+          "text": "                    downloadUtil.downloadManager.addDownload(download.request)"
+        },
+        {
+          "line": 79,
+          "text": "                } else {"
+        },
+        {
+          "line": 80,
+          "text": "                    downloadUtil.downloadManager.setStopReason(songId, NO_STOP_REASON)"
+        },
+        {
+          "line": 81,
+          "text": "                }"
+        },
+        {
+          "line": 82,
+          "text": "            }"
+        },
+        {
+          "line": 83,
+          "text": "        }"
+        },
+        {
+          "line": 84,
+          "text": ""
+        },
+        {
+          "line": 85,
+          "text": "        override fun remove(songIds: Collection<String>) {"
+        },
+        {
+          "line": 86,
+          "text": "            songIds.distinct().forEach(downloadUtil.downloadManager::removeDownload)"
+        },
+        {
+          "line": 87,
+          "text": "        }"
+        }
+      ]
+    },
+    {
+      "repository": "androidx/media",
+      "revision": "5fb306449733dd71595700c1227ad6087578c559",
+      "path": "libraries/exoplayer/src/main/java/androidx/media3/exoplayer/offline/DownloadManager.java",
+      "url": "https://github.com/androidx/media/blob/5fb306449733dd71595700c1227ad6087578c559/libraries/exoplayer/src/main/java/androidx/media3/exoplayer/offline/DownloadManager.java",
+      "bytes": 50623,
+      "sha256": "81e8762edf74d06d55c7dda5bb5ded801a323fd4c6bf0b7905be16ce44c13c39",
+      "selected_lines": [
+        {
+          "line": 489,
+          "text": "  public void removeDownload(String id) {"
+        },
+        {
+          "line": 490,
+          "text": "    pendingMessages++;"
+        },
+        {
+          "line": 491,
+          "text": "    internalHandler.obtainMessage(MSG_REMOVE_DOWNLOAD, id).sendToTarget();"
+        },
+        {
+          "line": 492,
+          "text": "  }"
+        },
+        {
+          "line": 1098,
+          "text": "      } else if (--activeDownloadTaskCount == 0) {"
+        },
+        {
+          "line": 1099,
+          "text": "        removeMessages(MSG_UPDATE_PROGRESS);"
+        },
+        {
+          "line": 1100,
+          "text": "      }"
+        },
+        {
+          "line": 1101,
+          "text": ""
+        },
+        {
+          "line": 1102,
+          "text": "      if (task.isCanceled) {"
+        },
+        {
+          "line": 1103,
+          "text": "        syncTasks();"
+        },
+        {
+          "line": 1104,
+          "text": "        return;"
+        },
+        {
+          "line": 1105,
+          "text": "      }"
+        },
+        {
+          "line": 1106,
+          "text": ""
+        },
+        {
+          "line": 1107,
+          "text": "      @Nullable Exception finalException = task.finalException;"
+        },
+        {
+          "line": 1108,
+          "text": "      if (finalException != null) {"
+        },
+        {
+          "line": 1109,
+          "text": "        Log.e(TAG, \"Task failed: \" + task.request + \", \" + isRemove, finalException);"
+        },
+        {
+          "line": 1110,
+          "text": "      }"
+        },
+        {
+          "line": 1111,
+          "text": ""
+        },
+        {
+          "line": 1112,
+          "text": "      Download download = checkNotNull(getDownload(downloadId, /* loadFromIndex= */ false));"
+        },
+        {
+          "line": 1113,
+          "text": "      switch (download.state) {"
+        },
+        {
+          "line": 1114,
+          "text": "        case STATE_DOWNLOADING:"
+        },
+        {
+          "line": 1115,
+          "text": "          checkState(!isRemove);"
+        },
+        {
+          "line": 1116,
+          "text": "          onDownloadTaskStopped(download, finalException);"
+        },
+        {
+          "line": 1117,
+          "text": "          break;"
+        },
+        {
+          "line": 1118,
+          "text": "        case STATE_REMOVING:"
+        },
+        {
+          "line": 1119,
+          "text": "        case STATE_RESTARTING:"
+        },
+        {
+          "line": 1120,
+          "text": "          checkState(isRemove);"
+        },
+        {
+          "line": 1121,
+          "text": "          onRemoveTaskStopped(download);"
+        },
+        {
+          "line": 1122,
+          "text": "          break;"
+        },
+        {
+          "line": 1159,
+          "text": "    private void onRemoveTaskStopped(Download download) {"
+        },
+        {
+          "line": 1160,
+          "text": "      if (download.state == STATE_RESTARTING) {"
+        },
+        {
+          "line": 1161,
+          "text": "        @Download.State"
+        },
+        {
+          "line": 1162,
+          "text": "        int state = download.stopReason == STOP_REASON_NONE ? STATE_QUEUED : STATE_STOPPED;"
+        },
+        {
+          "line": 1163,
+          "text": "        putDownloadWithState(download, state, download.stopReason);"
+        },
+        {
+          "line": 1164,
+          "text": "        syncTasks();"
+        },
+        {
+          "line": 1165,
+          "text": "      } else {"
+        },
+        {
+          "line": 1166,
+          "text": "        int removeIndex = getDownloadIndex(download.request.id);"
+        },
+        {
+          "line": 1167,
+          "text": "        downloads.remove(removeIndex);"
+        },
+        {
+          "line": 1168,
+          "text": "        try {"
+        },
+        {
+          "line": 1169,
+          "text": "          downloadIndex.removeDownload(download.request.id);"
+        },
+        {
+          "line": 1170,
+          "text": "        } catch (IOException e) {"
+        },
+        {
+          "line": 1171,
+          "text": "          Log.e(TAG, \"Failed to remove from database\");"
+        },
+        {
+          "line": 1172,
+          "text": "        }"
+        },
+        {
+          "line": 1173,
+          "text": "        DownloadUpdate update ="
+        },
+        {
+          "line": 1174,
+          "text": "            new DownloadUpdate("
+        },
+        {
+          "line": 1175,
+          "text": "                download,"
+        },
+        {
+          "line": 1176,
+          "text": "                /* isRemove= */ true,"
+        },
+        {
+          "line": 1177,
+          "text": "                new ArrayList<>(downloads),"
+        },
+        {
+          "line": 1178,
+          "text": "                /* finalException= */ null);"
+        },
+        {
+          "line": 1179,
+          "text": "        mainHandler.obtainMessage(MSG_DOWNLOAD_UPDATE, update).sendToTarget();"
+        },
+        {
+          "line": 1180,
+          "text": "      }"
+        },
+        {
+          "line": 1333,
+          "text": "    @Override"
+        },
+        {
+          "line": 1334,
+          "text": "    public void run() {"
+        },
+        {
+          "line": 1335,
+          "text": "      try {"
+        },
+        {
+          "line": 1336,
+          "text": "        if (isRemove) {"
+        },
+        {
+          "line": 1337,
+          "text": "          downloader.remove();"
+        },
+        {
+          "line": 1338,
+          "text": "        } else {"
+        }
+      ]
+    },
+    {
+      "repository": "androidx/media",
+      "revision": "5fb306449733dd71595700c1227ad6087578c559",
+      "path": "libraries/exoplayer/src/main/java/androidx/media3/exoplayer/offline/ProgressiveDownloader.java",
+      "url": "https://github.com/androidx/media/blob/5fb306449733dd71595700c1227ad6087578c559/libraries/exoplayer/src/main/java/androidx/media3/exoplayer/offline/ProgressiveDownloader.java",
+      "bytes": 8725,
+      "sha256": "e4057209e8fa53f5c7cd9cbd71372101e0427120e8b96d7ad1b502fe1e654393",
+      "selected_lines": [
+        {
+          "line": 129,
+          "text": "    dataSpec ="
+        },
+        {
+          "line": 130,
+          "text": "        new DataSpec.Builder()"
+        },
+        {
+          "line": 131,
+          "text": "            .setUri(mediaItem.localConfiguration.uri)"
+        },
+        {
+          "line": 132,
+          "text": "            .setKey(mediaItem.localConfiguration.customCacheKey)"
+        },
+        {
+          "line": 133,
+          "text": "            .setFlags(DataSpec.FLAG_ALLOW_CACHE_FRAGMENTATION)"
+        },
+        {
+          "line": 134,
+          "text": "            .setPosition(position)"
+        },
+        {
+          "line": 135,
+          "text": "            .setLength(length)"
+        },
+        {
+          "line": 136,
+          "text": "            .build();"
+        },
+        {
+          "line": 207,
+          "text": "  @Override"
+        },
+        {
+          "line": 208,
+          "text": "  public void remove() {"
+        },
+        {
+          "line": 209,
+          "text": "    dataSource.getCache().removeResource(dataSource.getCacheKeyFactory().buildCacheKey(dataSpec));"
+        },
+        {
+          "line": 210,
+          "text": "  }"
+        }
+      ]
+    },
+    {
+      "repository": "androidx/media",
+      "revision": "5fb306449733dd71595700c1227ad6087578c559",
+      "path": "libraries/exoplayer/src/main/java/androidx/media3/exoplayer/offline/DefaultDownloaderFactory.java",
+      "url": "https://github.com/androidx/media/blob/5fb306449733dd71595700c1227ad6087578c559/libraries/exoplayer/src/main/java/androidx/media3/exoplayer/offline/DefaultDownloaderFactory.java",
+      "bytes": 7032,
+      "sha256": "bc94f185810b1c9cab46527f79703413d68b33af5528b5176dbd9a782f4843bd",
+      "selected_lines": [
+        {
+          "line": 72,
+          "text": "  public Downloader createDownloader(DownloadRequest request) {"
+        },
+        {
+          "line": 73,
+          "text": "    @C.ContentType"
+        },
+        {
+          "line": 74,
+          "text": "    int contentType = Util.inferContentTypeForUriAndMimeType(request.uri, request.mimeType);"
+        },
+        {
+          "line": 75,
+          "text": "    switch (contentType) {"
+        },
+        {
+          "line": 76,
+          "text": "      case C.CONTENT_TYPE_DASH:"
+        },
+        {
+          "line": 77,
+          "text": "      case C.CONTENT_TYPE_HLS:"
+        },
+        {
+          "line": 78,
+          "text": "      case C.CONTENT_TYPE_SS:"
+        },
+        {
+          "line": 79,
+          "text": "        return createSegmentDownloader(request, contentType);"
+        },
+        {
+          "line": 80,
+          "text": "      case C.CONTENT_TYPE_OTHER:"
+        },
+        {
+          "line": 81,
+          "text": "        @Nullable DownloadRequest.ByteRange byteRange = request.byteRange;"
+        },
+        {
+          "line": 82,
+          "text": "        return new ProgressiveDownloader("
+        },
+        {
+          "line": 83,
+          "text": "            new MediaItem.Builder()"
+        },
+        {
+          "line": 84,
+          "text": "                .setUri(request.uri)"
+        },
+        {
+          "line": 85,
+          "text": "                .setCustomCacheKey(request.customCacheKey)"
+        },
+        {
+          "line": 86,
+          "text": "                .build(),"
+        },
+        {
+          "line": 87,
+          "text": "            cacheDataSourceFactory,"
+        },
+        {
+          "line": 88,
+          "text": "            executor,"
+        },
+        {
+          "line": 89,
+          "text": "            (byteRange != null) ? byteRange.offset : 0,"
+        },
+        {
+          "line": 90,
+          "text": "            (byteRange != null) ? byteRange.length : C.LENGTH_UNSET);"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "NaTune repository remove queues DownloadManager.removeDownload without a per-move acknowledgment.",
+    "ProgressiveDownloader removes the original request-derived cache key, not necessarily the resolved source-prefixed key selected for export. Both downloader removal and listener purge must be scoped.",
+    "NaTune onDownloadRemoved invokes broad all-source-key purging on download AND player caches; individual purge exceptions are swallowed.",
+    "Media3 onTaskStopped logs finalException but still calls onRemoveTaskStopped for REMOVING/RESTARTING. The index-removal exception is caught and a main-thread removal update is sent with finalException=null.",
+    "PRDownloader request-lifetime cancel counts its latch down before a final transport completion callback; latch release alone does not prove staging is gone."
+  ],
+  "required_move_checks": [
+    "Actual original request and chosen rendition identity; owner prevents re-add/restart/other destructive writers.",
+    "Required encrypted move claim and verified URI playback/index relationship before any original removal.",
+    "Do not hold cache monitors while awaiting manager/listener work that needs those monitors.",
+    "Observe settled original task/callback, then freshly inspect exact persistent index and exact unchanged selected cache scope; callback alone releases no byte reservation.",
+    "Preserve unrelated raw/source-prefixed keys and player-cache entries; no broad original helper after one-key verification."
+  ],
+  "limitations": [
+    "Public source/version review plus separately retained exact APK helper inspection; internal Media3 handler/task bytecode hooks are not yet bound or device-tested.",
+    "No private data, media, app operation, removal, installation, model or device execution.",
+    "A direct WritableDownloadIndex edit has not been adopted as a substitute for a supported owner lifecycle."
+  ]
+}

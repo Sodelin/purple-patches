@@ -23,13 +23,16 @@ jobs:
             natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
             natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
             natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java \
+            natune/runtime/dev/purple/patches/natune/NatuneCoroutineStop.java \
             natune/storage-tests/VerifiedStreamCopyControls.java \
             natune/storage-tests/NatuneCachedSourceControls.java \
             natune/storage-tests/TemporarySpaceBudgetControls.java \
+            natune/storage-tests/NatuneCoroutineStopControls.java \
             natune/storage-tests/fixtures/r8/*.java
           java -cp "$RUNNER_TEMP/copy-core" VerifiedStreamCopyControls > dist/stream-copy-controls.txt
           java -cp "$RUNNER_TEMP/copy-core" NatuneCachedSourceControls > dist/cache-source-controls.txt
           java -cp "$RUNNER_TEMP/copy-core" TemporarySpaceBudgetControls > dist/temporary-budget-controls.txt
+          java -cp "$RUNNER_TEMP/copy-core" NatuneCoroutineStopControls > dist/coroutine-stop-controls.txt
       - name: Compile SAF adapter against real Android SDK
         run: |
           ANDROID_JAR="$(find "$ANDROID_HOME/platforms" -name android.jar -type f | sort -V | tail -1)"
@@ -44,12 +47,14 @@ jobs:
             natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java \
             natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
             natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java \
+            natune/runtime/dev/purple/patches/natune/NatuneCoroutineStop.java \
             natune/storage-tests/VerifiedStreamCopyControls.java \
             natune/storage-tests/NatuneCachedSourceControls.java \
             natune/storage-tests/TemporarySpaceBudgetControls.java \
+            natune/storage-tests/NatuneCoroutineStopControls.java \
             natune/storage-tests/fixtures/r8/*.java > dist/source-SHA256SUMS
           cd dist
-          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
+          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt coroutine-stop-controls.txt android-saf-compile.txt source-SHA256SUMS > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: natune-shared-storage-controls
