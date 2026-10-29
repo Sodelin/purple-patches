@@ -1,0 +1,23 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40916090931,
+  "artifact_id": 12915648562,
+  "source_commit": "a1187d3b12c3a36e0f12745cee892b42f57d5c51",
+  "version": "0.1.0-alpha.3",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15460323,
+  "artifact_zip_sha256": "255bebc0d450ea52c18cf9ab6934e1cac491aacd66186aed30d56bc7bad689cd",
+  "members_sha256": {
+    "SHA256SUMS": "084dea87d52fcb17d181caa3d5026ac12036f88d9d1fc19b05097f84509eb7f0",
+    "patches-0.1.0-alpha.3-javadoc.mpp": "df7c0ce94f437dad5ba97a680c10ebd1e2585a78be250a3ef636acdfcf75c552",
+    "patches-0.1.0-alpha.3-sources.mpp": "f8fe039487ebbb81eec929c2acc91c49c0630ecf80d576a20254cd1338c21ba0",
+    "patches-0.1.0-alpha.3.mpp": "587e772dd9c347abf5fdaca5a824ab6a32b1116da9fc21aaa0f4eba0ef984627",
+    "patches-bundle.json": "d4530acf713a6f23a00ca14d90558b66e18eeadf8a5438011d0918b9d85fbdc6",
+    "patches-list.json": "fced5b322fdddfaafba93bb5c8102486c7fb2205cf342458169c1a3b44a2e86f",
+    "purple-provenance.json": "f13960d8d2192466c5ef24a5209c270508e35f93068f495614d5cfa9f2a1dbda"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 9,
+  "actual_apk_patch_or_device_acceptance": false,
+  "notes": "Hosted build only; source snapshot hashes checked from Git, APK installation and live keyboard not tested."
+}
