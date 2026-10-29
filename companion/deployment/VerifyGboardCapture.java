@@ -76,14 +76,15 @@ public final class VerifyGboardCapture {
         if (!java.util.Set.of("0.1.0-alpha.4", "0.1.0-alpha.5", "0.1.0-alpha.6", "0.1.0-alpha.7").contains(version)) {
             require(calls(find(classes, WRAPPER, "limitReached"), SESSION, "limitReached", 0),
                     "Whisper capture does not expose its actual limit state");
-            boolean readsLimit = false, recordingNotice = false, resultNotice = false;
+            boolean readsLimit = false, recordingIntro = false, recordingNotice = false, resultNotice = false;
             for (var type : classes.values()) if (type.getType().startsWith("Ldev/purple/patches/gboard/PurpleAiRuntime"))
                 for (var candidate : type.getMethods()) {
                     readsLimit |= calls(candidate, WRAPPER, "limitReached", 0);
+                    recordingIntro |= contains(candidate, "Recording for up to ") && contains(candidate, "Tap Stop when finished.");
                     recordingNotice |= contains(candidate, "Recording limit reached.");
                     resultNotice |= contains(candidate, "Only the captured audio is included.");
                 }
-            require(readsLimit && recordingNotice && resultNotice,
+            require(readsLimit && recordingIntro && recordingNotice && resultNotice,
                     "Recording limit or partial-result notice references are missing");
             System.out.println("Verified recording-limit state and notice references in APK DEX; device behavior is not established.");
         }
