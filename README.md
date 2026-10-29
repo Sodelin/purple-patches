@@ -72,6 +72,9 @@ Alpha.19 improves preservation of existing network-security resources. Two
 patch and compiled loopback-policy checks. General resource-alias handling,
 private bootstrap, companion recovery and real device acceptance remain open;
 alpha.19 has not been published to the candidate feed.
+Alpha.20 source contains an access-point fallback for a missing or incompatible
+optional dependency. Its hosted integration and bundle verification are in
+progress; it has not passed Android acceptance or replaced the public feed.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining

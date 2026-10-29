@@ -15,8 +15,8 @@ public final class PurpleAccessPoints {
     private static final int[] ICONS = {android.R.drawable.ic_btn_speak_now, android.R.drawable.ic_menu_edit};
     private PurpleAccessPoints() {}
     public static Object extend(Context context, Object original) {
-        if (!PurpleAiRuntime.enabled(context) || !(original instanceof Collection<?>)) return original;
         try {
+            if (!PurpleAiRuntime.enabled(context) || !(original instanceof Collection<?>)) return original;
             List<String> values = new ArrayList<>();
             for (Object value : (Collection<?>)original) {
                 if (!(value instanceof String)) return original;
@@ -27,11 +27,11 @@ public final class PurpleAccessPoints {
             Method copy = type.getDeclaredMethod("n", Collection.class);
             if (!type.isInstance(original) || copy.getReturnType()!=type || !Modifier.isStatic(copy.getModifiers())) return original;
             copy.setAccessible(true); return copy.invoke(null, values);
-        } catch (ReflectiveOperationException | RuntimeException ignored) { return original; }
+        } catch (ReflectiveOperationException | RuntimeException | LinkageError ignored) { return original; }
     }
     public static void register(Object controller, Context context) {
-        if (!PurpleAiRuntime.enabled(context) || controller == null) return;
         try {
+            if (!PurpleAiRuntime.enabled(context) || controller == null) return;
             ClassLoader loader=controller.getClass().getClassLoader();
             Class<?> descriptor=Class.forName("mtr",false,loader), builder=Class.forName("mtm",false,loader);
             Class<?> controllerType=Class.forName("mwv",false,loader);
@@ -50,7 +50,7 @@ public final class PurpleAccessPoints {
                 label.set(value,LABELS[i]);runnable.invoke(value,(Runnable)()->PurpleAiRuntime.click(whisper));
                 register.invoke(controller,build.invoke(value),false);
             }
-        } catch (ReflectiveOperationException | RuntimeException ignored) {
+        } catch (ReflectiveOperationException | RuntimeException | LinkageError ignored) {
             // An unavailable optional action cannot prevent normal Gboard startup.
         }
     }
