@@ -122,12 +122,16 @@ jobs:
           "$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang" \
             -std=c11 -Wall -Wextra -Werror -fPIC -shared -I public-flac-source/include \
             natune/runtime/native/flac_integrity_jni.c "$RUNNER_TEMP/flac-android/src/libFLAC/libFLAC.a" \
+            -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 \
             -lm -o dist/libpurple_natune_flac.so
+          "$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" -Wl dist/libpurple_natune_flac.so > dist/native-elf-readelf.txt
+          python natune/check_native_elf_layout.py dist/libpurple_natune_flac.so > dist/native-elf-layout.txt
           printf '%s\n' 'xiph/flac 1.5.0 commit 1507800de4b70e21be71f38caa0d9079d0bc6e45; native FLAC only; Android ARM64 API 29' > dist/flac-upstream.txt
           cp public-flac-source/COPYING.Xiph dist/FLAC-LICENSE.txt
       - name: Retain compact public verification
         run: |
-          sha256sum natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
+          sha256sum .github/workflows/verify-natune-shared-storage.yml natune/check_native_elf_layout.py \
+            natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
             natune/NatuneDataSpecBinding.java \
             natune/NatuneDataSpecBindingControls.java \
             natune/test-fixtures/android/net/Uri.java \
@@ -156,7 +160,7 @@ jobs:
             natune/storage-tests/MediaStoreAudioDestinationControls.java \
             natune/storage-tests/NatuneFolderCopyControls.java > dist/source-SHA256SUMS
           cd dist
-          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt coroutine-stop-controls.txt media-store-controls.txt folder-copy-controls.txt shared-document-request-controls.txt android-saf-compile.txt flac-integrity-controls.txt flac-folder-controls.txt flac-folder-missing-controls.txt flac-upstream.txt FLAC-LICENSE.txt libpurple_natune_flac.so source-SHA256SUMS > SHA256SUMS
+          sha256sum stream-copy-controls.txt cache-source-controls.txt temporary-budget-controls.txt coroutine-stop-controls.txt media-store-controls.txt folder-copy-controls.txt shared-document-request-controls.txt android-saf-compile.txt flac-integrity-controls.txt flac-folder-controls.txt flac-folder-missing-controls.txt flac-upstream.txt native-elf-readelf.txt native-elf-layout.txt FLAC-LICENSE.txt libpurple_natune_flac.so source-SHA256SUMS > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: natune-shared-storage-controls

@@ -26,8 +26,10 @@ installed or accepted on a phone.
 `materialize.py --local-flac --runtime-settings` selects the development profile
 and copies exactly these three Android Java sources into the extension module.
 The incomplete folder-copy components have a separate, uninstalled development
-carrier profile in `materialize.py --folder-carrier`; its first hosted package
-verification remains pending. It embeds the already-tested ARM64 FLAC decoder
+carrier profile in `materialize.py --folder-carrier`. Hosted run 40935477677
+built it and passed the exact public APK's program/resource comparison; the
+artifact/source readback and limitations are in `../flac-carrier-verification.json`.
+It embeds the already-tested ARM64 FLAC decoder
 and the folder-copy classes without adding an app action or a journal connection.
 Their actual app host still needs to be selected. The settings profile excludes an otherwise unnecessary second
 Kotlin standard library. Current selected feeds and installed behavior are
@@ -59,6 +61,12 @@ resource-table encoder. The exact-input byte comparison remains mandatory;
 this source-based expectation is not itself a successful packaging result.
 See the [resource mode selection](https://github.com/MorpheApp/morphe-patcher/blob/v2.0.0/src/main/kotlin/app/morphe/patcher/Patcher.kt#L50-L57)
 and [raw resource patch API](https://github.com/MorpheApp/morphe-patcher/blob/v2.0.0/src/main/kotlin/app/morphe/patcher/patch/Patch.kt#L751-L767).
+The successful successor retained all original non-DEX entry bytes and matched
+the compiled extension and JNI names. The previously built native library has
+4 KiB ELF load alignment, so this carrier is not suitable as a 16 KiB-device
+release. A replacement 16 KiB native build and APK ZIP layout verification are
+in progress. No app hook, journal owner, Android execution or installation is
+claimed by the carrier.
 
 The separately implemented VerifiedStreamCopy and SharedDocumentDestination
 provide bounded streaming, full destination readback and the real Android SAF

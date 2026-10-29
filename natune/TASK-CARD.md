@@ -32,7 +32,10 @@ cache is not accessible to a differently signed patch by assumption. No
 current music copy, deletion or storage gain is claimed. Gboard is separately
 owned; a pinned source join passed hosted library checks and an Android
 cross-build without touching its index. `companion-source-join-verification.json`
-records the exact join and its limits.
+records the exact join and its limits. The uninstalled folder/FLAC carrier
+passed an exact public APK static comparison; its existing native library is
+4 KiB aligned, so a 16 KiB-compatible successor and package-layout check remain
+necessary. `flac-carrier-verification.json` records the package and limitation.
 
 ## Remaining work packages
 
@@ -65,9 +68,10 @@ verified; no decoder selection or new phone dependency is claimed here.
 
 ## Next checkpoint and blockers
 
-Record the tested shared Rust API boundary for the Gboard owner, then integrate
-the real selected app action and journal/receiver once their original authority
-and data-continuity interfaces exist. The concrete app-to-journal expert review
+Build and verify the 16 KiB-compatible decoder and its APK package layout, then
+integrate the real selected app action and journal/receiver once their original
+authority and data-continuity interfaces exist. The shared Rust API boundary
+was returned to the Gboard owner. The concrete app-to-journal expert review
 is prepared; the existing Dot route is unverified, so that request remains
 unsent. The same-signer/data-handoff and real app/journal/receiver interfaces
 remain critical gaps. A useful completion ETA cannot yet be supported;
