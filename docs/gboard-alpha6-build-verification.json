@@ -1,0 +1,25 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40925825758,
+  "artifact_id": 12919903141,
+  "source_commit": "3b16c6982d133263c28c0ecbf065e5a0da19037d",
+  "version": "0.1.0-alpha.6",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15463743,
+  "artifact_zip_sha256": "0dc9ed3bd281398e9252961395fcb4dc79073bf2b6cedd86bb1ab972d5b6b87f",
+  "members_sha256": {
+    "SHA256SUMS": "0f96b56dc7604b067ef77178f8fc0616d9efd593bc30e2a99a299d0e47d93fc4",
+    "patches-0.1.0-alpha.6-javadoc.mpp": "3b6fbd4b410445de0e9af80d9a65b454d5c5e5b5e2a1a664e87bceb40bfff593",
+    "patches-0.1.0-alpha.6-sources.mpp": "728ab1f0a643fc5dcbfe6f5edf1cdecfbc86034dd78e380b143330cbe725990f",
+    "patches-0.1.0-alpha.6.mpp": "22f3bfaea6b7e4134111a6b116aef4cc234d53fe9ce8655aacaa61b8be7dfa23",
+    "patches-bundle.json": "7de74bcd67cf9fb8b19d89cce4b46316ae09e971e81572748dc5b315289812dc",
+    "patches-list.json": "4870bccc5ddace5582aa689af43b8c2edfe29ec3c215b1a62808c5f337e1969f",
+    "purple-provenance.json": "2e2019eac1dad6840935ad23314cd22eba9ec3e23df666cc3ac7cb6a65d34381"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "checks": "Hosted editor/session, Medium/Max effort policy and finite-capture synthetic controls passed; no microphone or model opened.",
+  "actual_apk_patch_or_device_acceptance_at_build_time": false,
+  "later_exact_apk_static_verification": "gboard-alpha6-apk-verification.json",
+  "notes": "Artifact and all members read and verified in memory. This does not establish device behavior."
+}

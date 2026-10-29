@@ -157,6 +157,9 @@ public final class PurpleAiRuntime {
                 .putExtra("com.termux.RUN_COMMAND_ARGUMENTS", new String[]{"bootstrap"})
                 .putExtra("com.termux.RUN_COMMAND_WORKDIR", "/data/data/com.termux/files/home")
                 .putExtra("com.termux.RUN_COMMAND_BACKGROUND", true)
+                // Best effort on reviewed Termux source only; the stdout capability handoff
+                // remains a release blocker until a non-loggable channel is established.
+                .putExtra("com.termux.RUN_COMMAND_BACKGROUND_CUSTOM_LOG_LEVEL", "0")
                 .putExtra("com.termux.RUN_COMMAND_PENDING_INTENT", callback);
         try { if (ime.startService(command) == null) throw new IllegalStateException(); }
         catch (RuntimeException ignored) { callback.cancel(); callback = null; nonce = null; notifyUser("Local tools are not available"); }

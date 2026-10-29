@@ -13,8 +13,12 @@ its [hosted bundle](docs/gboard-alpha5-build-verification.json) and
 the newer companion's explicit voice-preflight capability. These
 candidates have not passed device acceptance or replaced the public feed.
 See [editor snapshot safety](docs/EDITOR-SNAPSHOT.md) before using the candidate.
-The alpha.6 source adds a per-translation Medium/Max reasoning choice; it has
-not yet passed its own hosted build or phone acceptance.
+The alpha.6 source adds a per-translation Medium/Max reasoning choice. Its
+[hosted bundle](docs/gboard-alpha6-build-verification.json) passed; phone
+acceptance remains open.
+Alpha.7 adds a source-level mitigation for a Termux bootstrap logging risk;
+the mitigation and a replacement capability handoff remain unverified. See
+[bootstrap privacy](docs/BOOTSTRAP-PRIVACY.md). Do not activate the candidate.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining
@@ -34,8 +38,11 @@ The user selected full large-v3 for accuracy. Turbo, base and other generations
 are refused; no model substitution is permitted.
 
 The two actions require the authenticated local companion bootstrap at the
-stable Termux path ~/.local/bin/purple-gboard-service. Credentials remain only
-in keyboard-process memory, through a one-shot explicit nonexported callback.
+stable Termux path ~/.local/bin/purple-gboard-service. The keyboard does not
+persist the bearer in its preferences, but the current bootstrap sends it
+through Termux stdout and a one-shot explicit nonexported callback.
+Termux may log that stdout. The bearer handoff is a release blocker; see
+[bootstrap privacy](docs/BOOTSTRAP-PRIVACY.md).
 The keyboard refuses text/audio submission unless the companion advertises
 keyboard_data_path=memory-only-v1, and refuses dictation unless the declared
 model family is whisper-large-v3. The older retained bridge does not satisfy
