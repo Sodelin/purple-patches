@@ -59,3 +59,13 @@ failed its synthetic timestamp test because Git rendered UTC as `Z` rather
 than `+00:00`. Its source-integrity refusal fixture passed; no bundle was
 built. The corrected test compares parsed instants and keeps this failure as
 history rather than counting it as a successful build.
+
+The proposed alpha.15 workflow at `tools/proposals/build-gboard-pinned.yml`
+selects the observed `ubuntu-24.04` label, exact Temurin `21.0.13+9`, and the
+three action commit hashes observed in both alpha.14 builds. It records the
+`ANDROID_HOME` platform `android.jar` the reviewed Morphe plugin would select,
+and its SHA-256; it does not instrument the actual later plugin selection.
+The runner image behind the label, the SDK bytes and transitive dependencies
+still require verification; recording the SDK hash is not an SDK pin. This is
+reviewable source only until the actual workflow is updated and tested. It
+does not publish a release or change the phone.

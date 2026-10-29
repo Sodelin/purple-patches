@@ -1,0 +1,79 @@
+name: Build Gboard patch bundle off phone
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'gboard/**'
+      - 'tools/materialize.py'
+      - 'tools/bundle_feed.py'
+      - 'tools/version.txt'
+      - '.github/workflows/build.yml'
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: purple-gboard-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TZ: UTC
+      LC_ALL: C.UTF-8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # observed v4
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # observed v4
+        with:
+          distribution: temurin
+          java-version: '21.0.13+9'
+      - name: Record selected toolchain inputs
+        run: |
+          java -version
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          platforms=Path(os.environ['ANDROID_HOME'])/'platforms'
+          candidates=[p for p in platforms.iterdir() if p.is_dir() and (p/'android.jar').exists()]
+          if not candidates: raise SystemExit('Android platform jar unavailable')
+          selected=max(candidates,key=lambda p:p.name)
+          if not (selected/'android.jar').is_file(): raise SystemExit('Selected Android platform jar is not a file')
+          with (selected/'android.jar').open('rb') as stream:
+              digest=hashlib.file_digest(stream,'sha256').hexdigest()
+          print(json.dumps({'android_home_candidate_platform':selected.name,'android_jar_sha256':digest,
+                            'limits':'Prediction from ANDROID_HOME before build; local.properties or environment changes may select another SDK'}))
+          PY
+      - name: Feed metadata controls
+        run: python tools/bundle_feed.py --check
+      - name: Pure editor/session policy controls
+        run: |
+          mkdir -p "$RUNNER_TEMP/purple-policy"
+          javac -d "$RUNNER_TEMP/purple-policy" gboard/src/dev/purple/patches/gboard/SessionPolicy.java gboard/src/dev/purple/patches/gboard/CaptureSession.java gboard/SessionPolicyCheck.java gboard/CaptureSessionCheck.java
+          java -cp "$RUNNER_TEMP/purple-policy" SessionPolicyCheck
+          java -cp "$RUNNER_TEMP/purple-policy" dev.purple.patches.gboard.CaptureSessionCheck
+      - name: Materialize pinned mature upstream
+        run: |
+          git init "$RUNNER_TEMP/gboard-upstream"
+          git -C "$RUNNER_TEMP/gboard-upstream" remote add origin https://github.com/jasonwu1994/Gboard-patches
+          git -C "$RUNNER_TEMP/gboard-upstream" fetch --depth=1 origin 2eb71854accc7e906d3e4f5495b2a54ed1e2af47
+          git -C "$RUNNER_TEMP/gboard-upstream" checkout --detach FETCH_HEAD
+          python tools/materialize.py "$RUNNER_TEMP/gboard-upstream"
+      - name: Build and test complete patch source
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          cd "$RUNNER_TEMP/gboard-upstream"
+          chmod +x gradlew
+          ./gradlew --no-daemon :patches:buildAndroid :patches:generatePatchesList
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          cp patches/build/libs/*.mpp "$GITHUB_WORKSPACE/dist/"
+          cp patches-list.json patches-bundle.json purple-provenance.json "$GITHUB_WORKSPACE/dist/"
+          cd "$GITHUB_WORKSPACE/dist"
+          sha256sum * > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # observed v4
+        with:
+          name: purple-gboard-candidate
+          path: dist/
+          retention-days: 7
