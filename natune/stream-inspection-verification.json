@@ -1,0 +1,32 @@
+{
+  "run_id": 40866800058,
+  "source_commit": "273db99320d946f69fefb73790dccc9e4f96eb82",
+  "artifact_id": 12893962066,
+  "artifact_zip_sha256": "c933ad4025e55944f27bfa53ec62c5cd917d64c051c5df1f8cb2834ec68bf139",
+  "artifact_files_sha256": {
+    "target-proof.json": "1666a0e11dcc98f805016f06410aee09a6eeb4623c0ddee87c429aa42c0ff642",
+    "policy-hooks.txt": "fc4c231b2274b945498c78b2be8c0d2b3505ee08e0a1fdb59fd1e443fef53d86"
+  },
+  "source_types_match": true,
+  "factory_methods_match": true,
+  "source_interfaces": [
+    "Lr8/dm2;"
+  ],
+  "source_type_count": 26,
+  "factory_count": 17,
+  "data_spec_fields": [
+    "a:Landroid/net/Uri;\tflags=17",
+    "b:J\tflags=17",
+    "c:I\tflags=17",
+    "d:[B\tflags=17",
+    "e:Ljava/util/Map;\tflags=17",
+    "f:J\tflags=17",
+    "g:J\tflags=17",
+    "h:Ljava/lang/String;\tflags=17",
+    "i:I\tflags=17"
+  ],
+  "apk_executed": false,
+  "application_state_read": false,
+  "device_acceptance": false,
+  "limitation": "Actual bytecode interface and factory identification, not strict FLAC enforcement or hook coverage acceptance."
+}

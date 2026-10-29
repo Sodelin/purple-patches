@@ -34,10 +34,11 @@ jobs:
       - name: Inspect release bytecode without loading app classes
         run: |
           mkdir -p "$RUNNER_TEMP/natune-inspector"
-          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-inspector" natune/InspectNatune.java
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-inspector" natune/*.java
+          java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" FlacPrefixProbeControls > dist/flac-prefix-controls.txt
           java -cp "$RUNNER_TEMP/natune-inspector:$RUNNER_TEMP/morphe.jar" InspectNatune "$RUNNER_TEMP/natune-original.apk" > dist/policy-hooks.txt
           cd dist
-          sha256sum target-proof.json policy-hooks.txt > SHA256SUMS
+          sha256sum target-proof.json policy-hooks.txt flac-prefix-controls.txt > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: natune-public-hook-inspection
