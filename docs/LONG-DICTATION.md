@@ -23,6 +23,12 @@ text. Audio, result and IPC overhead also affect memory. The pinned upstream
 passes a decoded sample vector to its full inference call, but that source
 fact does not establish acceptable memory, latency or performance on the phone.
 
+The current keyboard clears its in-memory WAV in a `finally` block even if the
+engine request fails or times out. It therefore cannot offer a retry of that
+recording. A lost start response can also leave the original job's outcome
+unknown; automatically submitting the same or another request is not a safe
+recovery protocol. No actual failure or lost recording has been observed here.
+
 For the desired user experience, make recording boundaries and any partial
 result explicit, retain the complete usable transcript for review, and support
 longer speech without silent truncation or automatic duplicate execution.
