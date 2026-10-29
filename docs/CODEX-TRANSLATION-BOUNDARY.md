@@ -8,6 +8,16 @@ protection of Codex's own writers. In particular, a prompt instruction is not
 an enforcement boundary, and disabling named features is not proof that every
 native, hosted or dynamic tool is unavailable.
 
+The retained upstream 0.161.0 [tool-registration source](https://github.com/openai/codex/blob/979011409de0a60b52f179721948e65531d26144/codex-rs/core/src/tools/spec_plan.rs#L1028)
+separately considers shell, MCP and utility tools. For example, its utility path
+can register `apply_patch` when an environment exists and the selected model
+advertises it, subject to the startup tool policy; that condition is separate
+from the shell-feature switch. This is a concrete reason that the companion's
+named feature switches alone do not prove an empty catalogue. The installed
+binary's source correspondence, effective startup policy, current model
+metadata and actual exposed catalogue remain unverified; this observation does
+not establish that a particular request exposed or executed `apply_patch`.
+
 The installed CLI's help describes `--sandbox` as a policy for model-generated
 shell commands. A bounded local check of its separate `codex sandbox` command
 returned that sandboxing is unsupported on this Android operating system.

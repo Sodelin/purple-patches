@@ -57,7 +57,11 @@ and a one-shot policy refuses duplicate requests. A changed or unavailable ancho
 prevents the request. A `true` return is presented as a request sent, not proof
 that the editor ultimately changed; a false return or exception remains unknown.
 The user can select and copy the displayed result while the preview stays open.
-This source has not yet been built or tested on Android. It does not resolve the
+The [hosted source and bundle build](gboard-alpha9-build-verification.json)
+passed, including synthetic one-shot/refusal controls. The separately patched
+[APK inspection](gboard-alpha9-apk-verification.json) found the insertion and
+preview references; it did not exercise their control flow. This has not been
+tested on Android. It does not resolve the
 active-composition, editor-session-dismissal, earlier-result-loss or cross-process
 atomicity gaps described here.
 

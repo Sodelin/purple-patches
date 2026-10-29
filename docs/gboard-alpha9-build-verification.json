@@ -1,0 +1,27 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40935192950,
+  "artifact_id": 12925106155,
+  "source_commit": "3c5aeff1ed7630f592019440d02146fa131a7b1e",
+  "version": "0.1.0-alpha.9",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15471101,
+  "artifact_zip_sha256": "7e1f7e2485ae5b441384b7265701649a00c14195f96b7afddb6e51510a7150dc",
+  "members_sha256": {
+    "SHA256SUMS": "e1104daa3b76c9b7cbf1eb9edef95a392262ba1536a86c35d6cd3888615a1f7f",
+    "patches-0.1.0-alpha.9-javadoc.mpp": "00ad4a1e15d5b670bb92cbc513e902b195170bcb43c0e90b68225fe51a65f6cf",
+    "patches-0.1.0-alpha.9-sources.mpp": "5fff2e189ecadec982cfd224fc4cec2a30139bca1cb17297338a87259a19b568",
+    "patches-0.1.0-alpha.9.mpp": "04b366a02388b6f8cbe09718af48e8109c6f95bb485762f8f33eec0453185107",
+    "patches-bundle.json": "fca454c1a228ce8fe2f17812a77ebe8650065289b6189f5a28ff0f1f93ce39f5",
+    "patches-list.json": "be71cd3db36253fbb05f51c52a43bb96ae83f945d9b6dca497c9490fb22e73d0",
+    "purple-provenance.json": "11410ef1351b2c0d966fc3d4d0c5252291d669b3f535a12c7c9880c518618e9c"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "checks": "Hosted feed, editor/session, scoped-permission, capture, one-shot insertion controls and upstream patch build passed.",
+  "checks_scope": "Synthetic policy and stub controls plus source/bundle build; no Android editor, permission dialog, microphone, model or device execution.",
+  "apk_patching_at_build_time": false,
+  "privacy_release_gate": "OPEN: Termux command still emits the bearer in stdout; logging extra is defense in depth only. The selected Codex no-tools and writer boundary is also unverified.",
+  "device_accepted": false,
+  "notes": "All archive members were read and hashed in memory, and every overlay source hash matched the exact Git commit. Hosted artifacts expire; retain source and rebuild if needed."
+}
