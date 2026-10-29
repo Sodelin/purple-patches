@@ -27,6 +27,23 @@ not taken from an Android URI or arbitrary app message.
 | Moved | Owner has checked exact source/index removal and all staging disposition | Mapping remains; duplicate reservation released |
 | Abandoned | Before indexing only: owner has verified cleanup and retained the original source | Reservation released; operation ID remains consumed |
 
+**Current source gate:** New `RemovalPending` events are refused before any
+journal write. The v1 journal has no actual binding to an independently
+verified computer copy, Screening Room Omni phone acceptance, or the user's
+reconciled selection/KEEP decisions. A serialized event or a successful local
+copy cannot supply those missing checks. Old v1 `RemovalPending` histories can
+still be read, and the existing owner's later `Moved` observation can reconcile
+them; replay does not perform removal. The host must verify that observation.
+This is a journal guard, not a system-wide block on other code removing files.
+No production app is wired to this API.
+
+The user's current computer-transfer workflow also needs a separately versioned
+state for a verified computer copy and removed temporary shared document while
+the phone's original cache remains. V1 cannot release that staging charge
+without claiming the original was moved or abandoned, so it is not a compatible
+computer-transfer scheduler yet. Keep existing history readable; do not invent
+remote receipt, playback acceptance or a disposable-document mapping.
+
 The journal records observations; none of these enums authenticates a caller,
 recreates a native permit or executes a copy/removal. Android may not submit
 serialized `Moved` as a cleanup grant. The future captured owner must actually

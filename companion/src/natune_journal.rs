@@ -199,6 +199,14 @@ impl<S: Store> Journal<S> {
     pub fn record(&mut self, operation_id: &str, expected_generation: Option<u64>, event: Event)
             -> Result<(), String> {
         self.certain()?;
+        // A v1 journal has no bound computer-copy receipt, phone playback
+        // acceptance, or reconciled KEEP decision. A caller-supplied event is
+        // not that proof. Keep historical pending records readable so their
+        // original owners can reconcile them, but never start a NEW removal
+        // until a versioned real-owner admission path has been integrated.
+        if matches!(&event, Event::RemovalPending) {
+            return Err("New original removal requires bound remote-copy, phone-playback and selection checks".into());
+        }
         if !hex64(operation_id) { return Err("Move operation identity invalid".into()); }
         let prior = self.rows.get(operation_id);
         if prior.map(|r| r.generation) != expected_generation { return Err("Move generation conflict".into()); }
@@ -332,8 +340,20 @@ mod tests {
         step(j,c,Event::Destination{uri:document().uri});
         step(j,c,Event::Verified{document:document()});
     }
+    // Construct a SYNTHETIC old-schema event solely to test replay of a
+    // pre-existing history. This cannot start a real removal or create an
+    // application grant, and is not available outside this RAM fixture.
+    fn old_fixture_step(j: &mut Journal<Memory>, c: &Claim, event: Event) {
+        let prior=j.rows.get(&c.operation_id).unwrap();
+        let record=Record { schema:1, operation_id:c.operation_id.clone(), generation:prior.generation+1,
+            previous_sha256:Some(prior.last_hash.clone()), event };
+        let bytes=serde_json::to_vec(&record).unwrap();
+        let projected=j.project(&record,&bytes).unwrap();
+        j.store.append(&format!("{}-{:016x}.age",c.operation_id,record.generation),&bytes).unwrap();
+        j.rows.insert(c.operation_id.clone(),projected);
+    }
     #[test]
-    fn complete_lifecycle_keeps_identity_and_charge_until_actual_owner_result() {
+    fn new_original_removal_is_refused_and_keeps_identity_and_charge() {
         let memory=Memory::default(); let mut j=Journal::open(memory.clone(),1000).unwrap(); let c=claim('1');
         begin(&mut j,&c);
         assert_eq!(j.reserved_bytes().unwrap(),100);
@@ -344,27 +364,29 @@ mod tests {
         assert_eq!(j.document(&c.song_id,&c.rendition_key).unwrap(),Some(&document()));
         assert!(j.document(&c.song_id,"other-rendition").unwrap().is_none());
         assert!(j.record(&c.operation_id,Some(3),Event::Abandoned).is_err());
-        step(&mut j,&c,Event::RemovalPending);
+        assert!(j.record(&c.operation_id,Some(3),Event::RemovalPending).is_err());
         assert_eq!(j.reserved_bytes().unwrap(),100);
-        step(&mut j,&c,Event::Moved);
-        assert_eq!(j.reserved_bytes().unwrap(),0);
+        assert_eq!(memory.events.lock().unwrap().len(),4);
         let mut restored=Journal::open(memory,1000).unwrap();
         assert_eq!(restored.document(&c.song_id,&c.rendition_key).unwrap(),Some(&document()));
+        assert_eq!(restored.snapshot(&c.operation_id).unwrap().unwrap().stage,Stage::Indexed);
+        assert_eq!(restored.reserved_bytes().unwrap(),100);
+        assert!(restored.record(&c.operation_id,Some(3),Event::RemovalPending).is_err());
         assert!(restored.record(&c.operation_id,None,Event::Begin{claim:c.clone()}).is_err());
-        assert!(restored.record(&c.operation_id,Some(5),Event::Moved).is_err());
+        assert!(restored.record(&c.operation_id,Some(3),Event::Moved).is_err());
     }
     #[test]
     fn restart_reconstructs_every_unsettled_charge_without_side_effect_replay() {
         let memory=Memory::default(); let c=claim('2'); let mut j=Journal::open(memory.clone(),1000).unwrap();
         begin(&mut j,&c);
-        for event in [Event::Destination{uri:document().uri}, Event::Verified{document:document()}, Event::Indexed, Event::RemovalPending] {
+        for event in [Event::Destination{uri:document().uri}, Event::Verified{document:document()}, Event::Indexed] {
             j=Journal::open(memory.clone(),1000).unwrap();
             assert_eq!(j.reserved_bytes().unwrap(),100);
             step(&mut j,&c,event);
         }
         let restored=Journal::open(memory.clone(),50).unwrap();
         assert_eq!(restored.reserved_bytes().unwrap(),100);
-        assert_eq!(memory.events.lock().unwrap().len(),5); // Loading wrote NOTHING.
+        assert_eq!(memory.events.lock().unwrap().len(),4); // Loading wrote NOTHING.
     }
     #[test]
     fn admission_recovery_includes_pending_and_consumed_terminal_ids() {
@@ -372,7 +394,7 @@ mod tests {
         let pending=claim('1'); let moved=claim('2'); let abandoned=claim('3');
         begin(&mut j,&pending); begin(&mut j,&moved); begin(&mut j,&abandoned);
         verify(&mut j,&moved); step(&mut j,&moved,Event::Indexed);
-        step(&mut j,&moved,Event::RemovalPending); step(&mut j,&moved,Event::Moved);
+        old_fixture_step(&mut j,&moved,Event::RemovalPending); step(&mut j,&moved,Event::Moved);
         step(&mut j,&abandoned,Event::Abandoned);
         let restored=Journal::open(memory.clone(),50).unwrap();
         let snapshot=restored.admission_recovery().unwrap();
@@ -383,6 +405,20 @@ mod tests {
             RecoveryAttempt{operation_id:abandoned.operation_id,source_bytes:90,peak_bytes:100,unsettled:false},
         ]);
         assert_eq!(memory.events.lock().unwrap().len(),9); // Read-only recovery.
+    }
+    #[test]
+    fn legacy_pending_replays_without_starting_removal_and_can_be_reconciled() {
+        let memory=Memory::default(); let mut j=Journal::open(memory.clone(),1000).unwrap(); let c=claim('b');
+        begin(&mut j,&c); verify(&mut j,&c); step(&mut j,&c,Event::Indexed);
+        old_fixture_step(&mut j,&c,Event::RemovalPending);
+        drop(j);
+        let mut restored=Journal::open(memory.clone(),1000).unwrap();
+        assert_eq!(restored.snapshot(&c.operation_id).unwrap().unwrap().stage,Stage::RemovalPending);
+        assert_eq!(restored.reserved_bytes().unwrap(),100);
+        assert_eq!(memory.events.lock().unwrap().len(),5); // Replay performs no side effect.
+        // This event is a synthetic owner observation, not removal authority.
+        step(&mut restored,&c,Event::Moved);
+        assert_eq!(restored.reserved_bytes().unwrap(),0);
     }
     #[test]
     fn accepted_but_uncertain_persistence_poisoned_until_explicit_recovery() {

@@ -70,20 +70,14 @@ fn check() -> Result<(), String> {
         return Err("Verified-state recovery differs".into());
     }
     journal.record(&claim.operation_id,Some(2),Event::Indexed)?;
-    journal.record(&claim.operation_id,Some(3),Event::RemovalPending)?;
-    drop(journal);
-    let mut journal=open()?;
-    if journal.reserved_bytes()?!=claim.peak_bytes || journal.document(&claim.song_id,&claim.rendition_key)?!=Some(&document) {
-        return Err("Indexed/pending-state recovery differs".into());
+    if journal.record(&claim.operation_id,Some(3),Event::RemovalPending).is_ok() {
+        return Err("Unbound original-removal gate unexpectedly opened".into());
     }
-    // This is only a synthetic observation in an isolated proof namespace.
-    // No media, document, source cache or original app was operated upon.
-    journal.record(&claim.operation_id,Some(4),Event::Moved)?;
     drop(journal);
     let mut journal=open()?;
-    if journal.reserved_bytes()?!=0 || journal.document(&claim.song_id,&claim.rendition_key)?!=Some(&document) ||
-        journal.snapshot(&claim.operation_id)?.map(|s|s.stage)!=Some(Stage::Moved) {
-        return Err("Final mapping/charge recovery differs".into());
+    if journal.reserved_bytes()?!=claim.peak_bytes || journal.document(&claim.song_id,&claim.rendition_key)?!=Some(&document) ||
+        journal.snapshot(&claim.operation_id)?.map(|s|s.stage)!=Some(Stage::Indexed) {
+        return Err("Indexed/held-state recovery differs".into());
     }
     if journal.record(&claim.operation_id,None,Event::Begin{claim:claim.clone()}).is_ok() {
         return Err("Consumed operation unexpectedly readmitted".into());
@@ -103,11 +97,11 @@ fn check() -> Result<(), String> {
         }
         encrypted+=1;
     }
-    if encrypted!=6 { return Err("Check event count differs".into()); }
+    if encrypted!=4 { return Err("Check event count differs".into()); }
     println!("{}",serde_json::json!({
-        "schema":"purple.natune.encrypted-journal-public-check.v1",
+        "schema":"purple.natune.encrypted-journal-public-check.v2",
         "status":"PASS", "public_fixture_only":true, "encrypted_events":encrypted,
-        "actual_vault_backend":true, "reopened_stages":4,
+        "actual_vault_backend":true, "reopened_stages":3, "unbound_original_removal_refused":true,
         "original_app_data_access":false, "source_cache_removed":false,
         "actual_android_move":false, "model_invocation":false, "listener_started":false
     }));
