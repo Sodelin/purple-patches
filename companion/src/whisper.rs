@@ -133,6 +133,10 @@ fn preflight_with_pin(state: &Path, pin: ModelPin<'_>) -> Result<Config, String>
     if engine.len() == 0 || engine.mode() & 0o111 == 0 {
         return Err("Whisper unavailable: engine is empty or not executable".into());
     }
+    if cli::sha256_file(&config.binary).map_err(|_| "Whisper unavailable: pinned engine cannot be read")?
+        != config.binary_sha256 {
+        return Err("Whisper unavailable: installed engine bytes changed".into());
+    }
     if fs::metadata(&config.model).map_err(|_| "Whisper unavailable: model metadata missing")?.len() != pin.bytes {
         return Err("Whisper unavailable: selected model size differs".into());
     }
@@ -143,12 +147,12 @@ fn preflight_with_pin(state: &Path, pin: ModelPin<'_>) -> Result<Config, String>
 fn config_with_pin(state: &Path, pin: ModelPin<'_>) -> Result<Config, String> {
     let config = preflight_with_pin(state, pin)?;
     // Streaming hashes use bounded memory; no model/audio leaves this device.
-    if cli::sha256_file(&config.binary)
-        .map_err(|_| "Whisper unavailable: pinned binary cannot be read")?
-        != config.binary_sha256
-        || cli::sha256_file(&config.model)
-            .map_err(|_| "Whisper unavailable: pinned model cannot be read")?
-            != config.model_sha256
+    if cli::sha256_file(&config.model)
+        .map_err(|_| "Whisper unavailable: pinned model cannot be read")?
+        != config.model_sha256
+        || cli::sha256_file(&config.binary)
+            .map_err(|_| "Whisper unavailable: pinned binary cannot be read")?
+            != config.binary_sha256
     {
         return Err("Whisper unavailable: installed engine/model bytes changed".into());
     }
@@ -159,8 +163,8 @@ fn config(state: &Path) -> Result<Config, String> {
     config_with_pin(state, selected_model())
 }
 
-pub fn available(state: &Path) -> Result<(), String> {
-    config(state).map(|_| ())
+pub fn preflight(state: &Path) -> Result<(), String> {
+    preflight_with_pin(state, selected_model()).map(|_| ())
 }
 
 pub fn family(state:&Path)->Option<&'static str> {
@@ -254,6 +258,9 @@ mod tests {
         fs::set_permissions(&binary, fs::Permissions::from_mode(0o600)).unwrap();
         assert!(preflight_with_pin(&scratch.0, pin).is_err());
         fs::set_permissions(&binary, fs::Permissions::from_mode(0o700)).unwrap();
+        fs::write(&binary, b"fixture enginE").unwrap();
+        assert!(preflight_with_pin(&scratch.0, pin).is_err());
+        fs::write(&binary, b"fixture engine").unwrap();
         fs::write(&model, &header[..47]).unwrap();
         assert!(preflight_with_pin(&scratch.0, pin).is_err());
         header[47] = 1; // Same-size/header change requires the full hash, not metadata alone.

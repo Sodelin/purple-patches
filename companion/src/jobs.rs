@@ -57,8 +57,9 @@ impl Service {
     }
     pub fn transcribe(self: &Arc<Self>, bytes: Vec<u8>) -> Result<Value, String> {
         whisper::validate_wav(&bytes)?;
-        // Check availability before retaining a recording or starting a job.
-        whisper::available(&self.state)?;
+        // Cheap metadata/engine preflight before starting the owned worker.
+        // The worker checks the complete selected model bytes once before inference.
+        whisper::preflight(&self.state)?;
         self.start(Work::Audio(bytes))
     }
     fn start(self: &Arc<Self>, work: Work) -> Result<Value, String> {

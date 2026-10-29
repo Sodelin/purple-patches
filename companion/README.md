@@ -35,13 +35,15 @@ authorized; full weights must be acquired once at their selected final location.
 No shared external model path or second full weights copy is admitted by this
 source.
 
-The `0.2.2-dev.1` source changes the health preflight: it requires a valid
+The `0.2.2-dev.2` source changes the health preflight: it requires a valid
 private config, the selected official full-large-v3 SHA declaration and size,
-the full-v3 header, and a present nonempty executable engine inside the owned
-Whisper directory. This preflight deliberately does not hash the entire model on
-every health request. Complete model and engine hashes are still checked before
-transcription, after audio capture; metadata preflight alone cannot detect a
-same-size corrupt file or establish phone readiness. The development companion
+the full-v3 header, and a present nonempty executable engine with matching SHA
+inside the owned Whisper directory. This preflight deliberately does not hash
+the entire model on every health request. The owned worker checks the complete
+model hash once and rechecks the engine before inference, after audio capture. Removing the
+duplicate full-model hash from request admission avoids reading the same 3.1 GB
+model twice for each transcription. Metadata preflight alone cannot detect a
+same-size corrupt model or establish phone readiness. The development companion
 is not installed or accepted. The earlier0.2.1 candidate remains the published
 historical artifact and is not silently replaced.
 
