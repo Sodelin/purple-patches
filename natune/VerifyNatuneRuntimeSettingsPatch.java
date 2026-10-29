@@ -100,7 +100,10 @@ public final class VerifyNatuneRuntimeSettingsPatch {
         var selected = VerifyNatuneMobilePatch.snapshot(new File(args[1]), false, prefixes, true);
         var classes = new TreeMap<>(selected.classes());
         var bodies = new TreeMap<>(selected.methods());
-        Set<String> permitted = Set.of(TYPE, "Ldev/purple/patches/natune/PurpleSettingsActivity;");
+        Set<String> required = Set.of(TYPE, "Ldev/purple/patches/natune/PurpleSettingsActivity;");
+        // Android's extension build can also emit its generated namespace R.
+        Set<String> permitted = Set.of(TYPE, "Ldev/purple/patches/natune/PurpleSettingsActivity;",
+            "Ldev/purple/patches/natune/R;");
         var found = new HashSet<String>();
         for (String name : new ArrayList<>(classes.keySet())) {
             if (original.classes().containsKey(name)) continue;
@@ -109,7 +112,7 @@ public final class VerifyNatuneRuntimeSettingsPatch {
             found.add(outer);
             classes.remove(name);
         }
-        need(found.equals(permitted), "Missing selected settings extension classes");
+        need(found.containsAll(required), "Missing selected settings extension classes");
         bodies.keySet().removeIf(name -> {
             int separator = name.indexOf("->");
             return separator > 0 && !original.classes().containsKey(name.substring(0, separator));
