@@ -26,3 +26,11 @@ editor behavior require the existing authorized device and model acceptance.
 Android documents [`Locale.getAvailableLocales()` and `toLanguageTag()`](https://developer.android.com/reference/java/util/Locale)
 and notes that a well-formed tag is not necessarily a registered one. No model
 or phone operation was performed for this change.
+
+The first static APK check, run `40957451264`, applied the patch but failed
+before its inventory checks because the new minimum-API verifier accepted only
+`sdkVersion`. Android's [release tooling](https://android.googlesource.com/platform/build/+/045a3d6a3e359633a14853a5a5e1e4f2a11cbdae/tools/releasetools/common.py)
+recognizes both `minSdkVersion` and `sdkVersion`. The corrected verifier accepts
+either single numeric field, still refuses ambiguous, missing, nonnumeric or
+pre-21 values, and has fixtures for both spellings. The failed run did not
+publish an APK; the exact actual value and corrected inspection remain pending.

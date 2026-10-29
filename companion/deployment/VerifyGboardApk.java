@@ -72,7 +72,8 @@ public final class VerifyGboardApk {
         throw new IllegalStateException("Verifier accepted an invalid fixture");
     }
     static int requireLocaleApi(String badging) {
-        var sdk = java.util.regex.Pattern.compile("(?m)^sdkVersion:'([0-9]+)'\\r?$").matcher(badging);
+        // aapt2 has emitted both names; require one numeric value either way.
+        var sdk = java.util.regex.Pattern.compile("(?m)^(?:minSdkVersion|sdkVersion):'([0-9]+)'\\r?$").matcher(badging);
         if (!sdk.find()) throw new IllegalStateException("Missing numeric minimum Android API");
         int minimum;
         try { minimum = Integer.parseInt(sdk.group(1)); }
@@ -93,9 +94,11 @@ public final class VerifyGboardApk {
         expectFailure(() -> requireMembers("fixture", original, new Members(Map.of(abstractMethod, false), original.fields())));
         expectFailure(() -> requireMembers("fixture", original, new Members(Map.of(concrete, false, abstractMethod, false), original.fields())));
         if (requireLocaleApi("sdkVersion:'21'\n") != 21) throw new IllegalStateException("Minimum API fixture failed");
+        if (requireLocaleApi("minSdkVersion:'26'\n") != 26) throw new IllegalStateException("Modern minimum API fixture failed");
         expectFailure(() -> requireLocaleApi("sdkVersion:'20'\n"));
+        expectFailure(() -> requireLocaleApi("minSdkVersion:'M'\n"));
         expectFailure(() -> requireLocaleApi("no sdk version\n"));
-        expectFailure(() -> requireLocaleApi("sdkVersion:'21'\nsdkVersion:'26'\n"));
+        expectFailure(() -> requireLocaleApi("sdkVersion:'21'\nminSdkVersion:'26'\n"));
         System.out.println("Stock API verifier controls passed: retained members and parents; missing fields, methods, bodies and parents rejected.");
     }
     static byte[] digest(InputStream input) throws Exception {
