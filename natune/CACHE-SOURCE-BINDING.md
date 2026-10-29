@@ -85,6 +85,15 @@ same monitor. UI insertion, transaction/restart recovery and deletion remain
 unbound. Test fixture classes under storage-tests/fixtures must never be copied
 into an extension or APK.
 
+The original DownloadUtil.kt:441–451 onDownloadRemoved listener calls
+purgeSongCacheEntries, whose source at491–495 iterates every recognized source
+key and removes it from both downloadCache and playerCache. Settling manager
+removal can therefore trigger broader deletion than one selected rendition.
+Do not chain that original action after one verified copy. The new move needs
+an owner-scoped callback/removal path preserving other keys and owners, or
+verified recovery for every affected original. The exact listener hook and
+durable move claim remain to be bound; this finding grants no deletion scope.
+
 ## Controlled verification scope
 
 The hosted shared-storage workflow compiles the actual reader and tests public
@@ -100,7 +109,17 @@ cache-source-verification.json. Its source predates the subsequently mandatory
 StopCheck parameter and lock-wait cancellation controls. Record that new
 version's actual result separately; do not treat the older pass as its proof.
 
+Successor run40889712120 at a8afb70434627a6e77375a4abdf1e860cd4cf150 passed46
+cache-source controls with the mandatory original StopCheck,49 byte-copy
+controls and real Android SDK compilation. cache-source-verification.json now
+pins that exact artifact and its source bodies; the prior40-control epoch is
+preserved in Git history and its predecessor field. These successful controls
+still use public ABI stand-ins, not an installed app's cache objects. The
+upstream metadata constant's full source bytes/hash are separately pinned in
+cache-metadata-source-review.json.
+
 Primary source:
 
 - https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/di/AppModule.kt
 - https://github.com/androidx/media/blob/1.10.1/libraries/datasource/src/main/java/androidx/media3/datasource/cache/ContentMetadata.java
+- https://github.com/NatuneGroup/ArchiveTune/blob/b7e4dd444fea202a5c32e96f7b1199a74fe3ae70/app/src/main/kotlin/moe/rukamori/archivetune/playback/DownloadUtil.kt

@@ -114,9 +114,10 @@ remain for the owning job's explicit recovery/cleanup; no old user file or
 source can be deleted by this adapter.
 
 The copy result is in-memory byte evidence, not a deletion permit or completed
-move. Exact Media3 source lease/coverage, original caller serialization, durable
-encrypted transaction custody, song-ID/content-URI index, UI entry and settled
-DownloadManager/cache removal are still unbound. Real Android provider/grant,
+move. The source lease/coverage reader is now implemented against the exact
+original public ABI and controlled stand-ins; its actual UI/caller hook,
+durable encrypted transaction custody, song-ID/content-URI index, UI entry and
+settled DownloadManager/cache removal are still unbound. Real Android provider/grant,
 low-space interruption/restart and playback/playlist retention acceptance are
 not established by host controls or SDK compilation. The current public feed
 and installed app do not include a Move to folder button.
@@ -146,6 +147,15 @@ and its original manager. These descriptors identify hook inputs; they do not
 establish a held read lease, a synchronized concrete implementation or durable
 move custody. The next binding step must resolve the actual implementors and
 their writer/reader lifecycle before any source removal path is admitted.
+
+Later inspections40887293242/40888097008 resolve concrete wrappers dd6/c7b and
+the original span/metadata fields. NatuneCachedSource.java now implements that
+read-only source boundary with the original monitor order and mandatory stop
+checks, validated by successor run40889712120 (46 cache-source controls plus49
+copy controls). CACHE-SOURCE-BINDING.md records the exact ABI and scopes.
+The original removal listener also purges all recognized source variants from
+both caches, so the next removal binding must scope that callback, not attach
+the old Delete action to a successful copy. No deletion path has been enabled.
 
 ## Reproducible source evidence
 

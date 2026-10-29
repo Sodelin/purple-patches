@@ -29,3 +29,10 @@ a Media3 source lease, a verified provider grant or a cache-deletion authority.
 See ../SHARED-STORAGE.md and ../shared-storage-verification.json for the exact
 remaining binding and acceptance gates. These classes add no model/network
 client, listener, grant, runtime record or source deletion path.
+
+NatuneCachedSource now supplies exact-release cache-source code using original
+wrapper/delegate monitors, full span coverage and original stop checks.
+Run40889712120 passes46 public-fixture cache-source controls plus49 copy
+controls. It remains unbound to an actual APK UI hook and has no removal path.
+See ../CACHE-SOURCE-BINDING.md for the original broad-purge callback hazard and
+remaining transaction, indexing and phone acceptance requirements.

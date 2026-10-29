@@ -1,0 +1,14 @@
+{
+  "schema": "purple.public-source-review.v1",
+  "date": "2026-10-29",
+  "files": [
+    {
+      "repository": "androidx/media",
+      "revision": "1.10.1",
+      "path": "libraries/datasource/src/main/java/androidx/media3/datasource/cache/ContentMetadata.java",
+      "url": "https://raw.githubusercontent.com/androidx/media/1.10.1/libraries/datasource/src/main/java/androidx/media3/datasource/cache/ContentMetadata.java",
+      "bytes": 2882,
+      "sha256": "bb86710349f83845e607675df76a37aa2f25324959c099580ad43c67d27936ea"
+    }
+  ]
+}
