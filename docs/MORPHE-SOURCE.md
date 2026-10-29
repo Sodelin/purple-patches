@@ -60,7 +60,7 @@ offset for LocalDateTime serialization. Controls cover offset/date rollover,
 ambiguous time, wrong repository/version/component, auxiliary MPP and
 credential-bearing URLs. The generated **unpublished build placeholder** keeps
 its download URL blank; the selected external candidate channel now points at
-the actual published private release.
+the actual published public prerelease.
 
 ## Retained experiments and activation gaps
 

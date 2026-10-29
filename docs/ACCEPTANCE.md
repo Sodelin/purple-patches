@@ -20,11 +20,11 @@ must continue working. A successful hosted build is not device acceptance.
 | Microphone | Device tests must verify stop, cancel,60-second ceiling, permissions, interruptions and release. Health/family validation must precede microphone opening. |
 | Translation | One explicit selected-text request, exact gpt-6.1-sol, no context inheritance/fallback, preview and explicit insertion. Live testing remains held. |
 | Regression/rollback | Alongside-stock package option and independent keyboard recovery must work before changing the user's default. No installation/default switch has occurred. |
-| Update feed | Private published patch-only release425723616 and companion0.2.1 release425713896; every selected asset fully verified. Authenticated raw-feed, actual tag resolution and complete pinned MPP download pass. See[candidate-source-verification.json](candidate-source-verification.json). Actual phone Manager credential/import/update acceptance remains pending. |
+| Update feed | The public candidate feed, published Gboard prerelease and complete pinned MPP were rechecked anonymously on 29 October 2026; the separate companion0.2.1 prerelease also resolved anonymously. See [public-feed-check-20261029.json](public-feed-check-20261029.json). Actual phone Manager import/update acceptance remains pending. |
 
 ## Reproduce without phone toolchains
 
-The private repository is `Sodelin/purple-patches`. Its Gboard workflow checks
+The public repository is `Sodelin/purple-patches`. Its Gboard workflow checks
 out the exact upstream commit recorded in `tools/materialize.py`, applies this
 small overlay, runs policy checks plus the upstream test suite, and builds the
 Morphe bundle/catalog. `tools/version.txt` names the distinct candidate version.
@@ -53,7 +53,7 @@ fixture checks and packaging work moving while that action is held.
 
 For Morphe input, select exactly `patches-0.1.0-alpha.1.mpp`. The hosted
 archive also contains auxiliary `-sources.mpp` and `-javadoc.mpp` outputs;
-those are not the Manager patch input. A private candidate update feed is now published and remotely verified; actual Manager import/update remains unperformed.
+those are not the Manager patch input. The public candidate update feed and selected MPP have been remotely verified; actual Manager import/update remains unperformed.
 
 ## Selected local deliverable
 
@@ -63,14 +63,14 @@ with SHA256SUMS alongside it. Full local bytes/hash readback passed; see
 [local-patch-delivery.json](local-patch-delivery.json). This is an8MB selected
 user deliverable, not a local compiler/SDK cache, APK installation, Manager
 import or keyboard activation. `tools/export_patch_bundle.py` recreates it from
-the retained private asset, verifies the pin before writing, uses exclusive
+the retained release asset, verifies the pin before writing, uses exclusive
 creation and refuses a differing existing file.
 
 ## Companion revision selection
 
 Use the verified0.2.1 companion with the unchanged0.1.0-alpha.1 main MPP for
 future authorized deployment. Its executable, wrapper, fixed schema and exact
-corresponding source are retained in private prerelease425713896; all six assets
+corresponding source are retained in public prerelease425713896; all six assets
 passed full remote byte readback. See[private-companion-0.2.1.json](private-companion-0.2.1.json).
 The previous0.2.0 artifact/draft is retained history, with a read-back
 supersession notice; it is not a supported future runtime selection.

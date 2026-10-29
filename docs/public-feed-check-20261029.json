@@ -1,0 +1,32 @@
+{
+  "observed_utc": "2026-10-29T16:45:32Z",
+  "source_commit": "0eb402bbd10315bcbf9a51fb93259a347d1a1b96",
+  "repository": "Sodelin/purple-patches",
+  "anonymous": true,
+  "feed": {
+    "url": "https://raw.githubusercontent.com/Sodelin/purple-patches/main/channels/candidate.json",
+    "http_status": 200,
+    "sha256": "d2303edac35dece55b08b2fe0e10013c5b0940755ae3006aabdcb5e0c0ec94fe",
+    "matches_local_source": true,
+    "version": "0.1.0-alpha.1"
+  },
+  "gboard_release": {
+    "tag": "patches-v0.1.0-alpha.1",
+    "draft": false,
+    "prerelease": true,
+    "main_mpp_bytes": 8205100,
+    "main_mpp_sha256": "af2077907783247f667940e02659fe8b574ec36fd26df8af67e22469de3f11fe",
+    "complete_asset_stream_verified": true,
+    "saved_to_disk": false
+  },
+  "companion_release": {
+    "tag": "companion-v0.2.1-candidate",
+    "draft": false,
+    "prerelease": true,
+    "asset_count": 6,
+    "current_check": "anonymous release metadata only; prior full-byte evidence retained separately"
+  },
+  "manager_import_tested": false,
+  "phone_keyboard_tested": false,
+  "model_testing_performed": false
+}
