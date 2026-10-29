@@ -52,7 +52,7 @@ impl Service {
         let query: cli::Query =
             serde_json::from_slice(bytes).map_err(|_| "Invalid keyboard request JSON")?;
         query.validate(&cli::models()?)?;
-        if query.mode != "translate" || query.prompt.len()>8192 || !query.context.is_empty() { return Err("Only explicit bounded translation is enabled".into()); }
+        if query.mode != "translate" || query.prompt.len()>cli::TRANSLATION_TEXT_BYTES || !query.context.is_empty() { return Err("Only explicit bounded translation is enabled".into()); }
         self.start(Work::Query(query))
     }
     pub fn transcribe(self: &Arc<Self>, bytes: Vec<u8>) -> Result<Value, String> {
