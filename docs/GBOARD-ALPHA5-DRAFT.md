@@ -1,7 +1,16 @@
-# Gboard alpha.5 and companion dev.3 — draft build custody
+# Gboard alpha.5 and companion dev.3 — candidate build custody
 
-This draft preserves selected hosted build outputs. It is not a release for
-installation, a Morphe feed update, or proof that the keyboard works on a phone.
+An attempted GitHub draft release was refused; no alpha.5 draft release was
+created. The exact main MPP and companion ZIP are preserved separately in the
+user's private Drive, with full byte/hash readback and actual file restoration.
+The larger Gboard workflow ZIP was uploaded there too, but only its metadata
+was checked: two raw readback attempts returned a closed transport. It must not
+be treated as a verified recovery copy. The private file references and proof
+are retained in an encrypted local receipt; workflow artifacts expire after
+seven days.
+
+These are not a release for installation, a Morphe feed update, or proof that
+the keyboard works on a phone.
 The existing public feed still selects alpha.1 and warns about its known editor
 snapshot issue.
 
@@ -22,5 +31,5 @@ rollback. No model, keyboard or app was installed or tested on the phone for
 this draft. See [`ACCEPTANCE.md`](ACCEPTANCE.md) for the complete open list.
 
 All assets must match their recorded SHA-256 values before any future authorized
-use. A draft asset, hosted synthetic test, or static APK inspection is not device
+use. A stored asset, hosted synthetic test, or static APK inspection is not device
 acceptance and does not release existing privacy or installation holds.

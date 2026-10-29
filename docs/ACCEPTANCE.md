@@ -75,9 +75,10 @@ creation and refuses a differing existing file.
 
 Gboard alpha.5 requires the `0.2.2-dev.3` voice-readiness capability. Its
 hosted companion artifact and source are verified in
-[companion-022-dev3-verification.json](companion-022-dev3-verification.json),
-but the artifact has only seven-day workflow retention: durable deployment and
-update custody still need to be established. The previously published0.2.1
+[companion-022-dev3-verification.json](companion-022-dev3-verification.json).
+The exact main Gboard bundle and companion archive have private Drive copies
+with full readback and actual restoration; see [candidate custody](GBOARD-ALPHA5-DRAFT.md).
+Public deployment and update custody still need to be established. The previously published0.2.1
 companion remains historical evidence for earlier candidates; it does not
 satisfy alpha.5's voice-preflight contract. Its earlier readback is retained in
 [private-companion-0.2.1.json](private-companion-0.2.1.json). The previous0.2.0
