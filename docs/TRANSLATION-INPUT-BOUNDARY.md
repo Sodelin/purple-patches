@@ -24,5 +24,6 @@ source and serialization behavior, not the model's translation quality or its
 resistance to prompt injection. Prompt wording is not a no-tools guarantee.
 The independent CLI tool-catalogue, privacy-writer, account, cancellation,
 device and installation gates remain open; Codex may send submitted text to
-the configured service. No model request or phone action is needed for these
-source controls.
+the configured service. The [hosted companion verification](companion-022-dev7-verification.json)
+passed the synthetic controls and Android cross-build. No model request or
+phone action was made for these source controls.

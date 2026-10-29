@@ -1,0 +1,29 @@
+{
+  "schema": "purple.companion-hosted-verification.v1",
+  "workflow_run": 40966246230,
+  "workflow_url": "https://github.com/Sodelin/purple-patches/actions/runs/40966246230",
+  "artifact_id": 12937403848,
+  "source_commit": "9697ca562b57258c394caa0624ae68b5aa719f6e",
+  "source_tree": "2a138fa74f4d20a8c63138914b38a8ae74b7a71f",
+  "companion_version": "0.2.2-dev.7",
+  "artifact_zip_bytes": 731238,
+  "artifact_zip_sha256": "971ab60f338b27928a9896b34515e2da73c4ca3972c7932927409e399e2c1884",
+  "members_sha256": {
+    "SHA256SUMS": "2355429b6a32fc0d4492cdb39141c56b6afc5c88f8bf9b19a2371f49602d900b",
+    "native-controls.txt": "bc26b7837b7890dd05828dcf8e9cc2fa8cb9df86e48f3b723925ff0cd00995da",
+    "natune-journal-check": "1cb275614b40bc8c2efcbc169db6347aeb6abbe6a332557662f651727fb4aa53",
+    "purple-gboard-service": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91",
+    "purple-keyboard-bridge": "3ca7faf06d2df514b63927e87794ecd1d550741e69beaca54219ed10a71c1c5d",
+    "response-schema.json": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
+    "source-SHA256SUMS": "bf27818e06bbe14227081221a0e08f0f87741211bc59fe4816c0e974eec521fe"
+  },
+  "sha256sums_all_match": true,
+  "source_files_matched_git_commit": 13,
+  "deployment_files_matched_git_commit": 2,
+  "public_controls": "47 passed and one known owner-identity diagnostic remained ignored. The two new controls exercise selected-text JSON serialization, argument separation and translation input boundaries.",
+  "android_cross_build": "Two ELF64 little-endian EM_AARCH64 executables; verified headers only, not executed.",
+  "archive": "The full ZIP was uploaded once to the existing owner-only Drive folder; independent complete remote readback and extracted bridge hash matched. Encrypted receipts are retained separately. The exact temporary archive was removed after verification.",
+  "scope": "Public synthetic host tests and Android cross-compilation only. No model, microphone, installed keyboard, phone engine or actual translation was run.",
+  "limits": "The selected text is explicitly labeled as translation data; this does not prove model adherence, a no-tools runtime, writer privacy, recovery, Android behavior or prompt-injection resistance.",
+  "release_or_device_acceptance": false
+}
