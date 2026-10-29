@@ -307,6 +307,11 @@ public class SessionPolicyCheck {
         rejectsCatalog(catalog(new String[]{"gpt-6.1-sol"},new String[][]{{"high"}}));
         rejectsCatalog(catalog(new String[]{"gpt-6.1-sol","gpt-6.1-sol"},
                 new String[][]{{"medium"},{"max"}}));
+        check(SessionPolicy.previewDisposition(true,false,true,true)==SessionPolicy.PreviewDisposition.INSERTABLE);
+        check(SessionPolicy.previewDisposition(true,false,true,false)==SessionPolicy.PreviewDisposition.COPY_ONLY);
+        check(SessionPolicy.previewDisposition(false,false,true,true)==SessionPolicy.PreviewDisposition.REFUSE);
+        check(SessionPolicy.previewDisposition(true,true,true,true)==SessionPolicy.PreviewDisposition.REFUSE);
+        check(SessionPolicy.previewDisposition(true,false,false,false)==SessionPolicy.PreviewDisposition.REFUSE);
         String[] tools = SessionPolicy.permissionsFor(SessionPolicy.PERMISSION_LOCAL_TOOLS);
         check(tools.length == 1 && tools[0].equals("com.termux.permission.RUN_COMMAND"));
         String[] microphone = SessionPolicy.permissionsFor(SessionPolicy.PERMISSION_MICROPHONE);
@@ -348,6 +353,7 @@ public class SessionPolicyCheck {
         checkBridgeCatalog();
         System.out.println("Editor privacy, localhost, stale selection and UTF-8 limits passed");
         System.out.println("One-shot insertion request and uncertain-result controls passed");
+        System.out.println("Same-session changed-anchor copy-only preview controls passed");
         System.out.println("Bootstrap session, deadline, replacement and one-shot controls passed");
         System.out.println("Scoped permission activity JVM fixture passed");
         System.out.println("Actual bridge catalogue adapter with controlled JSON stubs passed");

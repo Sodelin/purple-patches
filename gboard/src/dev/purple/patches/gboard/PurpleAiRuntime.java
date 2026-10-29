@@ -313,19 +313,33 @@ public final class PurpleAiRuntime {
                 final boolean recordingLimited = reachedLimit;
                 String text = currentBridge.execute(anchor.selected, language, effort, audio, stopped);
                 MAIN.post(() -> {
-                    if (request != operation || stopped.get() || !anchor.matches(service.get(), generation)) return;
-                    dismiss();
                     InputMethodService current = service.get(); if (current == null) return;
+                    boolean safe = anchor.previewEligible(current, generation);
+                    boolean sameAnchor = safe && anchor.matches(current, generation);
+                    SessionPolicy.PreviewDisposition disposition = SessionPolicy.previewDisposition(
+                            request == operation, stopped.get(), safe, sameAnchor);
+                    if (disposition == SessionPolicy.PreviewDisposition.REFUSE
+                            || service.get() != current || !anchor.previewEligible(current, generation)
+                            || request != operation || stopped.get()) return;
+                    dismiss();
                     TextView preview = new TextView(current); preview.setText(text); preview.setSaveEnabled(false);
                     preview.setTextIsSelectable(true); preview.setPadding(24,16,24,16);
                     AlertDialog.Builder result = new AlertDialog.Builder(current).setTitle(voice ? "Whisper transcript" : "Translation")
                             .setView(preview).setNegativeButton("Close", null);
-                    if (recordingLimited) result.setMessage("Recording reached the " + SessionPolicy.AUDIO_SECONDS
-                            + "-second limit. Only the captured audio is included.");
+                    String notice = recordingLimited ? "Recording reached the " + SessionPolicy.AUDIO_SECONDS
+                            + "-second limit. Only the captured audio is included." : "";
+                    if (disposition == SessionPolicy.PreviewDisposition.COPY_ONLY)
+                        notice += (notice.isEmpty() ? "" : "\n\n")
+                                + "The selection changed. You can copy this result; insertion is disabled.";
+                    if (!notice.isEmpty()) result.setMessage(notice);
                     AlertDialog resultDialog = result.setPositiveButton("Insert", null).create();
                     SessionPolicy.InsertionAttempt insertion = new SessionPolicy.InsertionAttempt();
                     resultDialog.setOnShowListener(d -> {
                         android.widget.Button insert = resultDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        if (disposition == SessionPolicy.PreviewDisposition.COPY_ONLY) {
+                            insert.setEnabled(false);
+                            return;
+                        }
                         insert.setOnClickListener(v -> {
                             insert.setEnabled(false);
                             SessionPolicy.InsertionOutcome outcome = insertion.attempt(
@@ -381,6 +395,13 @@ public final class PurpleAiRuntime {
                 });
                 return snapshot==null ? null : new Snapshot(connection,generation,snapshot);
             } catch (RuntimeException ignored) { return null; }
+        }
+        boolean previewEligible(InputMethodService ime, long current) {
+            if (ime == null || session != current) return false;
+            try {
+                EditorInfo info = ime.getCurrentInputEditorInfo();
+                return info != null && !SessionPolicy.sensitive(info.inputType, info.imeOptions);
+            } catch (RuntimeException unavailable) { return false; }
         }
         boolean matches(InputMethodService ime, long current) {
             try {

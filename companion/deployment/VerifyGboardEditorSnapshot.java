@@ -4,6 +4,7 @@ import com.android.tools.smali.dexlib2.iface.ClassDef;
 import com.android.tools.smali.dexlib2.iface.Method;
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
+import com.android.tools.smali.dexlib2.iface.reference.StringReference;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ public final class VerifyGboardEditorSnapshot {
     private static final String RUNTIME = "Ldev/purple/patches/gboard/PurpleAiRuntime;";
     private static final String BOOTSTRAP = "Ldev/purple/patches/gboard/SessionPolicy$BootstrapAttempt;";
     private static final String RECEIVER = "Ldev/purple/patches/gboard/PurpleBootstrapReceiver;";
+    private static final String PREVIEW = "Ldev/purple/patches/gboard/SessionPolicy$PreviewDisposition;";
 
     private static void require(boolean condition, String detail) {
         if (!condition) throw new IllegalStateException(detail);
@@ -59,6 +61,30 @@ public final class VerifyGboardEditorSnapshot {
             for (var handler : block.getExceptionHandlers())
                 if (exceptionType.equals(handler.getExceptionType())) return true;
         return false;
+    }
+
+    /** These are reference checks, not proof of a disabled button's control flow. */
+    private static void verifyCopyOnlyPreview(Map<String, ClassDef> classes) {
+        require(classes.containsKey(PREVIEW), "Missing preview disposition");
+        require(method(classes, POLICY, "previewDisposition").getReturnType().equals(PREVIEW),
+                "Preview policy has the wrong result type");
+        method(classes, SNAPSHOT, "previewEligible");
+        boolean policy = false, eligibility = false, notice = false, enabled = false;
+        for (ClassDef type : classes.values()) if (type.getType().startsWith("Ldev/purple/patches/gboard/PurpleAiRuntime"))
+            for (Method candidate : type.getMethods()) {
+                if (candidate.getImplementation() == null) continue;
+                for (var instruction : candidate.getImplementation().getInstructions()) {
+                    if (!(instruction instanceof ReferenceInstruction ref)) continue;
+                    if (ref.getReference() instanceof MethodReference call) {
+                        policy |= call.getDefiningClass().equals(POLICY) && call.getName().equals("previewDisposition");
+                        eligibility |= call.getDefiningClass().equals(SNAPSHOT) && call.getName().equals("previewEligible");
+                        enabled |= call.getName().equals("setEnabled");
+                    }
+                    if (ref.getReference() instanceof StringReference value)
+                        notice |= value.getString().contains("You can copy this result; insertion is disabled.");
+                }
+            }
+        require(policy && eligibility && notice && enabled, "Missing copy-only preview references");
     }
 
     /** Linkage only: presence of references is not control-flow or Android execution proof. */
@@ -147,6 +173,14 @@ public final class VerifyGboardEditorSnapshot {
             require(!catches(matchesMethod, "Ldev/purple/patches/gboard/NoSuchSyntheticException;"),
                     "Editor exception-handler checker accepted a missing type");
             System.out.println("Verified editor-anchor exception-handler presence and negative control; runtime behavior is not proved.");
+        }
+        if (revision >= 12) {
+            verifyCopyOnlyPreview(classes);
+            var missing = new HashMap<>(classes); missing.remove(PREVIEW);
+            boolean refused = false;
+            try { verifyCopyOnlyPreview(missing); } catch (IllegalStateException expected) { refused = true; }
+            require(refused, "Copy-only preview checker accepted a missing disposition");
+            System.out.println("Verified changed-anchor copy-only preview references and missing-class negative control; no Android behavior is proved.");
         }
     }
 }

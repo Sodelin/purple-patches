@@ -22,8 +22,9 @@ refer to the original connection, and rechecks the current editor's sensitive
 field flags. These checks can refuse an observed editor switch during capture;
 they do not make editor reads and insertion atomic.
 
-The original session/editor/content checks still run before preview and before
-explicit insertion. Multiple editor IPC calls and the later `commitText` are
+Through alpha.11, the session/editor/content checks run before preview and before
+explicit insertion. Alpha.12's changed-anchor preview is copy-only, while the
+checks still run before insertion. Multiple editor IPC calls and the later `commitText` are
 not an atomic compare-and-replace; an editor can change between the last check
 and insertion. This source change is not an installed keyboard or device
 acceptance. The alpha.3 bundle and supported APK patch passed the hosted checks
@@ -74,12 +75,19 @@ tested on Android. It does not resolve the
 active-composition, editor-session-dismissal, earlier-result-loss or cross-process
 atomicity gaps described here.
 
-There is an earlier result-loss path as well: when an operation completes, its
-queued UI callback returns without showing the result if the captured editor
-anchor no longer matches. Ending the input session also cancels the operation
-and dismisses its dialog. These checks avoid inserting into a changed editor,
-but the current implementation does not provide a way to recover a generated
-result in those cases. This is source behavior, not an observed device incident.
+Through alpha.11, when an operation completes, its queued UI callback returns
+without showing the result if the captured editor anchor no longer matches.
+Alpha.12 source instead displays a selectable, copy-only preview when the
+original request is still current in the same non-sensitive session but its
+anchor has changed. Insert is disabled for that preview. It still checks the
+anchor before an insertion offered in the unchanged case. The source and pure
+policy controls have not yet been built or tested on Android.
+
+Ending the input session still cancels the operation and dismisses its dialog.
+The current implementation does not provide a way to recover a generated
+result after that session ends, the process exits, or the preview cannot be
+shown. The safety checks are multiple non-atomic calls, and a field may change
+after them. These are source limitations, not observed device incidents.
 
 Before activation, select and verify an insertion protocol that handles active
 composition deliberately, keeps a recoverable preview when insertion fails or
