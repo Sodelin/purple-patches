@@ -16,6 +16,7 @@ from stage_candidate_release import ROOT, REPO, api, gh, digest
 TAG = 'natune-patches-v0.1.0-alpha.1'
 TEMPLATE = 'e721536ab19e30d16ce9d31ae1830ca299aad383'
 MEMBERS = {'patches-0.1.0-alpha.1.mpp', 'patches-list.json',
+           'patches-0.1.0-alpha.1-sources.mpp', 'patches-0.1.0-alpha.1-javadoc.mpp',
            'purple-natune-provenance.json', 'target-proof.json',
            'patch-result.json', 'static-preservation.txt', 'SHA256SUMS'}
 
