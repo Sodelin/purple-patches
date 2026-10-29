@@ -1,0 +1,32 @@
+name: Review public Stockfish timeout source
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'research/stockfish-timeout/**'
+      - '.github/workflows/stockfish-timeout.yml'
+permissions:
+  contents: read
+jobs:
+  source-control:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # observed v4
+        with:
+          persist-credentials: false
+      - name: Fetch exact public source and run the silent-stream fixture
+        run: |
+          SOURCE="$RUNNER_TEMP/Engine.java"
+          curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+            'https://raw.githubusercontent.com/ImNoammm/Noams-Morphe-Patches/33c81c3a0acdf55bd0240dc62c7e30085642d0e3/extensions/chesscom/src/main/java/app/noam/extension/chesscom/stockfish/Engine.java' \
+            --output "$SOURCE"
+          printf '%s  %s\n' '3fcc5011c739a694f4f9e5df7e1dc59de3832801220ec7ee4c1b8245c33c6f1a' "$SOURCE" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/stockfish-timeout-classes"
+          javac -d "$RUNNER_TEMP/stockfish-timeout-classes" \
+            research/stockfish-timeout/stubs/android/content/pm/ApplicationInfo.java \
+            research/stockfish-timeout/stubs/android/content/Context.java \
+            research/stockfish-timeout/stubs/android/app/ActivityManager.java \
+            research/stockfish-timeout/stubs/app/noam/extension/chesscom/Utils.java \
+            "$SOURCE" research/stockfish-timeout/TimeoutRepro.java
+          java -cp "$RUNNER_TEMP/stockfish-timeout-classes" TimeoutRepro
