@@ -71,6 +71,15 @@ jobs:
           git -C "$RUNNER_TEMP/gboard-upstream" fetch --depth=1 origin 2eb71854accc7e906d3e4f5495b2a54ed1e2af47
           git -C "$RUNNER_TEMP/gboard-upstream" checkout --detach FETCH_HEAD
           python tools/materialize.py "$RUNNER_TEMP/gboard-upstream"
+      - name: Exercise actual materialized access-point hooks
+        run: |
+          mkdir -p "$RUNNER_TEMP/purple-access-points"
+          mapfile -d '' fixtures < <(find gboard/accesspoint-tests -type f -name '*.java' -print0)
+          test "${#fixtures[@]}" -gt 0
+          javac --release 11 -d "$RUNNER_TEMP/purple-access-points" "${fixtures[@]}" \
+            gboard/src/dev/purple/patches/gboard/PurpleAccessPoints.java \
+            "$RUNNER_TEMP/gboard-upstream/extensions/extension/src/main/java/dev/jason/gboardpatches/extension/accesspoint/GboardAccessPointContributionsRuntime.java"
+          java -cp "$RUNNER_TEMP/purple-access-points" PurpleAccessPointsCheck
       - name: Build and test complete patch source
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
