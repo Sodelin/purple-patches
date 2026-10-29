@@ -21,12 +21,13 @@ jobs:
           rustup target add aarch64-linux-android
           NDK_ROOT="${ANDROID_NDK_HOME:-$ANDROID_NDK_LATEST_HOME}"
           export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android31-clang"
-          CARGO_INCREMENTAL=0 cargo build --locked --manifest-path companion/Cargo.toml --release --target aarch64-linux-android
+          CARGO_INCREMENTAL=0 cargo build --locked --manifest-path companion/Cargo.toml --release --target aarch64-linux-android --bins
           mkdir -p dist
           cp companion/target/aarch64-linux-android/release/purple-keyboard-bridge dist/
+          cp companion/target/aarch64-linux-android/release/natune-journal-check dist/
           cp companion/deployment/purple-gboard-service dist/
           install -m 600 companion/deployment/response-schema.json dist/response-schema.json
-          sha256sum companion/Cargo.toml companion/Cargo.lock companion/src/*.rs > dist/source-SHA256SUMS
+          sha256sum companion/Cargo.toml companion/Cargo.lock companion/src/*.rs companion/src/bin/*.rs > dist/source-SHA256SUMS
           cd dist
           sha256sum * > SHA256SUMS
       - uses: actions/upload-artifact@v4
