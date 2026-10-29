@@ -1,0 +1,24 @@
+{
+  "schema": "purple.cache-source-verification.v1",
+  "run_id": 40889096770,
+  "source_commit": "8e0bfb752b25e335789ced9ca887ce72096599ed",
+  "artifact_id": 12904647280,
+  "artifact_zip_sha256": "d90ffa9e299ab5ba560b569c9191f0e9bcfb476dd22c113bd52939f2b840e76e",
+  "artifact_files_sha256": {
+    "SHA256SUMS": "875e22daf9475ea1c68ddd6208027eb47bcce4ae6891da3a05392fa091c2d4fa",
+    "android-saf-compile.txt": "b04a0cf11547b7270e83647fbc377a616ef977edc530214304ce30b50fa5eedd",
+    "cache-source-controls.txt": "f3e3a768e810240d5aa061cb27afd9930dad51d19664bf8e8e5d17e08f382933",
+    "source-SHA256SUMS": "0fe8404633a70ccd3cb98fd6bebaa2cb6cb6c2d7258c9e50bf5b9b13f2475114",
+    "stream-copy-controls.txt": "934db12090b7e8c2b12b375c3d7b6a0ded5aba4b20367aa343acb7cf5a8c0305"
+  },
+  "reports": {
+    "stream-copy-controls.txt": "VERIFIED_STREAM_COPY_CONTROLS passed=49 android_owner_binding=false source_removal=false installed_ui=false",
+    "cache-source-controls.txt": "NATUNE_CACHE_SOURCE_CONTROLS passed=40 owners=public_fixture_stand_ins apk_hook=false device_cache_test=false source_removal=false",
+    "android-saf-compile.txt": "ANDROID_SAF_COMPILE passed=true device_provider_test=false apk_binding=false"
+  },
+  "controlled_abi_stand_ins": true,
+  "installed_cache_test": false,
+  "apk_ui_hook": false,
+  "source_removal": false,
+  "phone_acceptance": false
+}

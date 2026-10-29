@@ -50,14 +50,18 @@ public final class NatuneCachedSourceControls {
         public OutputStream openNewOutput() { opened = true; return bytes; }
         public InputStream reopen() { return new ByteArrayInputStream(bytes.toByteArray()); }
     }
+    private static <T> T withSource(Object cache, NatuneCachedSource.ReadAction<T> action) throws IOException {
+        // Explicit controlled stop stand-in; no Android job/control authority.
+        return NatuneCachedSource.withSource(cache, KEY, () -> {}, action);
+    }
     private static VerifiedStreamCopy.VerifiedCopy copy(dd6 cache, Destination destination) throws IOException {
-        return NatuneCachedSource.withSource(cache, KEY,
+        return withSource(cache,
                 source -> VerifiedStreamCopy.copy(source, destination, () -> {}));
     }
     private static void check() throws Exception {
         dd6 cache = fixture(); Destination dest = new Destination();
         VerifiedStreamCopy.SourceLease[] escaped = new VerifiedStreamCopy.SourceLease[1];
-        VerifiedStreamCopy.VerifiedCopy proof = NatuneCachedSource.withSource(cache, KEY, source -> {
+        VerifiedStreamCopy.VerifiedCopy proof = withSource(cache, source -> {
             need(Thread.holdsLock(cache.b) && Thread.holdsLock(cache.c), "Actual two owner monitors held");
             escaped[0] = source;
             return VerifiedStreamCopy.copy(source, dest, () -> {});
@@ -70,21 +74,21 @@ public final class NatuneCachedSourceControls {
         refuses(() -> escaped[0].open(), "Escaped source cannot reopen");
         refuses(() -> escaped[0].assertUnchanged(), "Escaped source cannot assert owner state");
         InputStream[] escapedInput = new InputStream[1];
-        NatuneCachedSource.withSource(fixture(), KEY, source -> {
+        withSource(fixture(), source -> {
             escapedInput[0] = source.open();
             need(escapedInput[0].read() == (BYTES[0] & 255), "Actual source stream opened");
             return null;
         });
         refuses(() -> escapedInput[0].read(), "Escaped stream cannot read outside lock lifetime");
         dd6 singleAttempt = fixture();
-        NatuneCachedSource.withSource(singleAttempt, KEY, source -> {
+        withSource(singleAttempt, source -> {
             try (InputStream ignored = source.open()) { ignored.read(); }
             try { source.open(); throw new IllegalStateException("Unexpected source retry"); }
             catch (IOException expected) { need(true, "Source opening reserved once"); }
             return null;
         });
-        refuses(() -> NatuneCachedSource.withSource(new Object(), KEY, source -> null), "Wrong owner rejected");
-        refuses(() -> NatuneCachedSource.withSource(new dd6(null), KEY, source -> null), "No implicit cache creation");
+        refuses(() -> withSource(new Object(), source -> null), "Wrong owner rejected");
+        refuses(() -> withSource(new dd6(null), source -> null), "No implicit cache creation");
         for (String mode : new String[]{"unknownLength", "noLength", "shortTail", "gap", "overlap",
                 "wrongKey", "uncachedHole", "empty", "fileLength"}) {
             dd6 bad = fixture(); d7b first = bad.c.spans.first(), last = bad.c.spans.last();
@@ -105,7 +109,7 @@ public final class NatuneCachedSourceControls {
         }
         for (String mode : new String[]{"delegate", "metadata", "spans", "file"}) {
             dd6 changed = fixture(); Destination untouched = new Destination();
-            refuses(() -> NatuneCachedSource.withSource(changed, KEY, source -> {
+            refuses(() -> withSource(changed, source -> {
                 switch (mode) {
                     case "delegate" -> changed.c = new c7b(BYTES.length);
                     case "metadata" -> changed.c.metadata.length(BYTES.length + 1);
@@ -117,7 +121,7 @@ public final class NatuneCachedSourceControls {
             need(!untouched.opened, "Changed lease refuses before writing: " + mode);
         }
         AtomicBoolean refusedOtherThread = new AtomicBoolean();
-        NatuneCachedSource.withSource(fixture(), KEY, source -> {
+        withSource(fixture(), source -> {
             Thread other = new Thread(() -> {
                 try { source.open(); }
                 catch (IOException expected) { refusedOtherThread.set(true); }
@@ -131,7 +135,7 @@ public final class NatuneCachedSourceControls {
         dd6 contended = fixture(); CountDownLatch starting = new CountDownLatch(1);
         AtomicBoolean entered = new AtomicBoolean();
         Thread writer = new Thread(() -> { starting.countDown(); contended.p(KEY); entered.set(true); });
-        NatuneCachedSource.withSource(contended, KEY, source -> {
+        withSource(contended, source -> {
             writer.start();
             try {
                 if (!starting.await(2, TimeUnit.SECONDS)) throw new IOException("Worker did not start");
@@ -144,6 +148,45 @@ public final class NatuneCachedSourceControls {
         });
         writer.join(2000);
         need(entered.get() && !writer.isAlive(), "Original operation resumes after lease closes");
+
+        AtomicBoolean callbackEntered = new AtomicBoolean();
+        refuses(() -> NatuneCachedSource.withSource(fixture(), KEY,
+                () -> { throw new IOException("Original stopped"); }, source -> {
+                    callbackEntered.set(true); return null;
+                }), "Stopped job refuses before locks");
+        need(!callbackEntered.get(), "Stopped job enters no copy callback");
+
+        dd6 waiting = fixture(); AtomicBoolean stopped = new AtomicBoolean();
+        AtomicBoolean stoppedRefused = new AtomicBoolean(); CountDownLatch requested = new CountDownLatch(1);
+        Thread waitingJob = new Thread(() -> {
+            try {
+                NatuneCachedSource.withSource(waiting, KEY, () -> {
+                    requested.countDown();
+                    if (stopped.get()) throw new IOException("Original stopped while waiting");
+                }, source -> { callbackEntered.set(true); return null; });
+            } catch (IOException expected) { stoppedRefused.set(true); }
+        });
+        synchronized (waiting.b) {
+            waitingJob.start();
+            need(requested.await(2, TimeUnit.SECONDS), "Waiting job checked original stop");
+            long end = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+            while (waitingJob.getState() != Thread.State.BLOCKED && System.nanoTime() < end) Thread.yield();
+            need(waitingJob.getState() == Thread.State.BLOCKED, "Job waits on actual wrapper lock");
+            stopped.set(true);
+        }
+        waitingJob.join(2000);
+        need(stoppedRefused.get() && !callbackEntered.get() && !waitingJob.isAlive(),
+                "Cancelled lock waiter cannot later enter callback");
+
+        stopped.set(false);
+        refuses(() -> NatuneCachedSource.withSource(fixture(), KEY, () -> {
+            if (stopped.get()) throw new IOException("Original stopped during read");
+        }, source -> {
+            try (InputStream in = source.open()) {
+                in.read(); stopped.set(true); in.read();
+            }
+            return null;
+        }), "Original stop closes off further source reads");
     }
     public static void main(String[] args) throws Exception {
         for (int i = 0; i < BYTES.length; i++) BYTES[i] = (byte)(i * 29 + i / 7);

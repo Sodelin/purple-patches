@@ -41,6 +41,13 @@ reflection, without setAccessible, package-private access or class construction.
 The selecting Morphe patch must enforce the target APK's original compatibility
 pins; matching member names alone is not target/signature admission.
 
+The API requires the original owner's StopCheck, checks it before lock
+acquisition and immediately after each monitor is acquired, and retains it for
+source reads. There is no default non-stopped production overload. A cancelled
+lock waiter refuses before its copy callback starts when the monitor becomes
+available. Java monitor acquisition itself remains non-interruptible; this
+prevents late execution but does not promise a bounded acquisition time.
+
 The snapshot requires a positive original content length, nonempty cached
 coverage from byte0 to that exact end, one selected source key, positive segment
 lengths and matching regular file sizes. Gaps, overlaps, unknown length, holes
@@ -86,6 +93,12 @@ refused incomplete/changed inputs, original Java monitor lifetime, another
 thread's refusal and lease/stream escape. These are logic/locking controls,
 not tests on the installed Cache, a private library, SAF provider or media file.
 Retain the actual terminal run and report before claiming those controls pass.
+
+First implementation run40889096770 passed49 copy controls,40 cache-source
+controls and SDK compilation, with complete artifact/source hash readback in
+cache-source-verification.json. Its source predates the subsequently mandatory
+StopCheck parameter and lock-wait cancellation controls. Record that new
+version's actual result separately; do not treat the older pass as its proof.
 
 Primary source:
 

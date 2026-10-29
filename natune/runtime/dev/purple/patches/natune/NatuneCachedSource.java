@@ -26,9 +26,12 @@ public final class NatuneCachedSource {
         T run(VerifiedStreamCopy.SourceLease source) throws IOException;
     }
 
-    public static <T> T withSource(Object cache, String exactCacheKey, ReadAction<T> action)
+    public static <T> T withSource(Object cache, String exactCacheKey,
+            VerifiedStreamCopy.StopCheck stop, ReadAction<T> action)
             throws IOException {
         Objects.requireNonNull(action, "action");
+        Objects.requireNonNull(stop, "stop");
+        stop.check();
         if (cache == null || exactCacheKey == null || exactCacheKey.isEmpty())
             throw new IOException("Selected cache and key required");
         Binding binding = new Binding(cache.getClass().getClassLoader());
@@ -36,12 +39,14 @@ public final class NatuneCachedSource {
         Object lock = get(binding.lock, cache);
         if (lock == null) throw new IOException("Cache lock unavailable");
         synchronized (lock) {
+            stop.check();
             Object delegate = get(binding.delegate, cache);
             // Do not call q(): it creates a new cache when none is initialized.
             if (delegate == null || delegate.getClass() != binding.concrete)
                 throw new IOException("Initialized original cache required");
             synchronized (delegate) {
-                try (Snapshot source = new Snapshot(binding, cache, lock, delegate, exactCacheKey)) {
+                stop.check();
+                try (Snapshot source = new Snapshot(binding, cache, lock, delegate, exactCacheKey, stop)) {
                     return action.run(source);
                 }
             }
@@ -114,14 +119,17 @@ public final class NatuneCachedSource {
         final Binding binding;
         final Object cache, lock, delegate;
         final String key;
+        final VerifiedStreamCopy.StopCheck stop;
         final Thread thread = Thread.currentThread();
         final long expected;
         final Segment[] segments;
         boolean alive = true, opened;
         SpanInput input;
-        Snapshot(Binding binding, Object cache, Object lock, Object delegate, String key) throws IOException {
+        Snapshot(Binding binding, Object cache, Object lock, Object delegate, String key,
+                VerifiedStreamCopy.StopCheck stop) throws IOException {
             this.binding = binding; this.cache = cache; this.lock = lock;
             this.delegate = delegate; this.key = key;
+            this.stop = stop;
             expected = binding.expected(cache, key);
             if (expected <= 0) throw new IOException("Complete content length required");
             Object[] spans = binding.currentSpans(cache, key);
@@ -148,6 +156,7 @@ public final class NatuneCachedSource {
             if (!alive || Thread.currentThread() != thread || !Thread.holdsLock(lock) ||
                 !Thread.holdsLock(delegate) || get(binding.delegate, cache) != delegate)
                 throw new IOException("Original cache lease no longer held");
+            stop.check();
         }
         public long length() { return expected; }
         public boolean complete() { return alive; }
