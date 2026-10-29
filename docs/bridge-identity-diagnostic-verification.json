@@ -1,0 +1,16 @@
+{
+  "observed_utc": "2026-10-29T21:39:20Z",
+  "source_commit": "aeb34e8e2a60df6e12feb20b33cf2c62cd289617",
+  "source_tree": "36b153127192f700510107f1ba70940e21ab72a6",
+  "run": "https://github.com/Sodelin/purple-patches/actions/runs/40959549174",
+  "job": "https://github.com/Sodelin/purple-patches/actions/runs/40959549174/job/123748416756",
+  "result": "One intentionally ignored diagnostic was selected and passed because it reproduced the defect: a live same-UID parent with a repeatedly matching Identity was classified as not current by a copy of the test executable at a different path.",
+  "counts": {"selected": 1, "passed": 1, "failed": 0, "filtered_out": 45},
+  "limits": [
+    "The fixture observes public Linux runner processes, not the phone.",
+    "It calls actual Identity::read and Identity::current but does not call bootstrap, stop, serve or the encrypted vault.",
+    "The ordinary native suite, Android cross-build and artifact upload were skipped in this diagnostic-only run.",
+    "The fixture does not establish that a duplicate server can start, that any record was lost, or that an actual service incident occurred.",
+    "A passing reproduction is not an acceptance test or a fix. Process-observation errors and shutdown uncertainty need a separate design and tests."
+  ]
+}

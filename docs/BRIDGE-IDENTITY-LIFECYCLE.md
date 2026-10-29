@@ -23,7 +23,11 @@ same-UID parent through the real `Identity::read` and checks that the current
 predicate returns false while the caller executable differs. The existing
 `companion.yml` workflow's optional `identity_diagnostic` mode runs only that fixture; it does not
 open an actual vault, run `bootstrap` or `stop`, start a bridge, or simulate
-Android. Its outcome is tracked separately from this source finding.
+Android. [Hosted run 40959549174](https://github.com/Sodelin/purple-patches/actions/runs/40959549174)
+executed exactly that diagnostic at source `aeb34e8e2a60df6e12feb20b33cf2c62cd289617`:
+the live fixture owner was classified as not current. The test passes because it
+reproduces the defect, not because the defect is fixed. The run skipped the
+normal suite and Android cross-build. See [the bounded evidence](bridge-identity-diagnostic-verification.json).
 
 Review must distinguish a matching live owner, a conclusively different or
 exited owner, and unknown observation; preserve records on uncertainty; and

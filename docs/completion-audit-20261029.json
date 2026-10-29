@@ -1,7 +1,7 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: alpha.18 preserves selected translation language script and region, passed hosted locale controls and corrected exact-APK inspection, and reproduced its bundle in two hosted builds",
+  "current_turn_classification": "progress: a hosted public fixture reproduced the companion's cross-executable live-owner identity defect; recovery design and expert review remain open",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",
@@ -26,6 +26,7 @@
   },
   "remaining_gboard_gates": [
     "A caller-bound Termux handoff that does not expose the bearer through loggable stdout, plus actual privacy-writer and tool-boundary evidence.",
+    "Bridge owner lifecycle: a changed command executable can misclassify a live owner, and observation errors collapse into absence; preserve the encrypted record and distinguish UNKNOWN before safe update or stop. See bridge-identity-diagnostic-verification.json.",
     "Original job identity, cancellation, encrypted settlement and no-replay recovery when a start response or process is lost; the Dot review request is prepared but its route is unverified.",
     "Full large-v3 acquisition and exact engine/model acceptance when the model hold is released, including meaningful latency, memory and cancellation checks.",
     "Editor composition, result retention across session ends, long dictation and actual user-directed preview/insertion behavior; alpha.12 copy-only behavior remains untested on Android.",
@@ -37,5 +38,5 @@
     "observed_utc": "2026-10-29T21:32:39Z",
     "qualification": "Concurrent user activity may change this snapshot. It is below the 20 GiB engineering reserve; no phone build or personal-media deletion follows."
   },
-  "next_action": "Advance caller-bound bootstrap and durable job recovery source design; obtain the already-prepared expert review through a verified existing route, and perform model, installation or device actions only after their named holds are released."
+  "next_action": "Obtain the prepared owner-identity, caller-bound bootstrap and durable-job expert reviews through a verified existing route; develop and verify the resulting recovery design before activation. Perform model, installation or device actions only after their named holds are released."
 }
