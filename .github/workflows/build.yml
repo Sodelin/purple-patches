@@ -30,8 +30,9 @@ jobs:
       - name: Pure editor/session policy controls
         run: |
           mkdir -p "$RUNNER_TEMP/purple-policy"
-          javac -d "$RUNNER_TEMP/purple-policy" gboard/src/dev/purple/patches/gboard/SessionPolicy.java gboard/SessionPolicyCheck.java
+          javac -d "$RUNNER_TEMP/purple-policy" gboard/src/dev/purple/patches/gboard/SessionPolicy.java gboard/src/dev/purple/patches/gboard/CaptureSession.java gboard/SessionPolicyCheck.java gboard/CaptureSessionCheck.java
           java -cp "$RUNNER_TEMP/purple-policy" SessionPolicyCheck
+          java -cp "$RUNNER_TEMP/purple-policy" dev.purple.patches.gboard.CaptureSessionCheck
       - name: Materialize pinned mature upstream
         run: |
           git init "$RUNNER_TEMP/gboard-upstream"
