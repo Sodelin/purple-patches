@@ -37,6 +37,14 @@ them; replay does not perform removal. The host must verify that observation.
 This is a journal guard, not a system-wide block on other code removing files.
 No production app is wired to this API.
 
+Hosted [run 40910866618](https://github.com/Sodelin/purple-patches/actions/runs/40910866618)
+at `49703d7b4527cd8fd8834f4d1a7496b55c727de0` passed 38 Rust library
+controls, including refusal of a new removal and synthetic legacy-pending
+replay, and cross-built the AArch64 checker. Artifact and source readback are
+recorded in `removal-gate-verification.json`. The checker was not run on the
+phone; these controls do not verify the real receiver, original app, encryption
+backend, selection or any music copy.
+
 The user's current computer-transfer workflow also needs a separately versioned
 state for a verified computer copy and removed temporary shared document while
 the phone's original cache remains. V1 cannot release that staging charge

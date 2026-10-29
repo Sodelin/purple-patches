@@ -1,0 +1,55 @@
+{
+  "schema": "purple.natune.removal-gate-verification.v1",
+  "source_commit": "49703d7b4527cd8fd8834f4d1a7496b55c727de0",
+  "run_id": 40910866618,
+  "run_url": "https://github.com/Sodelin/purple-patches/actions/runs/40910866618",
+  "artifact_id": 12912874319,
+  "artifact_zip_sha256": "3e8a3a7a6b09dfe4cf5ef0d757ba35d606df2eb30e7b984654b844b66e71f917",
+  "artifact_files_sha256": {
+    "native-controls.txt": "ab801746b7d771c8a9bae48abfa7a14585757f6b5317507ccea31f8f9f1befc6",
+    "natune-journal-check": "eb02f1deebe48662e75481c9d75a37edf63ac153c126a665a509573dc185c0ac",
+    "purple-gboard-service": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91",
+    "purple-keyboard-bridge": "012728a807914932b6c95c9d9bd2d1777a88dd8ab5a313bd17063437db774ffa",
+    "response-schema.json": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
+    "source-SHA256SUMS": "093f467e8df853ea602bc3e57797c36137992b4fef49431722bfa9f9f4af7fc2"
+  },
+  "source_files_sha256": {
+    "companion/Cargo.toml": "e6cab69c08a51d51b936d6739b33b03e3cc05b4acd0f152adcdf9aa6b687d5e0",
+    "companion/Cargo.lock": "bb0b1fc7d4611d120a39afbf107238ea22034ef9bd65995e336519ec693a32e3",
+    "companion/src/cli.rs": "504ca36c12a8627b00a7e2f33d8ed9f829ad1e499da2d363b72f72e9ea4d7546",
+    "companion/src/http.rs": "2933781ca9e8e785c598ee3ccec4266bf628dedca19ceed43c338f55a6eacfea",
+    "companion/src/jobs.rs": "2be689495355610f9075e05eb4de1e6e09cd01d4da573c01c7baf18560fd4abd",
+    "companion/src/lib.rs": "01c94b9939ec65148683a221ea0fa0bd55b7f9d4a03483a0a4fafb3ce9bad068",
+    "companion/src/main.rs": "16147887864ab191726a910759f90abf2ef365ee11960b534928f03e87d25667",
+    "companion/src/memory.rs": "caf71a444975569fac7e97d677eeffca3caa53e2ae242ac7a2d6932592131419",
+    "companion/src/natune_journal.rs": "ab9016f58f632091258956b1e3f40d9f62ae98885e90da0cef86ec0ec29949df",
+    "companion/src/private.rs": "8262df14c2cfe673b7d927f8e3119c50986b193afee2db3feeb3ef926b4e36c1",
+    "companion/src/vault.rs": "c30cb1e4556dc809003a18965dbbcf70f10facc917899b3bcde5b96af9990683",
+    "companion/src/whisper.rs": "c350f8023c3f47840a8dbc4d330d4a12beccd5468c98191ece70cc45a641bfc3",
+    "companion/src/bin/natune-journal-check.rs": "6ded0ceb783cd200aa54357e053d045eb56d829036a6f73a9e62b3c6e4a3a732"
+  },
+  "rust_test_summary": [
+    "test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s"
+  ],
+  "journal_gate_fixture_tests": [
+    "test natune_journal::tests::abandoned_original_id_stays_consumed_but_a_new_authorized_attempt_can_recover ... ok",
+    "test natune_journal::tests::accepted_but_uncertain_persistence_poisoned_until_explicit_recovery ... ok",
+    "test natune_journal::tests::admission_recovery_includes_pending_and_consumed_terminal_ids ... ok",
+    "test natune_journal::tests::legacy_pending_replays_without_starting_removal_and_can_be_reconciled ... ok",
+    "test natune_journal::tests::missing_middle_chain_modified_record_and_wrong_filename_refuse_recovery ... ok",
+    "test natune_journal::tests::new_original_removal_is_refused_and_keeps_identity_and_charge ... ok",
+    "test natune_journal::tests::size_admission_happens_before_persistence_and_is_adaptive ... ok",
+    "test natune_journal::tests::source_claim_and_planned_destination_validation_precedes_any_write ... ok",
+    "test natune_journal::tests::restart_reconstructs_every_unsettled_charge_without_side_effect_replay ... ok",
+    "test natune_journal::tests::wrong_generation_destination_length_digest_or_transition_never_persist ... ok"
+  ],
+  "cross_build": {
+    "fixture_checker_elf_machine": "AArch64",
+    "phone_execution": false
+  },
+  "limitations": [
+    "Hosted fixture controls use a RAM Store and do not test real device encryption, Android app ownership, receiver authentication, music, media removal or remote verification.",
+    "The v1 source guard refuses new removal events, but it is not an Android or system-wide deletion barrier.",
+    "No phone music, app state, model, permission or install was changed."
+  ]
+}
