@@ -1,0 +1,27 @@
+{
+  "schema": "purple.companion-hosted-verification.v1",
+  "workflow_run": 40937358263,
+  "artifact_id": 12923969640,
+  "source_commit": "b151ab657890aef10b21bf664ebf5b16904f4e1e",
+  "companion_version": "0.2.2-dev.6",
+  "artifact_zip_bytes": 729805,
+  "artifact_zip_sha256": "117652399ec048f5b22a7cffe1c185b145b5dd86aad85efa1546b8d425111fde",
+  "members_sha256": {
+    "SHA256SUMS": "a264d6422cd193a1b47cbf763f03e4eb10b9dd21d8c1149873b07cb48f7e35dd",
+    "native-controls.txt": "771df0962c8a7afe9e5efbf6b4442f0792835c724c393ffaee23f6692203c167",
+    "natune-journal-check": "bd04e2e8b2ca00ad53ba026e94297ccf03c74974f6bb97416f8bf80b83d8b131",
+    "purple-gboard-service": "e59eb1da913ab6dd7f7ee376f9db627f812b6946442905836905706e8f5e8d91",
+    "purple-keyboard-bridge": "34fc643a7472695024ff6e5e859cb4bbaa04285b6fc0d4c9ab9c9acaa35dd0cd",
+    "response-schema.json": "b85983871c13bf4304a2e43fcf8968d5e7b3f8b59332337cb405c1c45028a3aa",
+    "source-SHA256SUMS": "6ba2f4ca144e0707bdda25af6b85afb78a27e2948a8d7c98517cdbd41df9a162"
+  },
+  "sha256sums_all_match": true,
+  "source_files_matched_git_commit": 13,
+  "deployment_files_matched_git_commit": 2,
+  "public_controls": "45 passed, including successful child exit before full input was sent, normal pipe round trips, output bounds and cancellation.",
+  "android_cross_build": "Two ELF64 little-endian EM_AARCH64 executables; verified headers only, not executed.",
+  "scope": "Public synthetic host tests and Android cross-compilation only. No user input, model, microphone, phone engine or keyboard was run or installed.",
+  "input_limit": "All bytes accepted by the pipe does not prove that the child consumed or interpreted them.",
+  "release_or_device_acceptance": false,
+  "artifact_readback": "All seven ZIP members were read and hashed in memory. Hosted artifacts expire; source remains the reproducible input."
+}
