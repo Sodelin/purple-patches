@@ -1,17 +1,17 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: alpha.12 copy-only same-session Gboard preview, hosted bundle, exact-APK static inspection and private full-readback archive",
+  "current_turn_classification": "progress: alpha.13 warning for a possibly started local job, hosted bundle, exact-APK static inspection and private full-readback archive",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",
     "subagents": "None used."
   },
   "gboard_evidence": {
-    "source_commit": "4aeec4d2136314f61348795c668335f48d29a9d9",
-    "bundle": "gboard-alpha12-build-verification.json: hosted build and copy-only preview policy controls; exact MPP and overlay hashes verified.",
-    "apk": "gboard-alpha12-apk-verification.json: pinned public Gboard release signature checked and three patches applied; original API/native/asset inventory and new preview references checked statically.",
-    "custody": "GBOARD-ALPHA12-CUSTODY.md: private Drive ZIP full readback and MPP hash matched in memory; no disk restore or installation.",
+    "source_commit": "bc81100e7851c7cc0ca345e8189d16916a6bb3b0",
+    "bundle": "gboard-alpha13-build-verification.json: hosted build, copy-only preview and potential-start cancellation-ordering controls; exact MPP and overlay hashes verified.",
+    "apk": "gboard-alpha13-apk-verification.json: pinned public Gboard release signature checked and three patches applied; original API/native/asset inventory and preview/warning references checked statically.",
+    "custody": "GBOARD-ALPHA13-CUSTODY.md: private Drive ZIP full readback and MPP hash matched in memory; no disk restore or installation.",
     "companion": "companion-022-dev6-verification.json: 45 public controls and Android ARM64 cross-build; the separate Drive upload outcome is uncertain.",
     "not_proven": "No actual keyboard/UI, microphone, full-v3 inference, Sol account request, installed behavior, stock-feature regression or rollback has been accepted."
   },
@@ -30,7 +30,7 @@
     "Full large-v3 acquisition and exact engine/model acceptance when the model hold is released, including meaningful latency, memory and cancellation checks.",
     "Editor composition, result retention across session ends, long dictation and actual user-directed preview/insertion behavior; alpha.12 copy-only behavior remains untested on Android.",
     "A finite authorized install/alongside-stock regression and rollback window with adequate measured storage headroom.",
-    "A verified maintained Morphe feed for the accepted version and actual Manager import/update; the currently published alpha.1 feed has a warning and is not alpha.12."
+    "A verified maintained Morphe feed for the accepted version and actual Manager import/update; the currently published alpha.1 feed has a warning and is not alpha.13."
   ],
   "storage_observation": {
     "free_bytes": 5953245184,

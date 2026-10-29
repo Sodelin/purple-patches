@@ -28,7 +28,10 @@ wins before dispatch does not issue that warning; the worker rechecks the stop
 flag before sending. Terminal job states clear the marker. These are
 conservative, in-memory notices, not a job ID, durable recovery, confirmed
 cancellation or a way to inspect an unknown job. Session loss can still hide
-the notice. The source change has not yet been built or tested on Android.
+the notice. The [hosted bundle and cancellation-ordering controls](gboard-alpha13-build-verification.json)
+passed; [static APK inspection](gboard-alpha13-apk-verification.json) found the
+warning references and passed a missing-bridge negative control. Those checks
+do not establish Android behavior or actual cancellation and recovery.
 
 The success path has a related recovery boundary. At source `6926a11`, the
 worker seals a failure/cancellation receipt when its engine outcome is an

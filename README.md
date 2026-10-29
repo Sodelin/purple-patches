@@ -41,6 +41,11 @@ and policy controls](docs/gboard-alpha12-build-verification.json) and
 [exact-APK static inspection](docs/gboard-alpha12-apk-verification.json)
 passed. Session-end retention, active composition and Android behavior remain
 unverified; it has not replaced the public feed.
+Alpha.13 warns if a local job may have started when cancellation or an error
+occurs. Its [hosted bundle and cancellation-ordering controls](docs/gboard-alpha13-build-verification.json)
+and [exact-APK static inspection](docs/gboard-alpha13-apk-verification.json)
+passed. This warning does not provide durable job recovery or prove that a
+cancelled job stopped; the candidate remains uninstalled.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining

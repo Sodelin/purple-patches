@@ -1,0 +1,64 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40946066243,
+  "workflow_source_commit": "bc81100e7851c7cc0ca345e8189d16916a6bb3b0",
+  "bundle_build_run": 40945630370,
+  "bundle_source_commit": "bc81100e7851c7cc0ca345e8189d16916a6bb3b0",
+  "bundle_version": "0.1.0-alpha.13",
+  "bundle_sha256": "5dc7ac8e7fd9584beea76ead2dbb35036a5b52de67ac073ec4f440a2b77cc7d8",
+  "artifact_id": 12928932144,
+  "artifact_zip_bytes": 49121986,
+  "artifact_zip_sha256": "de5a667230e43ae6ea7095ef15a11f1b97fef16bc7fe54feb26d4ed6c4a6aeb8",
+  "members": {
+    "SHA256SUMS": {
+      "bytes": 354,
+      "sha256": "8dfbf8c2ba7e9c2550b6a834ab732a94841e6a3382c90b59bee5c1ae6b3f3cd0"
+    },
+    "build-run.json": {
+      "bytes": 152,
+      "sha256": "070a7c4010af2932e83dea42795a9ee5a3c30b098923f63a99ecb67fe850c3ae"
+    },
+    "gboard-patch-result.json": {
+      "bytes": 401,
+      "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"
+    },
+    "gboard-purple-unsigned.apk": {
+      "bytes": 84557618,
+      "sha256": "391fda03b164a1fa10253b743df6842b8a6270aa94854dcef2dcdb16c2c537f6"
+    },
+    "purple-provenance.json": {
+      "bytes": 1993,
+      "sha256": "f114bfccc3da6a1c9352905cacb9f1a4c5f52456be5c4358a33134676f5b5771"
+    }
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified_by_workflow": true
+  },
+  "hosted_static_verification": {
+    "original_classes_retained": 22860,
+    "output_classes": 26029,
+    "original_method_signatures_retained": 118230,
+    "original_field_signatures_retained": 85104,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "copy_only_preview_references_and_missing_class_negative_control": true,
+    "potential_start_warning_references_and_missing_bridge_negative_control": true,
+    "one_shot_insertion_and_preview_references_present": true,
+    "bootstrap_session_lifetime_references_present": true,
+    "editor_runtime_exception_handler_present": true,
+    "editor_handler_and_bootstrap_checker_negative_controls_passed": true,
+    "sol_catalog_and_filtered_effort_references_present": true,
+    "successful_protocol_health_policy_references_present": true,
+    "scoped_permission_and_background_log_extra_references_present": true,
+    "limitations": "DEX references and exception handlers are static evidence, not Android execution or proof of preview or warning control flow, cancellation, recovery, account availability or privacy. The candidate still sends its bootstrap bearer through Termux stdout."
+  },
+  "independent_artifact_verification": "ZIP and every member read and hashed in memory; checksum list, successful build source, version, patch selection and upstream provenance matched.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7
+}

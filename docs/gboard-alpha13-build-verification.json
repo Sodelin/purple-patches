@@ -1,0 +1,28 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40945630370,
+  "artifact_id": 12927859419,
+  "source_commit": "bc81100e7851c7cc0ca345e8189d16916a6bb3b0",
+  "version": "0.1.0-alpha.13",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15478411,
+  "artifact_zip_sha256": "70dd836ed135b11492f3c5127b6801ce16d4d620feb087c53a0840319197c384",
+  "members_sha256": {
+    "SHA256SUMS": "4b72781bfe8094a8451dbb41b78bbd8cb3fe53d2a404f3716787d99e37040248",
+    "patches-0.1.0-alpha.13-javadoc.mpp": "c4c7b036f23c9e3414b38477b3c819efe879e193ecd9f1bffee2fad34414cf6c",
+    "patches-0.1.0-alpha.13-sources.mpp": "a1d1314e4651dd1b3acc4b6b46bad6f4f5ba14700bfb60fd3e1e66033ba628d9",
+    "patches-0.1.0-alpha.13.mpp": "5dc7ac8e7fd9584beea76ead2dbb35036a5b52de67ac073ec4f440a2b77cc7d8",
+    "patches-bundle.json": "397c1f0f1bd6d5452b3a27967ea8790a2ae75ca35c3bdca2f012b92de5f9ba1f",
+    "patches-list.json": "2a0ca18a904a643d7d13fb49caac2c57716437b98182041958608588841e282b",
+    "purple-provenance.json": "f114bfccc3da6a1c9352905cacb9f1a4c5f52456be5c4358a33134676f5b5771"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "checks": "Hosted feed, editor/session, copy-only preview, potential-start cancellation-ordering controls, bootstrap, Sol catalog adapter with controlled JSON stubs, scoped permissions, capture and upstream patch build passed.",
+  "checks_scope": "Synthetic policy, concurrency and stub controls plus source/bundle build; no actual Android UI, callback, network cancellation, microphone, model, account or phone execution.",
+  "apk_patching_at_build_time": false,
+  "unreleased_feed_has_download_url": false,
+  "privacy_release_gate": "OPEN: Termux command still emits the bearer in stdout; the selected Codex no-tools and writer boundary is also unverified.",
+  "device_accepted": false,
+  "notes": "All archive members were read and hashed in memory and every overlay source hash matched the exact Git commit. A possible-start warning is not durable reconciliation, authenticated cancellation or a reaped-process receipt."
+}
