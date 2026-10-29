@@ -7,6 +7,7 @@ mod http;
 mod jobs;
 mod private;
 mod whisper;
+pub mod natune_journal;
 
 use private::{private_dir, read, write_atomic, Lock};
 use serde::{Deserialize, Serialize};
