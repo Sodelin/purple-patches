@@ -1,0 +1,78 @@
+{
+  "schema": "purple.hosted-apk-verification.v1",
+  "workflow_run": 40930961299,
+  "workflow_source_commit": "b957f017c17be97d47d1690fc8fef2cf70373a8b",
+  "bundle_build_run": 40930173609,
+  "bundle_source_commit": "6b3cf5faa8190f43dfb7fa234cdaa6d70919abad",
+  "bundle_version": "0.1.0-alpha.8",
+  "bundle_sha256": "7abae1c07a4eed34981518ddc612e60901bec65bd513dc7a9c36f6e5dc7934e5",
+  "artifact_id": 12922891345,
+  "artifact_zip_bytes": 49115710,
+  "artifact_zip_sha256": "5c7537e7ed69da8eaec87e9680fa378c4c96a0916bbec89543754b498ea406f8",
+  "members": {
+    "SHA256SUMS": {
+      "bytes": 354,
+      "sha256": "245eef2ec1506d8ce8223bc5cf8fca566452f2c892640a49666ffe1ffcc00705"
+    },
+    "build-run.json": {
+      "bytes": 152,
+      "sha256": "976f4dc2526d2aee363db971bd04e3f755988684fec2d26a467e239fe97219aa"
+    },
+    "gboard-patch-result.json": {
+      "bytes": 401,
+      "sha256": "373f6471df457ce1f35683ecb932ae01289c84fda6535107968b74291b0be3da"
+    },
+    "gboard-purple-unsigned.apk": {
+      "bytes": 84551527,
+      "sha256": "05725f944fd0c4bf48c03efe5d592109d85b952eed77421b3733672f19e56542"
+    },
+    "purple-provenance.json": {
+      "bytes": 1992,
+      "sha256": "edce66c902a5c513c046b12acdb8759314ee1e51517be84c1b028d174e4d1c13"
+    }
+  },
+  "input": {
+    "origin": "APKMirror supported release",
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "bytes": 80701877,
+    "sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "google_signature_verified_by_workflow": true
+  },
+  "hosted_static_verification": {
+    "original_classes_retained": 22860,
+    "output_classes": 26015,
+    "original_native_libraries_exact": 15,
+    "original_assets_exact": 140,
+    "translation_effort_references_present": true,
+    "scoped_permission_and_background_log_extra_references_present": true,
+    "recording_limit_state_and_notice_references_present": true,
+    "limitations": "DEX references are static linkage evidence, not Android execution or proof of control flow or privacy. The candidate still sends its bootstrap bearer through Termux stdout."
+  },
+  "independent_artifact_verification": "ZIP and every member read and hashed in memory; all four member checksums, bundle source commit, version and upstream provenance matched.",
+  "installed": false,
+  "signed": false,
+  "live_model_tested": false,
+  "artifact_retention_days": 7,
+  "patch_result_raw": {
+    "success": true,
+    "outputPath": "/home/runner/work/_temp/gboard-purple-unsigned.apk",
+    "packageName": "com.google.android.inputmethod.latin",
+    "packageVersion": "18.5.4.993608717-release-arm64-v8a",
+    "appliedPatches": [
+      "Add Gboard Signature Bypass",
+      "Whisper 3 dictation and AI Translate",
+      "Package Rename"
+    ],
+    "failedPatches": [],
+    "stepResults": [
+      {
+        "step": "PATCHING",
+        "success": true
+      },
+      {
+        "step": "REBUILDING",
+        "success": true
+      }
+    ]
+  }
+}

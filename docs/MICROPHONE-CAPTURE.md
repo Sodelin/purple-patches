@@ -20,9 +20,10 @@ misbehaving or stalled platform call can still delay actual microphone release;
 this design does not claim hard real-time enforcement or prove hardware behavior.
 The returned WAV still exists in memory until the caller finishes and clears it;
 this is not a claim about Android's internal audio buffers or all process writers.
-Alpha.8 source informs the user of the 60-second recording bound and indicates
-when the controller reached it; that source has not yet been built or accepted
-on Android. This does not provide longer dictation; see [LONG-DICTATION.md](LONG-DICTATION.md).
+Alpha.8 informs the user of the 60-second recording bound and indicates when
+the controller reached it. Its [off-phone build and synthetic controls](gboard-alpha8-build-verification.json)
+passed; actual Android acceptance remains open. This does not provide longer
+dictation; see [LONG-DICTATION.md](LONG-DICTATION.md).
 The stop/start timing, release, interruptions, permission flow and audio quality
 still require an authorized device acceptance test.
 

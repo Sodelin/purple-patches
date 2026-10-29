@@ -7,12 +7,14 @@ automatic limit. A user speaking beyond that point could reasonably expect audio
 that the candidate did not collect. This is source behavior, not a claim about
 an installed keyboard.
 
-Alpha.8 source keeps the existing 60-second bound but states it while recording
-and, when the capture controller reaches the time or byte limit, identifies the
-result as covering only the captured audio. Its synthetic checks cover manual
-stop, a delayed read and the byte limit. This is a transparency improvement, not
-long-form support; the alpha.8 source still needs its own build and actual
-Android validation.
+Alpha.8 keeps the existing 60-second bound but states it while recording and,
+when the capture controller reaches the time or byte limit, identifies the
+result as covering only the captured audio. Its off-phone build and synthetic
+checks passed, including manual stop, a delayed read and the byte limit; see
+[the build evidence](gboard-alpha8-build-verification.json). This is a
+transparency improvement, not long-form support. The [hosted APK inspection](gboard-alpha8-apk-verification.json)
+also found the limit state and notice references in DEX; this is static linkage,
+not proof of Android behavior. Actual Android validation remains open.
 
 Simply increasing one number does not provide complete long-form support. The
 companion currently validates at most 90 seconds per WAV; its HTTP request has a
