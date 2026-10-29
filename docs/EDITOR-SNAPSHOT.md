@@ -16,6 +16,12 @@ returns null when nothing is selected. This cannot distinguish every timeout
 from an empty selection; the surrounding reads and second position observation
 must also succeed.
 
+In `0.1.0-alpha.3`, after capturing the second snapshot, the implementation
+also checks that both that snapshot and the current input connection still
+refer to the original connection, and rechecks the current editor's sensitive
+field flags. These checks can refuse an observed editor switch during capture;
+they do not make editor reads and insertion atomic.
+
 The original session/editor/content checks still run before preview and before
 explicit insertion. Multiple editor IPC calls and the later `commitText` are
 not an atomic compare-and-replace; an editor can change between the last check

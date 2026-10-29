@@ -259,7 +259,10 @@ public final class PurpleAiRuntime {
             EditorInfo info=ime.getCurrentInputEditorInfo();
             if (info==null || SessionPolicy.sensitive(info.inputType,info.imeOptions)) return false;
             Snapshot now=capture(ime,current);
-            return now!=null && now.start==start && now.end==end && now.offset==offset
+            EditorInfo finalInfo=ime.getCurrentInputEditorInfo();
+            return now!=null && now.connection==connection && ime.getCurrentInputConnection()==connection
+                    && finalInfo!=null && !SessionPolicy.sensitive(finalInfo.inputType,finalInfo.imeOptions)
+                    && now.start==start && now.end==end && now.offset==offset
                     && SessionPolicy.sameAnchor(session,current,before,after,selected,now.before,now.after,now.selected);
         }
     }
