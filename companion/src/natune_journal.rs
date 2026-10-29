@@ -34,12 +34,28 @@ pub struct Document {
     pub sha256: String,
 }
 
+/// An observation supplied by the selected receiver's real owner, never a
+/// credential, automatic removal permit, or proof by itself. Its byte extent
+/// and digest must match this operation's independently verified local copy.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct RemoteReceipt {
+    pub receiver_id: String,
+    pub transfer_id: String,
+    pub bytes: u64,
+    pub sha256: String,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Event {
     Begin { claim: Claim },
     Destination { uri: String },
     Verified { document: Document },
+    // Version 2 observations for a verified computer handoff. The real owner
+    // must bind these observations to the actual receiver and cleanup result.
+    RemoteVerified { receipt: RemoteReceipt },
+    StageCleaned,
     Indexed,
     RemovalPending,
     Moved,
@@ -49,7 +65,7 @@ pub enum Event {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Stage { Reserved, Destination, Verified, Indexed, RemovalPending, Moved, Abandoned }
+pub enum Stage { Reserved, Destination, Verified, RemoteVerified, StagedRemotely, Indexed, RemovalPending, Moved, Abandoned }
 
 #[derive(Clone, Debug)]
 pub struct Snapshot {
@@ -57,6 +73,9 @@ pub struct Snapshot {
     pub generation: u64,
     pub stage: Stage,
     pub document: Option<Document>,
+    pub remote: Option<RemoteReceipt>,
+    schema: u32,
+    local_cleaned: bool,
     destination: Option<String>,
     last_hash: String,
 }
@@ -157,6 +176,14 @@ impl<S: Store> Journal<S> {
                 return Err("Competing Move claims require reconciliation".into());
             }
         }
+        let mut transfers = BTreeSet::new();
+        for row in journal.rows.values() {
+            if let Some(remote) = &row.remote {
+                if !transfers.insert((&remote.receiver_id, &remote.transfer_id)) {
+                    return Err("Remote receipt identity reused across Move claims".into());
+                }
+            }
+        }
         // Recovery preserves oversized historical holds; a lower pool must not
         // prevent reconciliation. New admissions still refuse overcommit.
         journal.reserved_bytes()?;
@@ -168,7 +195,7 @@ impl<S: Store> Journal<S> {
     }
     pub fn reserved_bytes(&self) -> Result<u64, String> {
         self.certain()?;
-        self.rows.values().filter(|r| !matches!(r.stage, Stage::Moved | Stage::Abandoned))
+        self.rows.values().filter(|r| !r.local_cleaned && !matches!(r.stage, Stage::Moved | Stage::Abandoned))
             .try_fold(0u64, |total,r| total.checked_add(r.claim.peak_bytes).ok_or_else(|| "Move holds overflow".into()))
     }
     /// Includes settled IDs so a restarted mirror cannot readmit them. The
@@ -182,7 +209,7 @@ impl<S: Store> Journal<S> {
             operation_id: row.claim.operation_id.clone(),
             source_bytes: row.claim.source_bytes,
             peak_bytes: row.claim.peak_bytes,
-            unsettled: !matches!(row.stage, Stage::Moved | Stage::Abandoned),
+            unsettled: !row.local_cleaned && !matches!(row.stage, Stage::Moved | Stage::Abandoned),
         }).collect();
         Ok(AdmissionRecovery { attempts, reserved_bytes })
     }
@@ -190,9 +217,16 @@ impl<S: Store> Journal<S> {
     /// No URI/length descriptor is promoted into a native write or removal permit.
     pub fn document(&self, song: &str, rendition: &str) -> Result<Option<&Document>, String> {
         self.certain()?;
-        Ok(self.rows.values().find(|r| r.claim.song_id == song && r.claim.rendition_key == rendition &&
+        Ok(self.rows.values().find(|r| !r.local_cleaned && r.claim.song_id == song && r.claim.rendition_key == rendition &&
             matches!(r.stage, Stage::Indexed | Stage::RemovalPending | Stage::Moved))
             .and_then(|r| r.document.as_ref()))
+    }
+    /// Recovery reference only; the real owner must revalidate the selected
+    /// receiver, saved bytes and current original before any source removal.
+    pub fn remote_receipt(&self, song: &str, rendition: &str) -> Result<Option<&RemoteReceipt>, String> {
+        self.certain()?;
+        Ok(self.rows.values().find(|r| r.claim.song_id == song && r.claim.rendition_key == rendition && r.remote.is_some())
+            .and_then(|r| r.remote.as_ref()))
     }
     /// expected_generation=None only for an ORIGINAL Begin. After an uncertain
     /// append this object refuses all access; reopen/reconcile, never auto-retry.
@@ -224,7 +258,8 @@ impl<S: Store> Journal<S> {
                 return Err("Temporary pool busy or track oversized".into());
             }
         }
-        let record = Record { schema: 1, operation_id: operation_id.to_owned(), generation,
+        let schema = if prior.is_some_and(|p| p.schema == 2) || matches!(&event, Event::RemoteVerified { .. }) { 2 } else { 1 };
+        let record = Record { schema, operation_id: operation_id.to_owned(), generation,
             previous_sha256: prior.map(|r| r.last_hash.clone()), event };
         let bytes = serde_json::to_vec(&record).map_err(|_| "Move event encoding failed")?;
         if bytes.len() > EVENT_CAP { return Err("Move event too large".into()); }
@@ -251,10 +286,16 @@ impl<S: Store> Journal<S> {
                 return Err("Move claim invalid, repeated or requires explicit replacement custody".into());
             }
             return Ok(Snapshot { claim: claim.clone(), generation: 0, stage: Stage::Reserved,
-                destination: None, document: None, last_hash: hash(bytes) });
+                destination: None, document: None, remote: None, schema: 1, local_cleaned: false, last_hash: hash(bytes) });
         }
         let mut next = self.rows.get(&record.operation_id).ok_or("Move claim missing")?.clone();
-        if record.schema != 1 || next.generation.checked_add(1) != Some(record.generation) ||
+        let schema_ok = match (next.schema, record.schema) {
+            (1, 1) => !matches!(&record.event, Event::RemoteVerified { .. } | Event::StageCleaned),
+            (1, 2) => matches!(&record.event, Event::RemoteVerified { .. }),
+            (2, 2) => true,
+            _ => false,
+        };
+        if !schema_ok || next.generation.checked_add(1) != Some(record.generation) ||
             record.previous_sha256.as_deref() != Some(next.last_hash.as_str()) {
             return Err("Move event chain differs".into());
         }
@@ -266,12 +307,22 @@ impl<S: Store> Journal<S> {
                 next.destination.as_ref() == Some(&document.uri) && document.bytes == next.claim.source_bytes && hex64(&document.sha256) => {
                 next.document = Some(document.clone()); Stage::Verified
             }
+            (Stage::Verified, Event::RemoteVerified { receipt }) if
+                text(&receipt.receiver_id,128) && text(&receipt.transfer_id,128) && hex64(&receipt.sha256) &&
+                next.document.as_ref().is_some_and(|d| d.bytes == receipt.bytes && d.sha256 == receipt.sha256) &&
+                !self.rows.values().any(|row| row.claim.operation_id != record.operation_id &&
+                    row.remote.as_ref().is_some_and(|r| r.receiver_id == receipt.receiver_id && r.transfer_id == receipt.transfer_id)) => {
+                next.remote = Some(receipt.clone()); Stage::RemoteVerified
+            }
+            (Stage::RemoteVerified, Event::StageCleaned) => { next.local_cleaned = true; Stage::StagedRemotely }
             (Stage::Verified, Event::Indexed) => Stage::Indexed,
             (Stage::Indexed, Event::RemovalPending) => Stage::RemovalPending,
+            (Stage::StagedRemotely, Event::RemovalPending) => Stage::RemovalPending,
             (Stage::RemovalPending, Event::Moved) => Stage::Moved,
             (Stage::Reserved | Stage::Destination | Stage::Verified, Event::Abandoned) => Stage::Abandoned,
             _ => return Err("Move lifecycle transition refused".into()),
         };
+        next.schema = record.schema;
         next.generation = record.generation;
         next.last_hash = hash(bytes);
         Ok(next)
@@ -328,6 +379,10 @@ mod tests {
     }
     fn document() -> Document {
         Document { uri: "content://fixture.documents/document/song".into(), bytes:90, sha256:"b".repeat(64) }
+    }
+    fn receipt() -> RemoteReceipt {
+        RemoteReceipt { receiver_id:"public-fixture-receiver".into(), transfer_id:"public-fixture-transfer".into(),
+            bytes:document().bytes, sha256:document().sha256 }
     }
     fn begin(j: &mut Journal<Memory>, c: &Claim) {
         j.record(&c.operation_id,None,Event::Begin{claim:c.clone()}).unwrap();
@@ -419,6 +474,66 @@ mod tests {
         // This event is a synthetic owner observation, not removal authority.
         step(&mut restored,&c,Event::Moved);
         assert_eq!(restored.reserved_bytes().unwrap(),0);
+    }
+    #[test]
+    fn remote_verified_and_cleaned_releases_only_temporary_charge_across_restart() {
+        let memory=Memory::default(); let c=claim('c'); let mut j=Journal::open(memory.clone(),100).unwrap();
+        begin(&mut j,&c); verify(&mut j,&c);
+        step(&mut j,&c,Event::RemoteVerified{receipt:receipt()});
+        assert_eq!(j.reserved_bytes().unwrap(),100);
+        assert_eq!(j.snapshot(&c.operation_id).unwrap().unwrap().stage,Stage::RemoteVerified);
+        assert_eq!(j.remote_receipt(&c.song_id,&c.rendition_key).unwrap(),Some(&receipt()));
+        drop(j);
+        let mut restored=Journal::open(memory.clone(),100).unwrap();
+        assert_eq!(restored.reserved_bytes().unwrap(),100);
+        step(&mut restored,&c,Event::StageCleaned);
+        assert_eq!(restored.reserved_bytes().unwrap(),0);
+        assert!(restored.document(&c.song_id,&c.rendition_key).unwrap().is_none());
+        assert_eq!(restored.remote_receipt(&c.song_id,&c.rendition_key).unwrap(),Some(&receipt()));
+        let generation=restored.snapshot(&c.operation_id).unwrap().unwrap().generation;
+        assert!(restored.record(&c.operation_id,Some(generation),Event::RemovalPending).is_err());
+        assert!(restored.record(&c.operation_id,Some(generation),Event::Moved).is_err());
+        drop(restored);
+        let mut again=Journal::open(memory.clone(),100).unwrap();
+        assert_eq!(again.snapshot(&c.operation_id).unwrap().unwrap().stage,Stage::StagedRemotely);
+        assert_eq!(again.admission_recovery().unwrap().reserved_bytes,0);
+        assert!(!again.admission_recovery().unwrap().attempts[0].unsettled);
+        let another=claim('d'); begin(&mut again,&another); // Separate track can use the recovered budget.
+        assert_eq!(again.reserved_bytes().unwrap(),100);
+        assert!(again.record(&c.operation_id,None,Event::Begin{claim:c.clone()}).is_err());
+    }
+    #[test]
+    fn remote_receipt_must_match_verified_copy_and_transfer_identity_is_unique() {
+        let memory=Memory::default(); let mut j=Journal::open(memory.clone(),1000).unwrap(); let a=claim('c');
+        begin(&mut j,&a); verify(&mut j,&a);
+        assert!(j.record(&a.operation_id,Some(2),Event::StageCleaned).is_err());
+        for wrong in [RemoteReceipt{bytes:89,..receipt()}, RemoteReceipt{sha256:"c".repeat(64),..receipt()},
+                RemoteReceipt{receiver_id:String::new(),..receipt()}, RemoteReceipt{transfer_id:String::new(),..receipt()}] {
+            assert!(j.record(&a.operation_id,Some(2),Event::RemoteVerified{receipt:wrong}).is_err());
+        }
+        assert_eq!(memory.events.lock().unwrap().len(),3);
+        step(&mut j,&a,Event::RemoteVerified{receipt:receipt()});
+        let b=claim('d'); begin(&mut j,&b); verify(&mut j,&b);
+        assert!(j.record(&b.operation_id,Some(2),Event::RemoteVerified{receipt:receipt()}).is_err());
+        assert_eq!(memory.events.lock().unwrap().len(),7);
+    }
+    #[test]
+    fn remote_cleanup_unknown_refuses_replay_and_schema_downgrade() {
+        let memory=Memory::default(); let c=claim('e'); let mut j=Journal::open(memory.clone(),1000).unwrap();
+        begin(&mut j,&c); verify(&mut j,&c); step(&mut j,&c,Event::RemoteVerified{receipt:receipt()});
+        memory.fail_after_write.store(true,Ordering::SeqCst);
+        assert!(j.record(&c.operation_id,Some(3),Event::StageCleaned).is_err());
+        assert!(j.reserved_bytes().is_err());
+        assert!(j.record(&c.operation_id,Some(3),Event::StageCleaned).is_err());
+        let restored=Journal::open(memory.clone(),1000).unwrap();
+        assert_eq!(restored.snapshot(&c.operation_id).unwrap().unwrap().stage,Stage::StagedRemotely);
+        assert_eq!(restored.reserved_bytes().unwrap(),0);
+        let name=format!("{}-{:016x}.age",c.operation_id,4);
+        let mut events=memory.events.lock().unwrap();
+        let mut value:serde_json::Value=serde_json::from_slice(&events[&name]).unwrap();
+        value["schema"]=1.into(); events.insert(name,serde_json::to_vec(&value).unwrap());
+        drop(events);
+        assert!(Journal::open(memory,1000).is_err());
     }
     #[test]
     fn accepted_but_uncertain_persistence_poisoned_until_explicit_recovery() {

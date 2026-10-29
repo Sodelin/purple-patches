@@ -45,12 +45,29 @@ recorded in `removal-gate-verification.json`. The checker was not run on the
 phone; these controls do not verify the real receiver, original app, encryption
 backend, selection or any music copy.
 
-The user's current computer-transfer workflow also needs a separately versioned
-state for a verified computer copy and removed temporary shared document while
-the phone's original cache remains. V1 cannot release that staging charge
-without claiming the original was moved or abandoned, so it is not a compatible
-computer-transfer scheduler yet. Keep existing history readable; do not invent
-remote receipt or a disposable-document mapping.
+V2 source adds a separate computer-transfer branch after `Verified`:
+
+| Durable stage | Required actual owner observation | Reservation / mapping |
+| --- | --- | --- |
+| RemoteVerified | The selected receiver's independently checked byte count and SHA-256 equal this operation's verified source/local copy; receiver and transfer identities are bound to the actual receipt | Still charged; source and staging remain |
+| StagedRemotely | The owner has confirmed this operation's disposable shared document and related temporary staging are gone; original cached song remains | Temporary charge released; remote receipt retained; no local playback URI advertised |
+
+The actual receiver/authentication, original source, cleanup and Android owner
+are still **unbound**. These events are observations supplied by the trusted
+owner, not proof of their own truth, permission to remove source music, or a
+working scheduler. Unknown remote completion or cleanup keeps the reservation
+charged until the owner reconciles it. Reusing a receiver/transfer identity for
+another song, mismatched bytes or digest, out-of-order cleanup, and a schema
+downgrade refuse. After confirmed staging cleanup, the document is not returned
+as a live local playback mapping. The original song remains claimed and its
+operation ID consumed; moving it later still requires an actual bound removal
+and selection path.
+
+Older v1 records remain readable. The first `RemoteVerified` record upgrades
+that operation's chain to schema 2, with no downgrade; an older reader that
+does not know those events must refuse rather than silently discard them. No
+history is rewritten. No serializer or receipt descriptor authenticates a
+caller or rechecks computer bytes on restart.
 
 The journal records observations; none of these enums authenticates a caller,
 recreates a native permit or executes a copy/removal. Android may not submit

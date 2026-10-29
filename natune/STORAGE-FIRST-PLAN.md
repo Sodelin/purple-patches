@@ -82,9 +82,10 @@ An independently useful local shared-folder copy may instead be retained for
 playback. Retaining it does not by itself authorize original removal under the
 current user condition or establish computer storage recovery. The existing
 v1 journal keeps a temporary charge until source removal and indexes the local
-URI: it cannot yet represent the verified-remote/cleaned-staging/original-held
-state. Do not deploy it as the computer-transfer scheduler until a versioned
-recovery path for that state and its actual receiver binding exist.
+URI. V2 source now models the verified-remote/cleaned-staging/original-held
+state without advertising a deleted local URI. Its actual receiver, source and
+cleanup observations are unbound; do not deploy it as the computer-transfer
+scheduler until those real ownership bindings and recovery checks exist.
 
 Check fresh headroom before each admission and during output, with a nonzero
 failure/cleanup allowance. Account for outstanding promises without double-counting
@@ -127,7 +128,7 @@ all Android writers.
 |6. Transaction and recovery | Original operation identity with required encrypted-before-persistence claim/result/recovery; restart/UNKNOWN reconciliation. | Rust journal and production encrypted-file backend reuse the existing vault;8 RAM lifecycle/recovery tests and Android cross-build pass. Actual app-scoped writer/delegation and real journal acceptance remain unbound; no new identity is authorized. |
 |7. Exact cache release | First verify the complete matching source and computer copy and applicable selection/KEEP decisions; then settle the original request, preserve other source variants/readers/owners, release only eligible unchanged cached bytes and reconcile counters. Omni acceptance is not required for the additional music covered by Nolan's clarification. | Original request-key remover and all-source listener both affect deletion scope; even a removal callback may follow task/index/purge failure. The real receiver, scoped listener/removal and settlement bindings remain open; no deletion path exists in the new reader. |
 |8. Library and playback | Stable original song/rendition→content URI mapping, coherent download indicators/playlists/favorites and offline playback after cache release. | Native content-URI bypass is reusable; request conversion preserves original key/range. Rust original-ID/rendition index is implemented; Android lookup/delegation, pre-router bytecode hook and prefetch/recovery guards remain unbound (shared-document-playback-source-review.json). |
-|9. Remote transfer and cleanup | Selected receiver gets complete verified bytes at the owner-selected destination; disposable staging is confirmed removed before its reservation settles. Original phone-file removal separately requires verified source/copy and applicable selection. No unaccounted upload staging. | Existing route/owners are retained. The v1 journal cannot yet represent remote-verified staging cleanup while the source remains; no media transfer/deletion is performed by this plan or the current source checks. |
+|9. Remote transfer and cleanup | Selected receiver gets complete verified bytes at the owner-selected destination; disposable staging is confirmed removed before its reservation settles. Original phone-file removal separately requires verified source/copy and applicable selection. No unaccounted upload staging. | V2 source models remote verification and staging cleanup without source removal; real receiver/cleanup binding and phone acceptance remain open. No media transfer/deletion is performed by this plan or the current source checks. |
 |10. Packaging and phone proof | Reproducible off-phone MPP/APK patching, declared compatibility, full unrelated-code/resource preservation, finite install/regression/rollback acceptance and verified update source. | Previous unrelated quality candidates are not a Move release. A storage MPP, complete patched APK verification, installation route and device acceptance remain open. |
 
 ## First gate: signer/data continuity
