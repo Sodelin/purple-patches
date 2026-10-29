@@ -1,0 +1,28 @@
+{
+  "schema": "purple.hosted-build-verification.v1",
+  "workflow_run": 40944057629,
+  "artifact_id": 12927654379,
+  "source_commit": "4aeec4d2136314f61348795c668335f48d29a9d9",
+  "version": "0.1.0-alpha.12",
+  "upstream_commit": "2eb71854accc7e906d3e4f5495b2a54ed1e2af47",
+  "artifact_zip_bytes": 15478563,
+  "artifact_zip_sha256": "9781939583d0cf15940d8d7928fb593c4106f284b83af51f3da0cac51b926803",
+  "members_sha256": {
+    "SHA256SUMS": "db82605d0335d268643cc314d757d09f639aa8c6e3152c6b2b1b9bee629b9f08",
+    "patches-0.1.0-alpha.12-javadoc.mpp": "88fbf2da0196d4d34ea95adf0c7d997cf244ab4f7b6655343d36f7691a6dacf3",
+    "patches-0.1.0-alpha.12-sources.mpp": "f83bf8adde1ebb61de7cdb3361bb79ba653148d1a370d2e57cc9fb1266c8d0d6",
+    "patches-0.1.0-alpha.12.mpp": "8671786f4aa918930e0505ef66a762e05404a595f30264d78d3f5e129c6fa051",
+    "patches-bundle.json": "db0c74257bf2bc1326963b8f2dcc8c44f9b3440c5860c8ddc215feac5e84b0ea",
+    "patches-list.json": "ea9072b9936ab5999e60f21f088e911406df6e6022d4d2937f914543333a2b7c",
+    "purple-provenance.json": "5faf2b4d5e991f06655f87e15ea631d4dde1a3d54a4701f8181819b479d5c961"
+  },
+  "sha256sums_all_match": true,
+  "overlay_files_matched_git_commit": 11,
+  "checks": "Hosted feed, editor/session, changed-or-unverifiable-anchor copy-only preview policy, bootstrap, Sol catalog adapter with controlled JSON stubs, scoped permissions, capture and upstream patch build passed.",
+  "checks_scope": "Synthetic policy and stub controls plus source/bundle build; no actual Android JSON parser, UI, callback, microphone, model, account or phone execution.",
+  "apk_patching_at_build_time": false,
+  "unreleased_feed_has_download_url": false,
+  "privacy_release_gate": "OPEN: Termux command still emits the bearer in stdout; the selected Codex no-tools and writer boundary is also unverified.",
+  "device_accepted": false,
+  "notes": "All archive members were read and hashed in memory and every overlay source hash matched the exact Git commit. Earlier run 40943601099 was intentionally canceled after a wording correction; its incomplete build is not counted."
+}

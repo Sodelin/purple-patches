@@ -35,6 +35,12 @@ Alpha.11 uses the local Sol catalog to show only advertised Medium/Max options;
 its [hosted bundle and synthetic catalog controls](docs/gboard-alpha11-build-verification.json)
 and [exact-APK static checks](docs/gboard-alpha11-apk-verification.json) passed.
 No live account or Android behavior has been verified.
+Alpha.12 offers a copy-only preview when the original editor anchor changed or
+cannot be verified within the same non-sensitive session. Its [hosted bundle
+and policy controls](docs/gboard-alpha12-build-verification.json) and
+[exact-APK static inspection](docs/gboard-alpha12-apk-verification.json)
+passed. Session-end retention, active composition and Android behavior remain
+unverified; it has not replaced the public feed.
 
 A versioned patch source for Morphe, starting with Gboard. The first candidate
 adds separate **Whisper 3 dictation** and **AI Translate** actions while retaining

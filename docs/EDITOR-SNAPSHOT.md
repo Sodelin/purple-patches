@@ -79,9 +79,12 @@ Through alpha.11, when an operation completes, its queued UI callback returns
 without showing the result if the captured editor anchor no longer matches.
 Alpha.12 source instead displays a selectable, copy-only preview when the
 original request is still current in the same non-sensitive session but its
-anchor no longer matches or cannot be verified. Insert is disabled for that preview. It still checks the
-anchor before an insertion offered in the unchanged case. The source and pure
-policy controls have not yet been built or tested on Android.
+anchor no longer matches or cannot be verified. Insert is disabled for that
+preview. It still checks the anchor before an insertion offered in the unchanged
+case. The [hosted bundle and pure policy controls](gboard-alpha12-build-verification.json)
+passed, and [static APK inspection](gboard-alpha12-apk-verification.json) found
+the preview references and passed a missing-class negative control. Static
+references do not prove Android control flow; device behavior remains untested.
 
 Ending the input session still cancels the operation and dismisses its dialog.
 The current implementation does not provide a way to recover a generated
