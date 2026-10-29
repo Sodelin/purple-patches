@@ -54,6 +54,8 @@ fixture checks and packaging work moving while that action is held.
 
 The current public feed and historical local deliverable point to alpha.1, which
 has the editor-snapshot issue documented in [EDITOR-SNAPSHOT.md](EDITOR-SNAPSHOT.md).
+The feed description now warns against installing it; anonymous readback is
+recorded in [feed-warning-readback-20261029.json](feed-warning-readback-20261029.json).
 Do not treat it as the current activation candidate. The hosted archives also
 contain auxiliary `-sources.mpp` and `-javadoc.mpp` outputs; those are not the
 Manager patch input. Actual Manager import/update remains unperformed.
