@@ -25,5 +25,5 @@ resistance to prompt injection. Prompt wording is not a no-tools guarantee.
 The independent CLI tool-catalogue, privacy-writer, account, cancellation,
 device and installation gates remain open; Codex may send submitted text to
 the configured service. The [hosted companion verification](companion-022-dev7-verification.json)
-passed the synthetic controls and Android cross-build. No model request or
-phone action was made for these source controls.
+passed the synthetic controls and Android cross-build. No model request,
+installed-app execution or keyboard activation was made for these controls.
