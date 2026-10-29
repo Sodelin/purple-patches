@@ -55,6 +55,7 @@ fn check() -> Result<(), String> {
         bytes:9,
         sha256:format!("{:x}",Sha256::digest(b"123456789")),
         actual_display_name:None,
+        flac_integrity:None,
     };
     let receipt=RemoteReceipt {
         receiver_id:"PUBLIC-FIXTURE-NOT-A-RECEIVER".into(),

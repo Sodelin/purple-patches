@@ -168,6 +168,13 @@ and a name changing during publication, and compiled against the Android SDK.
 `media-store-name-verification.json` pins its source, artifact and the separate
 Rust journal controls. This is not an app, device or real journal test.
 
+The uninstalled successor adds a distinct `runFlac` attempt which requires the
+selected native-FLAC verifier before any reservation, then validates the full
+copied stream against the same source/destination proof before publishing it.
+Missing checksums or unknown sample counts refuse that strict path; an ordinary
+copy of another format remains separate. Its host controls are pending and the
+real journal owner must retain the actual FLAC result with the operation.
+
 The copy result is in-memory byte evidence, not a deletion permit or completed
 move. The source lease/coverage reader is now implemented against the exact
 original public ABI and controlled stand-ins; its actual UI/caller hook,

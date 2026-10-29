@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HexFormat;
 
 /** Public hosted fixtures only; no app, provider, phone or personal audio. */
 public final class FlacIntegrityControls {
@@ -30,6 +31,8 @@ public final class FlacIntegrityControls {
     static final class Destination implements VerifiedStreamCopy.Destination {
         byte[] body;
         boolean closeFailure;
+        int maxRead = Integer.MAX_VALUE;
+        boolean zeroRead;
         public OutputStream openNewOutput() {
             return new ByteArrayOutputStream() {
                 public void close() throws IOException { super.close(); body = toByteArray(); }
@@ -37,6 +40,10 @@ public final class FlacIntegrityControls {
         }
         public InputStream reopen() {
             return new ByteArrayInputStream(body.clone()) {
+                public synchronized int read(byte[] b, int off, int len) {
+                    if (zeroRead) return 0;
+                    return super.read(b, off, Math.min(len, maxRead));
+                }
                 public void close() throws IOException {
                     super.close();
                     if (closeFailure) throw new IOException("Synthetic close failure");
@@ -58,8 +65,11 @@ public final class FlacIntegrityControls {
     }
     public static void main(String[] args) throws Exception {
         Path root = Path.of(args[0]);
-        for (int bits : new int[] {8, 16, 24, 32}) {
+        for (int bits : new int[] {4, 8, 12, 16, 20, 24, 31, 32}) {
             byte[] input = Files.readAllBytes(root.resolve("fixture-" + bits + ".flac"));
+            String expected = Files.readString(root.resolve("fixture-" + bits + ".md5")).trim();
+            need(HexFormat.of().formatHex(Arrays.copyOfRange(input, 26, 42)).equals(expected),
+                "Encoder STREAMINFO matches independently computed source PCM digest");
             Copy copy = new Copy(input);
             FlacIntegrity.Result result = copy.inspect();
             need(result.state == FlacIntegrity.State.VERIFIED && result.bitsPerSample == bits &&
@@ -87,9 +97,19 @@ public final class FlacIntegrityControls {
         refuses(() -> new Copy(badFrame).inspect(), "Damaged frame CRC or decoded samples");
         refuses(() -> new Copy(Arrays.copyOf(valid, valid.length - 5)).inspect(), "Truncated FLAC");
         refuses(() -> new Copy(new byte[] {1, 2, 3, 4, 5, 6, 7}).inspect(), "Not a FLAC stream");
+        byte[] trailing = Arrays.copyOf(valid, valid.length + 1); trailing[valid.length] = 7;
+        refuses(() -> new Copy(trailing).inspect(), "Unparsed trailing bytes");
+        trailing[valid.length] = (byte) 0xff;
+        refuses(() -> new Copy(trailing).inspect(), "Trailing partial frame sync");
 
         Copy changed = new Copy(valid); changed.destination.body[changed.destination.body.length - 1] ^= 1;
         refuses(changed::inspect, "Verified destination changed");
+        Copy changedMetadata = new Copy(valid); changedMetadata.destination.body = noTotal;
+        refuses(changedMetadata::inspect, "Valid but changed encoded bytes differ from copy proof");
+        Copy fragmented = new Copy(valid); fragmented.destination.maxRead = 101;
+        need(fragmented.inspect().state == FlacIntegrity.State.VERIFIED, "Fragmented stream remains complete");
+        Copy zeroRead = new Copy(valid); zeroRead.destination.zeroRead = true;
+        refuses(zeroRead::inspect, "Invalid zero-progress read");
         Copy wrong = new Copy(valid); Copy other = new Copy(valid);
         refuses(() -> FlacIntegrity.verify(wrong.proof, other.source, other.destination, () -> {}),
             "Proof belongs to the original source and destination");

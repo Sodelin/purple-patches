@@ -100,6 +100,15 @@ name observation are recorded in `media-store-name-verification.json`; actual
 Android selection, app-authenticated encrypted writer and restart/UNKNOWN
 recovery remain unbound.
 
+The next source candidate also binds the user's strict-FLAC choice at `Begin`.
+A strict MediaStore claim requires an `audio/flac` destination and will not
+accept `Verified` without the decoder owner's sample count, sample rate,
+channel count and original bit depth. An ordinary copy may omit those fields;
+legacy claims/documents retain their original serialized form. This structured
+observation is not itself proof that the real app ran the verifier. The
+integrated source and changed Rust constructor fields require their own hosted
+checks and a real encrypted owner before deployment.
+
 Hosted [run 40911881847](https://github.com/Sodelin/purple-patches/actions/runs/40911881847)
 at `ef58831a2e18bb966f173ac6ca394c4b2537fba4` passed 42 Rust library
 controls and cross-built the checker. The fixtures cover matching remote

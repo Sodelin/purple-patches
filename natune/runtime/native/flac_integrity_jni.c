@@ -13,7 +13,7 @@ typedef struct {
     jmethodID read_method, check_method;
     int failed, eof, info_seen, checksum_present;
     uint32_t rate, channels, bits;
-    uint64_t expected_samples, samples;
+    uint64_t expected_samples, samples, encoded_read, last_frame_end;
 } Context;
 
 static int current(Context *ctx) {
@@ -49,8 +49,19 @@ static FLAC__StreamDecoderReadStatus read_data(const FLAC__StreamDecoder *decode
     (*ctx->env)->GetByteArrayRegion(ctx->env, chunk, 0, n, (jbyte *) buffer);
     (*ctx->env)->DeleteLocalRef(ctx->env, chunk);
     if ((*ctx->env)->ExceptionCheck(ctx->env)) { ctx->failed = 1; return FLAC__STREAM_DECODER_READ_STATUS_ABORT; }
+    if ((uint64_t) n > UINT64_MAX - ctx->encoded_read) {
+        ctx->failed = 1; return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
+    }
+    ctx->encoded_read += (uint64_t) n;
     *bytes = (size_t) n;
     return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
+}
+
+static FLAC__StreamDecoderTellStatus tell_data(const FLAC__StreamDecoder *decoder,
+        FLAC__uint64 *offset, void *data) {
+    (void) decoder;
+    *offset = ((Context *) data)->encoded_read;
+    return FLAC__STREAM_DECODER_TELL_STATUS_OK;
 }
 
 static void metadata(const FLAC__StreamDecoder *decoder,
@@ -71,7 +82,6 @@ static void metadata(const FLAC__StreamDecoder *decoder,
 
 static FLAC__StreamDecoderWriteStatus write_audio(const FLAC__StreamDecoder *decoder,
         const FLAC__Frame *frame, const FLAC__int32 *const samples[], void *data) {
-    (void) decoder;
     Context *ctx = data;
     if (ctx->failed || !ctx->info_seen || !current(ctx) || frame == NULL || samples == NULL ||
             frame->header.channels != ctx->channels || frame->header.sample_rate != ctx->rate ||
@@ -83,6 +93,12 @@ static FLAC__StreamDecoderWriteStatus write_audio(const FLAC__StreamDecoder *dec
     }
     for (uint32_t i = 0; i < ctx->channels; i++)
         if (samples[i] == NULL) { ctx->failed = 1; return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT; }
+    FLAC__uint64 frame_end = 0;
+    if (!FLAC__stream_decoder_get_decode_position(decoder, &frame_end) ||
+            frame_end <= ctx->last_frame_end || frame_end > ctx->encoded_read) {
+        ctx->failed = 1; return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+    }
+    ctx->last_frame_end = frame_end;
     ctx->samples += frame->header.blocksize;
     if ((ctx->expected_samples != 0 && ctx->samples > ctx->expected_samples) || !current(ctx)) {
         ctx->failed = 1; return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
@@ -110,7 +126,7 @@ Java_dev_purple_patches_natune_FlacIntegrity_decode(JNIEnv *env, jclass type, jo
     FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
     int initialized = 0, success = 0;
     if (decoder != NULL && FLAC__stream_decoder_set_md5_checking(decoder, true) &&
-            FLAC__stream_decoder_init_stream(decoder, read_data, NULL, NULL, NULL, NULL,
+            FLAC__stream_decoder_init_stream(decoder, read_data, NULL, tell_data, NULL, NULL,
                 write_audio, metadata, decoder_error, &ctx) == FLAC__STREAM_DECODER_INIT_STATUS_OK) {
         initialized = 1;
         FLAC__bool processed = FLAC__stream_decoder_process_until_end_of_stream(decoder);
@@ -119,6 +135,7 @@ Java_dev_purple_patches_natune_FlacIntegrity_decode(JNIEnv *env, jclass type, jo
         initialized = 0;
         success = processed && finished && state == FLAC__STREAM_DECODER_END_OF_STREAM &&
             ctx.eof && !ctx.failed && ctx.info_seen && ctx.samples > 0 &&
+            ctx.last_frame_end == ctx.encoded_read &&
             (ctx.expected_samples == 0 || ctx.samples == ctx.expected_samples);
     }
     if (decoder != NULL) {

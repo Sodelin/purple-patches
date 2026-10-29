@@ -38,10 +38,10 @@ public final class NatuneFolderCopy {
     public interface JournalOwner {
         void begin(String operationId, String actualCacheKey,
                 VerifiedStreamCopy.SourceLease source,
-                TemporarySpaceBudget.Reservation reservation, Target target) throws IOException;
+                TemporarySpaceBudget.Reservation reservation, Target target, boolean requireFullFlac) throws IOException;
         void destination(String operationId, Uri actualReturnedUri) throws IOException;
         void verified(String operationId, Uri actualReturnedUri, String actualDisplayName,
-                VerifiedStreamCopy.VerifiedCopy copy) throws IOException;
+                VerifiedStreamCopy.VerifiedCopy copy, FlacIntegrity.Result flac) throws IOException;
     }
 
     /** Frozen user-selected local MediaStore destination; no grant is created. */
@@ -65,7 +65,7 @@ public final class NatuneFolderCopy {
     public enum Phase {
         NEW, ENTERED, RESERVED, BEGIN_ENTERED, BEGIN_RETAINED,
         CREATE_ENTERED, DESTINATION_RETURNED, DESTINATION_ENTERED,
-        DESTINATION_RETAINED, WRITE_ENTERED, COPY_VERIFIED, PUBLISH_ENTERED,
+        DESTINATION_RETAINED, WRITE_ENTERED, COPY_VERIFIED, FLAC_VERIFY_ENTERED, FLAC_VERIFIED, PUBLISH_ENTERED,
         PUBLISHED, VERIFIED_ENTERED, VERIFIED_RETAINED, LOCAL_VERIFIED
     }
 
@@ -81,6 +81,7 @@ public final class NatuneFolderCopy {
         private volatile boolean failed;
         private volatile MediaStoreAudioDestination destination;
         private volatile TemporarySpaceBudget.Reservation reservation;
+        private volatile FlacIntegrity.Result flacResult;
 
         public Phase phase() { return phase; }
         public boolean failed() { return failed; }
@@ -90,6 +91,8 @@ public final class NatuneFolderCopy {
             return value == null ? null : value.documentUri();
         }
         public TemporarySpaceBudget.Reservation reservation() { return reservation; }
+        /** Present only after the strict copy's full native-FLAC check passed. */
+        public FlacIntegrity.Result flacResult() { return flacResult; }
 
         /**
          * The actual caller owns operationId and selected spans. stagingBytes
@@ -102,16 +105,36 @@ public final class NatuneFolderCopy {
                 NavigableSet<?> selected, String operationId, Target target,
                 TemporarySpaceBudget budget, long stagingBytes, long overheadBytes,
                 VerifiedStreamCopy.StopCheck stop, JournalOwner owner) throws IOException {
+            return run(context, cache, selected, operationId, target, budget, stagingBytes,
+                overheadBytes, stop, owner, false);
+        }
+
+        /** Require complete native-FLAC decode and checksum before publication. */
+        public VerifiedStreamCopy.VerifiedCopy runFlac(Context context, Object cache,
+                NavigableSet<?> selected, String operationId, Target target,
+                TemporarySpaceBudget budget, long stagingBytes, long overheadBytes,
+                VerifiedStreamCopy.StopCheck stop, JournalOwner owner) throws IOException {
+            return run(context, cache, selected, operationId, target, budget, stagingBytes,
+                overheadBytes, stop, owner, true);
+        }
+
+        private VerifiedStreamCopy.VerifiedCopy run(Context context, Object cache,
+                NavigableSet<?> selected, String operationId, Target target,
+                TemporarySpaceBudget budget, long stagingBytes, long overheadBytes,
+                VerifiedStreamCopy.StopCheck stop, JournalOwner owner, boolean requireFlac) throws IOException {
             Objects.requireNonNull(context, "context");
             Objects.requireNonNull(target, "target");
             Objects.requireNonNull(budget, "budget");
             Objects.requireNonNull(stop, "stop");
             Objects.requireNonNull(owner, "owner");
             if (!journalOperationId(operationId)) throw new IOException("Original journal operation ID invalid");
+            if (requireFlac && !"audio/flac".equals(target.audioMime))
+                throw new IOException("Selected FLAC destination MIME required");
             if (!started.compareAndSet(false, true)) throw new IOException("Original copy already attempted");
             phase = Phase.ENTERED;
             try {
                 stop.check();
+                if (requireFlac) { FlacIntegrity.loadDecoder(); stop.check(); }
                 MediaStoreAudioDestination.validateTarget(context, target.volume, target.folder,
                     target.displayName, target.audioMime);
                 stop.check();
@@ -124,7 +147,7 @@ public final class NatuneFolderCopy {
                         phase = Phase.RESERVED;
                         stop.check();
                         phase = Phase.BEGIN_ENTERED;
-                        owner.begin(operationId, key, source, admitted, target);
+                        owner.begin(operationId, key, source, admitted, target, requireFlac);
                         phase = Phase.BEGIN_RETAINED;
                         stop.check();
                         source.assertUnchanged();
@@ -146,12 +169,22 @@ public final class NatuneFolderCopy {
                         phase = Phase.COPY_VERIFIED;
                         stop.check();
                         source.assertUnchanged();
+                        FlacIntegrity.Result audio = null;
+                        if (requireFlac) {
+                            phase = Phase.FLAC_VERIFY_ENTERED;
+                            audio = FlacIntegrity.verify(copy, source, destination, stop);
+                            if (audio.state != FlacIntegrity.State.VERIFIED)
+                                throw new IOException("Complete FLAC checksum and sample count required");
+                            flacResult = audio;
+                            phase = Phase.FLAC_VERIFIED;
+                            stop.check();
+                        }
                         phase = Phase.PUBLISH_ENTERED;
                         destination.publish(copy, source, stop);
                         phase = Phase.PUBLISHED;
                         stop.check();
                         phase = Phase.VERIFIED_ENTERED;
-                        owner.verified(operationId, destination.documentUri(), destination.observedDisplayName(), copy);
+                        owner.verified(operationId, destination.documentUri(), destination.observedDisplayName(), copy, audio);
                         phase = Phase.VERIFIED_RETAINED;
                         stop.check();
                         source.assertUnchanged();

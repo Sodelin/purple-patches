@@ -1,4 +1,5 @@
 import dev.purple.patches.natune.NatuneFolderCopy;
+import dev.purple.patches.natune.FlacIntegrity;
 import dev.purple.patches.natune.TemporarySpaceBudget;
 import dev.purple.patches.natune.VerifiedStreamCopy;
 import android.net.Uri;
@@ -67,10 +68,10 @@ public final class NatuneFolderCopyControls {
         boolean stopped;
         Owner(Fixture fixture) { this.fixture = fixture; }
         public void begin(String id, String key, VerifiedStreamCopy.SourceLease source,
-                TemporarySpaceBudget.Reservation reservation, NatuneFolderCopy.Target target)
+                TemporarySpaceBudget.Reservation reservation, NatuneFolderCopy.Target target, boolean requireFullFlac)
                 throws IOException {
             calls.add("begin");
-            need(id.equals(OPERATION) && key.equals(KEY) && target == TARGET,
+            need(id.equals(OPERATION) && key.equals(KEY) && target == TARGET && !requireFullFlac,
                 "Original intent and selected key reach owner");
             need(target.collectionUri().toString().equals("content://media/external_primary/audio/media") &&
                 target.volume.equals("external_primary") && target.folder.equals("Music/Selected/") &&
@@ -89,10 +90,11 @@ public final class NatuneFolderCopyControls {
                 fixture.app.store.opens == 0, "Actual returned URI reaches owner before output");
             if ("destination".equals(failAt)) throw new IOException("Synthetic uncertain destination");
         }
-        public void verified(String id, Uri uri, String name, VerifiedStreamCopy.VerifiedCopy proof) throws IOException {
+        public void verified(String id, Uri uri, String name, VerifiedStreamCopy.VerifiedCopy proof,
+                FlacIntegrity.Result flac) throws IOException {
             calls.add("verified");
             need(id.equals(OPERATION) && uri.equals(fixture.attempt.returnedUri()) &&
-                name.equals(fixture.app.store.name) && proof.bytes == BYTES.length &&
+                name.equals(fixture.app.store.name) && flac == null && proof.bytes == BYTES.length &&
                 fixture.app.store.pending == 0 && fixture.app.store.updates == 1,
                 "Owner receives matching proof after publication and readback");
             actualName = name;

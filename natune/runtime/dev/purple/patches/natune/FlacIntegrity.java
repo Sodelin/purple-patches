@@ -30,7 +30,7 @@ public final class FlacIntegrity {
     }
 
     private static boolean loaded;
-    private static synchronized void loadDecoder() throws IOException {
+    static synchronized void loadDecoder() throws IOException {
         if (loaded) return;
         try { System.loadLibrary("purple_natune_flac"); }
         catch (UnsatisfiedLinkError unavailable) { throw new IOException("Selected FLAC verifier unavailable", unavailable); }

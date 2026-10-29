@@ -39,6 +39,21 @@ pub struct MediaStoreAudioSelection {
     pub volume: String,
     pub relative_folder: String,
     pub mime_type: String,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub require_full_flac: bool,
+}
+
+fn is_false(value: &bool) -> bool { !*value }
+
+/// Supplied by the actual selected decoder owner after complete verification.
+/// A serialized observation is not proof of a real decoder or recording match.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct FlacIntegrityEvidence {
+    pub samples: u64,
+    pub sample_rate: u32,
+    pub channels: u8,
+    pub bits_per_sample: u8,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -50,6 +65,8 @@ pub struct Document {
     /// Schema 3 records the actual provider-selected name after readback.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub actual_display_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub flac_integrity: Option<FlacIntegrityEvidence>,
 }
 
 /// An observation supplied by the selected receiver's real owner, never a
@@ -348,7 +365,8 @@ impl<S: Store> Journal<S> {
             }
             (Stage::Destination, Event::Verified { document }) if
                 next.destination.as_ref() == Some(&document.uri) && document.bytes == next.claim.source_bytes &&
-                hex64(&document.sha256) && document_name_matches(&next.claim, document) => {
+                hex64(&document.sha256) && document_name_matches(&next.claim, document) &&
+                document_flac_matches(&next.claim, document) => {
                 next.document = Some(document.clone()); Stage::Verified
             }
             (Stage::Verified, Event::RemoteVerified { receipt }) if
@@ -392,7 +410,8 @@ fn media_store_selection(claim: &Claim, selected: &MediaStoreAudioSelection) -> 
         !subtype.is_empty() && subtype != "*" && subtype.bytes().all(|b| b.is_ascii_alphanumeric() ||
             matches!(b, b'!' | b'#' | b'$' | b'%' | b'&' | b'\'' | b'*' | b'+' | b'-' |
                 b'.' | b'^' | b'_' | b'`' | b'|' | b'~')));
-    volume_ok && folder_ok && mime_ok && media_display_name(&claim.requested_name) && content_uri(&claim.destination_tree_uri) &&
+    volume_ok && folder_ok && mime_ok && (!selected.require_full_flac || selected.mime_type == "audio/flac") &&
+        media_display_name(&claim.requested_name) && content_uri(&claim.destination_tree_uri) &&
         claim.destination_tree_uri == format!("content://media/{}/audio/media", selected.volume)
 }
 fn media_display_name(name: &str) -> bool {
@@ -402,6 +421,17 @@ fn document_name_matches(claim: &Claim, document: &Document) -> bool {
     match (&claim.media_store_audio, &document.actual_display_name) {
         (Some(_), Some(name)) => media_display_name(name),
         (None, None) => true,
+        _ => false,
+    }
+}
+fn document_flac_matches(claim: &Claim, document: &Document) -> bool {
+    match (&claim.media_store_audio, &document.flac_integrity) {
+        (None, None) => true,
+        (Some(selected), None) => !selected.require_full_flac,
+        (Some(selected), Some(info)) => selected.mime_type == "audio/flac" &&
+            info.samples > 0 && info.samples < (1u64 << 36) && info.sample_rate > 0 &&
+            info.sample_rate < (1u32 << 20) && (1..=8).contains(&info.channels) &&
+            (4..=32).contains(&info.bits_per_sample),
         _ => false,
     }
 }
@@ -459,14 +489,14 @@ mod tests {
             source_bytes: 90, peak_bytes: 100, media_store_audio: None }
     }
     fn document() -> Document {
-        Document { uri: "content://fixture.documents/document/song".into(), bytes:90, sha256:"b".repeat(64), actual_display_name:None }
+        Document { uri: "content://fixture.documents/document/song".into(), bytes:90, sha256:"b".repeat(64), actual_display_name:None, flac_integrity:None }
     }
     fn media_claim(digit: char) -> Claim {
         let mut c = claim(digit);
         c.destination_tree_uri = "content://media/external_primary/audio/media".into();
         c.media_store_audio = Some(MediaStoreAudioSelection {
             volume: "external_primary".into(), relative_folder: "Music/Selected/".into(),
-            mime_type: "audio/flac".into(),
+            mime_type: "audio/flac".into(), require_full_flac:false,
         });
         c
     }
@@ -528,6 +558,7 @@ mod tests {
         let legacy=document();
         let legacy_json=serde_json::to_string(&legacy).unwrap();
         assert!(!legacy_json.contains("actual_display_name"));
+        assert!(!legacy_json.contains("flac_integrity"));
         assert_eq!(serde_json::from_str::<Document>(&legacy_json).unwrap(),legacy);
         let memory=Memory::default(); let c=media_claim('e'); let mut j=Journal::open(memory.clone(),1000).unwrap();
         begin(&mut j,&c); step(&mut j,&c,Event::Destination{uri:media_document().uri});
@@ -542,6 +573,55 @@ mod tests {
         let mut wrong=document(); wrong.actual_display_name=Some("song.flac".into());
         assert!(j.record(&legacy_claim.operation_id,Some(1),Event::Verified{document:wrong}).is_err());
         step(&mut j,&legacy_claim,Event::Verified{document:document()});
+    }
+    #[test]
+    fn strict_flac_claim_requires_valid_complete_decoder_observation() {
+        let memory=Memory::default(); let mut c=media_claim('a');
+        c.media_store_audio.as_mut().unwrap().require_full_flac=true;
+        let mut j=Journal::open(memory.clone(),1000).unwrap();
+        begin(&mut j,&c); step(&mut j,&c,Event::Destination{uri:media_document().uri});
+        assert!(j.record(&c.operation_id,Some(1),Event::Verified{document:media_document()}).is_err());
+        let evidence=FlacIntegrityEvidence { samples:90, sample_rate:44100, channels:2, bits_per_sample:24 };
+        for invalid in [
+            FlacIntegrityEvidence{samples:0,..evidence.clone()},
+            FlacIntegrityEvidence{samples:1u64<<36,..evidence.clone()},
+            FlacIntegrityEvidence{sample_rate:0,..evidence.clone()},
+            FlacIntegrityEvidence{sample_rate:1u32<<20,..evidence.clone()},
+            FlacIntegrityEvidence{channels:0,..evidence.clone()},
+            FlacIntegrityEvidence{bits_per_sample:3,..evidence.clone()},
+        ] {
+            let mut doc=media_document(); doc.flac_integrity=Some(invalid);
+            assert!(j.record(&c.operation_id,Some(1),Event::Verified{document:doc}).is_err());
+        }
+        assert_eq!(memory.events.lock().unwrap().len(),2);
+        let mut doc=media_document(); doc.flac_integrity=Some(evidence.clone());
+        step(&mut j,&c,Event::Verified{document:doc.clone()});
+        drop(j);
+        let restored=Journal::open(memory,1000).unwrap();
+        let row=restored.snapshot(&c.operation_id).unwrap().unwrap();
+        assert!(row.claim.media_store_audio.as_ref().unwrap().require_full_flac);
+        assert_eq!(row.document.as_ref(),Some(&doc));
+        assert_eq!(row.document.as_ref().unwrap().flac_integrity.as_ref(),Some(&evidence));
+    }
+    #[test]
+    fn flac_policy_does_not_change_legacy_or_accept_wrong_mime() {
+        let default=media_claim('b');
+        let selection=default.media_store_audio.as_ref().unwrap();
+        let json=serde_json::to_string(selection).unwrap();
+        assert!(!json.contains("require_full_flac"));
+        assert_eq!(serde_json::from_str::<MediaStoreAudioSelection>(&json).unwrap(),selection.clone());
+        let memory=Memory::default(); let mut j=Journal::open(memory.clone(),1000).unwrap();
+        let mut wrong=media_claim('c'); let selected=wrong.media_store_audio.as_mut().unwrap();
+        selected.require_full_flac=true; selected.mime_type="audio/mpeg".into();
+        assert!(j.record(&wrong.operation_id,None,Event::Begin{claim:wrong.clone()}).is_err());
+        assert!(memory.events.lock().unwrap().is_empty());
+        let legacy=claim('d'); begin(&mut j,&legacy);
+        step(&mut j,&legacy,Event::Destination{uri:document().uri});
+        let mut doc=document(); doc.flac_integrity=Some(FlacIntegrityEvidence {
+            samples:90, sample_rate:44100, channels:2, bits_per_sample:24,
+        });
+        assert!(j.record(&legacy.operation_id,Some(1),Event::Verified{document:doc}).is_err());
+        step(&mut j,&legacy,Event::Verified{document:document()});
     }
     #[test]
     fn media_store_claim_rejects_mismatched_selection_before_persistence() {

@@ -243,6 +243,15 @@ format alternatives and phone acceptance remain unbound; the current patch
 materializer does not include this verifier. Nothing was installed or executed
 on the phone.
 
+The successor source connects `NatuneFolderCopy.Attempt.runFlac` to that exact
+copy proof before publication. It loads the selected native verifier before
+reservation, requires a selected FLAC MIME, and refuses publication if the
+complete decode/checksum or sample count is unavailable or invalid. Ordinary
+copies of other formats keep their separate path. A real owner must retain the
+FLAC result along with its actual encrypted operation evidence; a callback or
+in-memory result alone does not do so. The integrated successor still needs its
+own hosted verification and the real app, receiver and recovery bindings.
+
 Hosted attempt `40931041024` stopped during reference-decoder CMake
 configuration because the runner had neither Pandoc nor prebuilt manpages.
 No new decoder controls or Android cross-build ran in that attempt. The
