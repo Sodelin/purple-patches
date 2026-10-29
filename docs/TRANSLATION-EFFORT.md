@@ -28,6 +28,13 @@ request. Alpha.11 build and Android behavior remain unverified. Dev.5 passed its
 including single-choice catalog fixtures. No live translation or phone UI has
 been tested under the current model/device holds.
 
+The pinned upstream patch attaches its editor lifecycle hooks to
+[`InputMethodService` lifecycle methods](https://github.com/jasonwu1994/Gboard-patches/blob/2eb71854accc7e906d3e4f5495b2a54ed1e2af47/patches/src/main/kotlin/dev/jason/gboardpatches/patches/gboard/features/editingaccesspoints/GboardEditingAccessPointsTargets.kt#L9-L20).
+The reviewed [AOSP input-method wrapper](https://android.googlesource.com/platform/frameworks/base/+/64eaba03c5db8b431aef8a88d40593631951fe99/core/java/android/inputmethodservice/IInputMethodWrapper.java)
+dispatches its incoming input-method calls on the process main thread. This is
+source context for the UI lifecycle design, not proof of every call path in the
+installed keyboard or a substitute for device race and interruption tests.
+
 The extra choice is per request in this candidate; it does not persist a
 preference or change the normal Gboard translator. Before release, verify the
 actual language/effort dialogs, account/model availability, cancellation,

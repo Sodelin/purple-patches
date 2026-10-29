@@ -149,6 +149,7 @@ public final class PurpleAiRuntime {
         Runnable lookup = () -> {
             String[] choices = null;
             try {
+                if (stopped.get()) throw new InterruptedException();
                 currentBridge.verify(false);
                 if (stopped.get()) throw new InterruptedException();
                 choices = currentBridge.translationEfforts();
@@ -158,15 +159,18 @@ public final class PurpleAiRuntime {
             } finally {
                 final String[] available = choices;
                 MAIN.post(() -> {
-                    busy.set(false);
-                    boolean current = request == operation && !stopped.get() && dialog == progress;
-                    boolean anchorCurrent = current && anchor.matches(service.get(), generation);
-                    if (dialog == progress) dismiss();
-                    if (!current) return;
-                    if (!anchorCurrent) { notifyUser("The selection changed; select text again"); return; }
-                    if (available == null) {
-                        notifyUser("Sol 6.1 reasoning levels could not be confirmed. Check your local tools and model availability.");
-                        return;
+                    try {
+                        boolean current = request == operation && !stopped.get() && dialog == progress;
+                        boolean anchorCurrent = current && anchor.matches(service.get(), generation);
+                        if (dialog == progress) dismiss();
+                        if (!current) return;
+                        if (!anchorCurrent) { notifyUser("The selection changed; select text again"); return; }
+                        if (available == null) {
+                            notifyUser("Sol 6.1 reasoning levels could not be confirmed. Check your local tools and model availability.");
+                            return;
+                        }
+                    } finally {
+                        busy.set(false);
                     }
                     showTranslationEfforts(anchor, language, available, request);
                 });
@@ -184,7 +188,9 @@ public final class PurpleAiRuntime {
     }
     private static void showTranslationEfforts(Snapshot anchor, String language, String[] efforts, long request) {
         InputMethodService ime = service.get();
-        if (ime == null || request != operation || !anchor.matches(ime, generation)) return;
+        // Editor IPC may re-enter lifecycle code; do not replace a newer dialog afterwards.
+        if (ime == null || request != operation || dialog != null || !anchor.matches(ime, generation)
+                || dialog != null || request != operation) return;
         String[] labels = new String[efforts.length];
         for (int i = 0; i < efforts.length; i++) {
             if ("medium".equals(efforts[i])) labels[i] = "Medium";
