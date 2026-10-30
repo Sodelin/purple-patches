@@ -32,11 +32,10 @@ future build uses an ambiguous or dynamic profile, recovery refuses until the
 tool supports that profile; it does not substitute the current one.
 The earlier helper rejected a synthetic old archive when the current upstream
 pin changed. The corrected helper passed that regression, malformed-profile
-refusals and the other recovery controls locally in normal and optimized
-Python, then recovered the actual Drive MPP in memory again. It still requires
-the selected proof and historical source commit; this is not device acceptance.
-The tool recovered the exact MPP from the Drive stream in memory. Six synthetic
-recovery controls passed locally in normal and optimized Python and in
-[hosted run 40978096587](https://github.com/Sodelin/purple-patches/actions/runs/40978096587);
-the existing three comparison controls also passed. These controls do not
-establish a physical restore or a working keyboard.
+refusals and the other recovery controls locally and in
+[hosted run 40978767904](https://github.com/Sodelin/purple-patches/actions/runs/40978767904),
+then recovered the actual Drive MPP in memory again. Eight recovery controls
+passed in normal and optimized Python; three existing comparison controls also
+passed. The first helper's six controls and earlier readback are retained in
+[run 40978096587](https://github.com/Sodelin/purple-patches/actions/runs/40978096587).
+These controls do not establish a physical restore or a working keyboard.
