@@ -10,6 +10,13 @@
   "stale_request_diagnostic": "The real cleanup method was invoked with an artificially stale request and a simulated newer capture, dialog and busy state. It preserved the newer capture and dialog but cleared the shared busy flag. The intended newer-busy preservation assertion failed with STALE_REQUEST_RELEASED_NEWER_BUSY; the workflow treats this pinned failure as a diagnostic, not acceptance.",
   "scope": "The actual Java method was compiled against Android 36 SDK and invoked by reflection on a host JVM with small UI stand-ins. The test supplies the stale state directly; it does not establish that the installed Android lifecycle can reach it. No Android app, device, microphone, network, companion or model was run.",
   "workflow_history": "The initial new diagnostic workflow could not be dispatched because it was absent from the default branch (GitHub API 404). The existing release-controls workflow on the development branch was then used. A normal push run 40976396035 passed; the manually dispatched diagnostic run is recorded above.",
+  "workflow_gating": {
+    "source_commit": "83243984a10ec63ed2571a94edb81e39b6c74900",
+    "push_run": 40976801049,
+    "ordinary_manual_run": 40976850791,
+    "explicit_diagnostic_run": 40976892352,
+    "result": "The push and ordinary manual checks passed with the pinned diagnostic skipped. Enabling worker_ui_diagnostic ran the current controls and retained the expected synthetic stale-owner failure. This keeps normal release checks independent of a historical source pin."
+  },
   "fix_accepted": false,
   "device_accepted": false
 }

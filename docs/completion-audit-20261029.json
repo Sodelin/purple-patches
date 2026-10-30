@@ -1,7 +1,7 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: the real alpha.23 worker cleanup passed synthetic current-request controls but a supplied stale-request/newer-owner state exposed unconditional busy release. Actual Android reachability, owner-aware cleanup and Gboard privacy, recovery, model and device gates remain open.",
+  "current_turn_classification": "progress: the pinned worker cleanup diagnostic is opt-in, and hosted checks verify normal release controls skip it while an explicit run reproduces the synthetic stale-owner failure. Actual Android reachability, owner-aware cleanup and Gboard privacy, recovery, model and device gates remain open.",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",
