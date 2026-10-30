@@ -71,6 +71,12 @@ public final class VerifyGboardWorkerWiring {
         return count;
     }
 
+    private static boolean invokesStatic(Instruction instruction, String owner, String name,
+            String result, String... parameters) {
+        return (instruction.getOpcode() == Opcode.INVOKE_STATIC || instruction.getOpcode() == Opcode.INVOKE_STATIC_RANGE)
+                && invokes(instruction, owner, name, result, parameters);
+    }
+
     private static void verifyFailureBranch(Method caller) {
         List<Instruction> code = new ArrayList<>();
         List<Integer> offsets = new ArrayList<>();
@@ -80,7 +86,7 @@ public final class VerifyGboardWorkerWiring {
         }
         int launches = 0;
         for (int i = 0; i < code.size(); i++) {
-            if (!invokes(code.get(i), WORKER, "launch", "Z", "Ljava/lang/Runnable;", "Ljava/lang/String;")) continue;
+            if (!invokesStatic(code.get(i), WORKER, "launch", "Z", "Ljava/lang/Runnable;", "Ljava/lang/String;")) continue;
             launches++;
             require(i + 2 < code.size() && code.get(i + 1).getOpcode() == Opcode.MOVE_RESULT
                     && code.get(i + 1) instanceof OneRegisterInstruction,
@@ -96,7 +102,7 @@ public final class VerifyGboardWorkerWiring {
                     caller.getName() + ": success branch is not a forward instruction target");
             int cleanup = 0;
             for (int j = i + 3; j < code.size() && offsets.get(j) < target; j++) {
-                if (invokes(code.get(j), RUNTIME, "workerStartFailed", "V", "J",
+                if (invokesStatic(code.get(j), RUNTIME, "workerStartFailed", "V", "J",
                         "Ljava/util/concurrent/atomic/AtomicBoolean;", "Landroid/app/AlertDialog;",
                         CAPTURE, "Ljava/lang/String;")) cleanup++;
             }

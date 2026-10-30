@@ -126,7 +126,7 @@ jobs:
           "$AAPT2" dump badging "$RUNNER_TEMP/gboard-purple-unsigned.apk" > "$RUNNER_TEMP/output-badging.txt"
           "$AAPT2" dump xmltree "$RUNNER_TEMP/gboard-purple-unsigned.apk" --file AndroidManifest.xml > "$RUNNER_TEMP/output-manifest.txt"
           mkdir -p "$RUNNER_TEMP/apk-check" dist
-          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/apk-check" companion/deployment/VerifyGboardApk.java companion/deployment/VerifyGboardEditorSnapshot.java companion/deployment/VerifyGboardCapture.java companion/deployment/VerifyGboardReadiness.java companion/deployment/VerifyGboardTranslationChoice.java companion/deployment/VerifyGboardAccessPointFallback.java companion/deployment/VerifyGboardDirectLoopback.java
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/apk-check" companion/deployment/VerifyGboardApk.java companion/deployment/VerifyGboardEditorSnapshot.java companion/deployment/VerifyGboardCapture.java companion/deployment/VerifyGboardReadiness.java companion/deployment/VerifyGboardTranslationChoice.java companion/deployment/VerifyGboardAccessPointFallback.java companion/deployment/VerifyGboardDirectLoopback.java companion/deployment/VerifyGboardWorkerWiring.java
           java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardApk "$RUNNER_TEMP/gboard-original.apk" "$RUNNER_TEMP/gboard-purple-unsigned.apk" "$RUNNER_TEMP/output-badging.txt" "$RUNNER_TEMP/output-manifest.txt"
           java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardEditorSnapshot "$RUNNER_TEMP/gboard-purple-unsigned.apk"
           case "$BUNDLE_VERSION" in
@@ -165,6 +165,19 @@ jobs:
               fi
               grep -F 'Expected one explicit URL.openConnection(Proxy) and NO_PROXY' "$RUNNER_TEMP/alpha20-negative.txt"
               echo 'Old alpha.20 correctly refused by direct-loopback verifier.'
+            fi
+          fi
+          if [[ "$BUNDLE_VERSION" =~ ^0\.1\.0-alpha\.([0-9]+)$ ]] && (( 10#${BASH_REMATCH[1]} >= 23 )); then
+            java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardWorkerWiring "$RUNNER_TEMP/gboard-purple-unsigned.apk"
+            if [[ "$HISTORICAL_CONTROLS" == "true" ]]; then
+              gh run download 40972359801 --repo Sodelin/purple-patches --name purple-gboard-verified-unsigned-candidate --dir "$RUNNER_TEMP/alpha21-worker-negative"
+              printf '%s  %s\n' '1ff758517fa449e4ff63a4b3bc56711956001640072d570c17c430e94e5ddb42' "$RUNNER_TEMP/alpha21-worker-negative/gboard-purple-unsigned.apk" | sha256sum -c -
+              if java -cp "$RUNNER_TEMP/apk-check:$RUNNER_TEMP/morphe.jar" VerifyGboardWorkerWiring "$RUNNER_TEMP/alpha21-worker-negative/gboard-purple-unsigned.apk" > "$RUNNER_TEMP/alpha21-worker-negative.txt" 2>&1; then
+                echo 'Old alpha.21 unexpectedly passed the worker wiring verifier' >&2
+                exit 1
+              fi
+              grep -Fq 'Missing class Ldev/purple/patches/gboard/WorkerStart;' "$RUNNER_TEMP/alpha21-worker-negative.txt"
+              echo 'Old alpha.21 correctly refused by worker wiring verifier.'
             fi
           fi
           cp "$RUNNER_TEMP/gboard-purple-unsigned.apk" "$RUNNER_TEMP/gboard-patch-result.json" "$RUNNER_TEMP/build-run.json" "$RUNNER_TEMP/purple-bundle/purple-provenance.json" dist/

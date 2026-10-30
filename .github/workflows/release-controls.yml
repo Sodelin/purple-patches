@@ -114,5 +114,5 @@ jobs:
             echo 'The older artifact unexpectedly passed the worker wiring check' >&2
             exit 1
           fi
-          grep -F 'Missing class Ldev/purple/patches/gboard/WorkerStart;' "$RUNNER_TEMP/negative.txt"
+          grep -Fq 'Missing class Ldev/purple/patches/gboard/WorkerStart;' "$RUNNER_TEMP/negative.txt"
           echo 'The selected older APK was refused for its missing WorkerStart class.'
