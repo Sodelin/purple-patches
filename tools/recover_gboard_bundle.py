@@ -9,7 +9,7 @@ import re
 import sys
 from pathlib import Path
 
-from compare_gboard_builds import PIN, committed_selection, inspect_archive, require, sha
+from compare_gboard_builds import committed_profile, committed_selection, inspect_archive, require, sha
 
 
 def proof_inputs(proof):
@@ -20,7 +20,9 @@ def proof_inputs(proof):
             'Invalid selected source commit')
     require(isinstance(version,str) and re.fullmatch(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?',version) is not None,
             'Invalid selected bundle version')
-    require(proof.get('upstream_commit')==PIN and proof.get('all_seven_artifact_members_identical') is True,
+    upstream=proof.get('upstream_commit')
+    require(isinstance(upstream,str) and re.fullmatch(r'[0-9a-f]{40}',upstream) is not None
+            and proof.get('all_seven_artifact_members_identical') is True,
             'Missing matching-source reproducibility evidence')
     runs=proof.get('workflow_runs'); ids=proof.get('artifact_ids')
     sizes=proof.get('artifact_zip_bytes'); hashes=proof.get('artifact_zip_sha256')
@@ -33,14 +35,16 @@ def proof_inputs(proof):
     main_hash=proof.get('main_mpp_sha256')
     require(isinstance(main_hash,str) and re.fullmatch(r'[0-9a-f]{64}',main_hash) is not None,
             'Invalid main bundle digest')
-    return commit,version,list(zip(sizes,hashes)),main_hash
+    return commit,version,list(zip(sizes,hashes)),main_hash,upstream
 
 
 def recover(raw,proof,selection=committed_selection):
-    commit,version,pins,main_hash=proof_inputs(proof)
+    commit,version,pins,main_hash,proof_upstream=proof_inputs(proof)
     require((len(raw),sha(raw)) in pins, 'Archive does not match a selected build artifact')
     epoch,overlay,source_bytes=selection(commit)
-    members=inspect_archive(raw,commit,version,epoch,overlay,source_bytes)
+    upstream_pin,tool_inputs=committed_profile(source_bytes)
+    require(upstream_pin==proof_upstream,'Selected source and proof upstream differ')
+    members=inspect_archive(raw,commit,version,epoch,overlay,source_bytes,upstream_pin,tool_inputs)
     name=f'patches-{version}.mpp'; main=members[name]
     require(sha(main)==main_hash, 'Main bundle does not match the selected digest')
     return main,{
@@ -59,7 +63,7 @@ def main():
     if args.extract_main and sys.stdout.isatty():
         raise SystemExit('Refuse to write binary patch bytes to a terminal')
     proof=json.loads(Path(args.proof).read_text(encoding='utf-8'))
-    _,_,pins,_=proof_inputs(proof)
+    _,_,pins,_,_=proof_inputs(proof)
     raw=sys.stdin.buffer.read(max(size for size,_ in pins)+1)
     main,report=recover(raw,proof)
     if args.extract_main:

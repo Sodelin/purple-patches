@@ -12,6 +12,7 @@ VERSION='0.1.0-alpha.14'
 EPOCH=1793235723000
 OVERLAY={'gboard/src/Fixture.java'}
 SOURCE={name:('committed '+name).encode() for name in OVERLAY|set(TOOL_INPUTS)}
+SOURCE['tools/materialize.py']=f'PIN={PIN!r}\nTOOL_INPUTS={tuple(TOOL_INPUTS)!r}\n'.encode()
 
 
 def zip_bytes(files,reverse=False):

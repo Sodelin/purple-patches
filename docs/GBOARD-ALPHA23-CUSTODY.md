@@ -26,6 +26,15 @@ bytes; shell redirection can overwrite an existing file before the tool runs.
 The selected proof and source commit remain part of the trust boundary. The
 commit must be available in the local Git object store; a shallow checkout may
 need the exact source restored or fetched before recovery can run.
+The tool reads the upstream pin and build-input list as literals from that
+commit's `tools/materialize.py`, without executing historical source. If a
+future build uses an ambiguous or dynamic profile, recovery refuses until the
+tool supports that profile; it does not substitute the current one.
+The earlier helper rejected a synthetic old archive when the current upstream
+pin changed. The corrected helper passed that regression, malformed-profile
+refusals and the other recovery controls locally in normal and optimized
+Python, then recovered the actual Drive MPP in memory again. It still requires
+the selected proof and historical source commit; this is not device acceptance.
 The tool recovered the exact MPP from the Drive stream in memory. Six synthetic
 recovery controls passed locally in normal and optimized Python and in
 [hosted run 40978096587](https://github.com/Sodelin/purple-patches/actions/runs/40978096587);

@@ -1,7 +1,7 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: the actual alpha.23 MPP was recovered and verified in memory from its owner-only Drive archive using a reusable source-aware recovery tool. Actual Android reachability, owner-aware cleanup and Gboard privacy, job recovery, model and device gates remain open.",
+  "current_turn_classification": "progress: archived bundle recovery now selects the historical commit's literal upstream pin and build inputs, so a later tool-profile change does not silently invalidate an older verified build. Actual Android reachability, owner-aware cleanup and Gboard privacy, job recovery, model and device gates remain open.",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",

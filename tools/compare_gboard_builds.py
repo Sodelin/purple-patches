@@ -1,5 +1,6 @@
 """Compare two hosted Gboard builds without publishing or writing artifacts locally."""
 import argparse
+import ast
 from datetime import datetime, timezone
 import hashlib
 import io
@@ -23,7 +24,8 @@ def require(condition,message):
 def sha(value):return hashlib.sha256(value).hexdigest()
 
 
-def inspect_archive(raw,commit,version,epoch_ms,overlay_names,source_bytes):
+def inspect_archive(raw,commit,version,epoch_ms,overlay_names,source_bytes,
+                    upstream_pin=None,tool_inputs=None):
     """Check all selected bytes and provenance before comparing two public artifacts."""
     require(re.fullmatch(r'[0-9a-f]{40}',commit) is not None,'Invalid source commit')
     require(re.fullmatch(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?',version) is not None,
@@ -43,12 +45,14 @@ def inspect_archive(raw,commit,version,epoch_ms,overlay_names,source_bytes):
         checks[name]=digest
     require(set(checks)==names-{'SHA256SUMS'},'Incomplete checksum list')
     for name,digest in checks.items():require(sha(members[name])==digest,'Artifact checksum mismatch: '+name)
+    if upstream_pin is None:upstream_pin=PIN
+    if tool_inputs is None:tool_inputs=TOOL_INPUTS
     provenance=json.loads(members['purple-provenance.json'])
     require(provenance.get('overlay_commit')==commit and provenance.get('version')==version
-            and provenance.get('upstream_commit')==PIN,'Provenance identity mismatch')
+            and provenance.get('upstream_commit')==upstream_pin,'Provenance identity mismatch')
     require(type(provenance.get('manifest_timestamp_ms')) is int and provenance.get('manifest_timestamp_ms')==epoch_ms
             and provenance.get('manifest_timestamp_basis')=='source commit time','Timestamp provenance mismatch')
-    for field,expected in (('overlay',set(overlay_names)),('build_inputs',set(TOOL_INPUTS))):
+    for field,expected in (('overlay',set(overlay_names)),('build_inputs',set(tool_inputs))):
         entries=provenance.get(field)
         require(isinstance(entries,list),'Missing provenance input list')
         paths=[]
@@ -77,9 +81,10 @@ def inspect_archive(raw,commit,version,epoch_ms,overlay_names,source_bytes):
     return members
 
 
-def compare_archives(first,second,commit,version,epoch_ms,overlay_names,source_bytes):
-    a=inspect_archive(first,commit,version,epoch_ms,overlay_names,source_bytes)
-    b=inspect_archive(second,commit,version,epoch_ms,overlay_names,source_bytes)
+def compare_archives(first,second,commit,version,epoch_ms,overlay_names,source_bytes,
+                     upstream_pin=None,tool_inputs=None):
+    a=inspect_archive(first,commit,version,epoch_ms,overlay_names,source_bytes,upstream_pin,tool_inputs)
+    b=inspect_archive(second,commit,version,epoch_ms,overlay_names,source_bytes,upstream_pin,tool_inputs)
     changed=[name for name in sorted(a) if a[name]!=b[name]]
     main=f'patches-{version}.mpp'
     return {'source_commit':commit,'version':version,'manifest_timestamp_ms':epoch_ms,
@@ -130,6 +135,34 @@ def committed_selection(commit):
     return epoch,overlay,source_bytes
 
 
+def committed_profile(source_bytes):
+    """Read literal profile values from the selected commit without executing it."""
+    tree=ast.parse(source_bytes('tools/materialize.py').decode('utf-8'))
+    values={}
+    for node in ast.walk(tree):
+        if not isinstance(node,(ast.Assign,ast.AnnAssign,ast.AugAssign)):continue
+        targets=node.targets if isinstance(node,ast.Assign) else [node.target]
+        names={n.id for target in targets for n in ast.walk(target) if isinstance(n,ast.Name)}
+        for name in names & {'PIN','TOOL_INPUTS'}:
+            require(node in tree.body and isinstance(node,ast.Assign) and len(node.targets)==1
+                    and isinstance(node.targets[0],ast.Name) and name not in values,
+                    'Ambiguous committed build profile')
+            try:values[name]=ast.literal_eval(node.value)
+            except (ValueError,TypeError,SyntaxError):raise ValueError('Nonliteral committed build profile')
+    pin=values.get('PIN');inputs=values.get('TOOL_INPUTS')
+    require(isinstance(pin,str) and re.fullmatch(r'[0-9a-f]{40}',pin) is not None,
+            'Invalid committed upstream pin')
+    require(isinstance(inputs,(tuple,list)) and inputs and all(isinstance(x,str) for x in inputs),
+            'Invalid committed build inputs')
+    require(len(set(inputs))==len(inputs) and 'tools/materialize.py' in inputs,
+            'Incomplete or duplicate committed build inputs')
+    for path in inputs:
+        require(path and not path.startswith('/') and '\\' not in path
+                and all(part not in ('','.','..') for part in path.split('/')),
+                'Invalid committed build input path')
+    return pin,tuple(inputs)
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--first-run',type=int,required=True)
@@ -139,11 +172,13 @@ def main():
     args=parser.parse_args()
     require(args.first_run>0 and args.second_run>0 and args.first_run!=args.second_run,'Select two different run IDs')
     epoch,overlay,source_bytes=committed_selection(args.source_commit)
+    upstream_pin,tool_inputs=committed_profile(source_bytes)
     first_id,first=artifact_for(args.first_run,args.source_commit)
     second_id,second=artifact_for(args.second_run,args.source_commit)
-    result=compare_archives(first,second,args.source_commit,args.version,epoch,overlay,source_bytes)
+    result=compare_archives(first,second,args.source_commit,args.version,epoch,overlay,source_bytes,
+                            upstream_pin,tool_inputs)
     result.update({'workflow_runs':[args.first_run,args.second_run],'artifact_ids':[first_id,second_id],
-                   'overlay_files_verified':len(overlay),'build_inputs_verified':len(TOOL_INPUTS),
+                   'overlay_files_verified':len(overlay),'build_inputs_verified':len(tool_inputs),
                    'phone_or_model_action':False,'release_published':False})
     print(json.dumps(result,indent=2))
     return 0 if result['all_members_identical'] else 2
