@@ -7,6 +7,11 @@ on:
         required: false
         default: false
         type: boolean
+      natune_join_diagnostic:
+        description: Test the pinned NaTune journal with this Gboard companion
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: read
 concurrency:
@@ -18,6 +23,44 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Refuse incompatible diagnostic modes
+        if: ${{ inputs.identity_diagnostic && inputs.natune_join_diagnostic }}
+        run: |
+          echo 'Select one diagnostic at a time.' >&2
+          exit 1
+      - name: Stage exact NaTune journal sources in the disposable runner
+        if: ${{ inputs.natune_join_diagnostic && !inputs.identity_diagnostic }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --quiet
+          test "$(git hash-object companion/src/natune_journal.rs)" = f8c5fb7088ee2a4a146ec872770e760670b5b780
+          test "$(git hash-object companion/src/bin/natune-journal-check.rs)" = 2686e3858d2f2e45534ab0467982827e14845801
+          test "$(git hash-object companion/Cargo.toml)" = a77a48e80f517654e206f3eddeadbe6eabb59897
+          test "$(git hash-object companion/Cargo.lock)" = 921dabe80e1a28e7504fb2dbd226f07f3ac2f289
+          peer=ff1ae69c710a042ac882250a42a54c75c8b348de
+          git fetch --no-tags --depth=1 origin "$peer"
+          test "$(git rev-parse "$peer:companion/src/natune_journal.rs")" = fcfd58ee864004fe249e9d57ce7a0bbc99014b08
+          test "$(git rev-parse "$peer:companion/src/bin/natune-journal-check.rs")" = 622c142cee461c73515f9e3ee5091c305c8bc007
+          git show "$peer:companion/src/natune_journal.rs" > companion/src/natune_journal.rs
+          git show "$peer:companion/src/bin/natune-journal-check.rs" > companion/src/bin/natune-journal-check.rs
+          expected="$(printf '%s\n' companion/src/bin/natune-journal-check.rs companion/src/natune_journal.rs | LC_ALL=C sort)"
+          test "$(git diff --name-only | LC_ALL=C sort)" = "$expected"
+          test "$(git hash-object companion/src/natune_journal.rs)" = fcfd58ee864004fe249e9d57ce7a0bbc99014b08
+          test "$(git hash-object companion/src/bin/natune-journal-check.rs)" = 622c142cee461c73515f9e3ee5091c305c8bc007
+          mkdir -p dist
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = {'schema':'purple.companion-join-diagnostic.v1',
+                  'gboard_source_commit':os.environ['GITHUB_SHA'],
+                  'natune_source_commit':'ff1ae69c710a042ac882250a42a54c75c8b348de',
+                  'natune_journal_git_blob':'fcfd58ee864004fe249e9d57ce7a0bbc99014b08',
+                  'natune_checker_git_blob':'622c142cee461c73515f9e3ee5091c305c8bc007',
+                  'gboard_manifest_git_blob':'a77a48e80f517654e206f3eddeadbe6eabb59897',
+                  'gboard_lock_git_blob':'921dabe80e1a28e7504fb2dbd226f07f3ac2f289',
+                  'scope':'Disposable source join for public tests and cross-build; no installation or media access'}
+          Path('dist/join-provenance.json').write_text(json.dumps(data,indent=2)+'\n')
+          PY
       - name: Reproduce the known owner-identity defect only
         if: ${{ inputs.identity_diagnostic }}
         env:
@@ -28,6 +71,9 @@ jobs:
             --ignored --exact tests::reproduce_live_owner_misidentified_by_updated_command --nocapture
       - name: Native controls without any model invocation
         if: ${{ !inputs.identity_diagnostic }}
+        env:
+          CARGO_INCREMENTAL: 0
+          CARGO_PROFILE_TEST_DEBUG: 0
         run: |
           mkdir -p dist
           cargo test --locked --manifest-path companion/Cargo.toml --lib > dist/native-controls.txt
@@ -49,6 +95,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ !inputs.identity_diagnostic }}
         with:
-          name: purple-gboard-companion-candidate
+          name: ${{ inputs.natune_join_diagnostic && 'purple-companion-join-diagnostic' || 'purple-gboard-companion-candidate' }}
           path: dist/
           retention-days: 7
