@@ -1,0 +1,50 @@
+{
+  "schema": "purple.gboard-worker-wiring-verification.v1",
+  "observed_utc": "2026-10-30T00:27:01Z",
+  "verification_source_commit": "ab4d5f1fbb8060e54e3a76e997380464ada4acf6",
+  "verifier_git_blob": "799551839239d2a7fdb21eb0e2ffec1aeb59431d",
+  "patch_workflow_git_blob": "3f28ee48d6f06d4bc06c36facc155578e48cb39e",
+  "manual_control_run": "https://github.com/Sodelin/purple-patches/actions/runs/40979548199",
+  "full_patch_workflow_run": "https://github.com/Sodelin/purple-patches/actions/runs/40979613004",
+  "bundle": {
+    "version": "0.1.0-alpha.23",
+    "source_commit": "42de89706d8c326ab1074670dc87de689b876f60",
+    "build_run": 40974389461,
+    "main_mpp_sha256": "384946bf207aea81774ea3c5b814c2da06bc39b4ea18ede87185cc6f5f3a269b"
+  },
+  "target": {
+    "version": "18.5.4.993608717-release-arm64-v8a",
+    "original_apk_sha256": "0bbc448e570f4042692c850f8b5a19458e009d245c5f099bff3c0415574c2402",
+    "original_signer_sha256": "f0fd6c5b410f25cb25c3b53346c8972fae30f8ee7411df910480ad6b2d60db83"
+  },
+  "observations": {
+    "worker_calls": "Both chooseTranslationEffort and submit contain exactly one static WorkerStart.launch(Runnable,String) reference, consume its result, and use the expected forward success branch with a static workerStartFailed reference in the failure fallthrough. This is a bounded instruction-layout check, not complete reachability or data-flow proof.",
+    "keyboard_links": "The selected upstream editing runtime contains one start and one end invocation reference to PurpleAiRuntime; PurpleAccessPoints.lambda$register$0 contains one click invocation reference. Other prior controls inspect registration and catalog references. These observations do not prove that Android invokes the hooks or renders either action.",
+    "negative_control": "The independently SHA-256 checked alpha.21 APK was refused for its missing WorkerStart class. This tests the missing-class guard, not every possible verifier failure.",
+    "workflow": "The selected full patch workflow successfully ran the verifier on its unsigned output. Alpha revisions 23 and later are now checked by that workflow; its historical negative control remains optional while the older artifact is retained.",
+    "dispatcher_failure": "A new manual workflow available only on the development branch returned GitHub 404 before dispatch. The inspection was instead run through the existing registered release-controls workflow; the temporary workflow was removed from the next commit. No run was created by the failed dispatch."
+  },
+  "artifact_readback": {
+    "artifact_id": 12943659385,
+    "zip_bytes": 49129051,
+    "zip_sha256": "3c5c9ddde4c07f15bbff42cf5ad0426ba16b372a6895c3f98b333e59eab20ffb",
+    "unsigned_apk_bytes": 84559699,
+    "unsigned_apk_sha256": "d9b993c760d01c2be83ebf1d3d3cd4d3c352ee1e33611f111cf212e47a5347c2",
+    "member_readback": "The complete artifact ZIP and all five checksum-listed members were read and hashed in memory. Build and overlay provenance were checked. No APK was written to the phone.",
+    "retention": "The hosted artifact is temporary and may expire; it has not been separately archived to Drive. The prior exact bundle and earlier output evidence remain separately recorded."
+  },
+  "two_output_comparison": {
+    "previous_artifact_id": 12941693639,
+    "previous_unsigned_apk_sha256": "6ddb3981f9c988dd1de66af5e62e1cdfd8674bb6b8a396a74178ef412cd8c930",
+    "current_artifact_id": 12943659385,
+    "apk_entries_each": 9561,
+    "added_removed_or_changed_uncompressed_entries": 0,
+    "entry_order_identical": true,
+    "raw_different_bytes": 24,
+    "raw_differences_outside_local_or_central_zip_timestamp_fields": 0,
+    "timestamp_changed_entries": ["classes.dex", "classes2.dex", "classes3.dex", "classes4.dex"],
+    "method": "Both complete outer ZIPs were checked against selected lengths and SHA-256 pins; the two APK members were checked against their own pins. In memory, every APK entry was read and hashed, duplicate names were refused, and all entry names and ordering were compared. A second in-memory byte comparison parsed the local and central ZIP headers and found every differing offset inside a timestamp field for those four entries.",
+    "limits": "These two outputs have identical entry contents, but are not byte-identical APKs. The observation does not promise reproducibility on later runs or establish Android behavior, signing or installation."
+  },
+  "remaining": "The stale-worker ownership diagnostic, authenticated Termux handoff, bridge ownership and durable-job recovery, Whisper engine/model acceptance, actual keyboard regression and rollback, and maintained Manager feed remain open. No installation, microphone, model, account or phone execution was performed."
+}

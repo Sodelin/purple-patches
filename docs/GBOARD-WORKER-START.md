@@ -39,3 +39,12 @@ busy owner, the method preserved the newer capture and dialog but cleared the
 shared busy flag. The test does not establish that Android can reach this
 ordering. Treat the ownership invariant as open until its lifecycle is reviewed
 and corrected; the diagnostic is not device acceptance.
+
+An additional [compiled-wiring check](gboard-worker-wiring-verification.json)
+inspected the two worker launch and failure-branch references, the keyboard
+lifecycle hooks and an action callback in the exact alpha.23 APK. The older
+alpha.21 output was refused for its missing worker class. The verification is
+now included in the off-phone APK workflow. Two alpha.23 outputs had identical
+entry contents but different ZIP timestamps in four DEX headers; their APK
+hashes therefore differ. These observations do not close the ownership issue or
+establish actual Android execution.
