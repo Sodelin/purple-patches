@@ -24,3 +24,8 @@ not fetch from Drive, write an output file, update a feed or install a patch.
 Any caller that saves stdout must choose a new destination and verify the saved
 bytes; shell redirection can overwrite an existing file before the tool runs.
 The selected proof and source commit remain part of the trust boundary.
+The tool recovered the exact MPP from the Drive stream in memory. Six synthetic
+recovery controls passed locally in normal and optimized Python and in
+[hosted run 40978096587](https://github.com/Sodelin/purple-patches/actions/runs/40978096587);
+the existing three comparison controls also passed. These controls do not
+establish a physical restore or a working keyboard.
