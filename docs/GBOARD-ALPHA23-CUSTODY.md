@@ -23,7 +23,9 @@ verified MPP to non-terminal stdout only after all checks pass. The tool does
 not fetch from Drive, write an output file, update a feed or install a patch.
 Any caller that saves stdout must choose a new destination and verify the saved
 bytes; shell redirection can overwrite an existing file before the tool runs.
-The selected proof and source commit remain part of the trust boundary.
+The selected proof and source commit remain part of the trust boundary. The
+commit must be available in the local Git object store; a shallow checkout may
+need the exact source restored or fetched before recovery can run.
 The tool recovered the exact MPP from the Drive stream in memory. Six synthetic
 recovery controls passed locally in normal and optimized Python and in
 [hosted run 40978096587](https://github.com/Sodelin/purple-patches/actions/runs/40978096587);
