@@ -7,6 +7,11 @@ on:
         type: boolean
         default: false
         required: false
+      worker_wiring_check:
+        description: Inspect selected pre-existing compiled Gboard APKs
+        type: boolean
+        default: false
+        required: false
   push:
     paths:
       - 'tools/release_checks.py'
@@ -38,7 +43,7 @@ permissions:
 jobs:
   controls:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # observed v4
       - name: Exercise synthetic gates in normal and optimized Python
@@ -74,3 +79,40 @@ jobs:
           fi
           grep -F 'STALE_REQUEST_RELEASED_NEWER_BUSY' "$RUNNER_TEMP/stale-diagnostic.txt"
           echo 'EXPECTED SOURCE DIAGNOSTIC: simulated stale cleanup releases busy; actual Android reachability is unverified.'
+      - uses: actions/setup-java@v4
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_wiring_check }}
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Inspect compiled worker and lifecycle wiring in selected APKs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_wiring_check }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run view 40975115353 --repo Sodelin/purple-patches --json status,conclusion,headSha,workflowName > "$RUNNER_TEMP/current-run.json"
+          gh run view 40972359801 --repo Sodelin/purple-patches --json status,conclusion,headSha,workflowName > "$RUNNER_TEMP/old-run.json"
+          python - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          for name, sha in (('current-run.json', '42de89706d8c326ab1074670dc87de689b876f60'),
+                            ('old-run.json', '1be2420ec363ba6513c2d25db1f35e861e5bcc5f')):
+              run = json.loads((root / name).read_text())
+              if (run.get('status'), run.get('conclusion'), run.get('headSha'), run.get('workflowName')) != (
+                  'completed', 'success', sha, 'Patch and inspect a verified Gboard bundle off phone'):
+                  raise SystemExit('The selected artifact run changed or was not successful')
+          PY
+          gh run download 40975115353 --repo Sodelin/purple-patches --name purple-gboard-verified-unsigned-candidate --dir "$RUNNER_TEMP/current"
+          gh run download 40972359801 --repo Sodelin/purple-patches --name purple-gboard-verified-unsigned-candidate --dir "$RUNNER_TEMP/old"
+          printf '%s  %s\n' '6ddb3981f9c988dd1de66af5e62e1cdfd8674bb6b8a396a74178ef412cd8c930' "$RUNNER_TEMP/current/gboard-purple-unsigned.apk" | sha256sum -c -
+          printf '%s  %s\n' '1ff758517fa449e4ff63a4b3bc56711956001640072d570c17c430e94e5ddb42' "$RUNNER_TEMP/old/gboard-purple-unsigned.apk" | sha256sum -c -
+          curl -fL https://github.com/MorpheApp/morphe-desktop/releases/download/v1.19.1/morphe-desktop-1.19.1-all.jar -o "$RUNNER_TEMP/morphe.jar"
+          printf '%s  %s\n' 'a51472252cd63b2eac635dbb5a154ff918bfc15268da89679feb3d760230c573' "$RUNNER_TEMP/morphe.jar" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/wiring-check"
+          javac --release 21 -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/wiring-check" companion/deployment/VerifyGboardWorkerWiring.java
+          java -cp "$RUNNER_TEMP/wiring-check:$RUNNER_TEMP/morphe.jar" VerifyGboardWorkerWiring "$RUNNER_TEMP/current/gboard-purple-unsigned.apk"
+          if java -cp "$RUNNER_TEMP/wiring-check:$RUNNER_TEMP/morphe.jar" VerifyGboardWorkerWiring "$RUNNER_TEMP/old/gboard-purple-unsigned.apk" > "$RUNNER_TEMP/negative.txt" 2>&1; then
+            echo 'The older artifact unexpectedly passed the worker wiring check' >&2
+            exit 1
+          fi
+          grep -F 'Missing class Ldev/purple/patches/gboard/WorkerStart;' "$RUNNER_TEMP/negative.txt"
+          echo 'The selected older APK was refused for its missing WorkerStart class.'
