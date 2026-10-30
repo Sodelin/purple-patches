@@ -1,0 +1,39 @@
+{
+  "schema": "purple.gboard-natune-companion-join-verification.v1",
+  "workflow_run": 40980837220,
+  "workflow_url": "https://github.com/Sodelin/purple-patches/actions/runs/40980837220",
+  "workflow_source_commit": "92e9a44f1b591261c53e7451b8dc877c6b064be4",
+  "gboard_companion_version": "0.2.2-dev.7",
+  "gboard_manifest_git_blob": "a77a48e80f517654e206f3eddeadbe6eabb59897",
+  "gboard_lock_git_blob": "921dabe80e1a28e7504fb2dbd226f07f3ac2f289",
+  "natune_hosted_source_commit": "ff1ae69c710a042ac882250a42a54c75c8b348de",
+  "natune_local_commit_with_the_same_selected_journal_blobs": "39198539c2818fdf501baad8b348c62245f7985d",
+  "natune_journal_git_blob": "fcfd58ee864004fe249e9d57ce7a0bbc99014b08",
+  "natune_checker_git_blob": "622c142cee461c73515f9e3ee5091c305c8bc007",
+  "source_join_method": "A disposable hosted checkout kept the selected Gboard companion and its manifest/lock, fetched the pinned public NaTune commit, checked both owners' selected Git blob IDs, and replaced only natune_journal.rs and natune-journal-check.rs for the test. The separate owner's worktree and index were not modified; no source branch was merged.",
+  "controls": {
+    "host_library_tests_passed": 54,
+    "host_library_tests_failed": 0,
+    "host_library_tests_ignored": 1,
+    "journal_tests_passed": 21,
+    "ignored_test_limit": "The existing owner-identity diagnostic remains ignored in the regular run; this join does not fix or re-evaluate that defect.",
+    "android_aarch64_cross_build": true,
+    "scope": "Public synthetic library controls and cross-compilation; no Android executable, model, microphone, user media, receiver or installed app was run."
+  },
+  "artifact": {
+    "id": 12944094751,
+    "name": "purple-companion-join-diagnostic",
+    "zip_bytes": 744809,
+    "zip_sha256": "c039cdfa6cf618d3974e9f79159677a364a6d85db0e06f7f02016326839f6ee5",
+    "members_checked": 7,
+    "source_files_checked_against_selected_commits": 13,
+    "bridge_bytes": 759568,
+    "bridge_sha256": "4ab59448f873a7c648e108a4aa8199aa93fa47c51ed173b58d9d794f1b7318e2",
+    "journal_checker_bytes": 701496,
+    "journal_checker_sha256": "9f7e8a5c6d42f14619eec89831316287b0016420bc992f686c628b0d825481c3",
+    "binary_observation": "Both binaries have ELF64 little-endian AArch64 headers. They were not executed on Android.",
+    "readback": "The complete ZIP, all seven checksum-listed members, selected provenance and 13 source hashes were independently checked in memory. The two NaTune source hashes matched the owner's selected local commit; the others matched the hosted Gboard source commit.",
+    "retention": "The hosted diagnostic artifact is temporary and is not a private archive or a release."
+  },
+  "limits": "This tests only the selected companion source join. It does not join or install the NaTune app, establish its original signing/data handoff or authenticated journal owner, validate a real source/receiver, release media, prove Gboard privacy or job recovery, or replace phone acceptance. It does not claim anything about later changes by either owner."
+}

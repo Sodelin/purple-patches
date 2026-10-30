@@ -1,7 +1,7 @@
 {
   "date_utc": "2026-10-29",
   "full_objective_complete": false,
-  "current_turn_classification": "progress: the exact alpha.23 APK's worker launch, failure-branch, lifecycle and action callback references were checked in compiled DEX, with an older APK as a missing-class control; the check is integrated into the off-phone patch workflow. Two output APKs had identical entry contents but 24 timestamp-field byte differences. Actual Android reachability, owner-aware cleanup and privacy, job recovery, model and device gates remain open.",
+  "current_turn_classification": "progress: the current Gboard 0.2.2-dev.7 companion and the NaTune owner's selected journal sources passed a disposable hosted source-join test and Android ARM64 cross-build. The source branches remain separate; actual app ownership, privacy, recovery, model and device gates remain open.",
   "ownership": {
     "gboard": "PATCHES owns the Gboard overlay and its active worktree.",
     "natune": "The existing standalone NaTune/migration owner has its own worktree; no index or media-writer ownership is transferred.",
@@ -19,6 +19,7 @@
   },
   "natune_evidence": {
     "owner_hosted_verification": "https://github.com/Sodelin/purple-patches/blob/8dd56b1877d34a49ab20f1db59c510e4a44190ab/natune/combined-dev-verification.json",
+    "current_companion_source_join": "gboard-natune-companion-join-verification.json: Gboard 0.2.2-dev.7 and the owner's two pinned journal sources passed 54 host controls, including 21 journal controls, and an Android ARM64 cross-build in a disposable runner. One known owner-identity diagnostic stayed ignored. No branch was merged and no phone executable ran.",
     "scope": "The separate owner's combined audio-settings and folder/FLAC carrier passed hosted synthetic controls and exact-public-APK comparison; direct Morphe output required separate native finalization.",
     "not_proven": "The carrier has no Move action or complete FLAC/provider selection; original-app signing/data continuity, authenticated journal/receiver, phone playback and user-media transfer/removal remain open."
   },
