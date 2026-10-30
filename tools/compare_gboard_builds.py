@@ -110,6 +110,26 @@ def artifact_for(run,commit):
     return item['id'],gh('api',f"repos/{REPO}/actions/artifacts/{item['id']}/zip")
 
 
+def committed_selection(commit):
+    """Load the exact source inputs needed to inspect an archived build."""
+    require(re.fullmatch(r'[0-9a-f]{40}',commit) is not None,'Invalid source commit')
+    def git(*values):return subprocess.check_output(['git','--no-replace-objects','-C',str(ROOT),*values])
+    tree=git('ls-tree','-r','-z','--full-tree',commit,'--','gboard').split(b'\0')
+    overlay=[]
+    for entry in tree:
+        if not entry:continue
+        header,name=entry.split(b'\t',1);mode,kind,_=header.split(b' ',2)
+        require(mode==b'100644' and kind==b'blob','Unsupported committed overlay mode')
+        overlay.append(name.decode('utf-8'))
+    require(overlay,'Committed overlay is empty')
+    epoch=int(git('show','-s','--format=%ct',commit))*1000
+    cache={}
+    def source_bytes(path):
+        if path not in cache:cache[path]=git('show',commit+':'+path)
+        return cache[path]
+    return epoch,overlay,source_bytes
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--first-run',type=int,required=True)
@@ -118,21 +138,7 @@ def main():
     parser.add_argument('--version',required=True)
     args=parser.parse_args()
     require(args.first_run>0 and args.second_run>0 and args.first_run!=args.second_run,'Select two different run IDs')
-    require(re.fullmatch(r'[0-9a-f]{40}',args.source_commit) is not None,'Invalid source commit')
-    def git(*values):return subprocess.check_output(['git','--no-replace-objects','-C',str(ROOT),*values])
-    tree=git('ls-tree','-r','-z','--full-tree',args.source_commit,'--','gboard').split(b'\0')
-    overlay=[]
-    for entry in tree:
-        if not entry:continue
-        header,name=entry.split(b'\t',1);mode,kind,_=header.split(b' ',2)
-        require(mode==b'100644' and kind==b'blob','Unsupported committed overlay mode')
-        overlay.append(name.decode('utf-8'))
-    require(overlay,'Committed overlay is empty')
-    epoch=int(git('show','-s','--format=%ct',args.source_commit))*1000
-    cache={}
-    def source_bytes(path):
-        if path not in cache:cache[path]=git('show',args.source_commit+':'+path)
-        return cache[path]
+    epoch,overlay,source_bytes=committed_selection(args.source_commit)
     first_id,first=artifact_for(args.first_run,args.source_commit)
     second_id,second=artifact_for(args.second_run,args.source_commit)
     result=compare_archives(first,second,args.source_commit,args.version,epoch,overlay,source_bytes)

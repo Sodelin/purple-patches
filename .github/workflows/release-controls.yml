@@ -15,6 +15,10 @@ on:
       - 'tools/verify_candidate_source.py'
       - 'tools/export_patch_bundle.py'
       - 'tools/test_release_checks.py'
+      - 'tools/compare_gboard_builds.py'
+      - 'tools/check_compare_gboard_builds.py'
+      - 'tools/recover_gboard_bundle.py'
+      - 'tools/test_recover_gboard_bundle.py'
       - '.github/workflows/release-controls.yml'
   pull_request:
     paths:
@@ -24,6 +28,10 @@ on:
       - 'tools/verify_candidate_source.py'
       - 'tools/export_patch_bundle.py'
       - 'tools/test_release_checks.py'
+      - 'tools/compare_gboard_builds.py'
+      - 'tools/check_compare_gboard_builds.py'
+      - 'tools/recover_gboard_bundle.py'
+      - 'tools/test_recover_gboard_bundle.py'
       - '.github/workflows/release-controls.yml'
 permissions:
   contents: read
@@ -38,6 +46,9 @@ jobs:
           python -B tools/test_release_checks.py
           python -B -O tools/test_release_checks.py
           PYTHONOPTIMIZE=1 python -B tools/test_release_checks.py
+          python -B tools/check_compare_gboard_builds.py
+          python -B tools/test_recover_gboard_bundle.py
+          python -B -O tools/test_recover_gboard_bundle.py
       - name: Diagnose pinned Gboard worker cleanup on a host-only UI
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.worker_ui_diagnostic }}
         run: |
