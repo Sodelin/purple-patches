@@ -5,6 +5,8 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21s
 import com.android.tools.smali.dexlib2.iface.Method;
 import com.android.tools.smali.dexlib2.iface.value.*;
 import com.android.tools.smali.dexlib2.immutable.value.*;
+import com.android.tools.smali.dexlib2.immutable.instruction.ImmutableInstruction35c;
+import com.android.tools.smali.dexlib2.immutable.reference.ImmutableMethodReference;
 import com.android.tools.smali.dexlib2.iface.instruction.*;
 import com.android.tools.smali.dexlib2.iface.instruction.formats.ArrayPayload;
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference;
@@ -17,11 +19,12 @@ import java.util.zip.ZipFile;
 public final class VerifyNatuneMobilePatch {
     record Site(String method, int offset, int register) {}
     static final List<Site> SITES = List.of(
-        new Site("Lmoe/rukamori/archivetune/playback/MusicService$prefetchNextMediaItemStream$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;", 73, 20),
-        new Site("Lmoe/rukamori/archivetune/playback/MusicService;->k2(Lr8/km2;Z)Lr8/km2;", 26, 4),
-        new Site("Lmoe/rukamori/archivetune/playback/MusicService;->onMediaItemTransition(Lr8/yh7;I)V", 1216, 2),
-        new Site("Lmoe/rukamori/archivetune/playback/b;->a(Lr8/km2;)Lr8/km2;", 196, 1),
-        new Site("Lmoe/rukamori/archivetune/playback/g;->g(Ljava/lang/String;Lr8/cf2;)Ljava/lang/Object;", 290, 2)
+        new Site("Lmoe/rukamori/archivetune/playback/MusicService$prefetchNextMediaItemStream$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;", 100, 23),
+        new Site("Lmoe/rukamori/archivetune/playback/MusicService;->m2(Lr8/jm2;Z)Lr8/jm2;", 26, 4),
+        new Site("Lmoe/rukamori/archivetune/playback/MusicService;->onMediaItemTransition(Lr8/fi7;I)V", 1216, 2),
+        new Site("Lmoe/rukamori/archivetune/playback/MusicService;->z1(Ljava/lang/String;ZLr8/df2;)Ljava/lang/Object;", 70, 10),
+        new Site("Lmoe/rukamori/archivetune/playback/b;->a(Lr8/jm2;)Lr8/jm2;", 196, 1),
+        new Site("Lmoe/rukamori/archivetune/playback/g;->g(Ljava/lang/String;Lr8/df2;)Ljava/lang/Object;", 290, 2)
     );
     record Body(int registers, List<String> instructions, List<String> handlers) {}
     record MethodState(int flags, Object annotations, Object parameterAnnotations, Body body) {}
@@ -115,14 +118,51 @@ public final class VerifyNatuneMobilePatch {
         return body(method, expectedChange, 0);
     }
     static Body body(Method method, Site expectedChange, int verifiedPrefixInstructions) {
+        return body(method, expectedChange, verifiedPrefixInstructions, null);
+    }
+    // A runtime-settings caller independently verifies its added prefix, then
+    // normalizes only the exact rewritten audio call back to the original.
+    static Body body(Method method, Site expectedChange, int verifiedPrefixInstructions, Site runtimeChange) {
         var implementation = method.getImplementation();
         if (implementation == null) return null;
         var instructions = new ArrayList<Instruction>();
         implementation.getInstructions().forEach(instructions::add);
+        int removedUnits = 0;
         if (verifiedPrefixInstructions > 0) {
-            need(implementation.getTryBlocks().isEmpty(), "Cannot strip a prefix across try handlers");
             need(verifiedPrefixInstructions < instructions.size(), "Missing original method body");
+            for (int i = 0; i < verifiedPrefixInstructions; i++) removedUnits += instructions.get(i).getCodeUnits();
+            for (var block : implementation.getTryBlocks()) {
+                need(block.getStartCodeAddress() >= removedUnits, "Try range overlaps added prefix");
+                for (var handler : block.getExceptionHandlers())
+                    need(handler.getHandlerCodeAddress() >= removedUnits, "Handler targets added prefix");
+            }
             instructions.subList(0, verifiedPrefixInstructions).clear();
+        }
+        if (runtimeChange != null) {
+            int address = 0;
+            boolean changed = false;
+            for (int i = 0; i < instructions.size(); i++) {
+                var instruction = instructions.get(i);
+                if (address == runtimeChange.offset()) {
+                    need(instruction.getOpcode() == Opcode.INVOKE_STATIC && instruction instanceof FiveRegisterInstruction &&
+                        instruction instanceof ReferenceInstruction, "Runtime audio call layout changed");
+                    var call = (FiveRegisterInstruction) instruction;
+                    var reference = ((ReferenceInstruction) instruction).getReference();
+                    need(reference instanceof MethodReference && signature((MethodReference) reference).equals(
+                        "Ldev/purple/patches/natune/RuntimeSettings;->lowData(Landroid/content/Context;)Z") &&
+                        call.getRegisterCount() == 1 && i + 1 < instructions.size(), "Wrong runtime audio target");
+                    var result = instructions.get(i + 1);
+                    need(result.getOpcode() == Opcode.MOVE_RESULT && result instanceof OneRegisterInstruction &&
+                        ((OneRegisterInstruction) result).getRegisterA() == runtimeChange.register(), "Wrong runtime audio result");
+                    instructions.set(i, new ImmutableInstruction35c(Opcode.INVOKE_STATIC, call.getRegisterCount(),
+                        call.getRegisterC(), call.getRegisterD(), call.getRegisterE(), call.getRegisterF(), call.getRegisterG(),
+                        new ImmutableMethodReference("Lr8/mg6;", "u", List.of("Landroid/content/Context;"), "Z")));
+                    changed = true;
+                    break;
+                }
+                address += instruction.getCodeUnits();
+            }
+            need(changed, "Runtime audio call missing at original offset");
         }
         int[] originalWidths = instructions.stream().mapToInt(Instruction::getCodeUnits).toArray();
         var labels = new HashMap<Integer,Integer>();
@@ -147,7 +187,7 @@ public final class VerifyNatuneMobilePatch {
             if (expectedChange != null && address == expectedChange.offset()) {
                 need(instruction.getOpcode() == Opcode.INVOKE_STATIC, "Original policy call changed");
                 var target = (MethodReference) ((ReferenceInstruction) instruction).getReference();
-                need(signature(target).equals("Lr8/hg6;->p(Landroid/content/Context;)Z"), "Different policy helper");
+                need(signature(target).equals("Lr8/mg6;->u(Landroid/content/Context;)Z"), "Different policy helper");
                 var result = instructions.get(i + 1);
                 need(result.getOpcode() == Opcode.MOVE_RESULT &&
                      ((OneRegisterInstruction) result).getRegisterA() == expectedChange.register(), "Different original result register");
@@ -161,10 +201,10 @@ public final class VerifyNatuneMobilePatch {
         var handlers = new ArrayList<String>();
         for (var block : implementation.getTryBlocks()) {
             var row = new StringBuilder();
-            token(row, label(labels, block.getStartCodeAddress()));
-            token(row, label(labels, block.getStartCodeAddress() + block.getCodeUnitCount()));
+            token(row, label(labels, block.getStartCodeAddress() - removedUnits));
+            token(row, label(labels, block.getStartCodeAddress() + block.getCodeUnitCount() - removedUnits));
             for (var handler : block.getExceptionHandlers()) {
-                token(row, handler.getExceptionType()); token(row, label(labels, handler.getHandlerCodeAddress()));
+                token(row, handler.getExceptionType()); token(row, label(labels, handler.getHandlerCodeAddress() - removedUnits));
             }
             handlers.add(row.toString());
         }
@@ -176,6 +216,9 @@ public final class VerifyNatuneMobilePatch {
     // A caller must independently verify each exact prefix before supplying its
     // length here. The remaining complete body still uses the ordinary verifier.
     static Snapshot snapshot(File apk, boolean expectedChanges, Map<String,Integer> verifiedPrefixes) throws Exception {
+        return snapshot(apk, expectedChanges, verifiedPrefixes, false);
+    }
+    static Snapshot snapshot(File apk, boolean expectedChanges, Map<String,Integer> verifiedPrefixes, boolean runtimeChanges) throws Exception {
         var methods = new TreeMap<String, MethodState>();
         var classes = new TreeMap<String, ClassState>();
         var dex = DexFileFactory.loadDexContainer(apk, Opcodes.getDefault());
@@ -191,7 +234,8 @@ public final class VerifyNatuneMobilePatch {
                 for (var method : clazz.getMethods()) {
                     String key = signature(method);
                     Site site = expectedChanges ? SITES.stream().filter(x -> x.method().equals(key)).findFirst().orElse(null) : null;
-                    need(methods.put(key, new MethodState(method.getAccessFlags(), method.getAnnotations(), method.getParameters().stream().map(p -> p.getAnnotations()).toList(), body(method, site, verifiedPrefixes.getOrDefault(key, 0)))) == null,
+                    Site runtimeSite = runtimeChanges ? SITES.stream().filter(x -> x.method().equals(key)).findFirst().orElse(null) : null;
+                    need(methods.put(key, new MethodState(method.getAccessFlags(), method.getAnnotations(), method.getParameters().stream().map(p -> p.getAnnotations()).toList(), body(method, site, verifiedPrefixes.getOrDefault(key, 0), runtimeSite))) == null,
                          "Duplicate method");
                 }
             }
@@ -202,9 +246,13 @@ public final class VerifyNatuneMobilePatch {
         initializerControls();
         var expected = snapshot(new File(args[0]), true);
         var actual = snapshot(new File(args[1]), false);
-        compare(expected, actual, args, "Verified exact five audio result overrides; global low-data helper and every other method preserved.");
+        compare(expected, actual, args, "Verified exact six audio result overrides; global low-data helper and every other method preserved.");
     }
     static void compare(Snapshot expected, Snapshot actual, String[] args, String report) throws Exception {
+        compare(expected, actual, args, report, Map.of());
+    }
+    static void compare(Snapshot expected, Snapshot actual, String[] args, String report,
+            Map<String,String> permittedAdditions) throws Exception {
         need(expected.classes().keySet().equals(actual.classes().keySet()), "Class set changed");
         int classDifferences = 0;
         for (String name : expected.classes().keySet()) {
@@ -236,6 +284,7 @@ public final class VerifyNatuneMobilePatch {
         for (Site site : SITES) need(expected.methods().containsKey(site.method()), "Missing audio site");
         int nativeFiles = 0, assets = 0, preservedEntries = 0;
         try (var source = new ZipFile(args[0]); var patched = new ZipFile(args[1])) {
+            var foundAdditions = new HashSet<String>();
             var entries = source.entries();
             while (entries.hasMoreElements()) {
                 var entry = entries.nextElement();
@@ -247,17 +296,25 @@ public final class VerifyNatuneMobilePatch {
                 byte[] a, b;
                 try (var input = source.getInputStream(entry)) { a = MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()); }
                 try (var input = patched.getInputStream(retained)) { b = MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()); }
-                need(MessageDigest.isEqual(a, b), "Original asset bytes changed");
+                need(MessageDigest.isEqual(a, b), "Original asset bytes changed: " + name);
                 preservedEntries++;
                 if (name.startsWith("lib/")) nativeFiles++;
                 if (name.startsWith("assets/")) assets++;
             }
             var outputEntries = patched.entries();
             while (outputEntries.hasMoreElements()) {
-                String name = outputEntries.nextElement().getName();
-                need(source.getEntry(name) != null || name.matches("classes(?:[2-9][0-9]*|1[0-9]+)?\\.dex"),
-                     "Unexpected non-DEX entry added");
+                var entry = outputEntries.nextElement();
+                String name = entry.getName();
+                if (source.getEntry(name) != null || name.matches("classes(?:[2-9][0-9]*|1[0-9]+)?\\.dex")) continue;
+                if (entry.isDirectory() && permittedAdditions.keySet().stream().anyMatch(p -> p.startsWith(name))) continue;
+                String expectedHash = permittedAdditions.get(name);
+                need(expectedHash != null && foundAdditions.add(name), "Unexpected or duplicate non-DEX entry added");
+                try (var input = patched.getInputStream(entry)) {
+                    String actualHash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()));
+                    need(expectedHash.equals(actualHash), "Added carrier entry differs");
+                }
             }
+            need(foundAdditions.equals(permittedAdditions.keySet()), "Selected carrier entries missing");
         }
         System.out.println(report);
         System.out.println("Classes=" + expected.classes().size() + "; methods=" + expected.methods().size() +

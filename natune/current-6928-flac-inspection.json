@@ -1,0 +1,85 @@
+{
+  "apk_sha256": "b6e6c4fed044416cd8c8b232ebda6bdca8b6c2626637a400ffc19d8800026d60",
+  "hooks": {
+    "Lr8/nu0;->f(Ljava/lang/Exception;Lr8/wf4;ZI)Lr8/ex3;": {
+      "registers": 15,
+      "code_units": 52,
+      "tries": 1,
+      "code_sha256": "b94f08d1a21aff640ddd068c33351f11a54d48147b3758d1b335f19487534daf",
+      "fields": [
+        "Lr8/nu0;->B:I",
+        "Lr8/nu0;->L:Z",
+        "Lr8/nu0;->N:Lr8/ao7;"
+      ],
+      "selected_calls": []
+    },
+    "Lr8/ne7;->Q(Lr8/fv3;Lr8/wf4;Z)Ljava/util/ArrayList;": {
+      "registers": 7,
+      "code_units": 72,
+      "tries": 0,
+      "code_sha256": "031f7590a08812cc42ce7a20bd572fdcd62e15c18761a6229b42adc73c697df3",
+      "fields": [
+        "Lr8/ne7;->f1:Landroid/content/Context;",
+        "Lr8/ne7;->h1:Lr8/mu2;",
+        "Lr8/t2a;->B:Lr8/t2a;",
+        "Lr8/wf4;->o:Ljava/lang/String;",
+        "Lr8/ye7;->a:Ljava/util/HashMap;"
+      ],
+      "selected_calls": []
+    },
+    "Lr8/ne7;->e0(Lr8/ge3;)Lr8/zs2;": {
+      "registers": 6,
+      "code_units": 29,
+      "tries": 0,
+      "code_sha256": "1c1a3c8c9e5e58d929da26386a48bf06cb094b7bf1c1a33e187f7742b84ab173",
+      "fields": [
+        "Lr8/bm0;->a:Landroid/os/Handler;",
+        "Lr8/ge3;->z:Ljava/lang/Object;",
+        "Lr8/ne7;->g1:Lr8/bm0;",
+        "Lr8/ne7;->l1:Lr8/wf4;"
+      ],
+      "selected_calls": []
+    },
+    "Lr8/ne7;->y0(Lr8/wf4;)Z": {
+      "registers": 6,
+      "code_units": 52,
+      "tries": 0,
+      "code_sha256": "3d7b35d2d1dfdd88a2fd39a0e9611b498968f256440e386a95626188ca648c7b",
+      "fields": [
+        "Lr8/ne7;->h1:Lr8/mu2;",
+        "Lr8/nu0;->A:Lr8/t5a;",
+        "Lr8/t5a;->a:I",
+        "Lr8/wf4;->J:I",
+        "Lr8/wf4;->K:I"
+      ],
+      "selected_calls": [
+        "Lr8/ne7;->D0(Lr8/wf4;)I"
+      ]
+    },
+    "Lr8/ne7;->z0(Lr8/fv3;Lr8/wf4;)I": {
+      "registers": 21,
+      "code_units": 270,
+      "tries": 0,
+      "code_sha256": "3e51c3b65cec420aca016c42aa0f76b077642a5e275d24055685cb75a8f0abd2",
+      "fields": [
+        "Lr8/ne7;->f1:Landroid/content/Context;",
+        "Lr8/ne7;->h1:Lr8/mu2;",
+        "Lr8/qe7;->g:Z",
+        "Lr8/t2a;->A:I",
+        "Lr8/t2a;->B:Lr8/t2a;",
+        "Lr8/vf4;->F:I",
+        "Lr8/vf4;->G:I",
+        "Lr8/vf4;->H:I",
+        "Lr8/vf4;->n:Ljava/lang/String;",
+        "Lr8/wf4;->G:I",
+        "Lr8/wf4;->H:I",
+        "Lr8/wf4;->P:I",
+        "Lr8/wf4;->o:Ljava/lang/String;"
+      ],
+      "selected_calls": [
+        "Lr8/ne7;->D0(Lr8/wf4;)I"
+      ]
+    }
+  },
+  "runtime_verified": false
+}

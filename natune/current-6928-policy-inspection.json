@@ -1,0 +1,111 @@
+{
+  "apk_sha256": "b6e6c4fed044416cd8c8b232ebda6bdca8b6c2626637a400ffc19d8800026d60",
+  "dex": [
+    "classes.dex",
+    "classes2.dex",
+    "classes3.dex"
+  ],
+  "methods_with_code": 110693,
+  "network_helper": {
+    "dex": "classes.dex",
+    "code_sha256": "905edca75365896f49814a158b59c343b26516554a15366ff32aef25d83dfd5b"
+  },
+  "audio_callers": [
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/MusicService$prefetchNextMediaItemStream$2;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 26,
+      "code_units": 311,
+      "code_sha256": "0c7f22667d152970e6c3727cd524778b12133112c9d5a3750400caf32e756318",
+      "calls": [
+        {
+          "code_unit": 100,
+          "target": "Lr8/mg6;->u(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 23
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/MusicService;->m2(Lr8/jm2;Z)Lr8/jm2;",
+      "flags": 17,
+      "registers": 58,
+      "code_units": 2320,
+      "code_sha256": "952ba33e67fbb0f45e7de47212d64b05ff5641ef820c438af9159b14d70041e3",
+      "calls": [
+        {
+          "code_unit": 26,
+          "target": "Lr8/mg6;->u(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 4
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/MusicService;->onMediaItemTransition(Lr8/fi7;I)V",
+      "flags": 17,
+      "registers": 20,
+      "code_units": 1263,
+      "code_sha256": "6fb36f0d4aad588d482017a7d7c359421864d59c0e7a09bf91d02ea9b6192b94",
+      "calls": [
+        {
+          "code_unit": 1216,
+          "target": "Lr8/mg6;->u(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 2
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/MusicService;->z1(Ljava/lang/String;ZLr8/df2;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 11,
+      "code_units": 114,
+      "code_sha256": "9651985f2dab5aa2e40ae907e7ef7b183abe9c5dff0d4255545e49657c408a29",
+      "calls": [
+        {
+          "code_unit": 70,
+          "target": "Lr8/mg6;->u(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 10
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/b;->a(Lr8/jm2;)Lr8/jm2;",
+      "flags": 17,
+      "registers": 21,
+      "code_units": 491,
+      "code_sha256": "e64fae92cccb0cecd316fed2899144b9cdfa583d32cd3f9ce84c196ab215c159",
+      "calls": [
+        {
+          "code_unit": 196,
+          "target": "Lr8/mg6;->u(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 1
+        }
+      ]
+    },
+    {
+      "dex": "classes2.dex",
+      "signature": "Lmoe/rukamori/archivetune/playback/g;->g(Ljava/lang/String;Lr8/df2;)Ljava/lang/Object;",
+      "flags": 17,
+      "registers": 25,
+      "code_units": 468,
+      "code_sha256": "4438c4195bde9dd8beb326c824e8f0964cabb5f46e8becc46eb6aa64d1447206",
+      "calls": [
+        {
+          "code_unit": 290,
+          "target": "Lr8/mg6;->u(Landroid/content/Context;)Z",
+          "invoke_opcode": 113,
+          "move_result_register": 2
+        }
+      ]
+    }
+  ]
+}

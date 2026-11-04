@@ -1,9 +1,16 @@
-name: Build and validate Natune local FLAC prototype off phone
+name: Build and validate Natune runtime settings prototype off phone
 on:
   workflow_dispatch:
+    inputs:
+      folder_carrier:
+        description: Build the separate uninstalled folder/FLAC carrier
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: read
   packages: read
+  actions: read
 concurrency:
   group: purple-natune-local-flac-prototype
   cancel-in-progress: false
@@ -17,15 +24,37 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - uses: actions/download-artifact@v4
+        if: ${{ inputs.folder_carrier }}
+        with:
+          name: natune-shared-storage-controls
+          run-id: 40936010048
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/natune-flac-input
+      - name: Verify selected public native carrier input
+        if: ${{ inputs.folder_carrier }}
+        run: |
+          (cd "$RUNNER_TEMP/natune-flac-input" && sha256sum -c SHA256SUMS)
+          sha256sum -c "$RUNNER_TEMP/natune-flac-input/source-SHA256SUMS"
+          echo "a13763b6b5638d4d7e9a9bb53876841b72a65875e2760fad9f6d1480cb673ae7  $RUNNER_TEMP/natune-flac-input/libpurple_natune_flac.so" | sha256sum -c -
+          echo "7866ee98760fc1f0156b4fe6bf530257e02be487ab3fd94e2b63799dd32d6b2c  $RUNNER_TEMP/natune-flac-input/FLAC-LICENSE.txt" | sha256sum -c -
       - name: DEX input-boundary controls
         run: python -m unittest discover -s natune -p 'test_*.py' -v
       - name: Materialize official template at reviewed revision
+        env:
+          FOLDER_CARRIER: ${{ inputs.folder_carrier }}
+          NATUNE_FLAC_LIBRARY: ${{ runner.temp }}/natune-flac-input/libpurple_natune_flac.so
+          NATUNE_FLAC_LICENSE: ${{ runner.temp }}/natune-flac-input/FLAC-LICENSE.txt
         run: |
           git init "$RUNNER_TEMP/natune-template"
           git -C "$RUNNER_TEMP/natune-template" remote add origin https://github.com/MorpheApp/morphe-patches-template
           git -C "$RUNNER_TEMP/natune-template" fetch --depth=1 origin e721536ab19e30d16ce9d31ae1830ca299aad383
           git -C "$RUNNER_TEMP/natune-template" checkout --detach FETCH_HEAD
-          python natune/materialize.py "$RUNNER_TEMP/natune-template" --local-flac
+          if [ "$FOLDER_CARRIER" = "true" ]; then
+            python natune/materialize.py "$RUNNER_TEMP/natune-template" --local-flac --runtime-settings --folder-carrier
+          else
+            python natune/materialize.py "$RUNNER_TEMP/natune-template" --local-flac --runtime-settings
+          fi
       - name: Build real Morphe bundle and generated patch metadata
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,6 +65,34 @@ jobs:
           ./gradlew --no-daemon :patches:buildAndroid :patches:generatePatchesList
           mkdir -p "$GITHUB_WORKSPACE/dist"
           cp patches/build/libs/*.mpp patches-list.json purple-natune-provenance.json "$GITHUB_WORKSPACE/dist/"
+      - name: Exercise settings entry against synthetic release ABI
+        run: |
+          mkdir -p "$RUNNER_TEMP/cache-range-controls"
+          javac -Xlint:all -Werror -d "$RUNNER_TEMP/cache-range-controls" \
+            natune/runtime/dev/purple/patches/natune/CacheRangeGuard.java \
+            natune/settings-tests/cache-fixtures/r8/ud1.java natune/settings-tests/CacheRangeGuardControls.java
+          java -cp "$RUNNER_TEMP/cache-range-controls" CacheRangeGuardControls > dist/cache-range-controls.txt
+          mkdir -p "$RUNNER_TEMP/settings-controls"
+          javac -Xlint:all -Werror -d "$RUNNER_TEMP/settings-controls" \
+            natune/runtime/dev/purple/patches/natune/NatuneSettingsNavigation.java \
+            natune/settings-tests/fixtures/dev/purple/patches/natune/RuntimeSettings.java \
+            natune/settings-tests/fixtures/android/widget/Toast.java \
+            natune/settings-tests/fixtures/r8/*.java \
+            natune/storage-tests/media-fixtures/android/content/*.java \
+            natune/storage-tests/media-fixtures/android/database/*.java \
+            natune/test-fixtures/android/net/Uri.java \
+            natune/settings-tests/NatuneSettingsNavigationControls.java
+          java -cp "$RUNNER_TEMP/settings-controls" NatuneSettingsNavigationControls > dist/settings-navigation-controls.txt
+          python natune/settings-tests/materialize_enabled.py "$RUNNER_TEMP/enabled-src/RuntimeSettings.java"
+          mkdir -p "$RUNNER_TEMP/preferences-controls"
+          javac -Xlint:all -Werror -d "$RUNNER_TEMP/preferences-controls" \
+            "$RUNNER_TEMP/enabled-src/RuntimeSettings.java" \
+            natune/settings-tests/fixtures-page/dev/purple/patches/natune/PurpleSettingsPage.java \
+            natune/storage-tests/media-fixtures/android/content/*.java \
+            natune/storage-tests/media-fixtures/android/database/*.java \
+            natune/test-fixtures/android/net/Uri.java \
+            natune/settings-tests/RuntimeSettingsControls.java
+          java -cp "$RUNNER_TEMP/preferences-controls" RuntimeSettingsControls > dist/runtime-settings-controls.txt
       - name: Acquire exact verified public original and proven patching tool
         run: |
           python natune/fetch_target.py "$RUNNER_TEMP/natune-original.apk"
@@ -44,25 +101,162 @@ jobs:
           "$APKSIGNER" verify --print-certs "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-signers.txt"
           "$AAPT2" dump badging "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/natune-badging.txt"
           python natune/verify_apk_metadata.py "$RUNNER_TEMP/natune-signers.txt" "$RUNNER_TEMP/natune-badging.txt" > dist/target-proof.json
+          python natune/check_6928_patch_sites.py > dist/current-site-controls.txt
+          python natune/inspect_installed_6928.py "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/current-policy.json"
+          cmp natune/current-6928-policy-inspection.json "$RUNNER_TEMP/current-policy.json"
+          python natune/inspect_flac_6928.py "$RUNNER_TEMP/natune-original.apk" > "$RUNNER_TEMP/current-flac.json"
+          cmp natune/current-6928-flac-inspection.json "$RUNNER_TEMP/current-flac.json"
           curl -fL https://github.com/MorpheApp/morphe-desktop/releases/download/v1.19.1/morphe-desktop-1.19.1-all.jar -o "$RUNNER_TEMP/morphe.jar"
           echo "a51472252cd63b2eac635dbb5a154ff918bfc15268da89679feb3d760230c573  $RUNNER_TEMP/morphe.jar" | sha256sum -c -
-      - name: Patch exact APK with validation and inspect expected changes
+      - name: Verify the optional output-rate label patch independently
+        if: ${{ !inputs.folder_carrier }}
         run: |
           java -jar "$RUNNER_TEMP/morphe.jar" patch \
-            --patches dist/patches-0.2.0-dev.2.mpp --exclusive \
-            --enable "Allow full-quality audio on mobile data" \
-            --enable "Require FLAC for local audio decoding" \
+            --patches dist/patches-0.3.1-dev.6928.mpp --exclusive \
+            --enable "Clarify Natune output rate estimate" \
+            --bytecode-mode FULL --validate --unsigned \
+            --result-file dist/output-label-patch-result.json \
+            --out "$RUNNER_TEMP/natune-label-patched.apk" "$RUNNER_TEMP/natune-original.apk"
+          mkdir -p "$RUNNER_TEMP/output-label-verifier"
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/output-label-verifier" \
+            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneOutputEstimatePatch.java
+          java -cp "$RUNNER_TEMP/output-label-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneOutputEstimatePatch \
+            "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-label-patched.apk" > dist/output-label-preservation.txt
+      - name: Verify the optional download cache coverage patch independently
+        if: ${{ !inputs.folder_carrier }}
+        run: |
+          java -jar "$RUNNER_TEMP/morphe.jar" patch \
+            --patches dist/patches-0.3.1-dev.6928.mpp --exclusive \
+            --enable "Verify Natune download cache coverage" \
+            --bytecode-mode FULL --validate --unsigned \
+            --result-file dist/cache-coverage-patch-result.json \
+            --out "$RUNNER_TEMP/natune-cache-patched.apk" "$RUNNER_TEMP/natune-original.apk"
+          python -c 'import os, pathlib, zipfile; z=zipfile.ZipFile("dist/patches-0.3.1-dev.6928.mpp"); d=z.read("extensions/extension.mpe"); assert d.startswith(b"dex\n"); pathlib.Path(os.environ["RUNNER_TEMP"], "cache-extension.dex").write_bytes(d)'
+          mkdir -p "$RUNNER_TEMP/cache-coverage-verifier"
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/cache-coverage-verifier" \
+            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneCacheCoveragePatch.java
+          java -cp "$RUNNER_TEMP/cache-coverage-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneCacheCoveragePatch \
+            "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-cache-patched.apk" "$RUNNER_TEMP/cache-extension.dex" > dist/cache-coverage-preservation.txt
+      - name: Patch exact APK with validation and inspect expected changes
+        if: ${{ !inputs.folder_carrier }}
+        run: |
+          java -jar "$RUNNER_TEMP/morphe.jar" patch \
+            --patches dist/patches-0.3.1-dev.6928.mpp --exclusive \
+            --enable "Runtime switches for Natune audio policies" \
             --bytecode-mode FULL --validate --unsigned \
             --result-file dist/patch-result.json \
             --out "$RUNNER_TEMP/natune-patched.apk" "$RUNNER_TEMP/natune-original.apk"
           mkdir -p "$RUNNER_TEMP/natune-verifier"
-          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-verifier" natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneLocalFlacPatch.java
-          java -cp "$RUNNER_TEMP/natune-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneLocalFlacPatch \
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-verifier" natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneLocalFlacPatch.java natune/VerifyNatuneFlacCarrier.java natune/VerifyNatuneRuntimeSettingsPatch.java
+          java -cp "$RUNNER_TEMP/natune-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneRuntimeSettingsPatch \
             "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-patched.apk" > dist/static-preservation.txt
+          sha256sum .github/workflows/build-natune-local-flac.yml natune/target.json natune/materialize.py \
+            natune/NatuneMobileDataPatch.kt natune/NatuneLocalFlacPatch.kt natune/NatuneRuntimeSettingsPatch.kt natune/NatuneOutputEstimatePatch.kt natune/NatuneCacheCoveragePatch.kt natune/NatuneTidalLocalFilePatch.kt natune/NatuneFailureCachePreservationPatch.kt natune/NatuneDownloadSafetyBundle.kt \
+            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneLocalFlacPatch.java natune/VerifyNatuneRuntimeSettingsPatch.java natune/VerifyNatuneOutputEstimatePatch.java natune/VerifyNatuneCacheCoveragePatch.java natune/VerifyNatuneDownloadSafetyBundle.java \
+            natune/inspect_dex.py natune/inspect_installed_6928.py natune/inspect_flac_6928.py \
+            natune/check_6928_patch_sites.py natune/current-6928-policy-inspection.json natune/current-6928-flac-inspection.json \
+            natune/runtime/dev/purple/patches/natune/RuntimeSettings.java \
+            natune/runtime/dev/purple/patches/natune/CacheRangeGuard.java \
+            natune/runtime/dev/purple/patches/natune/PurpleSettingsPage.java \
+            natune/runtime/dev/purple/patches/natune/NatuneSettingsNavigation.java > dist/source-SHA256SUMS
+          cd dist
+          sha256sum * > SHA256SUMS
+      - name: Verify cache guard together with runtime audio settings
+        if: ${{ !inputs.folder_carrier }}
+        run: |
+          java -jar "$RUNNER_TEMP/morphe.jar" patch \
+            --patches dist/patches-0.3.1-dev.6928.mpp --exclusive \
+            --enable "Verify Natune cache with audio settings" \
+            --bytecode-mode FULL --validate --unsigned \
+            --result-file dist/combined-cache-patch-result.json \
+            --out "$RUNNER_TEMP/natune-combined-patched.apk" "$RUNNER_TEMP/natune-original.apk"
+          java -cp "$RUNNER_TEMP/cache-coverage-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneCacheCoveragePatch \
+            "$RUNNER_TEMP/natune-patched.apk" "$RUNNER_TEMP/natune-combined-patched.apk" "$RUNNER_TEMP/cache-extension.dex" > dist/combined-cache-preservation.txt
+          (cd dist && find . -maxdepth 1 -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/natune-final-SHA256SUMS")
+          mv "$RUNNER_TEMP/natune-final-SHA256SUMS" dist/SHA256SUMS
+      - name: Verify Tidal routing and failure preservation with combined audio controls
+        if: ${{ !inputs.folder_carrier }}
+        run: |
+          java -jar "$RUNNER_TEMP/morphe.jar" patch \
+            --patches dist/patches-0.3.1-dev.6928.mpp --exclusive \
+            --enable "Natune audio and download safeguards" \
+            --bytecode-mode FULL --validate --unsigned \
+            --result-file dist/download-safeguards-patch-result.json \
+            --out "$RUNNER_TEMP/natune-safeguards-patched.apk" "$RUNNER_TEMP/natune-original.apk"
+          mkdir -p "$RUNNER_TEMP/download-safeguards-verifier"
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/download-safeguards-verifier" \
+            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneDownloadSafetyBundle.java
+          java -cp "$RUNNER_TEMP/download-safeguards-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneDownloadSafetyBundle \
+            "$RUNNER_TEMP/natune-combined-patched.apk" "$RUNNER_TEMP/natune-safeguards-patched.apk" > dist/download-safeguards-preservation.txt
+          (cd dist && find . -maxdepth 1 -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/natune-final-SHA256SUMS")
+          mv "$RUNNER_TEMP/natune-final-SHA256SUMS" dist/SHA256SUMS
+      - name: Patch exact APK with the uninstalled FLAC folder carrier
+        if: ${{ inputs.folder_carrier }}
+        run: |
+          java -jar "$RUNNER_TEMP/morphe.jar" patch \
+            --patches dist/patches-0.4.0-dev.3.mpp --exclusive \
+            --enable "NaTune FLAC folder carrier (development)" \
+            --enable "Runtime switches for Natune audio policies" \
+            --bytecode-mode FULL --validate --unsigned \
+            --result-file dist/patch-result.json \
+            --out "$RUNNER_TEMP/natune-patched.apk" "$RUNNER_TEMP/natune-original.apk"
+          ZIPALIGN="$(find "$ANDROID_HOME/build-tools" -name zipalign -type f | sort -V | tail -1)"
+          bash natune/finalize_carrier.sh "$RUNNER_TEMP/natune-patched.apk" \
+            "$RUNNER_TEMP/natune-flac-input/libpurple_natune_flac.so" "$ZIPALIGN" \
+            "$RUNNER_TEMP/natune-final.apk" > dist/carrier-finalization.txt
+          python natune/verify_carrier_finalization.py "$RUNNER_TEMP/natune-patched.apk" "$RUNNER_TEMP/natune-final.apk" > dist/finalization-contents.txt
+          python natune/compare_apk_resources.py "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-final.apk" | tee dist/resource-differences.txt
+          python natune/check_apk_native_layout.py "$RUNNER_TEMP/natune-final.apk" > dist/native-apk-layout.txt
+          cat dist/native-apk-layout.txt
+          AAPT2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort -V | tail -1)"
+          "$AAPT2" dump xmltree "$RUNNER_TEMP/natune-original.apk" --file AndroidManifest.xml > "$RUNNER_TEMP/original-manifest.txt"
+          "$AAPT2" dump xmltree "$RUNNER_TEMP/natune-final.apk" --file AndroidManifest.xml > "$RUNNER_TEMP/patched-manifest.txt"
+          if cmp -s "$RUNNER_TEMP/original-manifest.txt" "$RUNNER_TEMP/patched-manifest.txt"; then
+            printf '%s\n' 'MANIFEST_XMLTREE identical=true' | tee dist/manifest-comparison.txt
+          else
+            printf '%s\n' 'MANIFEST_XMLTREE identical=false' | tee dist/manifest-comparison.txt
+            diff -u "$RUNNER_TEMP/original-manifest.txt" "$RUNNER_TEMP/patched-manifest.txt" | head -80 || true
+          fi
+          mkdir -p "$RUNNER_TEMP/natune-verifier"
+          javac -cp "$RUNNER_TEMP/morphe.jar" -d "$RUNNER_TEMP/natune-verifier" \
+            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneLocalFlacPatch.java \
+            natune/VerifyNatuneFlacCarrier.java natune/VerifyNatuneRuntimeSettingsPatch.java
+          python -c 'import os, pathlib, zipfile; z=zipfile.ZipFile("dist/patches-0.4.0-dev.3.mpp"); d=z.read("extensions/extension.mpe"); assert d.startswith(b"dex\n"); pathlib.Path(os.environ["RUNNER_TEMP"], "natune-extension.dex").write_bytes(d)'
+          java -cp "$RUNNER_TEMP/natune-verifier:$RUNNER_TEMP/morphe.jar" VerifyNatuneRuntimeSettingsPatch \
+            "$RUNNER_TEMP/natune-original.apk" "$RUNNER_TEMP/natune-final.apk" "$RUNNER_TEMP/natune-extension.dex" > dist/static-preservation.txt
+          NDK_ROOT="${ANDROID_NDK_HOME:-$ANDROID_NDK_LATEST_HOME}"
+          "$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" --dyn-syms --wide \
+            "$RUNNER_TEMP/natune-flac-input/libpurple_natune_flac.so" | grep -F 'Java_dev_purple_patches_natune_FlacIntegrity_decode' > /dev/null
+          printf '%s\n' 'FLAC_JNI_SYMBOL present=true device_execution=false' > dist/native-jni-symbol.txt
+          sha256sum .github/workflows/build-natune-local-flac.yml natune/materialize.py \
+            natune/NatuneMobileDataPatch.kt natune/NatuneLocalFlacPatch.kt natune/NatuneRuntimeSettingsPatch.kt natune/NatuneFlacFolderCarrierPatch.kt \
+            natune/VerifyNatuneMobilePatch.java natune/VerifyNatuneLocalFlacPatch.java natune/VerifyNatuneRuntimeSettingsPatch.java natune/VerifyNatuneFlacCarrier.java natune/compare_apk_resources.py natune/check_apk_native_layout.py \
+            natune/finalize_carrier.sh natune/verify_carrier_finalization.py \
+            natune/target.json natune/fetch_target.py natune/verify_apk_metadata.py \
+            natune/runtime/dev/purple/patches/natune/VerifiedStreamCopy.java \
+            natune/runtime/dev/purple/patches/natune/NatuneCachedSource.java \
+            natune/runtime/dev/purple/patches/natune/TemporarySpaceBudget.java \
+            natune/runtime/dev/purple/patches/natune/NatuneCoroutineStop.java \
+            natune/runtime/dev/purple/patches/natune/SharedDocumentDestination.java \
+            natune/runtime/dev/purple/patches/natune/MediaStoreAudioDestination.java \
+            natune/runtime/dev/purple/patches/natune/NatuneFolderCopy.java \
+            natune/runtime/dev/purple/patches/natune/FlacIntegrity.java \
+            natune/runtime/dev/purple/patches/natune/RuntimeSettings.java \
+            natune/runtime/dev/purple/patches/natune/PurpleSettingsPage.java \
+            natune/runtime/dev/purple/patches/natune/NatuneSettingsNavigation.java \
+            natune/settings-tests/fixtures/dev/purple/patches/natune/RuntimeSettings.java \
+            natune/settings-tests/fixtures/android/widget/Toast.java \
+            natune/settings-tests/fixtures/r8/*.java \
+            natune/settings-tests/fixtures-page/dev/purple/patches/natune/PurpleSettingsPage.java \
+            natune/settings-tests/NatuneSettingsNavigationControls.java \
+            natune/settings-tests/RuntimeSettingsControls.java natune/settings-tests/materialize_enabled.py \
+            natune/storage-tests/media-fixtures/android/content/*.java \
+            natune/storage-tests/media-fixtures/android/database/*.java \
+            natune/test-fixtures/android/net/Uri.java > dist/source-SHA256SUMS
           cd dist
           sha256sum * > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
-          name: purple-natune-local-flac-prototype
+          name: ${{ inputs.folder_carrier && 'purple-natune-folder-carrier-prototype' || 'purple-natune-runtime-settings-prototype' }}
           path: dist/
           retention-days: 14

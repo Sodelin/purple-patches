@@ -1,7 +1,6 @@
 package dev.purple.patches.natune;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 
 /** Private app configuration only. No account, model, media, log or service. */
@@ -36,6 +35,10 @@ public final class RuntimeSettings {
     }
     /** Called with the ACTUAL original audio-only policy result. A disabled
      * switch returns that exact value, not a reconstructed network guess. */
+    /** Morphe binds the exact original helper in front of this refusal body. */
+    public static boolean lowData(Context context) {
+        throw new IllegalStateException("Original low-data helper is not bound");
+    }
     public static boolean mobilePolicy(Context context,boolean originalLowData) {
         return fullQualityMobile(context) ? false : originalLowData;
     }
@@ -61,8 +64,6 @@ public final class RuntimeSettings {
         return preferences(context).edit().clear().commit();
     }
     public static void open(Context context) {
-        Intent intent = new Intent(context,PurpleSettingsActivity.class);
-        if (!(context instanceof android.app.Activity)) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        PurpleSettingsPage.show(context);
     }
 }

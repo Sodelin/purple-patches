@@ -13,7 +13,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 /** Exact release sites proven in policy-hooks.json, not source-name guesses. */
-private class AudioSite(
+internal class AudioSite(
     owner: String,
     name: String,
     parameters: List<String>,
@@ -36,17 +36,19 @@ private class AudioSite(
     )
 }
 
-private val audioSites = listOf(
+internal val audioSites = listOf(
     AudioSite("Lmoe/rukamori/archivetune/playback/MusicService\$prefetchNextMediaItemStream\$2;",
-        "invokeSuspend", listOf("Ljava/lang/Object;"), "Ljava/lang/Object;", 23, 287, 73, 20),
+        "invokeSuspend", listOf("Ljava/lang/Object;"), "Ljava/lang/Object;", 26, 311, 100, 23),
     AudioSite("Lmoe/rukamori/archivetune/playback/MusicService;",
-        "k2", listOf("Lr8/km2;", "Z"), "Lr8/km2;", 58, 2320, 26, 4),
+        "m2", listOf("Lr8/jm2;", "Z"), "Lr8/jm2;", 58, 2320, 26, 4),
     AudioSite("Lmoe/rukamori/archivetune/playback/MusicService;",
-        "onMediaItemTransition", listOf("Lr8/yh7;", "I"), "V", 20, 1263, 1216, 2),
+        "onMediaItemTransition", listOf("Lr8/fi7;", "I"), "V", 20, 1263, 1216, 2),
+    AudioSite("Lmoe/rukamori/archivetune/playback/MusicService;",
+        "z1", listOf("Ljava/lang/String;", "Z", "Lr8/df2;"), "Ljava/lang/Object;", 11, 114, 70, 10),
     AudioSite("Lmoe/rukamori/archivetune/playback/b;",
-        "a", listOf("Lr8/km2;"), "Lr8/km2;", 21, 491, 196, 1),
+        "a", listOf("Lr8/jm2;"), "Lr8/jm2;", 21, 491, 196, 1),
     AudioSite("Lmoe/rukamori/archivetune/playback/g;",
-        "g", listOf("Ljava/lang/String;", "Lr8/cf2;"), "Ljava/lang/Object;", 25, 468, 290, 2),
+        "g", listOf("Ljava/lang/String;", "Lr8/df2;"), "Ljava/lang/Object;", 25, 468, 290, 2),
 )
 
 @Suppress("unused")
@@ -59,7 +61,7 @@ val natuneFullQualityMobilePatch = bytecodePatch(
         name = "Natune",
         packageName = "moe.rukamori.archivetune",
         apkFileType = ApkFileType.APK,
-        targets = listOf(AppTarget(version = "N202610191717", isExperimental = true)),
+        targets = listOf(AppTarget(version = "N202611030452", isExperimental = true)),
     ))
     execute {
         // Resolve and check every site before mutating any method. A changed
@@ -78,7 +80,7 @@ val natuneFullQualityMobilePatch = bytecodePatch(
             val call = instructions[index]
             check(call.opcode == Opcode.INVOKE_STATIC) { "Audio policy invocation changed" }
             val reference = (call as? ReferenceInstruction)?.reference as? MethodReference
-            check(reference != null && reference.definingClass == "Lr8/hg6;" && reference.name == "p" &&
+            check(reference != null && reference.definingClass == "Lr8/mg6;" && reference.name == "u" &&
                 reference.parameterTypes.map { it.toString() } == listOf("Landroid/content/Context;") &&
                 reference.returnType == "Z") { "Different audio policy helper" }
             val result = instructions[index + 1]
@@ -86,7 +88,7 @@ val natuneFullQualityMobilePatch = bytecodePatch(
                 (result as OneRegisterInstruction).registerA == site.resultRegister) { "Audio policy result changed" }
             Triple(method, index + 1, site.resultRegister)
         }
-        // const/16 accepts result registers above v15 (prefetch uses v20).
+        // const/16 accepts result registers above v15 (prefetch uses v23).
         // Leave the original helper and every non-audio caller untouched.
         changes.forEach { (method, index, register) ->
             method.replaceInstruction(index, BuilderInstruction21s(Opcode.CONST_16, register, 0))

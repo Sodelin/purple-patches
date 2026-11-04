@@ -13,10 +13,10 @@ import java.util.*;
 public final class VerifyNatuneLocalFlacPatch {
     record Hook(String key, int registers, int format, int prefix, int refusal) {}
     static final List<Hook> HOOKS = List.of(
-        new Hook("Lr8/ge7;->z0(Lr8/hv3;Lr8/yf4;)I",21,20,8,1),
-        new Hook("Lr8/ge7;->y0(Lr8/yf4;)Z",6,5,8,0),
-        new Hook("Lr8/ge7;->Q(Lr8/hv3;Lr8/yf4;Z)Ljava/util/ArrayList;",7,5,9,-1),
-        new Hook("Lr8/ge7;->e0(Lr8/ie3;)Lr8/bt2;",6,5,15,-2)
+        new Hook("Lr8/ne7;->z0(Lr8/fv3;Lr8/wf4;)I",21,20,8,1),
+        new Hook("Lr8/ne7;->y0(Lr8/wf4;)Z",6,5,8,0),
+        new Hook("Lr8/ne7;->Q(Lr8/fv3;Lr8/wf4;Z)Ljava/util/ArrayList;",7,5,9,-1),
+        new Hook("Lr8/ne7;->e0(Lr8/ge3;)Lr8/zs2;",6,5,15,-2)
     );
     static void need(boolean ok, String why) { VerifyNatuneMobilePatch.need(ok,why); }
     static void op(Instruction i, Opcode opcode) { need(i.getOpcode()==opcode,"Wrong guard opcode"); }
@@ -35,7 +35,7 @@ public final class VerifyNatuneLocalFlacPatch {
         op(x.get(0),Opcode.MOVE_OBJECT_FROM16);reg(x.get(0),0);
         need(((TwoRegisterInstruction)x.get(0)).getRegisterB()==h.format,"Wrong Format parameter");
         op(x.get(1),Opcode.IGET_OBJECT);reg(x.get(1),0);
-        need(((TwoRegisterInstruction)x.get(1)).getRegisterB()==0 && ref(x.get(1)).equals("Lr8/yf4;->o:Ljava/lang/String;"),"Wrong parsed MIME field");
+        need(((TwoRegisterInstruction)x.get(1)).getRegisterB()==0 && ref(x.get(1)).equals("Lr8/wf4;->o:Ljava/lang/String;"),"Wrong parsed MIME field");
         need(x.get(2).getOpcode()==Opcode.CONST_STRING || x.get(2).getOpcode()==Opcode.CONST_STRING_JUMBO,"Wrong MIME constant opcode");reg(x.get(2),1);
         need(((StringReference)((ReferenceInstruction)x.get(2)).getReference()).getString().equals("audio/flac"),"Wrong admitted codec");
         call(x.get(3),Opcode.INVOKE_VIRTUAL,"Ljava/lang/String;->equals(Ljava/lang/Object;)Z",1,0);
@@ -59,10 +59,10 @@ public final class VerifyNatuneLocalFlacPatch {
     }
     static void lifecycleGuard(List<Instruction> x,Hook h) {
         op(x.get(0),Opcode.IGET_OBJECT);reg(x.get(0),0);
-        need(((TwoRegisterInstruction)x.get(0)).getRegisterB()==5 && ref(x.get(0)).equals("Lr8/ie3;->z:Ljava/lang/Object;"),"Wrong original FormatHolder");
-        op(x.get(1),Opcode.CHECK_CAST);reg(x.get(1),0);need(ref(x.get(1)).equals("Lr8/yf4;"),"Wrong Format cast");
+        need(((TwoRegisterInstruction)x.get(0)).getRegisterB()==5 && ref(x.get(0)).equals("Lr8/ge3;->z:Ljava/lang/Object;"),"Wrong original FormatHolder");
+        op(x.get(1),Opcode.CHECK_CAST);reg(x.get(1),0);need(ref(x.get(1)).equals("Lr8/wf4;"),"Wrong Format cast");
         op(x.get(2),Opcode.IGET_OBJECT);reg(x.get(2),1);
-        need(((TwoRegisterInstruction)x.get(2)).getRegisterB()==0 && ref(x.get(2)).equals("Lr8/yf4;->o:Ljava/lang/String;"),"Wrong lifecycle parsed MIME");
+        need(((TwoRegisterInstruction)x.get(2)).getRegisterB()==0 && ref(x.get(2)).equals("Lr8/wf4;->o:Ljava/lang/String;"),"Wrong lifecycle parsed MIME");
         text(x.get(3),2,"audio/flac");
         call(x.get(4),Opcode.INVOKE_VIRTUAL,"Ljava/lang/String;->equals(Ljava/lang/Object;)Z",2,1);
         op(x.get(5),Opcode.MOVE_RESULT);reg(x.get(5),1);
@@ -74,7 +74,7 @@ public final class VerifyNatuneLocalFlacPatch {
         call(x.get(9),Opcode.INVOKE_DIRECT,"Ljava/io/IOException;-><init>(Ljava/lang/String;)V",1,2);
         op(x.get(10),Opcode.CONST_4);reg(x.get(10),2);need(((WideLiteralInstruction)x.get(10)).getWideLiteral()==0,"Recoverable policy error refused");
         op(x.get(11),Opcode.CONST_16);reg(x.get(11),3);need(((WideLiteralInstruction)x.get(11)).getWideLiteral()==4005,"Wrong original error code");
-        call(x.get(12),Opcode.INVOKE_VIRTUAL,"Lr8/mu0;->f(Ljava/lang/Exception;Lr8/yf4;ZI)Lr8/gx3;",4,1,0,2,3);
+        call(x.get(12),Opcode.INVOKE_VIRTUAL,"Lr8/nu0;->f(Ljava/lang/Exception;Lr8/wf4;ZI)Lr8/ex3;",4,1,0,2,3);
         op(x.get(13),Opcode.MOVE_RESULT_OBJECT);reg(x.get(13),0);
         op(x.get(14),Opcode.THROW);reg(x.get(14),0);
     }
@@ -118,12 +118,12 @@ public final class VerifyNatuneLocalFlacPatch {
             }
             passed++;
         }
-        var changed=new ArrayList<Instruction>(x);changed.set(0,new ImmutableInstruction22c(Opcode.IGET_OBJECT,0,5,new ImmutableFieldReference("Lr8/ie3;","wrong","Ljava/lang/Object;")));refused(changed,h);passed++;
+        var changed=new ArrayList<Instruction>(x);changed.set(0,new ImmutableInstruction22c(Opcode.IGET_OBJECT,0,5,new ImmutableFieldReference("Lr8/ge3;","wrong","Ljava/lang/Object;")));refused(changed,h);passed++;
         changed=new ArrayList<>(x);changed.set(3,new ImmutableInstruction21c(Opcode.CONST_STRING,2,new ImmutableStringReference("audio/aac")));refused(changed,h);passed++;
         changed=new ArrayList<>(x);changed.set(6,new ImmutableInstruction21t(Opcode.IF_NEZ,1,2));refused(changed,h);passed++;
         changed=new ArrayList<>(x);changed.set(10,new ImmutableInstruction11n(Opcode.CONST_4,2,1));refused(changed,h);passed++;
         changed=new ArrayList<>(x);changed.set(11,new ImmutableInstruction21s(Opcode.CONST_16,3,4002));refused(changed,h);passed++;
-        changed=new ArrayList<>(x);changed.set(12,new ImmutableInstruction35c(Opcode.INVOKE_VIRTUAL,5,4,1,5,2,3,new ImmutableMethodReference("Lr8/mu0;","f",List.of("Ljava/lang/Exception;","Lr8/yf4;","Z","I"),"Lr8/gx3;")));refused(changed,h);passed++;
+        changed=new ArrayList<>(x);changed.set(12,new ImmutableInstruction35c(Opcode.INVOKE_VIRTUAL,5,4,1,5,2,3,new ImmutableMethodReference("Lr8/nu0;","f",List.of("Ljava/lang/Exception;","Lr8/wf4;","Z","I"),"Lr8/ex3;")));refused(changed,h);passed++;
         changed=new ArrayList<>(x);changed.set(14,new ImmutableInstruction11x(Opcode.RETURN_OBJECT,0));refused(changed,h);passed++;
         return passed;
     }
@@ -166,7 +166,7 @@ public final class VerifyNatuneLocalFlacPatch {
         }
         var changed=new ArrayList<Instruction>(x);
         changed.set(2,new ImmutableInstruction21c(Opcode.CONST_STRING,1,new ImmutableStringReference("audio/aac")));refused(changed,h);count++;
-        changed=new ArrayList<>(x);changed.set(1,new ImmutableInstruction22c(Opcode.IGET_OBJECT,0,0,new ImmutableFieldReference("Lr8/yf4;","n","Ljava/lang/String;")));refused(changed,h);count++;
+        changed=new ArrayList<>(x);changed.set(1,new ImmutableInstruction22c(Opcode.IGET_OBJECT,0,0,new ImmutableFieldReference("Lr8/wf4;","n","Ljava/lang/String;")));refused(changed,h);count++;
         changed=new ArrayList<>(x);changed.set(5,new ImmutableInstruction21t(Opcode.IF_NEZ,0,2));refused(changed,h);count++;
         changed=new ArrayList<>(x);changed.set(0,new ImmutableInstruction22x(Opcode.MOVE_OBJECT_FROM16,0,h.format-1));refused(changed,h);count++;
         changed=new ArrayList<>(x);
@@ -189,7 +189,7 @@ public final class VerifyNatuneLocalFlacPatch {
         VerifyNatuneMobilePatch.initializerControls();
         var expected=VerifyNatuneMobilePatch.snapshot(new File(args[0]),true);
         var actual=VerifyNatuneMobilePatch.snapshot(new File(args[1]),false,prefixes);
-        VerifyNatuneMobilePatch.compare(expected,actual,args,"Verified five mobile-data overrides and four exact local FLAC guards; every original remaining method/body/resource preserved.");
+        VerifyNatuneMobilePatch.compare(expected,actual,args,"Verified six mobile-data overrides and four exact local FLAC guards; every original remaining method/body/resource preserved.");
         System.out.println("LOCAL_FLAC_GUARD_CONTROLS passed="+passed+" actual_patched_bytecode=true android_decoder_acceptance=false full_download_admission=false");
     }
 }
